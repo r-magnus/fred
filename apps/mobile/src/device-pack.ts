@@ -14,6 +14,8 @@ import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
 import type { ChunkRecord, EmbeddingSpec, PackManifest } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
+import { vectorRow } from '@fred/rag-core';
+import { decodeBase64 } from './base64.ts';
 import { initLlama, type LlamaContext } from 'llama.rn';
 
 interface LoadedPack {
@@ -21,14 +23,6 @@ interface LoadedPack {
   readonly db: DB;
   readonly vectors: Uint8Array;
   readonly dim: number;
-}
-
-/** Base64 -> bytes. vectors.i8 is read whole; at 613 chunks it is ~230 KB. */
-function decodeBase64(b64: string): Uint8Array {
-  const bin = globalThis.atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
 }
 
 export class DevicePackStore implements PackStore {
@@ -118,12 +112,8 @@ export class DevicePackStore implements PackStore {
     return hits.map((h) => {
       const pack = this.packs.get(h.packId);
       if (!pack) throw new Error(`pack not loaded: ${h.packId}`);
-      const start = h.ordinal * pack.dim;
-      // Int8Array view over the same buffer: no copy per candidate.
-      return {
-        vec: new Int8Array(pack.vectors.buffer, pack.vectors.byteOffset + start, pack.dim),
-        scale: 1,
-      };
+      // A view, not a copy: scoring a candidate set allocates nothing.
+      return { vec: vectorRow(pack.vectors, h.ordinal, pack.dim), scale: 1 };
     });
   }
 }
@@ -160,7 +150,16 @@ export async function createDeviceBackend(
       const r = await embed.embedding(text);
       return Float32Array.from(r.embedding);
     },
-    countTokens: (text: string) => Math.ceil(text.length / 4),
+    async countTokens(texts: readonly string[]): Promise<number[]> {
+      // Exact, via llama.rn's tokenizer. One bridge crossing per string is why
+      // the interface batches: compression asks for every sentence at once.
+      const out: number[] = [];
+      for (const t of texts) {
+        const r = await gen.tokenize(t);
+        out.push(r.tokens.length);
+      }
+      return out;
+    },
     async *generate(prompt: string, genOpts: GenerateOptions) {
       const chunks: string[] = [];
       await gen.completion(

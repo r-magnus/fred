@@ -12,7 +12,7 @@
 import { writeFileSync } from 'node:fs';
 import { getLlama, LlamaCompletion, type LlamaGrammar, type LlamaModel, type LlamaContext } from 'node-llama-cpp';
 import {
-  compressContext, estimateTokens, extractKeywords, retrieve, route,
+  compressContext, extractKeywords, retrieve, route,
   DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, DEFAULT_ABSTAIN_THRESHOLD,
   SYSTEM_PREFIX, renderContext, type ScoredChunk,
 } from '@fred/rag-core';
@@ -73,7 +73,7 @@ async function main(): Promise<void> {
   const backend = {
     embeddingSpec: () => manifest.embedding,
     embed: async (t: string) => Float32Array.from((await embedCtx.getEmbeddingFor(t)).vector),
-    countTokens: (t: string) => genModel.tokenize(t).length,
+    countTokens: async (texts: readonly string[]): Promise<number[]> => texts.map((t) => genModel.tokenize(t).length),
     // eslint-disable-next-line require-yield
     async *generate(): AsyncIterable<string> { throw new Error('unused in MCQ scoring'); },
   };
@@ -95,10 +95,10 @@ async function main(): Promise<void> {
         });
         if (hits.length > 0) {
           const blocks = condition === 'rag-rerank-compress'
-            ? compressContext(hits.map((h) => h.chunk), kws, {
+            ? (await compressContext(hits.map((h) => h.chunk), kws, {
                 ...DEFAULT_COMPRESSION,
-                countTokens: (t) => backend.countTokens(t) || estimateTokens(t),
-              }).chunks
+                countTokens: (texts) => backend.countTokens(texts),
+              })).chunks
             : hits.map((h) => ({ chunk: h.chunk, text: h.chunk.text }));
           context = renderContext(blocks);
         }
@@ -128,7 +128,7 @@ async function main(): Promise<void> {
         chosen,
         correct: chosen === q.answer,
         latencyMs,
-        promptTokens: backend.countTokens(prompt),
+        promptTokens: (await backend.countTokens([prompt]))[0] ?? 0,
         topScore,
         wouldAbstain: condition !== 'vanilla' && topScore < DEFAULT_ABSTAIN_THRESHOLD,
         retrievedPages: hits.map((h) => h.chunk.page ?? -1),

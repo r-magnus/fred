@@ -22,8 +22,17 @@ export interface InferenceBackend {
   embeddingSpec(): EmbeddingSpec;
   /** Stream generated text. Implementations should reuse a cached system prefix. */
   generate(prompt: string, opts: GenerateOptions): AsyncIterable<string>;
-  /** Approximate token count. Backends with a real tokenizer should use it. */
-  countTokens(text: string): number;
+  /**
+   * Exact token counts for a batch of strings.
+   *
+   * Batched and async on purpose. node-llama-cpp tokenizes synchronously, but
+   * llama.rn crosses a native bridge, so a per-string synchronous signature
+   * cannot be satisfied on device — the first implementation there fell back to
+   * a chars/4 heuristic, which silently made on-device compression ratios and
+   * token budgets incomparable to the ones the eval harness reports. One call
+   * for every sentence keeps it exact on both sides at one round trip.
+   */
+  countTokens(texts: readonly string[]): Promise<number[]>;
 }
 
 /** One candidate surfaced by the Stage-1 lexical pre-filter. */

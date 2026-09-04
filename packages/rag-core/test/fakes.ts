@@ -61,8 +61,8 @@ export class FakeBackend implements InferenceBackend {
   embeddingSpec(): EmbeddingSpec {
     return this.spec;
   }
-  countTokens(text: string): number {
-    return text.split(/\s+/).filter(Boolean).length;
+  async countTokens(texts: readonly string[]): Promise<number[]> {
+    return texts.map((t) => t.split(/\s+/).filter(Boolean).length);
   }
   async *generate(prompt: string, opts: GenerateOptions): AsyncIterable<string> {
     this.lastPrompt = prompt;

@@ -7,7 +7,7 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import { compressContext, estimateTokens, DEFAULT_COMPRESSION } from './compress.ts';
+import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPrompt, type ContextBlock } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
@@ -147,10 +147,10 @@ export async function ask(
   }
 
   // Stage 3 — compress before prefill.
-  const compressed = compressContext(
+  const compressed = await compressContext(
     candidates.map((c) => c.chunk),
     keywords,
-    { ...DEFAULT_COMPRESSION, countTokens: (t) => backend.countTokens(t) || estimateTokens(t) },
+    { ...DEFAULT_COMPRESSION, countTokens: (texts) => backend.countTokens(texts) },
   );
 
   const blocks: ContextBlock[] = compressed.chunks.map((c) => ({

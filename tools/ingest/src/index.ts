@@ -11,6 +11,7 @@
 import { extractPdf } from './pdf.ts';
 import { cleanPage, findBoilerplate } from './clean.ts';
 import { chunkPages, DEFAULT_CHUNKING, type SourcePage } from './chunk.ts';
+import { classifyChunk } from './filter.ts';
 import { loadEmbedder } from './embed.ts';
 import { writePack, type PackInput } from './pack.ts';
 import type { DomainTag, LicenseEntry } from '@fred/pack-format';
@@ -85,12 +86,16 @@ const chunks = chunkPages(cleaned, {
   domain: def.domain,
   tokenize: (t) => embedder.tokenCount(t),
 });
-const procedures = chunks.filter((c) => c.blockKind === 'procedure').length;
-console.log(`      ${chunks.length} chunks (${procedures} procedure, ${chunks.length - procedures} prose)`);
+const kept = chunks.filter((c) => !classifyChunk(c.text).drop);
+const dropped = chunks.length - kept.length;
+const procedures = kept.filter((c) => c.blockKind === 'procedure').length;
+console.log(`      ${chunks.length} chunks, dropped ${dropped} course-scaffolding ` +
+  `(${((dropped / chunks.length) * 100).toFixed(1)}%)`);
+console.log(`      ${kept.length} kept (${procedures} procedure, ${kept.length - procedures} prose)`);
 
 console.log('[5/5] embedding + writing pack');
-const vectors = await embedder.embed(chunks.map((c) => c.text));
-const { dir, manifest } = await writePack('packs', { ...def.input, embedding: embedder.spec }, chunks, vectors);
+const vectors = await embedder.embed(kept.map((c) => c.text));
+const { dir, manifest } = await writePack('packs', { ...def.input, embedding: embedder.spec }, kept, vectors);
 await embedder.dispose();
 
 const totalBytes = manifest.files.reduce((s, f) => s + f.bytes, 0);

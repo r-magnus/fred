@@ -85,3 +85,64 @@ Two lessons for the writeup:
 2. **Check the answer distribution, not just the accuracy.** Identical accuracy
    across four different conditions is the tell; 46/46 "A" made the cause
    obvious in a single query.
+
+---
+
+# Update — corpus cleanup (2026-09-04)
+
+25.7% of the pack was course apparatus rather than clinical knowledge:
+acknowledgements and contributor lists, course administration, module
+objectives, key-terms exercises, case-scenario worksheets, and blank ABCDE
+assessment checklists. All of it is topically adjacent, so it embeds near real
+clinical content and competes for the top-k. `tools/ingest/src/filter.ts` now
+removes it at ingest, and `verify-filter.ts` asserts that no passage cited by an
+eval question is lost.
+
+**Pack: 825 → 613 chunks, 1.37 MB → 1.06 MB.**
+**Practice-MCQ contamination: 9 chunks → 0.** The manual embeds its own
+multiple-choice questions, and their option text ("Give intramuscular adrenaline
+C.") was previously indexed and retrievable.
+
+## Accuracy, before and after
+
+| Condition | Before | After | Δ | p (paired) |
+|---|---:|---:|---:|---:|
+| vanilla | 63.0% | 63.0% | 0.0 | — |
+| rag | 80.4% | 76.1% | −4.3 | 0.625 |
+| rag-rerank | 71.7% | 76.1% | +4.3 | 0.500 |
+| rag-rerank-compress | 67.4% | 69.6% | +2.2 | 1.000 |
+
+**The cleanup produced no statistically detectable accuracy change.** Every
+comparison is p > 0.5; the deltas are one or two questions at n = 46.
+
+It was still the right change, on grounds that do not depend on this measurement:
+the pack is 23% smaller, the eval can no longer retrieve the corpus's own
+multiple-choice options, and a quarter of the index no longer consists of text
+that cannot answer a question.
+
+## What the cleanup did resolve
+
+The apparent **"reranking hurts retrieval"** result from the first run has
+dissolved. Before cleanup, rag beat rag-rerank 5 discordant to 1 (p = 0.219).
+After cleanup the two are **identical at 76.1%, 3 discordant to 3 (p = 1.000)**.
+
+The most likely reading is that the original gap was noise amplified by
+scaffolding chunks in the candidate pool, not a real property of the fusion
+weight. **α = 0.6 needs no adjustment on this evidence**, and the open question
+from M2 is closed — provisionally, at this sample size.
+
+## The core finding replicates
+
+| Comparison (cleaned pack) | Discordant | p |
+|---|---|---:|
+| corpus-derived: vanilla → rag | 12 gains / 2 losses | **0.013** |
+| corpus-derived: vanilla → rag-rerank | 12 gains / 3 losses | **0.035** |
+| independent: vanilla → rag | 1 gain / 5 losses | 0.219 |
+| independent: vanilla → rag-rerank | 0 gains / 3 losses | 0.250 |
+
+RAG still helps significantly on corpus-derived questions and still, consistently
+but not significantly, *hurts* on independent ones. Cleaning the corpus did not
+change that divergence — which strengthens the reading that it is a property of
+the evaluation design rather than of corpus quality.
+
+Expanding the eval set remains the blocking item for the independent-set effect.

@@ -1,0 +1,32 @@
+{
+  "name": "@fred/mobile",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "~57.0.20",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "@fred/pack-format": "*",
+    "@fred/rag-core": "*",
+    "@op-engineering/op-sqlite": "^18.1.4",
+    "llama.rn": "0.12.9",
+    "expo-file-system": "~57.0.6"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "prebuild": "expo prebuild --platform android --clean"
+  },
+  "private": true,
+  "op-sqlite": {
+    "fts5": true,
+    "performanceMode": true
+  }
+}

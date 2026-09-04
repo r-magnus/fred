@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/*",
     "tools/eval",
-    "tools/ingest"
+    "tools/ingest",
+    "apps/mobile"
   ],
   "scripts": {
     "test": "node --test packages/*/test/*.test.ts",

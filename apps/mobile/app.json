@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Fred",
+    "slug": "fred",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "android": {
+      "package": "dev.fred.app",
+      "largeHeap": false
+    },
+    "plugins": [
+      ["llama.rn", { "forceCxx20": true }]
+    ]
+  }
+}

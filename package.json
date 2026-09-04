@@ -5,11 +5,13 @@
   "description": "Offline on-device RAG assistant for first aid, survival, and local flora/fauna",
   "workspaces": [
     "packages/*",
-    "tools/eval"
+    "tools/eval",
+    "tools/ingest"
   ],
   "scripts": {
     "test": "node --test packages/*/test/*.test.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "ingest": "node tools/ingest/src/index.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

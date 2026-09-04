@@ -97,6 +97,24 @@ export function quantizeInt8(vec: Float32Array): { vec: Int8Array; scale: number
 }
 
 /**
+ * Map a raw cosine onto [0,1] against the encoder's unrelated-text floor.
+ *
+ * Sentence encoders compress cosine into a narrow high band: with gte-small,
+ * unrelated text scores ~0.71 and closely related text ~0.84. Fusing raw cosines
+ * makes every absolute threshold meaningless, because an unrelated chunk starts
+ * at 0.43 once weighted. Rescaling puts the floor at 0 and leaves the usable
+ * signal spread across the full range, so DEFAULT_ABSTAIN_THRESHOLD means what
+ * it says regardless of which encoder is loaded.
+ *
+ * A floor of 0 is the identity, which is what the test fakes use.
+ */
+export function rescaleCosine(cosine: number, floor: number): number {
+  if (floor <= 0) return Math.max(0, Math.min(1, cosine));
+  if (floor >= 1) return 0;
+  return Math.max(0, Math.min(1, (cosine - floor) / (1 - floor)));
+}
+
+/**
  * PocketRAG Eq. 3 — the hybrid score:
  *
  *   U_i = alpha * cos(E(q), E(c_i)) + (1 - alpha) * S_lex(q, c_i)
@@ -104,6 +122,8 @@ export function quantizeInt8(vec: Float32Array): { vec: Int8Array; scale: number
  * Cosine is clamped to [0,1] first. Embeddings can be negatively correlated, and
  * a negative term would let a strong lexical match be cancelled by an unrelated
  * vector, which is not the behaviour Eq. 3 intends.
+ *
+ * Callers pass a cosine that has already been through rescaleCosine.
  */
 export function fuse(cosine: number, sLex: number, alpha: number = DEFAULT_ALPHA): number {
   const c = Math.max(0, Math.min(1, cosine));

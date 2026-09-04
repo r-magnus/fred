@@ -21,6 +21,9 @@ export const FAKE_SPEC: EmbeddingSpec = {
   dim: FAKE_DIM,
   quantization: 'int8-per-row',
   normalized: true,
+  // The hash embedding genuinely produces near-zero cosine for unrelated text,
+  // unlike a real sentence encoder, so no floor correction is needed.
+  cosineFloor: 0,
 };
 
 /**

@@ -57,6 +57,21 @@ export interface EmbeddingSpec {
   readonly quantization: 'int8-per-row';
   /** Whether fp32 vectors were L2-normalized before quantization. */
   readonly normalized: boolean;
+  /**
+   * Empirical cosine similarity between UNRELATED text for this encoder.
+   *
+   * BERT-family encoders do not spread cosine over [0,1]. Measured for
+   * gte-small, two unrelated sentences score ~0.71 and a closely related pair
+   * ~0.84 — the entire useful signal lives in a narrow band near the top.
+   *
+   * Without correcting for this, any absolute threshold on the fused score is
+   * meaningless: at alpha=0.6 an unrelated chunk already scores 0.6*0.71 = 0.43,
+   * so an abstention gate set at 0.35 could never fire. Retrieval rescales
+   * cosine against this floor before fusing (see rag-core/score.ts:rescaleCosine).
+   *
+   * Calibrate per encoder at ingest time; do not guess it.
+   */
+  readonly cosineFloor: number;
 }
 
 export interface PackFileEntry {
@@ -142,4 +157,7 @@ export function embeddingsCompatible(a: EmbeddingSpec, b: EmbeddingSpec): boolea
     a.quantization === b.quantization &&
     a.normalized === b.normalized
   );
+  // cosineFloor is deliberately excluded: it is a calibration constant of the
+  // encoder, not part of vector identity. Retrieval takes it from the running
+  // backend, and packs record it only for provenance.
 }

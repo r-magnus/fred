@@ -1,0 +1,164 @@
+/**
+ * Node implementations of the rag-core boundaries, backed by real packs.
+ *
+ * The mobile app supplies the same two interfaces over llama.rn and op-sqlite.
+ * Because the pipeline code above them is shared, results measured here describe
+ * the system that ships.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import type {
+  ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest,
+} from '@fred/pack-format';
+import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
+import { getLlama, LlamaChatSession, type LlamaContext, type LlamaModel } from 'node-llama-cpp';
+
+interface LoadedPack {
+  readonly manifest: PackManifest;
+  readonly db: DatabaseSync;
+  readonly vectors: Buffer;
+  readonly dim: number;
+}
+
+export class NodePackStore implements PackStore {
+  private readonly packs = new Map<string, LoadedPack>();
+
+  load(dir: string): PackManifest {
+    const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')) as PackManifest;
+    const db = new DatabaseSync(join(dir, 'chunks.sqlite'), { readOnly: true });
+    const vectors = readFileSync(join(dir, 'vectors.i8'));
+    const expected = manifest.chunkCount * manifest.embedding.dim;
+    if (vectors.byteLength !== expected) {
+      throw new Error(`${manifest.id}: vectors.i8 is ${vectors.byteLength} bytes, expected ${expected}`);
+    }
+    this.packs.set(manifest.id, { manifest, db, vectors, dim: manifest.embedding.dim });
+    return manifest;
+  }
+
+  manifests(): PackManifest[] {
+    return [...this.packs.values()].map((p) => p.manifest);
+  }
+
+  embeddingSpecFor(packId: string): EmbeddingSpec {
+    const p = this.packs.get(packId);
+    if (!p) throw new Error(`pack not loaded: ${packId}`);
+    return p.manifest.embedding;
+  }
+
+  async searchLexical(
+    packIds: readonly string[],
+    terms: readonly string[],
+    limit: number,
+  ): Promise<readonly LexicalHit[]> {
+    if (terms.length === 0) return [];
+    // OR the terms: Stage 1 is a recall filter, precision comes from Stage 2.
+    // Quoted to keep FTS5 from interpreting a term as an operator.
+    const query = terms.map((t) => `"${t.replace(/"/g, '')}"`).join(' OR ');
+    const hits: LexicalHit[] = [];
+    for (const packId of packIds) {
+      const pack = this.packs.get(packId);
+      if (!pack) continue;
+      const rows = pack.db
+        .prepare(`SELECT c.ordinal AS ordinal, c.id AS id
+                  FROM chunks_fts f JOIN chunks c ON c.ordinal = f.rowid
+                  WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?`)
+        .all(query, limit) as { ordinal: number; id: string }[];
+      for (const r of rows) hits.push({ chunkId: r.id, packId, ordinal: r.ordinal });
+    }
+    return hits.slice(0, limit);
+  }
+
+  async getChunks(chunkIds: readonly string[]): Promise<readonly ChunkRecord[]> {
+    const out: ChunkRecord[] = [];
+    for (const [packId, pack] of this.packs) {
+      const ids = chunkIds.filter((i) => i.startsWith(`${packId}:`));
+      if (ids.length === 0) continue;
+      const rows = pack.db
+        .prepare(`SELECT * FROM chunks WHERE id IN (${ids.map(() => '?').join(',')})`)
+        .all(...ids) as Record<string, unknown>[];
+      for (const r of rows) {
+        out.push({
+          id: r.id as string,
+          packId: r.pack_id as string,
+          ordinal: r.ordinal as number,
+          text: r.text as string,
+          section: r.section as string,
+          source: r.source as string,
+          page: (r.page as number | null) ?? null,
+          domain: r.domain as DomainTag,
+          licenseId: r.license_id as string,
+          blockKind: r.block_kind as BlockKind,
+        });
+      }
+    }
+    return out;
+  }
+
+  async getVectors(hits: readonly LexicalHit[]) {
+    return hits.map((h) => {
+      const pack = this.packs.get(h.packId);
+      if (!pack) throw new Error(`pack not loaded: ${h.packId}`);
+      const start = h.ordinal * pack.dim;
+      const slice = pack.vectors.subarray(start, start + pack.dim);
+      return { vec: new Int8Array(slice.buffer, slice.byteOffset, slice.length), scale: 1 };
+    });
+  }
+
+  close(): void {
+    for (const p of this.packs.values()) p.db.close();
+  }
+}
+
+export interface NodeBackendOptions {
+  readonly embedModelPath: string;
+  readonly embedModelId: string;
+  readonly cosineFloor: number;
+  readonly genModelPath?: string;
+}
+
+export async function createNodeBackend(opts: NodeBackendOptions): Promise<InferenceBackend & { dispose(): Promise<void> }> {
+  const llama = await getLlama();
+  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath });
+  const embedCtx = await embedModel.createEmbeddingContext();
+
+  let genModel: LlamaModel | null = null;
+  let genCtx: LlamaContext | null = null;
+  if (opts.genModelPath) {
+    genModel = await llama.loadModel({ modelPath: opts.genModelPath });
+    genCtx = await genModel.createContext({ contextSize: 4096 });
+  }
+
+  const spec: EmbeddingSpec = {
+    modelId: opts.embedModelId,
+    dim: embedModel.embeddingVectorSize ?? 384,
+    quantization: 'int8-per-row',
+    normalized: true,
+    cosineFloor: opts.cosineFloor,
+  };
+
+  return {
+    embeddingSpec: () => spec,
+    async embed(text: string) {
+      const e = await embedCtx.getEmbeddingFor(text);
+      return Float32Array.from(e.vector);
+    },
+    countTokens: (text: string) => (genModel ?? embedModel).tokenize(text).length,
+    async *generate(prompt: string, genOpts: GenerateOptions) {
+      if (!genCtx) throw new Error('no generation model loaded');
+      const session = new LlamaChatSession({ contextSequence: genCtx.getSequence() });
+      const chunks: string[] = [];
+      await session.prompt(prompt, {
+        maxTokens: genOpts.maxTokens,
+        onTextChunk: (t) => chunks.push(t),
+      });
+      for (const c of chunks) yield c;
+    },
+    async dispose() {
+      await embedCtx.dispose();
+      await embedModel.dispose();
+      if (genCtx) await genCtx.dispose();
+      if (genModel) await genModel.dispose();
+    },
+  };
+}

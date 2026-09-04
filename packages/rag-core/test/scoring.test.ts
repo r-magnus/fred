@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   chunkTermSet, cosineInt8, dequantizeInt8, fuse, lexicalScore, quantizeInt8, DEFAULT_ALPHA,
+  rescaleCosine,
 } from '../src/score.ts';
 import { extractKeywords } from '../src/lexicon.ts';
 import { fakeEmbed } from './fakes.ts';
@@ -66,4 +67,30 @@ test('cosine ranking is invariant to the per-row INT8 scale', () => {
 
 test('cosineInt8 rejects a dimension mismatch instead of scoring garbage', () => {
   assert.throws(() => cosineInt8(new Float32Array(4), new Int8Array(8)), /dim mismatch/);
+});
+
+test('rescaleCosine maps an encoder floor onto zero', () => {
+  // Measured gte-small values: unrelated ~0.71, closely related ~0.84.
+  assert.equal(rescaleCosine(0.71, 0.71), 0);
+  assert.ok(Math.abs(rescaleCosine(0.838, 0.71) - 0.4414) < 1e-3);
+  assert.equal(rescaleCosine(1, 0.71), 1);
+  assert.equal(rescaleCosine(0.5, 0.71), 0, 'below the floor clamps to 0');
+});
+
+test('a floor of zero is the identity, and degenerate floors are safe', () => {
+  assert.equal(rescaleCosine(0.42, 0), 0.42);
+  assert.equal(rescaleCosine(-1, 0), 0);
+  assert.equal(rescaleCosine(0.9, 1), 0, 'floor of 1 cannot divide by zero');
+});
+
+test('without rescaling, the abstention gate could never fire on gte-small', () => {
+  // This is the bug rescaleCosine exists to prevent. Unrelated text at cosine
+  // 0.71 with zero lexical overlap still clears a 0.35 threshold once weighted.
+  const unrelatedRaw = fuse(0.71, 0, 0.6);
+  assert.ok(unrelatedRaw > 0.35, `raw fused score ${unrelatedRaw} would defeat the gate`);
+
+  // Rescaled against the same encoder's floor, it correctly scores zero.
+  const unrelatedScaled = fuse(rescaleCosine(0.71, 0.71), 0, 0.6);
+  assert.equal(unrelatedScaled, 0);
+  assert.ok(unrelatedScaled < 0.35, 'gate now fires on unrelated content');
 });

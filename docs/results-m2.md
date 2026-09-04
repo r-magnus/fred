@@ -146,3 +146,88 @@ change that divergence — which strengthens the reading that it is a property o
 the evaluation design rather than of corpus quality.
 
 Expanding the eval set remains the blocking item for the independent-set effect.
+
+---
+
+# Update — eval set expanded to 109 (2026-09-04)
+
+46 → **109 questions**: 59 corpus-derived (every citation verified present in the
+pack) and 50 independent. Key positions balanced. The expansion was undertaken
+specifically to resolve two effects that were underpowered at n = 46.
+
+| Condition | Overall | corpus-derived (n=59) | independent (n=50) | Abstain | Acc. when answering |
+|---|---:|---:|---:|---:|---:|
+| vanilla | 57.8% | 54.2% | 62.0% | — | 57.8% |
+| rag | 72.5% | 88.1% | 54.0% | 11% | 74.2% |
+| rag-rerank | **75.2%** | 86.4% | 62.0% | 17% | **79.1%** |
+| rag-rerank-compress | 70.6% | 83.1% | 56.0% | 17% | 73.6% |
+
+## Correction: "RAG hurts on independent questions" does not survive
+
+At n = 46 the independent set showed 1 gain against 5 losses, and this document
+previously reported that RAG *consistently but not significantly* hurt there. At
+n = 50 independent questions that reverses:
+
+| Comparison | Discordant | p |
+|---|---|---:|
+| independent: vanilla → rag | 5 gains / 9 losses | 0.424 |
+| **independent: vanilla → rag-rerank** | **5 gains / 5 losses** | **1.000** |
+
+With reranking the effect is *exactly zero* — 62.0% either way, five questions
+gained and five lost. The earlier apparent penalty was noise from a small sample,
+and the reading that RAG actively degrades answers on out-of-corpus questions
+should be withdrawn.
+
+Reranking is what recovers it: lexical-only retrieval loses ground on independent
+questions (54.0%) while hybrid does not (62.0%), 1 gain against 5 for rerank,
+though at p = 0.219 that is still not established.
+
+## What is established, strongly
+
+| Comparison | Discordant | p |
+|---|---|---:|
+| corpus-derived: vanilla → rag | 22 gains / 2 losses | **0.00004** |
+| corpus-derived: vanilla → rag-rerank | 22 gains / 3 losses | **0.0002** |
+
+RAG produces a very large gain on corpus-derived questions: **54.2% → 88.1%**.
+That replicates PocketRAG's direction and magnitude convincingly.
+
+## The methodological point, restated more precisely
+
+The claim is no longer "RAG helps on one set and hurts on the other". It is
+sharper than that:
+
+> **RAG produces a 34-point gain on questions drawn from the indexed corpus and
+> no measurable gain at all on questions that are not — 88.1% versus 62.0%, a
+> 26-point gap.**
+
+A benchmark built entirely from its own corpus, as PocketRAG's 200 MCQs are,
+measures retrieval and reading comprehension over known text. It cannot
+distinguish that from first-aid competence, because it contains no questions
+where the two would diverge. Reporting both sets is what makes the distinction
+visible, and the gap is the measurement the single-set design cannot produce.
+
+## The abstention gate earns its place
+
+| Condition | Abstained | Acc. on abstained | Answered | Acc. on answered |
+|---|---:|---:|---:|---:|
+| rag | 12 | 58.3% | 97 | 74.2% |
+| rag-rerank | 18 | 55.6% | 91 | **79.1%** |
+
+The gate withholds an answer on 17% of questions, and the model is markedly worse
+on exactly those — 55.6% against 79.1%, a **23.5-point** separation. It is
+selecting the questions it cannot answer, not firing at random.
+
+This is not something the paper can report: an MCQ benchmark forces a choice, so
+abstention can only ever look like a lost mark. Here it is measurable because
+`wouldAbstain` is recorded alongside the forced answer.
+
+## Selective context compression: a real trade, not a free win
+
+Compression cuts prompt tokens 1190 → 983 (**−17%**) and mean latency 4030 ms →
+2990 ms (**−26%**), and costs roughly 4 points of accuracy (86.4% → 83.1% on
+corpus-derived; 9 gains against 4 losses overall, p = 0.267, not significant).
+
+Given M0's finding that prefill dominates on mid-range hardware, a 26% latency
+cut for a not-yet-significant accuracy cost is likely worth taking there and not
+worth taking on a flagship. That is a per-device decision the paper does not make.

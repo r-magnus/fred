@@ -45,6 +45,21 @@ function isBlankChecklist(text: string): boolean {
   return (text.match(/\bYES\s+NO\b/g) ?? []).length >= 2;
 }
 
+/**
+ * Key-terms exercises are lists of bare "Term:" lines with blank definitions.
+ *
+ * The marker rule catches the chunk containing the "KEY TERMS" heading, but a
+ * long list spans several chunks and the continuations carry no heading at all.
+ * Those survived the first pass and stayed retrievable: a glossary stub matches
+ * clinical vocabulary strongly on the lexical stage while containing no answer.
+ */
+function isDefinitionStubList(text: string): boolean {
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 5) return false;
+  const stubs = lines.filter((l) => /^[A-Z][A-Za-z0-9 /()'-]{1,40}:$/.test(l)).length;
+  return stubs >= 5 && stubs / lines.length > 0.5;
+}
+
 /** Acknowledgement pages are mostly comma-separated personal names. */
 function isNameList(text: string): boolean {
   const commas = (text.match(/,/g) ?? []).length;
@@ -64,6 +79,7 @@ export function classifyChunk(text: string): FilterVerdict {
     if (marker.test(text)) return { drop: true, reason: marker.source };
   }
   if (isBlankChecklist(text)) return { drop: true, reason: 'blank assessment checklist' };
+  if (isDefinitionStubList(text)) return { drop: true, reason: 'key-terms definition stubs' };
   if (isNameList(text)) return { drop: true, reason: 'contributor name list' };
   return { drop: false, reason: null };
 }

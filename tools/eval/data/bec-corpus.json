@@ -29,8 +29,8 @@
   ],
   "answer": 1,
   "cite": {
-   "page": 30,
-   "quote": "Give intramuscular adrenaline for airway obstruction, severe wheezing or shock."
+   "page": 26,
+   "quote": "If the patient has swelling, hives or stridor, consider severe allergic reaction (anaphylaxis), and give intramuscular adrenaline."
   }
  },
  {
@@ -507,6 +507,499 @@
   "cite": {
    "page": 163,
    "quote": "NEVER put a non-rebreather facemask on before it is connected to oxygen."
+  }
+ },
+ {
+  "id": "bec-31",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Bruising around the umbilicus or over the flanks after trauma is a sign of what?",
+  "options": [
+   "A superficial skin infection",
+   "Dehydration",
+   "Internal bleeding",
+   "An allergic reaction"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 32,
+   "quote": "Bruising around the umbilicus (belly button) or over the flanks can be a sign of internal bleeding"
+  }
+ },
+ {
+  "id": "bec-32",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Into which body areas can a large quantity of blood be lost before the bleeding is recognized?",
+  "options": [
+   "Only the scalp and face",
+   "Only the hands and feet",
+   "The airway alone",
+   "Chest, pelvis, thigh and abdomen"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 32,
+   "quote": "A large quantity of blood can also be lost into the chest, pelvis, thigh and abdomen before the bleeding is recognized."
+  }
+ },
+ {
+  "id": "bec-33",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What does WHO BEC direct if a snake bite is suspected?",
+  "options": [
+   "Immobilize the limb",
+   "Apply a tight tourniquet",
+   "Cut and suck the wound",
+   "Pack the bite in ice"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 28,
+   "quote": "If snake bite is suspected, immobilize the limb. Take a picture of the snake if possible from a distance"
+  }
+ },
+ {
+  "id": "bec-34",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "How should the snake be documented after a suspected snake bite?",
+  "options": [
+   "Capture it and bring it with the patient",
+   "Photograph it from a distance if possible",
+   "Kill it for identification",
+   "No documentation is suggested"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 28,
+   "quote": "Take a picture of the snake if possible from a distance and send with patient."
+  }
+ },
+ {
+  "id": "bec-35",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which of these is listed as a cause of fluid loss leading to hypovolaemia?",
+  "options": [
+   "Wearing tight clothing",
+   "Low ambient humidity",
+   "Diarrhoea, vomiting, extensive burns or excess urination",
+   "Sleeping too long"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 105,
+   "quote": "loss of fluid due to diarrhoea, vomiting, extensive burns or excess urination (such as caused by high blood sugar)"
+  }
+ },
+ {
+  "id": "bec-36",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which groups are noted as being at particular risk of dehydration from poor fluid intake?",
+  "options": [
+   "Adolescents and athletes",
+   "Night-shift workers",
+   "People at high altitude only",
+   "Small children, the elderly and the very ill"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 105,
+   "quote": "Small children, the elderly and the very ill may be unable to drink enough fluids without assistance and are at risk of dehydration"
+  }
+ },
+ {
+  "id": "bec-37",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "How can blood pressure fall even when the amount of blood in the vessels is unchanged?",
+  "options": [
+   "Through abnormal relaxation and dilation of the blood vessels",
+   "Because blood becomes thicker",
+   "Because the heart shrinks",
+   "It cannot; volume must fall first"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 105,
+   "quote": "abnormal relaxation and enlargement (dilation) of the blood vessels (with the same amount of blood inside the vessel) can lower blood pressure"
+  }
+ },
+ {
+  "id": "bec-38",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Soot around the mouth or nose and burned facial hair suggest what?",
+  "options": [
+   "Simple soot staining with no risk",
+   "Smoke inhalation and airway burns",
+   "A bleeding disorder",
+   "Hypothermia"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 91,
+   "quote": "Soot around the mouth or nose, burned facial hair or facial burns suggest smoke inhalation and airway burns."
+  }
+ },
+ {
+  "id": "bec-39",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Distended neck veins can be caused by which of the following?",
+  "options": [
+   "Dehydration only",
+   "Low blood sugar",
+   "Heart failure, tension pneumothorax or pericardial tamponade",
+   "A sprained shoulder"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 91,
+   "quote": "Distended neck veins can be due to a back-up of blood due to heart failure, tension pneumothorax or pericardial tamponade."
+  }
+ },
+ {
+  "id": "bec-40",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Excessive use of the muscles in the neck and between the ribs suggests what?",
+  "options": [
+   "Good respiratory reserve",
+   "A muscle strain",
+   "Normal breathing at rest",
+   "Significant respiratory difficulty"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 91,
+   "quote": "Excessive muscle use in the neck and chest (between the ribs) suggests significant respiratory difficulty"
+  }
+ },
+ {
+  "id": "bec-41",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient has no pulse. What does WHO BEC direct?",
+  "options": [
+   "Follow relevant cardiopulmonary resuscitation protocols",
+   "Give oral fluids",
+   "Place in the recovery position",
+   "Wait and reassess in five minutes"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 31,
+   "quote": "No pulse - Follow relevant cardiopulmonary resuscitation (CPR) protocols."
+  }
+ },
+ {
+  "id": "bec-42",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient is wheezing. What does WHO BEC direct, and how often?",
+  "options": [
+   "Give a single dose of salbutamol only",
+   "Give salbutamol, repeated as needed",
+   "Give naloxone once",
+   "Give magnesium sulphate hourly"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 27,
+   "quote": "If wheezing, give salbutamol"
+  }
+ },
+ {
+  "id": "bec-43",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Besides needle decompression, what else is given immediately for suspected tension pneumothorax?",
+  "options": [
+   "Oral rehydration salts",
+   "A benzodiazepine",
+   "IV fluids and oxygen",
+   "Glucose"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 27,
+   "quote": "If concern for tension pneumothorax, perform needle decompression immediately and give IV fluids and oxygen."
+  }
+ },
+ {
+  "id": "bec-44",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What is given for concern of a large pleural effusion or haemothorax?",
+  "options": [
+   "Salbutamol",
+   "Naloxone",
+   "Adrenaline",
+   "Oxygen"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 27,
+   "quote": "If concern for large pleural effusion or haemothorax, give oxygen"
+  }
+ },
+ {
+  "id": "bec-45",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "How should infants be warmed when possible?",
+  "options": [
+   "Skin-to-skin contact",
+   "In a hot water bath",
+   "With a heat lamp only",
+   "By vigorous rubbing"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 37,
+   "quote": "Remove wet clothing and dry skin thoroughly. Place infants skin-to-skin when possible."
+  }
+ },
+ {
+  "id": "bec-46",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "For hypothermia in infants, what specific step is noted?",
+  "options": [
+   "Leave the head uncovered",
+   "Cover the head, but do not obstruct the face",
+   "Wrap the face completely",
+   "Cool the head deliberately"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 37,
+   "quote": "For hypothermia, be sure to cover infants' heads (but do not obstruct face)."
+  }
+ },
+ {
+  "id": "bec-47",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What does WHO BEC direct for a tightly wrapped infant with hyperthermia?",
+  "options": [
+   "Add another blanket",
+   "Immerse in cold water",
+   "Unbundle them",
+   "Leave them wrapped"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 37,
+   "quote": "For hyperthermia, unbundle tightly wrapped infants."
+  }
+ },
+ {
+  "id": "bec-48",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Can a simple pneumothorax become a tension pneumothorax?",
+  "options": [
+   "No, they are unrelated conditions",
+   "Only if the patient is a child",
+   "Only after surgery",
+   "Yes, any pneumothorax can become a tension pneumothorax"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 52,
+   "quote": "Any pneumothorax can become a tension pneumothorax."
+  }
+ },
+ {
+  "id": "bec-49",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "In a patient with one of the four key acute presentations, how should fever be regarded?",
+  "options": [
+   "As an important clue to severe illness, to be taken very seriously",
+   "As irrelevant to emergency care",
+   "As always indicating malaria",
+   "As a reason to delay treatment"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 11,
+   "quote": "fever can be an important clue to severe illness and should be taken very seriously"
+  }
+ },
+ {
+  "id": "bec-50",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What is described as a critical part of the approach to any ill or injured patient, before assessment begins?",
+  "options": [
+   "Taking a full medical history",
+   "Safety considerations",
+   "Recording vital signs",
+   "Obtaining written consent"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 23,
+   "quote": "SAFETY CONSIDERATIONS A critical part of the approach to any ill or injured patient"
+  }
+ },
+ {
+  "id": "bec-51",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which combination of findings is listed for severe allergic reaction?",
+  "options": [
+   "Small pupils with slow breathing",
+   "Distended neck veins with muffled heart sounds",
+   "Mouth, lip and tongue swelling with stridor or wheezing and hives",
+   "Cool skin with a slow pulse"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 30,
+   "quote": "Mouth, lip, and tongue swelling ... Difficulty breathing with stridor and/or wheezing ... Rash or hives"
+  }
+ },
+ {
+  "id": "bec-52",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "For a severe allergic reaction with difficulty breathing, how quickly should adrenaline be given?",
+  "options": [
+   "Only after 30 minutes of observation",
+   "Only if the patient loses consciousness",
+   "Only after oxygen has failed",
+   "As soon as possible"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 97,
+   "quote": "For severe allergic reaction with difficulty breathing give intramuscular adrenaline as soon as possible."
+  }
+ },
+ {
+  "id": "bec-54",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Why do patients with severe allergic reaction also need IV access and fluids?",
+  "options": [
+   "Because their condition can rapidly worsen once the adrenaline wears off",
+   "Because adrenaline causes dehydration",
+   "Because oral fluids are contraindicated",
+   "Because it prevents the rash"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 118,
+   "quote": "These patients will also need IV access and fluids as their condition can rapidly worsen once the adrenaline wears off."
+  }
+ },
+ {
+  "id": "bec-55",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Roughly how long do the effects of salbutamol and intramuscular adrenaline last?",
+  "options": [
+   "About 20 minutes",
+   "About 3 hours",
+   "About 24 hours",
+   "About 5 days"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 230,
+   "quote": "Salbutamol and IM adrenaline effects last for about 3 hours, and life-threatening symptoms may recur."
+  }
+ },
+ {
+  "id": "bec-56",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Why should the time of the last adrenaline dose be recorded at handover?",
+  "options": [
+   "To calculate the bill",
+   "To decide the transport route",
+   "To anticipate the return of symptoms",
+   "To determine blood type"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 208,
+   "quote": "time of last adrenaline dose to anticipate return symptoms"
+  }
+ },
+ {
+  "id": "bec-57",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What is given as the normal adult respiratory rate?",
+  "options": [
+   "4-8 breaths per minute",
+   "30-40 breaths per minute",
+   "Around 60 breaths per minute",
+   "10-20 breaths per minute"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 169,
+   "quote": "Measure other vital signs: respiratory rate and blood pressure (normal adult values: RR 10-20 breaths per minute"
+  }
+ },
+ {
+  "id": "bec-58",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which is listed among the haemorrhage-control skills in WHO BEC?",
+  "options": [
+   "Direct pressure, deep wound packing and tourniquet placement",
+   "Cautery and suturing",
+   "Blood transfusion in the field",
+   "Chest tube insertion"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 32,
+   "quote": "Stop the bleeding. Depending on the source, use"
+  }
+ },
+ {
+  "id": "bec-59",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which skill is listed for suspected pelvic fracture with bleeding?",
+  "options": [
+   "Needle decompression",
+   "Pelvic binding",
+   "Airway suctioning",
+   "Skin pinch test"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 32,
+   "quote": "pelvic binder or femur splint"
+  }
+ },
+ {
+  "id": "bec-60",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "If the airway is open and clear, what is the next step in the ABCDE approach?",
+  "options": [
+   "Move on to Exposure",
+   "Take a full history first",
+   "Move on to Breathing",
+   "Recheck the airway for ten minutes"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 26,
+   "quote": "If the airway is open, move onto \"Breathing\"."
   }
  }
 ]

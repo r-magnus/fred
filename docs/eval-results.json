@@ -1,0 +1,2741 @@
+{
+  "summaries": [
+    {
+      "condition": "vanilla",
+      "n": 46,
+      "accuracy": 0.6304347826086957,
+      "meanLatencyMs": 190.67391304347825,
+      "meanPromptTokens": 55.41304347826087,
+      "abstainRate": 0,
+      "accuracyWhenAnswering": 0.6304347826086957
+    },
+    {
+      "condition": "rag",
+      "n": 46,
+      "accuracy": 0.8043478260869565,
+      "meanLatencyMs": 4243.717391304348,
+      "meanPromptTokens": 1270.8695652173913,
+      "abstainRate": 0.043478260869565216,
+      "accuracyWhenAnswering": 0.7954545454545454
+    },
+    {
+      "condition": "rag-rerank",
+      "n": 46,
+      "accuracy": 0.717391304347826,
+      "meanLatencyMs": 4170.586956521739,
+      "meanPromptTokens": 1252.4130434782608,
+      "abstainRate": 0.043478260869565216,
+      "accuracyWhenAnswering": 0.7272727272727273
+    },
+    {
+      "condition": "rag-rerank-compress",
+      "n": 46,
+      "accuracy": 0.6739130434782609,
+      "meanLatencyMs": 3259.413043478261,
+      "meanPromptTokens": 1021.4130434782609,
+      "abstainRate": 0.043478260869565216,
+      "accuracyWhenAnswering": 0.6818181818181818
+    }
+  ],
+  "results": [
+    {
+      "questionId": "bec-01",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 232,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-02",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 155,
+      "promptTokens": 40,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-03",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 204,
+      "promptTokens": 60,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-04",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 180,
+      "promptTokens": 51,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-05",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 223,
+      "promptTokens": 63,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-06",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 181,
+      "promptTokens": 51,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-07",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 175,
+      "promptTokens": 47,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-08",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 221,
+      "promptTokens": 63,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-09",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 169,
+      "promptTokens": 43,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-10",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 180,
+      "promptTokens": 46,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-11",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 172,
+      "promptTokens": 49,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-12",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 155,
+      "promptTokens": 40,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-13",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 214,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-14",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 212,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-15",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 215,
+      "promptTokens": 63,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-16",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 235,
+      "promptTokens": 65,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-17",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 166,
+      "promptTokens": 48,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-18",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 158,
+      "promptTokens": 40,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-19",
+      "condition": "vanilla",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 217,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-20",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 181,
+      "promptTokens": 52,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-21",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 210,
+      "promptTokens": 60,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-22",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 273,
+      "promptTokens": 84,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-23",
+      "condition": "vanilla",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 179,
+      "promptTokens": 51,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-24",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 198,
+      "promptTokens": 58,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-25",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 214,
+      "promptTokens": 62,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-26",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 147,
+      "promptTokens": 40,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-27",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 149,
+      "promptTokens": 41,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-28",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 196,
+      "promptTokens": 62,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-29",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 188,
+      "promptTokens": 57,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-30",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 164,
+      "promptTokens": 50,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-01",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 184,
+      "promptTokens": 58,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-02",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 198,
+      "promptTokens": 61,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-03",
+      "condition": "vanilla",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 176,
+      "promptTokens": 54,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-04",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 206,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-05",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 160,
+      "promptTokens": 48,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-06",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 186,
+      "promptTokens": 55,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-07",
+      "condition": "vanilla",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 158,
+      "promptTokens": 48,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-08",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 192,
+      "promptTokens": 55,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-09",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 179,
+      "promptTokens": 54,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-10",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 184,
+      "promptTokens": 54,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-11",
+      "condition": "vanilla",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 223,
+      "promptTokens": 67,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-12",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 203,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-13",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 197,
+      "promptTokens": 58,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-14",
+      "condition": "vanilla",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 209,
+      "promptTokens": 64,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-15",
+      "condition": "vanilla",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 169,
+      "promptTokens": 47,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "ind-16",
+      "condition": "vanilla",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 184,
+      "promptTokens": 56,
+      "topScore": 0,
+      "wouldAbstain": false,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-01",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5033,
+      "promptTokens": 1455,
+      "topScore": 0.4375,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        169,
+        231,
+        170
+      ]
+    },
+    {
+      "questionId": "bec-02",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3960,
+      "promptTokens": 1197,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        234,
+        26,
+        225,
+        30
+      ]
+    },
+    {
+      "questionId": "bec-03",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4394,
+      "promptTokens": 1306,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        30,
+        27,
+        202,
+        236
+      ]
+    },
+    {
+      "questionId": "bec-04",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4360,
+      "promptTokens": 1301,
+      "topScore": 0.6666666666666666,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        26,
+        154,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-05",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4492,
+      "promptTokens": 1313,
+      "topScore": 0.875,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        26,
+        154,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-06",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 4605,
+      "promptTokens": 1375,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        155,
+        26,
+        159,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-07",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3186,
+      "promptTokens": 1027,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        140,
+        50,
+        140
+      ]
+    },
+    {
+      "questionId": "bec-08",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4349,
+      "promptTokens": 1289,
+      "topScore": 0.7272727272727273,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        146,
+        50,
+        135,
+        133
+      ]
+    },
+    {
+      "questionId": "bec-09",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3028,
+      "promptTokens": 972,
+      "topScore": 0.4,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        33,
+        28,
+        32,
+        33
+      ]
+    },
+    {
+      "questionId": "bec-10",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": false,
+      "latencyMs": 3656,
+      "promptTokens": 1119,
+      "topScore": 0.6666666666666666,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        237,
+        73,
+        235,
+        108
+      ]
+    },
+    {
+      "questionId": "bec-11",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4535,
+      "promptTokens": 1368,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        225,
+        232,
+        135
+      ]
+    },
+    {
+      "questionId": "bec-12",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3828,
+      "promptTokens": 1163,
+      "topScore": 0.75,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        205,
+        132,
+        144,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-13",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4555,
+      "promptTokens": 1378,
+      "topScore": 0.8333333333333334,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        144,
+        98,
+        230,
+        234
+      ]
+    },
+    {
+      "questionId": "bec-14",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 5074,
+      "promptTokens": 1492,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        28,
+        61,
+        60
+      ]
+    },
+    {
+      "questionId": "bec-15",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 5117,
+      "promptTokens": 1491,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        42,
+        229,
+        225
+      ]
+    },
+    {
+      "questionId": "bec-16",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4950,
+      "promptTokens": 1446,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        165,
+        225,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-17",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4040,
+      "promptTokens": 1250,
+      "topScore": 0.7142857142857143,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        97,
+        31,
+        97,
+        88
+      ]
+    },
+    {
+      "questionId": "bec-18",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 4105,
+      "promptTokens": 1237,
+      "topScore": 0.8333333333333334,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        164,
+        31,
+        49,
+        97
+      ]
+    },
+    {
+      "questionId": "bec-19",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4819,
+      "promptTokens": 1409,
+      "topScore": 0.6,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        43,
+        91,
+        86,
+        220
+      ]
+    },
+    {
+      "questionId": "bec-20",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4084,
+      "promptTokens": 1236,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        94,
+        113,
+        32,
+        96
+      ]
+    },
+    {
+      "questionId": "bec-21",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5063,
+      "promptTokens": 1502,
+      "topScore": 0.6363636363636364,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        108,
+        175,
+        177,
+        36
+      ]
+    },
+    {
+      "questionId": "bec-22",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 4588,
+      "promptTokens": 1376,
+      "topScore": 0.7857142857142857,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        124,
+        54,
+        125,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-23",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4593,
+      "promptTokens": 1357,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        215,
+        216,
+        71
+      ]
+    },
+    {
+      "questionId": "bec-24",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 5381,
+      "promptTokens": 1559,
+      "topScore": 0.8571428571428571,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        180,
+        170,
+        169
+      ]
+    },
+    {
+      "questionId": "bec-25",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 206,
+      "promptTokens": 62,
+      "topScore": 0,
+      "wouldAbstain": true,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-26",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3950,
+      "promptTokens": 1206,
+      "topScore": 0.8888888888888888,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        67,
+        50,
+        50,
+        67
+      ]
+    },
+    {
+      "questionId": "bec-27",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4146,
+      "promptTokens": 1257,
+      "topScore": 1,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        39,
+        38,
+        37,
+        219
+      ]
+    },
+    {
+      "questionId": "bec-28",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 2667,
+      "promptTokens": 873,
+      "topScore": 0.6666666666666666,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        184,
+        65,
+        76,
+        184
+      ]
+    },
+    {
+      "questionId": "bec-29",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4362,
+      "promptTokens": 1292,
+      "topScore": 0.8333333333333334,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        27,
+        167,
+        49,
+        225
+      ]
+    },
+    {
+      "questionId": "bec-30",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 5039,
+      "promptTokens": 1443,
+      "topScore": 0.6666666666666666,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        162,
+        163,
+        162,
+        167
+      ]
+    },
+    {
+      "questionId": "ind-01",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5437,
+      "promptTokens": 1575,
+      "topScore": 0.8571428571428571,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        155,
+        163,
+        159,
+        159
+      ]
+    },
+    {
+      "questionId": "ind-02",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": false,
+      "latencyMs": 4917,
+      "promptTokens": 1423,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        211,
+        155,
+        168,
+        43
+      ]
+    },
+    {
+      "questionId": "ind-03",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3895,
+      "promptTokens": 1177,
+      "topScore": 0.6,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        71,
+        79,
+        234,
+        54
+      ]
+    },
+    {
+      "questionId": "ind-04",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4054,
+      "promptTokens": 1246,
+      "topScore": 0.3333333333333333,
+      "wouldAbstain": true,
+      "retrievedPages": [
+        24,
+        24,
+        233,
+        138
+      ]
+    },
+    {
+      "questionId": "ind-05",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3496,
+      "promptTokens": 1076,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        24,
+        187,
+        216,
+        98
+      ]
+    },
+    {
+      "questionId": "ind-06",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3549,
+      "promptTokens": 1091,
+      "topScore": 0.625,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        42,
+        190,
+        189
+      ]
+    },
+    {
+      "questionId": "ind-07",
+      "condition": "rag",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4586,
+      "promptTokens": 1379,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        137,
+        146,
+        55,
+        130
+      ]
+    },
+    {
+      "questionId": "ind-08",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3996,
+      "promptTokens": 1264,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        190,
+        164,
+        196,
+        200
+      ]
+    },
+    {
+      "questionId": "ind-09",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 5012,
+      "promptTokens": 1470,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        40,
+        155,
+        159,
+        159
+      ]
+    },
+    {
+      "questionId": "ind-10",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 1783,
+      "promptTokens": 611,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        137,
+        136,
+        136,
+        136
+      ]
+    },
+    {
+      "questionId": "ind-11",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4508,
+      "promptTokens": 1333,
+      "topScore": 0.5714285714285714,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        216,
+        140,
+        140,
+        36
+      ]
+    },
+    {
+      "questionId": "ind-12",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4476,
+      "promptTokens": 1348,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        59,
+        200,
+        24,
+        59
+      ]
+    },
+    {
+      "questionId": "ind-13",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4366,
+      "promptTokens": 1297,
+      "topScore": 0.5555555555555556,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        77,
+        59,
+        55,
+        76
+      ]
+    },
+    {
+      "questionId": "ind-14",
+      "condition": "rag",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 5075,
+      "promptTokens": 1500,
+      "topScore": 0.8,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        229,
+        11,
+        12,
+        180
+      ]
+    },
+    {
+      "questionId": "ind-15",
+      "condition": "rag",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4510,
+      "promptTokens": 1370,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        134,
+        218,
+        59,
+        108
+      ]
+    },
+    {
+      "questionId": "ind-16",
+      "condition": "rag",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 5386,
+      "promptTokens": 1549,
+      "topScore": 0.5,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        200,
+        167,
+        200,
+        195
+      ]
+    },
+    {
+      "questionId": "bec-01",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5462,
+      "promptTokens": 1545,
+      "topScore": 0.49925815725189526,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        169,
+        170,
+        32
+      ]
+    },
+    {
+      "questionId": "bec-02",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3230,
+      "promptTokens": 964,
+      "topScore": 0.5211180817938368,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        26,
+        27,
+        211
+      ]
+    },
+    {
+      "questionId": "bec-03",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4520,
+      "promptTokens": 1374,
+      "topScore": 0.4736170618551244,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        30,
+        202,
+        140,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-04",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4626,
+      "promptTokens": 1367,
+      "topScore": 0.6305708745037781,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        154,
+        26,
+        159
+      ]
+    },
+    {
+      "questionId": "bec-05",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4524,
+      "promptTokens": 1313,
+      "topScore": 0.7278244820036781,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        154,
+        26,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-06",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 4620,
+      "promptTokens": 1375,
+      "topScore": 0.7181835994061243,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        159,
+        26,
+        155,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-07",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 2587,
+      "promptTokens": 853,
+      "topScore": 0.5823141441604358,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        50,
+        130,
+        136,
+        136
+      ]
+    },
+    {
+      "questionId": "bec-08",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 3137,
+      "promptTokens": 1003,
+      "topScore": 0.5537717685752194,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        130,
+        50,
+        50,
+        142
+      ]
+    },
+    {
+      "questionId": "bec-09",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5733,
+      "promptTokens": 1599,
+      "topScore": 0.3822102765220968,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        203,
+        209,
+        234,
+        138
+      ]
+    },
+    {
+      "questionId": "bec-10",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": false,
+      "latencyMs": 4041,
+      "promptTokens": 1248,
+      "topScore": 0.4268311346457635,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        73,
+        237,
+        235,
+        235
+      ]
+    },
+    {
+      "questionId": "bec-11",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4327,
+      "promptTokens": 1294,
+      "topScore": 0.6590303203832635,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        135,
+        130,
+        232
+      ]
+    },
+    {
+      "questionId": "bec-12",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3512,
+      "promptTokens": 1106,
+      "topScore": 0.5599595935570582,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        205,
+        145,
+        31,
+        132
+      ]
+    },
+    {
+      "questionId": "bec-13",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4090,
+      "promptTokens": 1253,
+      "topScore": 0.5993642533599892,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        145,
+        234,
+        234,
+        144
+      ]
+    },
+    {
+      "questionId": "bec-14",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3613,
+      "promptTokens": 1117,
+      "topScore": 0.5488277030954782,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        54,
+        66,
+        57
+      ]
+    },
+    {
+      "questionId": "bec-15",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 4801,
+      "promptTokens": 1417,
+      "topScore": 0.7554130301742352,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        229,
+        42,
+        49
+      ]
+    },
+    {
+      "questionId": "bec-16",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4415,
+      "promptTokens": 1322,
+      "topScore": 0.7169411915976819,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        49,
+        43,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-17",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4038,
+      "promptTokens": 1230,
+      "topScore": 0.4895751134231081,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        31,
+        97,
+        229,
+        98
+      ]
+    },
+    {
+      "questionId": "bec-18",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3841,
+      "promptTokens": 1182,
+      "topScore": 0.7008691943798551,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        164,
+        31,
+        164,
+        30
+      ]
+    },
+    {
+      "questionId": "bec-19",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4736,
+      "promptTokens": 1401,
+      "topScore": 0.5485594455244556,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        220,
+        43,
+        164,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-20",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3833,
+      "promptTokens": 1178,
+      "topScore": 0.661290004410549,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        94,
+        32,
+        54,
+        114
+      ]
+    },
+    {
+      "questionId": "bec-21",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4446,
+      "promptTokens": 1326,
+      "topScore": 0.5125863739743887,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        108,
+        54,
+        107,
+        40
+      ]
+    },
+    {
+      "questionId": "bec-22",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 4554,
+      "promptTokens": 1376,
+      "topScore": 0.6013030565833444,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        124,
+        54,
+        125,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-23",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3952,
+      "promptTokens": 1234,
+      "topScore": 0.6855345602297682,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        215,
+        106,
+        216
+      ]
+    },
+    {
+      "questionId": "bec-24",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 5357,
+      "promptTokens": 1559,
+      "topScore": 0.6720399478691854,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        180,
+        170,
+        169
+      ]
+    },
+    {
+      "questionId": "bec-25",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 209,
+      "promptTokens": 62,
+      "topScore": 0,
+      "wouldAbstain": true,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-26",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3911,
+      "promptTokens": 1206,
+      "topScore": 0.7140242228953804,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        67,
+        67,
+        50,
+        50
+      ]
+    },
+    {
+      "questionId": "bec-27",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3265,
+      "promptTokens": 1046,
+      "topScore": 0.5706553735719971,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        39,
+        38,
+        13,
+        37
+      ]
+    },
+    {
+      "questionId": "bec-28",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3541,
+      "promptTokens": 1116,
+      "topScore": 0.5392761753919004,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        184,
+        76,
+        76,
+        19
+      ]
+    },
+    {
+      "questionId": "bec-29",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 4170,
+      "promptTokens": 1267,
+      "topScore": 0.6375280097783436,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        27,
+        167,
+        49,
+        167
+      ]
+    },
+    {
+      "questionId": "bec-30",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 5041,
+      "promptTokens": 1443,
+      "topScore": 0.5899874620341397,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        162,
+        163,
+        162,
+        167
+      ]
+    },
+    {
+      "questionId": "ind-01",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5463,
+      "promptTokens": 1575,
+      "topScore": 0.6023222798221023,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        155,
+        163,
+        159,
+        159
+      ]
+    },
+    {
+      "questionId": "ind-02",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4853,
+      "promptTokens": 1423,
+      "topScore": 0.4457689319791756,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        168,
+        43,
+        211,
+        155
+      ]
+    },
+    {
+      "questionId": "ind-03",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3314,
+      "promptTokens": 1053,
+      "topScore": 0.39883085791685147,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        199,
+        79,
+        71
+      ]
+    },
+    {
+      "questionId": "ind-04",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3063,
+      "promptTokens": 973,
+      "topScore": 0.3550584680124652,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        24,
+        60,
+        60,
+        59
+      ]
+    },
+    {
+      "questionId": "ind-05",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 3837,
+      "promptTokens": 1157,
+      "topScore": 0.45522520672737005,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        24,
+        26,
+        216,
+        187
+      ]
+    },
+    {
+      "questionId": "ind-06",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3979,
+      "promptTokens": 1213,
+      "topScore": 0.48535881292633437,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        190,
+        190,
+        189,
+        194
+      ]
+    },
+    {
+      "questionId": "ind-07",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 5089,
+      "promptTokens": 1530,
+      "topScore": 0.3536677108766412,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        55,
+        146,
+        220,
+        135
+      ]
+    },
+    {
+      "questionId": "ind-08",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 5124,
+      "promptTokens": 1530,
+      "topScore": 0.3830662698835834,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        190,
+        215,
+        191,
+        187
+      ]
+    },
+    {
+      "questionId": "ind-09",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 4922,
+      "promptTokens": 1425,
+      "topScore": 0.5348528905838414,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        159,
+        159,
+        155,
+        155
+      ]
+    },
+    {
+      "questionId": "ind-10",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 2211,
+      "promptTokens": 748,
+      "topScore": 0.40291593183897356,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        136,
+        136,
+        137,
+        136
+      ]
+    },
+    {
+      "questionId": "ind-11",
+      "condition": "rag-rerank",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4406,
+      "promptTokens": 1303,
+      "topScore": 0.4402123347975265,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        216,
+        140,
+        140,
+        143
+      ]
+    },
+    {
+      "questionId": "ind-12",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 5213,
+      "promptTokens": 1513,
+      "topScore": 0.45520458467765235,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        200,
+        24,
+        161,
+        167
+      ]
+    },
+    {
+      "questionId": "ind-13",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3506,
+      "promptTokens": 1096,
+      "topScore": 0.48841293778460526,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        55,
+        135,
+        54,
+        65
+      ]
+    },
+    {
+      "questionId": "ind-14",
+      "condition": "rag-rerank",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 5042,
+      "promptTokens": 1443,
+      "topScore": 0.5756103329076019,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        12,
+        11,
+        27,
+        229
+      ]
+    },
+    {
+      "questionId": "ind-15",
+      "condition": "rag-rerank",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4079,
+      "promptTokens": 1268,
+      "topScore": 0.3089520886525746,
+      "wouldAbstain": true,
+      "retrievedPages": [
+        134,
+        124,
+        134,
+        102
+      ]
+    },
+    {
+      "questionId": "ind-16",
+      "condition": "rag-rerank",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 5614,
+      "promptTokens": 1585,
+      "topScore": 0.46456422687430954,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        195,
+        200,
+        200,
+        180
+      ]
+    },
+    {
+      "questionId": "bec-01",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 5139,
+      "promptTokens": 1493,
+      "topScore": 0.49925815725189526,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        169,
+        170,
+        32
+      ]
+    },
+    {
+      "questionId": "bec-02",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 2251,
+      "promptTokens": 755,
+      "topScore": 0.5211180817938368,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        26,
+        27,
+        211
+      ]
+    },
+    {
+      "questionId": "bec-03",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3473,
+      "promptTokens": 1074,
+      "topScore": 0.4736170618551244,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        30,
+        202,
+        140,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-04",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3416,
+      "promptTokens": 1074,
+      "topScore": 0.6305708745037781,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        154,
+        26,
+        159
+      ]
+    },
+    {
+      "questionId": "bec-05",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3103,
+      "promptTokens": 1016,
+      "topScore": 0.7278244820036781,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        154,
+        26,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-06",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3428,
+      "promptTokens": 1088,
+      "topScore": 0.7181835994061243,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        159,
+        26,
+        155,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-07",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 2133,
+      "promptTokens": 707,
+      "topScore": 0.5823141441604358,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        50,
+        130,
+        136,
+        136
+      ]
+    },
+    {
+      "questionId": "bec-08",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 2500,
+      "promptTokens": 817,
+      "topScore": 0.5537717685752194,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        130,
+        50,
+        50,
+        142
+      ]
+    },
+    {
+      "questionId": "bec-09",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": false,
+      "latencyMs": 4102,
+      "promptTokens": 1253,
+      "topScore": 0.3822102765220968,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        203,
+        209,
+        234,
+        138
+      ]
+    },
+    {
+      "questionId": "bec-10",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": false,
+      "latencyMs": 3104,
+      "promptTokens": 993,
+      "topScore": 0.4268311346457635,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        73,
+        237,
+        235,
+        235
+      ]
+    },
+    {
+      "questionId": "bec-11",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3229,
+      "promptTokens": 1019,
+      "topScore": 0.6590303203832635,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        135,
+        130,
+        232
+      ]
+    },
+    {
+      "questionId": "bec-12",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 2657,
+      "promptTokens": 871,
+      "topScore": 0.5599595935570582,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        205,
+        145,
+        31,
+        132
+      ]
+    },
+    {
+      "questionId": "bec-13",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3221,
+      "promptTokens": 1023,
+      "topScore": 0.5993642533599892,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        145,
+        234,
+        234,
+        144
+      ]
+    },
+    {
+      "questionId": "bec-14",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3099,
+      "promptTokens": 983,
+      "topScore": 0.5488277030954782,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        28,
+        54,
+        66,
+        57
+      ]
+    },
+    {
+      "questionId": "bec-15",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3529,
+      "promptTokens": 1108,
+      "topScore": 0.7554130301742352,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        229,
+        42,
+        49
+      ]
+    },
+    {
+      "questionId": "bec-16",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3192,
+      "promptTokens": 1027,
+      "topScore": 0.7169411915976819,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        26,
+        49,
+        43,
+        229
+      ]
+    },
+    {
+      "questionId": "bec-17",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3139,
+      "promptTokens": 983,
+      "topScore": 0.4895751134231081,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        31,
+        97,
+        229,
+        98
+      ]
+    },
+    {
+      "questionId": "bec-18",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3092,
+      "promptTokens": 988,
+      "topScore": 0.7008691943798551,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        164,
+        31,
+        164,
+        30
+      ]
+    },
+    {
+      "questionId": "bec-19",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3655,
+      "promptTokens": 1115,
+      "topScore": 0.5485594455244556,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        220,
+        43,
+        164,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-20",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 3491,
+      "promptTokens": 1096,
+      "topScore": 0.661290004410549,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        94,
+        32,
+        54,
+        114
+      ]
+    },
+    {
+      "questionId": "bec-21",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3505,
+      "promptTokens": 1072,
+      "topScore": 0.5125863739743887,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        108,
+        54,
+        107,
+        40
+      ]
+    },
+    {
+      "questionId": "bec-22",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 4458,
+      "promptTokens": 1303,
+      "topScore": 0.6013030565833444,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        124,
+        54,
+        125,
+        31
+      ]
+    },
+    {
+      "questionId": "bec-23",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3066,
+      "promptTokens": 981,
+      "topScore": 0.6855345602297682,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        215,
+        106,
+        216
+      ]
+    },
+    {
+      "questionId": "bec-24",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4042,
+      "promptTokens": 1248,
+      "topScore": 0.6720399478691854,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        169,
+        180,
+        170,
+        169
+      ]
+    },
+    {
+      "questionId": "bec-25",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 203,
+      "promptTokens": 62,
+      "topScore": 0,
+      "wouldAbstain": true,
+      "retrievedPages": []
+    },
+    {
+      "questionId": "bec-26",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3660,
+      "promptTokens": 1129,
+      "topScore": 0.7140242228953804,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        67,
+        67,
+        50,
+        50
+      ]
+    },
+    {
+      "questionId": "bec-27",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 2597,
+      "promptTokens": 852,
+      "topScore": 0.5706553735719971,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        39,
+        38,
+        13,
+        37
+      ]
+    },
+    {
+      "questionId": "bec-28",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 2855,
+      "promptTokens": 912,
+      "topScore": 0.5392761753919004,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        184,
+        76,
+        76,
+        19
+      ]
+    },
+    {
+      "questionId": "bec-29",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3200,
+      "promptTokens": 1015,
+      "topScore": 0.6375280097783436,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        27,
+        167,
+        49,
+        167
+      ]
+    },
+    {
+      "questionId": "bec-30",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3826,
+      "promptTokens": 1176,
+      "topScore": 0.5899874620341397,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        162,
+        163,
+        162,
+        167
+      ]
+    },
+    {
+      "questionId": "ind-01",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 4126,
+      "promptTokens": 1249,
+      "topScore": 0.6023222798221023,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        155,
+        163,
+        159,
+        159
+      ]
+    },
+    {
+      "questionId": "ind-02",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 3707,
+      "promptTokens": 1141,
+      "topScore": 0.4457689319791756,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        168,
+        43,
+        211,
+        155
+      ]
+    },
+    {
+      "questionId": "ind-03",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 2683,
+      "promptTokens": 855,
+      "topScore": 0.39883085791685147,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        54,
+        199,
+        79,
+        71
+      ]
+    },
+    {
+      "questionId": "ind-04",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 2486,
+      "promptTokens": 803,
+      "topScore": 0.3550584680124652,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        24,
+        60,
+        60,
+        59
+      ]
+    },
+    {
+      "questionId": "ind-05",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 2893,
+      "promptTokens": 930,
+      "topScore": 0.45522520672737005,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        24,
+        26,
+        216,
+        187
+      ]
+    },
+    {
+      "questionId": "ind-06",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 3056,
+      "promptTokens": 990,
+      "topScore": 0.48535881292633437,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        190,
+        190,
+        189,
+        194
+      ]
+    },
+    {
+      "questionId": "ind-07",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 4072,
+      "promptTokens": 1217,
+      "topScore": 0.3536677108766412,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        55,
+        146,
+        220,
+        135
+      ]
+    },
+    {
+      "questionId": "ind-08",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4004,
+      "promptTokens": 1236,
+      "topScore": 0.3830662698835834,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        190,
+        215,
+        191,
+        187
+      ]
+    },
+    {
+      "questionId": "ind-09",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": true,
+      "latencyMs": 3629,
+      "promptTokens": 1137,
+      "topScore": 0.5348528905838414,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        159,
+        159,
+        155,
+        155
+      ]
+    },
+    {
+      "questionId": "ind-10",
+      "condition": "rag-rerank-compress",
+      "chosen": 1,
+      "correct": true,
+      "latencyMs": 1762,
+      "promptTokens": 606,
+      "topScore": 0.40291593183897356,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        136,
+        136,
+        137,
+        136
+      ]
+    },
+    {
+      "questionId": "ind-11",
+      "condition": "rag-rerank-compress",
+      "chosen": 2,
+      "correct": true,
+      "latencyMs": 3161,
+      "promptTokens": 1028,
+      "topScore": 0.4402123347975265,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        216,
+        140,
+        140,
+        143
+      ]
+    },
+    {
+      "questionId": "ind-12",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 4045,
+      "promptTokens": 1221,
+      "topScore": 0.45520458467765235,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        200,
+        24,
+        161,
+        167
+      ]
+    },
+    {
+      "questionId": "ind-13",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 2723,
+      "promptTokens": 885,
+      "topScore": 0.48841293778460526,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        55,
+        135,
+        54,
+        65
+      ]
+    },
+    {
+      "questionId": "ind-14",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": false,
+      "latencyMs": 3595,
+      "promptTokens": 1130,
+      "topScore": 0.5756103329076019,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        12,
+        11,
+        27,
+        229
+      ]
+    },
+    {
+      "questionId": "ind-15",
+      "condition": "rag-rerank-compress",
+      "chosen": 0,
+      "correct": false,
+      "latencyMs": 3489,
+      "promptTokens": 1071,
+      "topScore": 0.3089520886525746,
+      "wouldAbstain": true,
+      "retrievedPages": [
+        134,
+        124,
+        134,
+        102
+      ]
+    },
+    {
+      "questionId": "ind-16",
+      "condition": "rag-rerank-compress",
+      "chosen": 3,
+      "correct": true,
+      "latencyMs": 4137,
+      "promptTokens": 1253,
+      "topScore": 0.46456422687430954,
+      "wouldAbstain": false,
+      "retrievedPages": [
+        195,
+        200,
+        200,
+        180
+      ]
+    }
+  ]
+}

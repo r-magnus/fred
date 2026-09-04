@@ -14,12 +14,20 @@ export interface RetrievalOptions {
   readonly topK: number;
   /** Eq. 3 semantic weight. */
   readonly alpha: number;
+  /**
+   * 'hybrid' runs both stages (the shipping configuration). 'lexical-only'
+   * stops after Stage 1 and skips query embedding entirely, which is the
+   * paper's plain "RAG" arm as distinct from "RAG + Rerank". Skipping the
+   * embedding rather than setting alpha=0 keeps the latency comparison honest.
+   */
+  readonly mode: 'hybrid' | 'lexical-only';
 }
 
 export const DEFAULT_RETRIEVAL: RetrievalOptions = {
   candidateLimit: 50,
   topK: 4,
   alpha: DEFAULT_ALPHA,
+  mode: 'hybrid',
 };
 
 export interface ScoredChunk {
@@ -68,7 +76,8 @@ export async function retrieve(
   opts: RetrievalOptions = DEFAULT_RETRIEVAL,
 ): Promise<ScoredChunk[]> {
   if (packIds.length === 0) return [];
-  assertCompatibleEmbedding(packIds, store, backend);
+  // Only the hybrid path compares vectors, so only it requires a matching encoder.
+  if (opts.mode === 'hybrid') assertCompatibleEmbedding(packIds, store, backend);
 
   // Stage 1 — lexical pre-filter. Cuts the vector work to a bounded candidate set.
   const terms = keywords.map((k) => k.term);
@@ -86,7 +95,10 @@ export async function retrieve(
   const byId = new Map(chunks.map((c) => [c.id, c]));
 
   // Stage 2 — semantic re-rank over the survivors only.
-  const queryVec = await backend.embed(keywords.map((k) => k.term).join(' '));
+  const lexicalOnly = opts.mode === 'lexical-only';
+  const queryVec = lexicalOnly
+    ? null
+    : await backend.embed(keywords.map((k) => k.term).join(' '));
 
   // The floor is a property of the running encoder, not of any one pack.
   const floor = backend.embeddingSpec().cosineFloor;
@@ -97,9 +109,14 @@ export async function retrieve(
     const chunk = byId.get(hit.chunkId);
     const v = vectors[i];
     if (!chunk || !v) continue;
+    const sLex = lexicalScore(keywords, chunkTermSet(chunk.text));
+    if (queryVec === null) {
+      // Stage 1 alone: rank purely by lexical overlap.
+      scored.push({ chunk, cosineRaw: 0, cosine: 0, sLex, score: sLex });
+      continue;
+    }
     const cosineRaw = cosineInt8(queryVec, v.vec);
     const cosine = rescaleCosine(cosineRaw, floor);
-    const sLex = lexicalScore(keywords, chunkTermSet(chunk.text));
     scored.push({ chunk, cosineRaw, cosine, sLex, score: fuse(cosine, sLex, opts.alpha) });
   }
 

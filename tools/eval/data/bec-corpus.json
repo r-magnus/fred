@@ -1,0 +1,512 @@
+[
+ {
+  "id": "bec-01",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Severe external bleeding from a limb continues despite direct pressure. What does WHO Basic Emergency Care list as a further option to stop it?",
+  "options": [
+   "Apply a tourniquet",
+   "Elevate the limb above the heart",
+   "Apply ice to the wound",
+   "Give oral fluids"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 32,
+   "quote": "Stop the bleeding. Depending on the source, use: - direct pressure - deep wound packing - a tourniquet - pelvic binder or femur splint."
+  }
+ },
+ {
+  "id": "bec-02",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "By what route is adrenaline given for anaphylaxis?",
+  "options": [
+   "Intravenous bolus",
+   "Intramuscular",
+   "Oral",
+   "Subcutaneous infusion"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 30,
+   "quote": "Give intramuscular adrenaline for airway obstruction, severe wheezing or shock."
+  }
+ },
+ {
+  "id": "bec-03",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Why must you be prepared to give additional doses of adrenaline?",
+  "options": [
+   "It is excreted rapidly by the kidneys",
+   "The first dose is deliberately sub-therapeutic",
+   "It can wear off in minutes",
+   "It must be titrated against blood pressure"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 30,
+   "quote": "Adrenaline can wear off in minutes so be prepared to give additional doses."
+  }
+ },
+ {
+  "id": "bec-04",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A choking patient can still cough forcefully and make sounds. What is indicated?",
+  "options": [
+   "Immediate abdominal thrusts",
+   "A blind finger sweep",
+   "Begin chest compressions",
+   "Keep the patient calm and encourage coughing"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 26,
+   "quote": "If the patient is able to cough or make noises, keep the patient calm and encourage coughing."
+  }
+ },
+ {
+  "id": "bec-05",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient is choking and is unable to cough or make any sound. What is indicated?",
+  "options": [
+   "Age-appropriate chest thrusts, abdominal thrusts or back blows",
+   "Encourage coughing",
+   "Give fluids to wash the obstruction down",
+   "Place in the recovery position"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 26,
+   "quote": "If the patient is choking (unable to cough, not making sounds) use age-appropriate chest thrusts/abdominal thrusts/back blows."
+  }
+ },
+ {
+  "id": "bec-06",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A choking patient becomes unconscious. What should you do?",
+  "options": [
+   "Continue abdominal thrusts with the patient standing",
+   "Follow relevant CPR protocols",
+   "Place in the recovery position and observe",
+   "Give intramuscular adrenaline"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 26,
+   "quote": "If the patient becomes unconscious while choking, follow relevant CPR protocols."
+  }
+ },
+ {
+  "id": "bec-07",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient has altered mental status with no evidence of trauma. What positioning does WHO BEC direct?",
+  "options": [
+   "Supine and flat",
+   "Sitting fully upright",
+   "Recovery position",
+   "Prone"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 28,
+   "quote": "If altered mental status and no evidence of trauma, place in recovery position."
+  }
+ },
+ {
+  "id": "bec-08",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Below which blood glucose level does WHO BEC direct giving glucose to a patient with altered mental status?",
+  "options": [
+   "7.0 mmol/L",
+   "10 mmol/L",
+   "1.0 mmol/L",
+   "3.5 mmol/L"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 28,
+   "quote": "If glucose low (<3.5 mmol/L) or glucose test not available and patient has altered mental status, give glucose."
+  }
+ },
+ {
+  "id": "bec-09",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which class of medication is indicated for active seizures?",
+  "options": [
+   "A benzodiazepine",
+   "Naloxone",
+   "Adrenaline",
+   "Salbutamol"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 28,
+   "quote": "For active seizures, give a benzodiazepine."
+  }
+ },
+ {
+  "id": "bec-10",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A pregnant patient is having seizures. Which medication is specifically indicated?",
+  "options": [
+   "A benzodiazepine only",
+   "Magnesium sulphate",
+   "Naloxone",
+   "Glucose"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 28,
+   "quote": "If pregnant and having seizures, give magnesium sulphate."
+  }
+ },
+ {
+  "id": "bec-11",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient has small pupils and slow breathing. What should you consider?",
+  "options": [
+   "Anaphylaxis",
+   "Hypoglycaemia",
+   "Opioid overdose",
+   "Tension pneumothorax"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 28,
+   "quote": "If pupils are small and breathing slow, consider opioid overdose and give naloxone."
+  }
+ },
+ {
+  "id": "bec-12",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which medication reverses the effects of opioids?",
+  "options": [
+   "Adrenaline",
+   "Magnesium sulphate",
+   "Salbutamol",
+   "Naloxone"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 31,
+   "quote": "Give naloxone to reverse the effects of opioids."
+  }
+ },
+ {
+  "id": "bec-13",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "After giving naloxone, why must the patient be monitored closely?",
+  "options": [
+   "Naloxone will wear off and additional doses may be needed",
+   "It can cause immediate anaphylaxis",
+   "It causes prolonged sedation",
+   "It must itself be reversed after ten minutes"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 31,
+   "quote": "Monitor closely as naloxone will wear off and additional doses may be needed."
+  }
+ },
+ {
+  "id": "bec-14",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient has unequal pupils and there is no concern for spinal injury. What does WHO BEC direct?",
+  "options": [
+   "Lay the patient completely flat",
+   "Raise the head of the bed 30 degrees",
+   "Place in the recovery position",
+   "Give a benzodiazepine"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 28,
+   "quote": "If pupils are not equal, consider increased pressure on the brain and raise head of bed 30 degrees if no concern for spinal injury."
+  }
+ },
+ {
+  "id": "bec-15",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "An unconscious patient is not breathing normally and there is NO concern for trauma. How should the airway be opened?",
+  "options": [
+   "Jaw thrust with cervical spine immobilization",
+   "A blind finger sweep",
+   "Head-tilt and chin-lift",
+   "Abdominal thrusts"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 26,
+   "quote": "NO TRAUMA: open the airway using the head-tilt and chin-lift manoeuvre."
+  }
+ },
+ {
+  "id": "bec-16",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "An unconscious patient is not breathing normally and trauma is suspected. How should the airway be opened?",
+  "options": [
+   "Head-tilt and chin-lift",
+   "Sit the patient fully upright",
+   "Log roll the patient to prone",
+   "Maintain cervical spine immobilization and use a jaw thrust"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 26,
+   "quote": "CONCERN FOR TRAUMA: maintain cervical spine immobilization and open the airway using the jaw thrust manoeuvre."
+  }
+ },
+ {
+  "id": "bec-17",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which medication should be given as soon as possible in an asthma or COPD exacerbation?",
+  "options": [
+   "Salbutamol",
+   "Naloxone",
+   "Magnesium sulphate",
+   "Glucose"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 31,
+   "quote": "Asthma and COPD are conditions causing spasm in the lower airways... Administer salbutamol as soon as possible."
+  }
+ },
+ {
+  "id": "bec-18",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What emergency procedure is indicated for suspected tension pneumothorax?",
+  "options": [
+   "Deep wound packing",
+   "Needle decompression",
+   "Pelvic binding",
+   "Log roll"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 31,
+   "quote": "If tension pneumothorax is suspected, perform emergency needle decompression."
+  }
+ },
+ {
+  "id": "bec-19",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which combination of findings suggests tension pneumothorax?",
+  "options": [
+   "Hives, wheezing and lip swelling",
+   "Small pupils with slow breathing",
+   "Hypotension and difficulty breathing with distended neck veins and absent breath sounds on one side",
+   "Low blood glucose with confusion"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 31,
+   "quote": "Hypotension WITH difficulty in breathing AND any of the following: - distended neck veins - absent breath sounds on affected side - hyperresonance with percussion on affected side - tracheal shift away from affected side"
+  }
+ },
+ {
+  "id": "bec-20",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Hypotension, distended neck veins and muffled heart sounds together suggest which condition?",
+  "options": [
+   "Anaphylaxis",
+   "Hypoglycaemia",
+   "Asthma",
+   "Pericardial tamponade"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 27,
+   "quote": "Look for hypotension, distended neck veins and muffled heart sounds that might indicate pericardial tamponade."
+  }
+ },
+ {
+  "id": "bec-21",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "According to WHO BEC, which signs may an adult in shock show before blood pressure falls?",
+  "options": [
+   "Tachycardia and tachypnoea",
+   "Bradycardia and hypertension",
+   "Altered mental status alone",
+   "Fever and rash"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 54,
+   "quote": "An adult patient in shock may have only tachycardia (elevated heart rate) and/or tachypnoea (high respiratory rate) and may not have low blood pressure until the condition is immediately life-threatening."
+  }
+ },
+ {
+  "id": "bec-22",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A bleeding trauma patient has a systolic blood pressure of 95 mmHg with cool, pale skin. What should you conclude?",
+  "options": [
+   "Shock is excluded because systolic pressure is above 90",
+   "Suspect hypovolaemic shock despite the blood pressure",
+   "Wait until systolic pressure falls below 90 before treating",
+   "This indicates neurogenic shock"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 54,
+   "quote": "Even with a systolic blood pressure greater than 90 mmHg, suspect hypovolaemic shock if there is severe bleeding or any sign of poor perfusion."
+  }
+ },
+ {
+  "id": "bec-23",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Hypovolaemic shock can result from which of the following?",
+  "options": [
+   "Allergic reaction only",
+   "Airway obstruction only",
+   "Rapid blood loss, or the fluid loss associated with burns",
+   "Low blood glucose"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 54,
+   "quote": "Hypovolaemic shock can result from rapid loss of blood (haemorrhagic shock) or from the fluid loss associated with burns."
+  }
+ },
+ {
+  "id": "bec-24",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "How long may a deep wound pack be left in place?",
+  "options": [
+   "Up to one week",
+   "Indefinitely, until a surgeon removes it",
+   "No more than two hours",
+   "No more than 24 hours, because of infection risk"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 170,
+   "quote": "A deep wound pack should not be left in place for more than 24 hours because of the risk of infection."
+  }
+ },
+ {
+  "id": "bec-25",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "During the Exposure step, what does WHO BEC direct for a patient in wet clothing?",
+  "options": [
+   "Remove wet clothes and dry the patient thoroughly",
+   "Leave the clothing in place to preserve warmth",
+   "Apply ice packs to reduce swelling",
+   "Cover with plastic sheeting only"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 28,
+   "quote": "Remove any wet clothes and dry patient thoroughly. Respect the patient and protect modesty during exposure."
+  }
+ },
+ {
+  "id": "bec-26",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "Which manoeuvre is used to move a patient with suspected spinal injury?",
+  "options": [
+   "Sit the patient upright",
+   "Log roll",
+   "Jaw thrust",
+   "Recovery position"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 28,
+   "quote": "Log roll if suspected spinal injury."
+  }
+ },
+ {
+  "id": "bec-27",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "In the SAMPLE history, what does the letter L stand for?",
+  "options": [
+   "Level of consciousness",
+   "Location of pain",
+   "Last oral intake",
+   "Length of symptoms"
+  ],
+  "answer": 2,
+  "cite": {
+   "page": 13,
+   "quote": "S: SIGNS AND SYMPTOMS A: ALLERGIES M: MEDICATIONS P: PAST MEDICAL HISTORY L: LAST ORAL INTAKE E: EVENTS SURROUNDING ILLNESS"
+  }
+ },
+ {
+  "id": "bec-28",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What does the AVPU scale stand for?",
+  "options": [
+   "Airway, ventilation, pulse, urine output",
+   "Allergies, vitals, pain, urgency",
+   "Arterial, venous, pulmonary, unknown",
+   "Alert, voice, pain, unresponsive"
+  ],
+  "answer": 3,
+  "cite": {
+   "page": 19,
+   "quote": "AVPU (alert, voice, pain, unresponsive) assessment"
+  }
+ },
+ {
+  "id": "bec-29",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "A patient needs ventilation but oxygen is not immediately available. What should you do?",
+  "options": [
+   "Start ventilation while oxygen is being prepared",
+   "Wait until oxygen arrives before ventilating",
+   "Give oral fluids instead",
+   "Place in the recovery position and observe"
+  ],
+  "answer": 0,
+  "cite": {
+   "page": 27,
+   "quote": "If oxygen not immediately available, DO NOT DELAY ventilation. Start ventilation while oxygen is being prepared."
+  }
+ },
+ {
+  "id": "bec-30",
+  "domain": "first-aid-physical",
+  "provenance": "corpus-derived",
+  "question": "What must be done before placing a non-rebreather facemask on a patient?",
+  "options": [
+   "Warm the mask",
+   "Connect it to oxygen",
+   "Remove the reservoir bag",
+   "Puncture the reservoir bag"
+  ],
+  "answer": 1,
+  "cite": {
+   "page": 163,
+   "quote": "NEVER put a non-rebreather facemask on before it is connected to oxygen."
+  }
+ }
+]

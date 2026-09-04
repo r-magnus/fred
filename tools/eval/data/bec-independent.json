@@ -1,0 +1,210 @@
+[
+ {
+  "id": "ind-01",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Where should the hands be placed to give chest compressions to an adult?",
+  "options": [
+   "Centre of the chest, on the lower half of the breastbone",
+   "Over the upper abdomen",
+   "Directly over the left nipple",
+   "On the collarbone"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-02",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the recommended rate of chest compressions for an adult in cardiac arrest?",
+  "options": [
+   "About 40 per minute",
+   "About 100 to 120 per minute",
+   "About 60 per minute",
+   "As fast as physically possible"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-03",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a minor thermal burn be cooled?",
+  "options": [
+   "Pack it with ice directly against the skin",
+   "Cover it with butter or cooking oil",
+   "With cool running water for several minutes",
+   "It should not be cooled at all"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-04",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A chemical has splashed into someone's eye. What is the immediate action?",
+  "options": [
+   "Rub the eye to disperse the chemical",
+   "Apply an eye patch and wait for help",
+   "Apply antibiotic ointment",
+   "Irrigate the eye with clean water for a prolonged period"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-05",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Someone has swallowed a corrosive substance. Should vomiting be induced?",
+  "options": [
+   "No, do not induce vomiting",
+   "Yes, immediately",
+   "Yes, using salt water",
+   "Only if they lose consciousness"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-06",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the main purpose of placing someone in the recovery position?",
+  "options": [
+   "To reduce swelling in the limbs",
+   "To keep the airway open and let fluids drain",
+   "To raise core body temperature",
+   "To immobilize the spine"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-07",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which finding is a classic early sign of stroke?",
+  "options": [
+   "Swelling in both legs",
+   "A persistent dry cough",
+   "Drooping on one side of the face",
+   "Rigidity of the abdomen"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-08",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a suspected broken forearm be managed before transport?",
+  "options": [
+   "Pull firmly to realign the bone",
+   "Massage the area to reduce swelling",
+   "Apply a heat pack",
+   "Immobilize it, including the joints above and below"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-09",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A conscious infant under one year old is choking. What is appropriate?",
+  "options": [
+   "Back blows alternating with chest thrusts",
+   "Standard adult abdominal thrusts",
+   "A blind finger sweep of the throat",
+   "Shaking the infant vigorously"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-10",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What most clearly distinguishes heat stroke from heat exhaustion?",
+  "options": [
+   "Heat stroke always involves heavy sweating",
+   "Altered mental status with a very high body temperature",
+   "Heat stroke lowers body temperature",
+   "There is no meaningful clinical difference"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-11",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should someone with severe hypothermia be rewarmed in a wilderness setting?",
+  "options": [
+   "Immerse them in hot water straight away",
+   "Rub their arms and legs vigorously",
+   "Gradually, with dry insulation and shelter, handling them gently",
+   "Give them alcohol to warm them up"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-12",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is correct first aid for a nosebleed?",
+  "options": [
+   "Tilt the head back and pinch the bony bridge",
+   "Lie flat on the back until it stops",
+   "Pack both nostrils tightly and lie down",
+   "Lean forward and pinch the soft part of the nose"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-13",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "After a head injury, which finding most warrants urgent medical attention?",
+  "options": [
+   "Repeated vomiting or increasing drowsiness",
+   "A small bruise at the point of impact",
+   "A mild headache that is improving",
+   "Feeling briefly startled by the impact"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-14",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "When is it appropriate to stop performing CPR?",
+  "options": [
+   "After exactly five minutes",
+   "When trained help takes over, the person recovers, or you are physically unable to continue",
+   "As soon as you hear ribs crack",
+   "If the person is still unresponsive after two cycles"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-15",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What should you do first on finding a collapsed person?",
+  "options": [
+   "Begin chest compressions immediately",
+   "Search them for identification",
+   "Check that the scene is safe to approach",
+   "Telephone a relative"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-16",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A wound has a knife still embedded in it. What is correct?",
+  "options": [
+   "Pull it out and apply pressure",
+   "Push it deeper to compress the vessel",
+   "Twist it to gauge the depth",
+   "Leave it in place and stabilize it"
+  ],
+  "answer": 3
+ }
+]

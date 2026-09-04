@@ -1,0 +1,112 @@
+/**
+ * Scoring: PocketRAG Eq. 2 (lexical), Eq. 3 (hybrid fusion), and INT8 vector math.
+ */
+import { stem, tokenize, type Keyword } from './lexicon.ts';
+
+/** PocketRAG Eq. 3: weight on the semantic term. Paper sets 0.6 empirically. */
+export const DEFAULT_ALPHA = 0.6;
+
+/**
+ * Build the matchable term set W_c for a chunk.
+ *
+ * Holds both surface and stemmed forms because extractKeywords leaves recognized
+ * domain terms unstemmed (they are lexicon keys) but stems everything else.
+ * Carrying both makes matching symmetric regardless of which path a term took.
+ */
+export function chunkTermSet(text: string): Set<string> {
+  const set = new Set<string>();
+  for (const tok of tokenize(text)) {
+    set.add(tok);
+    set.add(stem(tok));
+  }
+  return set;
+}
+
+/**
+ * PocketRAG Eq. 2, generalized to weighted terms:
+ *
+ *   S_lex(q, c) = sum(weight of matched keywords) / sum(all keyword weights)
+ *
+ * Reduces exactly to the paper's |K_q ∩ W_c| / |K_q| when all weights are equal.
+ * Always in [0,1], which matters because Eq. 3 fuses it with a cosine — an
+ * unbounded score like raw BM25 could not be mixed this way.
+ */
+export function lexicalScore(keywords: readonly Keyword[], terms: ReadonlySet<string>): number {
+  if (keywords.length === 0) return 0;
+  let matched = 0;
+  let total = 0;
+  for (const kw of keywords) {
+    total += kw.weight;
+    if (terms.has(kw.term)) matched += kw.weight;
+  }
+  return total === 0 ? 0 : matched / total;
+}
+
+/**
+ * Cosine between an fp32 query vector and an INT8-quantized candidate row.
+ *
+ * The candidate's per-row scale cancels: cos = (s*Σqc) / (||q|| * s*sqrt(Σc²)).
+ * So ranking never needs vectors.scale at all, and this runs as a single pass
+ * with no intermediate allocation — which is the point on a phone. The scale file
+ * is still shipped: it is needed to reconstruct true vectors for the ingest
+ * round-trip test and any future non-cosine use.
+ */
+export function cosineInt8(query: Float32Array, candidate: Int8Array): number {
+  const n = query.length;
+  if (candidate.length !== n) {
+    throw new Error(`dim mismatch: query ${n} vs candidate ${candidate.length}`);
+  }
+  let dot = 0;
+  let qq = 0;
+  let cc = 0;
+  for (let i = 0; i < n; i++) {
+    const q = query[i] as number;
+    const c = candidate[i] as number;
+    dot += q * c;
+    qq += q * q;
+    cc += c * c;
+  }
+  if (qq === 0 || cc === 0) return 0;
+  return dot / (Math.sqrt(qq) * Math.sqrt(cc));
+}
+
+/** Reconstruct fp32 values from a per-row symmetric INT8 row. */
+export function dequantizeInt8(row: Int8Array, scale: number): Float32Array {
+  const out = new Float32Array(row.length);
+  for (let i = 0; i < row.length; i++) out[i] = (row[i] as number) * scale;
+  return out;
+}
+
+/**
+ * Per-row symmetric INT8 quantization, mirroring tools/ingest.
+ * Exported so the round-trip test can assert encoder and decoder agree.
+ */
+export function quantizeInt8(vec: Float32Array): { vec: Int8Array; scale: number } {
+  let maxAbs = 0;
+  for (let i = 0; i < vec.length; i++) {
+    const a = Math.abs(vec[i] as number);
+    if (a > maxAbs) maxAbs = a;
+  }
+  const scale = maxAbs === 0 ? 1 : maxAbs / 127;
+  const out = new Int8Array(vec.length);
+  for (let i = 0; i < vec.length; i++) {
+    const q = Math.round((vec[i] as number) / scale);
+    out[i] = Math.max(-127, Math.min(127, q));
+  }
+  return { vec: out, scale };
+}
+
+/**
+ * PocketRAG Eq. 3 — the hybrid score:
+ *
+ *   U_i = alpha * cos(E(q), E(c_i)) + (1 - alpha) * S_lex(q, c_i)
+ *
+ * Cosine is clamped to [0,1] first. Embeddings can be negatively correlated, and
+ * a negative term would let a strong lexical match be cancelled by an unrelated
+ * vector, which is not the behaviour Eq. 3 intends.
+ */
+export function fuse(cosine: number, sLex: number, alpha: number = DEFAULT_ALPHA): number {
+  const c = Math.max(0, Math.min(1, cosine));
+  const l = Math.max(0, Math.min(1, sLex));
+  return alpha * c + (1 - alpha) * l;
+}

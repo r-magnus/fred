@@ -1,0 +1,26 @@
+node_modules/
+dist/
+*.log
+
+# Built data artifacts — large, reproducible from tools/ingest
+packs/*
+!packs/.gitkeep
+
+# Raw source corpora — large, redistributable only under their own licenses
+corpora/*
+!corpora/.gitkeep
+
+# Models
+models/
+*.gguf
+
+# Python
+__pycache__/
+.venv/
+venv/
+*.pyc
+
+# RN / Expo
+apps/mobile/.expo/
+apps/mobile/android/
+apps/mobile/ios/

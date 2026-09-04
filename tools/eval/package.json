@@ -1,0 +1,11 @@
+{
+  "name": "@fred/eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fred/rag-core": "*",
+    "@fred/pack-format": "*",
+    "node-llama-cpp": "^3.14.0"
+  }
+}

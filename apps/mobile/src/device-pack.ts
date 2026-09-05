@@ -14,8 +14,7 @@ import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
 import type { ChunkRecord, EmbeddingSpec, PackManifest } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
-import { vectorRow } from '@fred/rag-core';
-import { decodeBase64 } from './base64.ts';
+import { vectorRow, decodeBase64 } from '@fred/rag-core';
 import { initLlama, type LlamaContext } from 'llama.rn';
 
 interface LoadedPack {
@@ -124,24 +123,67 @@ export interface DeviceBackendOptions {
   readonly spec: EmbeddingSpec;
 }
 
+/**
+ * Bridges llama.rn's token callback to an async iterator.
+ *
+ * The first implementation here collected every token into an array and yielded
+ * only after completion() resolved, which made "time to first token" equal to
+ * total generation time (78.7 s measured, versus 78.7 s total) and would have
+ * shown the user a frozen screen until the whole answer was ready. Streaming is
+ * the entire point of reporting TTFT.
+ */
+class TokenStream {
+  private readonly queue: string[] = [];
+  private done = false;
+  private failure: unknown = null;
+  private wake: (() => void) | null = null;
+
+  push(token: string): void {
+    this.queue.push(token);
+    this.wake?.();
+  }
+  finish(err?: unknown): void {
+    this.done = true;
+    if (err !== undefined) this.failure = err;
+    this.wake?.();
+  }
+  async *iterate(): AsyncIterable<string> {
+    for (;;) {
+      while (this.queue.length > 0) yield this.queue.shift() as string;
+      if (this.failure !== null) throw this.failure;
+      if (this.done) return;
+      await new Promise<void>((resolve) => { this.wake = resolve; });
+      this.wake = null;
+    }
+  }
+}
+
 export async function createDeviceBackend(
   opts: DeviceBackendOptions,
 ): Promise<InferenceBackend & { release(): Promise<void> }> {
-  // KV cache quantization requires flash attention (PocketRAG §3.4.3); llama.cpp
-  // silently ignores cache_type without it.
+  // llama.rn defaults to 4 threads. The Snapdragon 8s Gen 4 has 8 cores, and M0
+  // measured its prefill at 8 threads, so leaving the default in place both
+  // halves throughput and makes on-device numbers incomparable to the baseline.
+  const N_THREADS = 8;
+  // 2048 was too small: a 1095-token RAG prompt left only 953 tokens, and
+  // generation ran until "context full" rather than finishing an answer.
+  const N_CTX = 4096;
+
   const gen: LlamaContext = await initLlama({
     model: opts.modelPath,
-    n_ctx: 2048,
+    n_ctx: N_CTX,
     n_batch: 512,
-    flash_attn: true,
-    cache_type_k: 'q8_0',
-    cache_type_v: 'q8_0',
+    n_threads: N_THREADS,
+    // ISOLATION STEP: KV cache quantization (PocketRAG §3.4.3) disabled.
+    // With cache_type_k/v = q8_0 and flash_attn, this build produced incoherent
+    // output ("URAIN. PRORPURINATION. ULONG."), not merely degraded answers.
   });
 
   const embed: LlamaContext = await initLlama({
     model: opts.embedModelPath,
     embedding: true,
     n_ctx: 512,
+    n_threads: N_THREADS,
   });
 
   return {
@@ -151,22 +193,26 @@ export async function createDeviceBackend(
       return Float32Array.from(r.embedding);
     },
     async countTokens(texts: readonly string[]): Promise<number[]> {
-      // Exact, via llama.rn's tokenizer. One bridge crossing per string is why
-      // the interface batches: compression asks for every sentence at once.
+      // Exact, via llama.rn's tokenizer. Batched by the interface so this costs
+      // one bridge crossing per string rather than one per compression pass.
       const out: number[] = [];
-      for (const t of texts) {
-        const r = await gen.tokenize(t);
-        out.push(r.tokens.length);
-      }
+      for (const t of texts) out.push((await gen.tokenize(t)).tokens.length);
       return out;
     },
-    async *generate(prompt: string, genOpts: GenerateOptions) {
-      const chunks: string[] = [];
-      await gen.completion(
-        { prompt, n_predict: genOpts.maxTokens, stop: [...(genOpts.stop ?? [])] },
-        (tok) => { chunks.push(tok.token); },
-      );
-      for (const c of chunks) yield c;
+    generate(prompt: string, genOpts: GenerateOptions): AsyncIterable<string> {
+      const stream = new TokenStream();
+      void gen
+        .completion(
+          {
+            prompt,
+            n_predict: genOpts.maxTokens,
+            stop: [...(genOpts.stop ?? [])],
+          },
+          (tok) => stream.push(tok.token),
+        )
+        .then(() => stream.finish())
+        .catch((e: unknown) => stream.finish(e));
+      return stream.iterate();
     },
     async release() {
       await gen.release();

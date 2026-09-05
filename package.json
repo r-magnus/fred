@@ -10,7 +10,7 @@
     "apps/mobile"
   ],
   "scripts": {
-    "test": "node --test packages/*/test/*.test.ts apps/mobile/test/*.test.ts",
+    "test": "node --test packages/*/test/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "ingest": "node tools/ingest/src/index.ts"
   },

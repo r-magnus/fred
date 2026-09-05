@@ -2,14 +2,15 @@
  * Off-device tests for the parts of the device PackStore that are pure.
  *
  * device-pack.ts itself cannot run under Node — it imports op-sqlite, llama.rn
- * and expo-file-system — but the byte handling underneath it can, and that is
- * exactly the code whose bugs would be silent: a wrong base64 decode or a wrong
- * row offset does not throw, it returns confidently wrong neighbours.
+ * and expo-file-system — so the byte handling it depends on lives here instead,
+ * where it is typechecked and tested. That is exactly the code whose bugs would
+ * be silent: a wrong base64 decode or a wrong row offset does not throw, it
+ * returns confidently wrong neighbours.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { decodeBase64 } from '../src/base64.ts';
-import { quantizeInt8, vectorRow, cosineInt8 } from '@fred/rag-core';
+import { quantizeInt8, vectorRow, cosineInt8 } from '../src/score.ts';
 
 test('base64 decode round-trips arbitrary bytes', () => {
   const bytes = new Uint8Array(512);

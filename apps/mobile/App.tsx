@@ -15,24 +15,26 @@
  *   adb push <pack>  /sdcard/Android/data/dev.fred.app/files/pack/
  *   adb push <model> /sdcard/Android/data/dev.fred.app/files/
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Directory } from 'expo-file-system';
+import { Directory, Paths } from 'expo-file-system';
 import { ask, type AskResult } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend } from './src/device-pack.ts';
 
 /**
- * The app-specific external directory, which adb can write to and the app can
- * read without any runtime permission. Internal storage (Paths.document) is not
- * reachable from `adb push`, and copying a 380 MB model in from Downloads on
- * first launch would add minutes to every iteration of this spike.
+ * Internal app storage. The app-specific EXTERNAL directory looks convenient
+ * because adb can write to it, but Android 15 scoped storage denies the app
+ * read access to files adb placed there — they are owned by shell, and
+ * FileSystemFile.textSync is rejected. Files are instead staged in
+ * /data/local/tmp and copied in as the app user:
  *
- *   adb push <pack>  /sdcard/Android/data/dev.fred.app/files/pack/
- *   adb push <model> /sdcard/Android/data/dev.fred.app/files/
+ *   adb push <f> /data/local/tmp/fred/
+ *   adb shell run-as dev.fred.app cp /data/local/tmp/fred/<f> files/
  */
-const EXTERNAL_FILES = '/storage/emulated/0/Android/data/dev.fred.app/files';
-const BASE = new Directory(`file://${EXTERNAL_FILES}`);
+const BASE = Paths.document;
 const QUESTION = 'How do I control severe external bleeding?';
+const BUILD_MARKER = 'fred-spike-v6-nokvq';
+console.log(`[fred] bundle ${BUILD_MARKER} loaded`);
 
 type Stage = { label: string; ms: number; note?: string };
 
@@ -42,11 +44,14 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
 
-  const log = (label: string, ms: number, note?: string): void =>
+  const log = (label: string, ms: number, note?: string): void => {
+    console.log(`[fred] ${label}: ${ms}ms${note ? ` (${note})` : ''}`);
     setStages((s) => [...s, note === undefined ? { label, ms } : { label, ms, note }]);
+  };
 
   const run = useCallback(async () => {
     setStages([]); setAnswer(''); setError(null); setRunning(true);
+    console.log('[fred] run() entered');
     try {
       const packDir = new Directory(BASE, 'pack');
       let t = Date.now();
@@ -57,8 +62,8 @@ export default function App() {
 
       t = Date.now();
       const backend = await createDeviceBackend({
-        modelPath: `${EXTERNAL_FILES}/Qwen3-0.6B-Q4_K_M.gguf`,
-        embedModelPath: `${EXTERNAL_FILES}/gte-small_fp16.gguf`,
+        modelPath: `${BASE.uri.replace(/^file:\/\//, '')}/Qwen3-0.6B-Q4_K_M.gguf`,
+        embedModelPath: `${BASE.uri.replace(/^file:\/\//, '')}/gte-small_fp16.gguf`,
         spec: manifest.embedding,
       });
       log('load models', Date.now() - t, 'SLM + embedder resident');
@@ -81,15 +86,29 @@ export default function App() {
           setAnswer(out);
         }
         log('generate total', Date.now() - t, `${result.citations.length} citations`);
+        console.log(`[fred] ANSWER(${out.length} chars): ${out.slice(0, 300).replace(/\n/g, ' | ')}`);
       } else {
         setAnswer(`(${result.kind})`);
       }
     } catch (e) {
+      console.log(`[fred] ERROR ${e instanceof Error ? e.message : String(e)}`);
+      console.log(`[fred] STACK ${e instanceof Error ? (e.stack ?? '') : ''}`);
       setError(e instanceof Error ? `${e.message}\n${e.stack ?? ''}` : String(e));
     } finally {
       setRunning(false);
     }
   }, []);
+
+  // Run once on mount. The measurement is driven from the host over adb, and
+  // synthetic taps do not reliably reach a Fabric view, so the spike should not
+  // depend on a human touching the screen at the right moment.
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    console.log('[fred] auto-run firing');
+    void run();
+  }, [run]);
 
   return (
     <SafeAreaView style={styles.root}>

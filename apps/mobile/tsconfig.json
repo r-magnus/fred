@@ -8,5 +8,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "../../packages/*/src/**/*.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "../../packages/*/src/**/*.ts"],
+  "exclude": ["test", "android", "node_modules"]
 }

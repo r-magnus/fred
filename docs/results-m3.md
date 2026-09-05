@@ -108,3 +108,80 @@ Fixing it means using the chat template, which re-introduces Qwen3's thinking
 mode (`docs/optimizations.md`) and so must disable it explicitly. That is the
 first M4 task, and it is also why generation currently takes 82 s: it is
 generating roughly ten times more tokens than the answer needs.
+
+---
+
+## The serious finding: the two runtimes do not embed alike
+
+The device answered the bleeding question with material about oxygen therapy and
+AEDs. Desktop, same model and same prompt, returned wound-packing procedures.
+Tracing it back through the pipeline:
+
+| | Device (llama.rn) | Harness (node-llama-cpp) |
+|---|---|---|
+| Retrieved pages | 231, 27, 31, 213 | **170, 169, 31** |
+| raw cosine | 0.806–0.828 | **0.848–0.884** |
+| Keywords extracted | identical | identical |
+
+Embedding the same string with the same GGUF on both sides:
+
+```
+harness:  norm=9.0042  head=-0.1932,-0.0359, 0.2422,-0.2663, 0.4111, 0.2249
+device:   norm=1.0000  head=-0.0361,-0.0032, 0.0317,-0.0053, 0.0299, 0.0116
+```
+
+Normalized for comparison, the harness vector is
+`-0.0215, -0.0040, 0.0269, -0.0296, 0.0457, 0.0250`. The **directions differ**,
+so this is not a scaling artifact. Measured cosine between the two runtimes'
+embeddings of identical text: **0.8313**, where it should be 1.0.
+
+Setting `pooling_type` to `mean`, `cls`, `last` and `none` changed the device
+vector only slightly and none matched, so pooling is not the whole explanation
+and the parameter appears to be largely inert at `initLlama`. The root cause is
+not yet isolated.
+
+### Why this matters more than the wrong answer
+
+`docs/results-m1.md` argued for writing ingest in TypeScript precisely to avoid
+this: *"Embedding the corpus with one implementation and queries with another
+introduces a numerical mismatch that degrades retrieval in a way no test would
+catch."* That reasoning was right and the fix was incomplete. Eliminating the
+sentence-transformers/llama.cpp mismatch introduced a
+node-llama-cpp/llama.rn mismatch — the same class of bug between a different
+pair of runtimes.
+
+It also breaks the project's central architectural claim. `rag-core` is shared so
+that the eval harness measures the code that ships, but **retrieval quality does
+not transfer**: M2's accuracy numbers were produced with harness embeddings and
+the device does not reproduce them. The shared-pipeline guarantee holds for
+logic and not for numerics.
+
+Nothing failed. Retrieval returned plausible chunks with plausible scores; only
+the choice of chunks was wrong.
+
+### What was done about it
+
+`EmbeddingSpec` now carries a **probe**: a canonical string and the normalized
+vector the ingesting encoder produced for it. `verifyEmbedderParity()` re-embeds
+that string at load and compares. The app now reports:
+
+```
+embedder parity: 19ms (MISMATCH cos=0.8313)
+```
+
+That converts a silent wrong-answer failure into a measured one at startup.
+Matching `modelId` and `dim` was never sufficient — two runtimes can load the
+same file, agree on all metadata, and still embed differently. Only comparing an
+actual vector catches it.
+
+### Options for resolving it
+
+1. **Isolate the divergence** — tokenization (BOS/EOS handling) is the next
+   suspect now that pooling is largely ruled out.
+2. **Build the index with the device's own encoder**, so llama.rn is the single
+   source of embeddings.
+3. **Use one engine on both sides that is not llama.cpp** — ONNX Runtime has
+   desktop and mobile builds and would make parity structural.
+
+Until one of these lands, on-device retrieval quality is **not** the quality M2
+measured, and the numbers should not be quoted as device numbers.

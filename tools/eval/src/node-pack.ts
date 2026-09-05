@@ -113,6 +113,7 @@ export interface NodeBackendOptions {
   readonly embedModelPath: string;
   readonly embedModelId: string;
   readonly cosineFloor: number;
+  readonly probe: EmbeddingSpec['probe'];
   readonly genModelPath?: string;
 }
 
@@ -134,6 +135,9 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     quantization: 'int8-per-row',
     normalized: true,
     cosineFloor: opts.cosineFloor,
+    // Supplied by the caller from the loaded manifest; this backend is the one
+    // the pack was built with, so it trivially satisfies its own probe.
+    probe: opts.probe,
   };
 
   return {
@@ -148,16 +152,23 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     },
     async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
       if (!genCtx) throw new Error('no generation model loaded');
-      const session = new LlamaChatSession({
-        contextSequence: genCtx.getSequence(),
-        systemPrompt: prompt.system,
-      });
-      const chunks: string[] = [];
-      await session.prompt(prompt.user, {
-        maxTokens: genOpts.maxTokens,
-        onTextChunk: (t) => chunks.push(t),
-      });
-      for (const c of chunks) yield c;
+      // Acquire and release per call: a context owns a fixed pool of sequences,
+      // and leaking them fails with "No sequences left" on the second question.
+      const sequence = genCtx.getSequence();
+      try {
+        const session = new LlamaChatSession({
+          contextSequence: sequence,
+          systemPrompt: prompt.system,
+        });
+        const chunks: string[] = [];
+        await session.prompt(prompt.user, {
+          maxTokens: genOpts.maxTokens,
+          onTextChunk: (t) => chunks.push(t),
+        });
+        for (const c of chunks) yield c;
+      } finally {
+        sequence.dispose();
+      }
     },
     async dispose() {
       await embedCtx.dispose();

@@ -25,7 +25,13 @@ export const FAKE_SPEC: EmbeddingSpec = {
   // The hash embedding genuinely produces near-zero cosine for unrelated text,
   // unlike a real sentence encoder, so no floor correction is needed.
   cosineFloor: 0,
+  probe: { text: 'probe', vector: [...fakeEmbedNormalized('probe', FAKE_DIM)] },
 };
+
+/** Module-scope helper so FAKE_SPEC can carry a self-consistent probe. */
+function fakeEmbedNormalized(text: string, dim: number): Float32Array {
+  return fakeEmbed(text, dim);
+}
 
 /**
  * Deterministic bag-of-words hash embedding. Not semantic, but stable and

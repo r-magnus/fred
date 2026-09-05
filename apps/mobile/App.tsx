@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Directory, Paths } from 'expo-file-system';
-import { ask, type AskResult } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, type AskResult } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend } from './src/device-pack.ts';
 
 /**
@@ -33,7 +33,7 @@ import { DevicePackStore, createDeviceBackend } from './src/device-pack.ts';
  */
 const BASE = Paths.document;
 const QUESTION = 'How do I control severe external bleeding?';
-const BUILD_MARKER = 'fred-spike-v7-chat';
+const BUILD_MARKER = 'fred-pool-cls';
 console.log(`[fred] bundle ${BUILD_MARKER} loaded`);
 
 type Stage = { label: string; ms: number; note?: string };
@@ -68,6 +68,15 @@ export default function App() {
       });
       log('load models', Date.now() - t, 'SLM + embedder resident');
 
+      // Verify this runtime reproduces the vectors the pack was built with.
+      // Matching metadata is not enough: llama.rn and node-llama-cpp load the
+      // same GGUF and embed differently, which silently returns the wrong
+      // chunks with plausible scores.
+      t = Date.now();
+      const parity = await verifyEmbedderParity(manifest.embedding, backend);
+      log('embedder parity', Date.now() - t,
+        `${parity.ok ? 'OK' : 'MISMATCH'} cos=${parity.cosine.toFixed(4)}`);
+
       t = Date.now();
       const result: AskResult = await ask(
         QUESTION,
@@ -75,6 +84,16 @@ export default function App() {
         { state: null },
       );
       log('retrieve', Date.now() - t, result.kind);
+      if (result.kind === 'answer') {
+        console.log(`[fred] stage1 candidates=${result.diagnostics.candidates.length} keywords=${result.diagnostics.keywords.map((k) => k.term).join(',')}`);
+      }
+      // Compare against the desktop harness for the same query: if the device
+      // embeds queries with llama.rn while the pack was embedded with
+      // node-llama-cpp, cosine is computed across two implementations and the
+      // wrong chunks come back (docs/results-m1.md warns about exactly this).
+      for (const c of result.kind === 'answer' ? result.diagnostics.candidates : []) {
+        console.log(`[fred] cand U=${c.score.toFixed(3)} cos=${c.cosine.toFixed(3)} raw=${c.cosineRaw.toFixed(3)} lex=${c.sLex.toFixed(2)} p.${c.chunk.page}`);
+      }
 
       if (result.kind === 'answer') {
         t = Date.now();
@@ -86,7 +105,7 @@ export default function App() {
           setAnswer(out);
         }
         log('generate total', Date.now() - t, `${result.citations.length} citations`);
-        console.log(`[fred] ANSWER(${out.length} chars): ${out.slice(0, 300).replace(/\n/g, ' | ')}`);
+        console.log(`[fred] ANSWER(${out.length} chars): ${out.slice(0, 500).replace(/\n/g, ' | ')}`);
       } else {
         setAnswer(`(${result.kind})`);
       }

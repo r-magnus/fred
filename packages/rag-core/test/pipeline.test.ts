@@ -58,7 +58,10 @@ test('the generated prompt starts with the cacheable system prefix verbatim', as
   const prompt = d.backend.lastPrompt ?? '';
   assert.ok(prompt.startsWith(SYSTEM_PREFIX), 'prefix must be byte-identical for KV reuse');
   assert.ok(prompt.includes('SOURCES:'));
-  assert.ok(prompt.includes('[1]'), 'sources must be numbered for citation');
+  assert.ok(prompt.includes('SOURCE 1'), 'sources must be numbered so steps can refer to them');
+  assert.ok(!/Cite the sources/i.test(prompt),
+    'the model is not asked to cite: citations come from retrieval, and asking a ' +
+    '0.6B model to inline them produced answers consisting only of "[1], [3]"');
 });
 
 test('abstains rather than answering from weak context', async () => {

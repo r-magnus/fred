@@ -3,6 +3,7 @@
  */
 import type { ChunkRecord } from '@fred/pack-format';
 import { embeddingsCompatible } from '@fred/pack-format';
+import type { EmbeddingSpec } from '@fred/pack-format';
 import type { InferenceBackend, PackStore } from './backends.ts';
 import type { Keyword } from './lexicon.ts';
 import { chunkTermSet, cosineInt8, fuse, lexicalScore, rescaleCosine, DEFAULT_ALPHA } from './score.ts';
@@ -66,6 +67,38 @@ export function assertCompatibleEmbedding(
       );
     }
   }
+}
+
+/**
+ * Confirm the running encoder reproduces the vectors the pack was built with.
+ *
+ * Matching EmbeddingSpec metadata is not sufficient: two runtimes can load the
+ * same GGUF, report the same modelId and dimension, and still embed differently.
+ * Only comparing an actual vector catches that, and it must be checked at load
+ * rather than left to show up as subtly worse answers.
+ */
+export async function verifyEmbedderParity(
+  spec: EmbeddingSpec,
+  backend: InferenceBackend,
+  minCosine = 0.99,
+): Promise<{ ok: boolean; cosine: number }> {
+  const expected = Float32Array.from(spec.probe.vector);
+  const actual = await backend.embed(spec.probe.text);
+  if (actual.length !== expected.length) {
+    return { ok: false, cosine: 0 };
+  }
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < expected.length; i++) {
+    const a = expected[i] as number;
+    const b = actual[i] as number;
+    dot += a * b;
+    na += a * a;
+    nb += b * b;
+  }
+  const cosine = na === 0 || nb === 0 ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
+  return { ok: cosine >= minCosine, cosine };
 }
 
 export async function retrieve(

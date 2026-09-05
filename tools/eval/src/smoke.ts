@@ -14,6 +14,7 @@ const backend = await createNodeBackend({
   embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: manifest.embedding.modelId,
   cosineFloor: manifest.embedding.cosineFloor,
+  probe: manifest.embedding.probe,
 });
 
 const packs = [{ id: manifest.id, domains: manifest.domains, scope: manifest.scope }];

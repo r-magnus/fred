@@ -184,13 +184,31 @@ export async function createDeviceBackend(
     embedding: true,
     n_ctx: 512,
     n_threads: N_THREADS,
+    // These two must match how the pack was embedded, or cosine is computed
+    // across two different implementations of the same model and the wrong
+    // chunks are returned. Measured before setting them: the device retrieved
+    // pages 231/27/31/213 at raw cosine 0.81-0.83 where the harness returned
+    // 170/169/31 at 0.85-0.88 for the same query.
+    //
+    // gte-small is a BERT encoder trained with MEAN pooling (1); llama.cpp's
+    // default depends on GGUF metadata and does not necessarily agree across
+    // wrappers. 2 is L2 normalization.
+    pooling_type: 'mean',
+    embd_normalize: 2,
   });
 
   return {
     embeddingSpec: () => opts.spec,
     async embed(text: string) {
       const r = await embed.embedding(text);
-      return Float32Array.from(r.embedding);
+      const v = Float32Array.from(r.embedding);
+      let norm = 0;
+      for (const x of v) norm += x * x;
+      console.log(
+        `[fred] embed dim=${v.length} norm=${Math.sqrt(norm).toFixed(4)} ` +
+          `head=${[...v.slice(0, 6)].map((x) => x.toFixed(4)).join(',')}`,
+      );
+      return v;
     },
     async countTokens(texts: readonly string[]): Promise<number[]> {
       // Exact, via llama.rn's tokenizer. Batched by the interface so this costs
@@ -216,13 +234,18 @@ export async function createDeviceBackend(
             // 3.1x latency on desktop and an empty answer under a token cap
             // (docs/optimizations.md).
             enable_thinking: false,
-            reasoning_format: 'none',
+            // reasoning_format is deliberately NOT set. With 'none' the response
+            // parser truncated the start of the answer ("INATION: 1,2" for what
+            // should read "EXAMINATION"), so the leading tokens were being eaten.
             n_predict: genOpts.maxTokens,
             // penalty_repeat defaults to 1.0, which is DISABLED. Without it the
             // model degenerated into repeating "and the man." indefinitely.
             penalty_repeat: 1.15,
-            temperature: 0.3,
-            top_p: 0.9,
+            // Greedy. node-llama-cpp defaults to greedy on desktop and produced
+            // clean answers that terminated in ~300 characters; sampling at 0.3
+            // on device rambled to the 1024-token cap without emitting EOS.
+            // Determinism is also worth more than variety for first-aid guidance.
+            temperature: 0,
             stop: [...(genOpts.stop ?? [])],
           },
           (tok) => stream.push(tok.token),

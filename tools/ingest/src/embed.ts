@@ -80,12 +80,20 @@ export async function loadEmbedder(modelPath: string, modelId: string): Promise<
   const dim = calibration[0]?.length ?? 0;
   if (dim === 0) throw new Error('embedder returned zero-length vectors');
 
+  // A canonical probe so any runtime can verify it reproduces these embeddings.
+  const PROBE_TEXT = 'control severe external bleeding';
+  const probeRaw = (await embedMany([PROBE_TEXT]))[0] as Float32Array;
+  let pn = 0;
+  for (const x of probeRaw) pn += x * x;
+  pn = Math.sqrt(pn) || 1;
+
   const spec: EmbeddingSpec = {
     modelId,
     dim,
     quantization: 'int8-per-row',
     normalized: true,
     cosineFloor,
+    probe: { text: PROBE_TEXT, vector: Array.from(probeRaw, (x) => x / pn) },
   };
 
   return {

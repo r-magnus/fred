@@ -58,6 +58,23 @@ export interface EmbeddingSpec {
   /** Whether fp32 vectors were L2-normalized before quantization. */
   readonly normalized: boolean;
   /**
+   * A canonical text and the L2-normalized vector this encoder produced for it
+   * at ingest, so a runtime can verify it reproduces the index's embeddings.
+   *
+   * This exists because it silently failed. The pack was embedded with
+   * node-llama-cpp and the app embeds queries with llama.rn; both wrap
+   * llama.cpp, but they produce different vectors for identical text, so cosine
+   * was being computed across two implementations. Retrieval still returned
+   * plausible-looking chunks with plausible-looking scores — just the wrong
+   * ones. Nothing threw. See docs/results-m3.md.
+   */
+  readonly probe: {
+    readonly text: string;
+    /** L2-normalized, so comparison is scale-independent. */
+    readonly vector: readonly number[];
+  };
+
+  /**
    * Empirical cosine similarity between UNRELATED text for this encoder.
    *
    * BERT-family encoders do not spread cosine over [0,1]. Measured for

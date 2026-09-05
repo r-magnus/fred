@@ -185,3 +185,65 @@ actual vector catches it.
 
 Until one of these lands, on-device retrieval quality is **not** the quality M2
 measured, and the numbers should not be quoted as device numbers.
+
+### Resolved: the harness is correct, the device runtime is not
+
+The section above did not say which side was wrong, and an initial reading of the
+tokenizers pointed the wrong way. node-llama-cpp's public `tokenize()` returns
+`2491 5729 6327 9524` for the probe string while llama.rn tokenizes it as
+`101 2491 5729 6327 9524 102` — with BERT's `[CLS]` and `[SEP]`. Since BERT
+encoders are trained with those markers, that appeared to make the device right
+and the index wrong.
+
+It does not. `tokenize()` is a public API, not the embedding path, and comparing
+both runtimes against a genuine reference settles it. transformers.js runs the
+reference ONNX weights with the real HuggingFace tokenizer:
+
+```
+reference (transformers.js)  -0.0215,-0.0039, 0.0269,-0.0295, 0.0456, 0.0249
+node-llama-cpp (ingest)      -0.0215,-0.0040, 0.0269,-0.0296, 0.0457, 0.0250
+llama.rn (device)            -0.0361,-0.0032, 0.0317,-0.0053, 0.0299, 0.0116
+```
+
+**node-llama-cpp reproduces the reference to four decimals. llama.rn does not.**
+
+Consequences:
+
+- **The pack index is built correctly.** No re-ingest is required.
+- **M2's accuracy numbers are valid**, because the harness embeds correctly on
+  both sides of its own comparison. The earlier warning that they "should not be
+  quoted as device numbers" stands only in the sense that the *device* does not
+  currently reproduce them — the fault is the device runtime, not the benchmark.
+- The defect is confined to llama.rn's embedding path, which is where the fix
+  belongs.
+
+`tools/eval/src/reference-embedding.mjs` keeps this check runnable. Any new or
+upgraded embedding backend should be compared against it before use, because
+"the answers look better" is how this was misdiagnosed twice.
+
+### Generation findings are confounded until parity is fixed
+
+Isolating flash attention from KV quantization gave:
+
+| Configuration | Output |
+|---|---|
+| `flash_attn` + `q8_0` KV cache | word salad |
+| `flash_attn` alone | coherent, but drifted into French/Portuguese |
+| neither | coherent English |
+
+That is suggestive, but **not trustworthy yet**. Retrieval parity is broken, so
+the model is being handed irrelevant context in every one of those runs, and
+context quality is a plausible cause of drift on a 0.6B model. Both flags are
+disabled with that reasoning recorded; they should be re-isolated only after
+`verifyEmbedderParity` passes.
+
+The narrow claim that survives: **the paper's §3.4.3 configuration produced
+unusable output on this stack**, which is enough to say it does not transfer
+unmodified. Attributing it to KV quantization specifically requires the retest.
+
+## Next step
+
+Make embedding parity structural rather than detected, by running the same ONNX
+model on both sides — transformers.js at ingest and ONNX Runtime on device. That
+removes the class of bug instead of instrumenting it, and the reference above is
+already the ingest-side implementation.

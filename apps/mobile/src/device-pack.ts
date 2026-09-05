@@ -174,9 +174,14 @@ export async function createDeviceBackend(
     n_ctx: N_CTX,
     n_batch: 512,
     n_threads: N_THREADS,
-    // ISOLATION STEP: KV cache quantization (PocketRAG §3.4.3) disabled.
-    // With cache_type_k/v = q8_0 and flash_attn, this build produced incoherent
-    // output ("URAIN. PRORPURINATION. ULONG."), not merely degraded answers.
+    // flash_attn and cache_type_k/v (PocketRAG §3.4.3) are both OFF.
+    //
+    // Enabled together they produced word salad ("URAIN. PRORPURINATION.").
+    // flash_attn alone produced coherent text that drifted into another
+    // language. Neither result is trustworthy yet: on-device retrieval parity is
+    // currently broken, so the model is being handed irrelevant context and any
+    // conclusion about generation settings is confounded. Re-isolate these only
+    // after verifyEmbedderParity passes.
   });
 
   const embed: LlamaContext = await initLlama({

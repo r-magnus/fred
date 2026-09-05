@@ -33,7 +33,7 @@ import { DevicePackStore, createDeviceBackend } from './src/device-pack.ts';
  */
 const BASE = Paths.document;
 const QUESTION = 'How do I control severe external bleeding?';
-const BUILD_MARKER = 'fred-spike-v6-nokvq';
+const BUILD_MARKER = 'fred-spike-v7-chat';
 console.log(`[fred] bundle ${BUILD_MARKER} loaded`);
 
 type Stage = { label: string; ms: number; note?: string };

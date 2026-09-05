@@ -45,6 +45,27 @@ export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[])
   return `\n\nSOURCES:\n${renderContext(blocks)}\n\nQUESTION: ${query}\n\nANSWER:`;
 }
 
+/**
+ * The prompt split into its stable and per-query halves.
+ *
+ * Kept separate because backends need to render it differently. A chat model
+ * needs these as distinct system and user turns so its template applies and it
+ * emits a proper end-of-turn token; concatenating them into one raw string
+ * leaves the model with no stopping signal, and it will generate until it hits
+ * the context limit. Keeping the system half intact is also what makes prefix
+ * KV caching possible.
+ */
+export interface PromptParts {
+  readonly system: string;
+  readonly user: string;
+}
+
+export function buildPromptParts(query: string, blocks: readonly ContextBlock[]): PromptParts {
+  return { system: SYSTEM_PREFIX, user: buildQuerySuffix(query, blocks).trimStart() };
+}
+
+/** Flattened form, for backends with no chat template. */
 export function buildPrompt(query: string, blocks: readonly ContextBlock[]): string {
-  return SYSTEM_PREFIX + buildQuerySuffix(query, blocks);
+  const { system, user } = buildPromptParts(query, blocks);
+  return `${system}\n\n${user}`;
 }

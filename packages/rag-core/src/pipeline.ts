@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPrompt, type ContextBlock } from './prompt.ts';
+import { buildPromptParts, type ContextBlock } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -158,7 +158,7 @@ export async function ask(
     text: c.text,
   }));
 
-  const prompt = buildPrompt(query, blocks);
+  const prompt = buildPromptParts(query, blocks);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };

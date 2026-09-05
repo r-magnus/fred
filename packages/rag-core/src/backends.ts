@@ -6,6 +6,7 @@
  * the numbers in the evaluation describe the system that actually ships.
  */
 import type { ChunkRecord, EmbeddingSpec } from '@fred/pack-format';
+import type { PromptParts } from './prompt.ts';
 
 export interface GenerateOptions {
   /** Upper bound on generated tokens. Set by the adaptive memory manager. */
@@ -20,8 +21,16 @@ export interface InferenceBackend {
   embed(text: string): Promise<Float32Array>;
   /** The encoder this backend is actually running, for compatibility checks. */
   embeddingSpec(): EmbeddingSpec;
-  /** Stream generated text. Implementations should reuse a cached system prefix. */
-  generate(prompt: string, opts: GenerateOptions): AsyncIterable<string>;
+  /**
+   * Stream generated text.
+   *
+   * Takes the prompt in halves rather than pre-joined so a backend with a chat
+   * template can render them as separate turns. That is not cosmetic: without a
+   * template the model receives no end-of-turn signal and generates until the
+   * context fills, which on device produced ~1000 tokens of repetition for a
+   * question needing about eighty.
+   */
+  generate(prompt: PromptParts, opts: GenerateOptions): AsyncIterable<string>;
   /**
    * Exact token counts for a batch of strings.
    *

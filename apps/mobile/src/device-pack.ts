@@ -13,7 +13,7 @@ import { open, type DB } from '@op-engineering/op-sqlite';
 import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
 import type { ChunkRecord, EmbeddingSpec, PackManifest } from '@fred/pack-format';
-import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
+import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import { vectorRow, decodeBase64 } from '@fred/rag-core';
 import { initLlama, type LlamaContext } from 'llama.rn';
 
@@ -199,13 +199,30 @@ export async function createDeviceBackend(
       for (const t of texts) out.push((await gen.tokenize(t)).tokens.length);
       return out;
     },
-    generate(prompt: string, genOpts: GenerateOptions): AsyncIterable<string> {
+    generate(prompt: PromptParts, genOpts: GenerateOptions): AsyncIterable<string> {
       const stream = new TokenStream();
       void gen
         .completion(
           {
-            prompt,
+            // Chat turns, not a raw string. Without the template the model gets
+            // no end-of-turn signal and generates until the context fills.
+            messages: [
+              { role: 'system', content: prompt.system },
+              { role: 'user', content: prompt.user },
+            ],
+            jinja: true,
+            // llama.rn defaults enable_thinking to TRUE. On Qwen3 that spends the
+            // whole budget inside <think> before any visible text — measured at
+            // 3.1x latency on desktop and an empty answer under a token cap
+            // (docs/optimizations.md).
+            enable_thinking: false,
+            reasoning_format: 'none',
             n_predict: genOpts.maxTokens,
+            // penalty_repeat defaults to 1.0, which is DISABLED. Without it the
+            // model degenerated into repeating "and the man." indefinitely.
+            penalty_repeat: 1.15,
+            temperature: 0.3,
+            top_p: 0.9,
             stop: [...(genOpts.stop ?? [])],
           },
           (tok) => stream.push(tok.token),

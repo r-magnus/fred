@@ -146,11 +146,14 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
       const m = genModel ?? embedModel;
       return texts.map((t) => m.tokenize(t).length);
     },
-    async *generate(prompt: string, genOpts: GenerateOptions) {
+    async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
       if (!genCtx) throw new Error('no generation model loaded');
-      const session = new LlamaChatSession({ contextSequence: genCtx.getSequence() });
+      const session = new LlamaChatSession({
+        contextSequence: genCtx.getSequence(),
+        systemPrompt: prompt.system,
+      });
       const chunks: string[] = [];
-      await session.prompt(prompt, {
+      await session.prompt(prompt.user, {
         maxTokens: genOpts.maxTokens,
         onTextChunk: (t) => chunks.push(t),
       });

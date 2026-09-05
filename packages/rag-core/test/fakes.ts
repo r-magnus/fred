@@ -11,6 +11,7 @@ import type {
   LexicalHit,
   PackStore,
 } from '../src/backends.ts';
+import type { PromptParts } from '../src/prompt.ts';
 import { quantizeInt8 } from '../src/score.ts';
 import { chunkTermSet } from '../src/score.ts';
 
@@ -64,8 +65,8 @@ export class FakeBackend implements InferenceBackend {
   async countTokens(texts: readonly string[]): Promise<number[]> {
     return texts.map((t) => t.split(/\s+/).filter(Boolean).length);
   }
-  async *generate(prompt: string, opts: GenerateOptions): AsyncIterable<string> {
-    this.lastPrompt = prompt;
+  async *generate(prompt: PromptParts, opts: GenerateOptions): AsyncIterable<string> {
+    this.lastPrompt = `${prompt.system}\n\n${prompt.user}`;
     this.lastOptions = opts;
     yield 'FAKE ';
     yield 'ANSWER';

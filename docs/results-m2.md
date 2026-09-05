@@ -231,3 +231,72 @@ corpus-derived; 9 gains against 4 losses overall, p = 0.267, not significant).
 Given M0's finding that prefill dominates on mid-range hardware, a 26% latency
 cut for a not-yet-significant accuracy cost is likely worth taking there and not
 worth taking on a flagship. That is a per-device decision the paper does not make.
+
+---
+
+# Update — re-run under the simplified prompt (2026-09-05)
+
+The system prompt changed during M3: the instruction to emit inline citations was
+removed, because a 0.6B model sometimes answered with nothing but `[1], [3]`
+(citations are a property of retrieval and are already returned structurally).
+`tools/eval/src/run.ts` uses `SYSTEM_PREFIX` for every RAG condition, so the
+previous table described a prompt that no longer exists. Re-run at n = 109.
+
+| Condition | Overall | corpus (n=59) | independent (n=50) | Mean ms | Prompt tok | Acc. when answering |
+|---|---:|---:|---:|---:|---:|---:|
+| vanilla | 57.8% | 54.2% | 62.0% | 190 | 55 | 57.8% |
+| rag | 67.9% | 83.1% | 50.0% | 3739 | 1149 | 68.0% |
+| rag-rerank | 76.1% | 88.1% | 62.0% | 3765 | 1129 | 80.2% |
+| **rag-rerank-compress** | **77.1%** | 88.1% | 64.0% | **3002** | **922** | **81.3%** |
+
+**Sanity check:** vanilla is unchanged at 57.8%, to the question. It does not use
+`SYSTEM_PREFIX`, so it should be identical, and it is — which confirms the change
+was isolated to the retrieval arms.
+
+## Two results that were not there before
+
+**Re-ranking now significantly beats lexical-only retrieval.**
+
+| Comparison | Discordant | p |
+|---|---|---:|
+| all: rag → rag-rerank | 1 gain / 10 losses | **0.0117** |
+
+Under the previous prompt this was 4/7, p = 0.549 — no detectable difference,
+and at one point it appeared to run the *wrong* way (see the earlier update).
+With the shorter prompt, Stage 2 is demonstrably doing work: **+8.2 points**
+overall, and it recovers the independent set entirely (50.0% → 62.0%). The
+paper's Table 1 shows the same ordering; we can now reproduce it.
+
+**Compression is free.**
+
+| Comparison | Discordant | p |
+|---|---|---:|
+| all: rerank → +compress | 4 gains / 5 losses | 1.000 |
+
+76.1% → 77.1%, while cutting prompt tokens 1129 → 922 (**−18%**) and latency
+3765 ms → 3002 ms (**−20%**). Under the previous prompt compression cost about
+4 points; with the instruction bloat removed it costs nothing measurable. So
+Selective Context Compression is a **20% latency reduction at no accuracy cost**,
+which is a stronger claim than the earlier "real trade, not a free win" — and it
+matters most on the mid-range hardware where M0 showed prefill dominating.
+
+## Unchanged
+
+| Comparison | Discordant | p |
+|---|---|---:|
+| corpus-derived: vanilla → rag-rerank | 22 gains / 2 losses | **0.00004** |
+| independent: vanilla → rag-rerank | 6 gains / 6 losses | 1.000 |
+
+RAG still produces a very large, highly significant gain on corpus-derived
+questions (54.2% → 88.1%) and is still *exactly* neutral on independent ones —
+six gained, six lost. The withdrawal of the "RAG hurts independent questions"
+claim stands, and the 26-point corpus/independent gap remains the central
+methodological finding.
+
+## Note on scope
+
+These numbers are produced with node-llama-cpp on both sides of the comparison,
+which `docs/results-m3.md` establishes reproduces the reference implementation to
+four decimals. They are therefore valid. They are **not** currently reproduced on
+device, because llama.rn's embedding path diverges; that is a defect in the device
+runtime, not in these measurements.

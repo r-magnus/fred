@@ -7,6 +7,7 @@
     "@fred/pack-format": "*",
     "@fred/rag-core": "*",
     "node-llama-cpp": "^3.14.0",
+    "onnxruntime-node": "^1.29.0",
     "pdfjs-dist": "^4.10.38"
   }
 }

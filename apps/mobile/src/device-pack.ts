@@ -14,7 +14,11 @@ import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
 import type { ChunkRecord, EmbeddingSpec, PackManifest } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
-import { vectorRow, decodeBase64 } from '@fred/rag-core';
+import {
+  vectorRow, decodeBase64, buildVocab, encode, meanPool, l2Normalize,
+  type TokenizerConfig,
+} from '@fred/rag-core';
+import * as ort from 'onnxruntime-react-native';
 import { initLlama, type LlamaContext } from 'llama.rn';
 
 interface LoadedPack {
@@ -119,8 +123,43 @@ export class DevicePackStore implements PackStore {
 
 export interface DeviceBackendOptions {
   readonly modelPath: string;
+  /** ONNX graph, the same file ingest used. */
   readonly embedModelPath: string;
+  /** WordPiece vocabulary, the same file ingest used. */
+  readonly embedVocabPath: string;
   readonly spec: EmbeddingSpec;
+}
+
+/**
+ * Embed with ONNX, tokenizing and pooling through rag-core.
+ *
+ * Previously this used llama.rn's embedding endpoint, which produced vectors
+ * 0.83 cosine from the index's for identical text — barely above this encoder's
+ * 0.75 floor for unrelated text — so Stage 2 was contributing noise. Sharing the
+ * ONNX graph is not enough on its own: the tokenizer and the pooling have to be
+ * the same code too, which is why both live in rag-core.
+ */
+async function embedWithOnnx(
+  session: ort.InferenceSession,
+  cfg: TokenizerConfig,
+  text: string,
+): Promise<Float32Array> {
+  const ids = encode(text, cfg);
+  const n = ids.length;
+  const mask = new Array<number>(n).fill(1);
+  const big = (xs: number[]): BigInt64Array => BigInt64Array.from(xs.map((x) => BigInt(x)));
+  const feeds: Record<string, ort.Tensor> = {
+    input_ids: new ort.Tensor('int64', big(ids), [1, n]),
+    attention_mask: new ort.Tensor('int64', big(mask), [1, n]),
+  };
+  if (session.inputNames.includes('token_type_ids')) {
+    feeds['token_type_ids'] = new ort.Tensor('int64', big(new Array<number>(n).fill(0)), [1, n]);
+  }
+  const out = await session.run(feeds);
+  const tensor = out[session.outputNames[0] as string] as ort.Tensor;
+  const dims = tensor.dims;
+  const dim = dims[dims.length - 1] as number;
+  return l2Normalize(meanPool(tensor.data as Float32Array, mask, dim));
 }
 
 /**
@@ -184,37 +223,13 @@ export async function createDeviceBackend(
     // after verifyEmbedderParity passes.
   });
 
-  const embed: LlamaContext = await initLlama({
-    model: opts.embedModelPath,
-    embedding: true,
-    n_ctx: 512,
-    n_threads: N_THREADS,
-    // These two must match how the pack was embedded, or cosine is computed
-    // across two different implementations of the same model and the wrong
-    // chunks are returned. Measured before setting them: the device retrieved
-    // pages 231/27/31/213 at raw cosine 0.81-0.83 where the harness returned
-    // 170/169/31 at 0.85-0.88 for the same query.
-    //
-    // gte-small is a BERT encoder trained with MEAN pooling (1); llama.cpp's
-    // default depends on GGUF metadata and does not necessarily agree across
-    // wrappers. 2 is L2 normalization.
-    pooling_type: 'mean',
-    embd_normalize: 2,
-  });
+  const embedSession = await ort.InferenceSession.create(opts.embedModelPath);
+  const vocabText = new File(opts.embedVocabPath).textSync();
+  const tokenizer = buildVocab(vocabText);
 
   return {
     embeddingSpec: () => opts.spec,
-    async embed(text: string) {
-      const r = await embed.embedding(text);
-      const v = Float32Array.from(r.embedding);
-      let norm = 0;
-      for (const x of v) norm += x * x;
-      console.log(
-        `[fred] embed dim=${v.length} norm=${Math.sqrt(norm).toFixed(4)} ` +
-          `head=${[...v.slice(0, 6)].map((x) => x.toFixed(4)).join(',')}`,
-      );
-      return v;
-    },
+    embed: (text: string) => embedWithOnnx(embedSession, tokenizer, text),
     async countTokens(texts: readonly string[]): Promise<number[]> {
       // Exact, via llama.rn's tokenizer. Batched by the interface so this costs
       // one bridge crossing per string rather than one per compression pass.
@@ -261,7 +276,7 @@ export async function createDeviceBackend(
     },
     async release() {
       await gen.release();
-      await embed.release();
+      await embedSession.release();
     },
   };
 }

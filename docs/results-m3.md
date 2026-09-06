@@ -247,3 +247,77 @@ Make embedding parity structural rather than detected, by running the same ONNX
 model on both sides — transformers.js at ingest and ONNX Runtime on device. That
 removes the class of bug instead of instrumenting it, and the reference above is
 already the ingest-side implementation.
+
+---
+
+## Parity, part two: ingest fixed, device blocked by a library conflict
+
+### Ingest now reproduces the reference exactly
+
+`rag-core` owns the embedding pipeline end to end:
+
+- `tokenizer.ts` — BERT WordPiece, mirroring HuggingFace's BertNormalizer +
+  BertPreTokenizer + WordPiece + TemplateProcessing. 54 tests, including eight
+  fixtures captured from `AutoTokenizer.from_pretrained('Supabase/gte-small')`
+  covering accents, punctuation splitting, `##` continuation, over-long words and
+  whitespace collapsing. These must match exactly: embedding depends on token
+  ids, and a tokenizer that is merely close yields vectors that are merely close.
+- `pooling.ts` — mean pooling over the attention mask, then L2 normalization.
+
+`tools/ingest/src/onnx-embed.ts` runs the reference ONNX graph fed by that code:
+
+```
+ours      = -0.0215,-0.0039,0.0269,-0.0295,0.0456,0.0249
+reference = -0.0215,-0.0039,0.0269,-0.0295,0.0456,0.0249
+max component delta: 2.87e-5   PARITY OK
+```
+
+The pack is rebuilt on these embeddings (667 chunks, `cosineFloor` 0.7492).
+`tools/ingest/src/verify-embedder.ts` keeps the check runnable.
+
+Sharing the model file was never going to be sufficient. Three things must match
+— tokenization, weights, pooling — and pooling differences change vector
+*direction*, which cosine cannot forgive.
+
+### The device half is blocked
+
+`onnxruntime-react-native` 1.24.3 fails at startup:
+
+```
+[runtime not ready]: TypeError: Cannot read property 'install' of null
+```
+
+Its JSI binding obtains the call invoker from `RCTBridge`, which **does not exist
+in bridgeless mode**. React Native's New Architecture removed it; a library
+needing it must be reimplemented as a C++ TurboModule.
+
+That collides with a hard requirement in the other direction: **llama.rn v0.10+
+requires the New Architecture.** So on this stack the LLM runtime and the ONNX
+runtime cannot both load. Patching `onnxruntime-react-native`'s use of Gradle 9's
+removed `VersionNumber` API (`scripts/patch-onnx-gradle.mjs`) gets it to *build*,
+but not to run.
+
+This is a library incompatibility rather than a flaw in the approach: ONNX is
+still the only runtime that spans Node and React Native with identical numerics.
+
+### Options
+
+1. **react-native-executorch** — one New-Architecture-native runtime for both the
+   LLM and the embedder, with `@react-native-rag/executorch` already pairing
+   them. Replaces llama.rn. ExecuTorch does not run under Node, so harness/device
+   numeric parity would still need a separate argument.
+2. **Build the vector index on device.** Ship packs with chunks and no vectors,
+   and have the app embed them once at install using whatever encoder it has.
+   Parity becomes trivially guaranteed because there is no cross-runtime
+   comparison at all. Costs a one-time indexing pass (~667 chunks) and gives up
+   the property that the harness measures the device's exact retrieval.
+3. **Make ingest match llama.rn.** Treat the device encoder as ground truth and
+   reproduce it at ingest. Attempted via `pooling_type` and `embd_normalize`
+   without success; would need llama.rn source-level investigation.
+
+Option 2 is the smallest change and the only one that makes the device
+*correct* today. Option 1 is the better end state if harness/device parity is
+worth a runtime migration.
+
+Until one lands, on-device retrieval remains unfixed and `verifyEmbedderParity`
+reports the mismatch at startup rather than letting it pass silently.

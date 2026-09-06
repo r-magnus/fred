@@ -12,12 +12,17 @@ import { extractPdf } from './pdf.ts';
 import { cleanPage, findBoilerplate } from './clean.ts';
 import { chunkPages, DEFAULT_CHUNKING, type SourcePage } from './chunk.ts';
 import { classifyChunk } from './filter.ts';
-import { loadEmbedder } from './embed.ts';
+import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { writePack, type PackInput } from './pack.ts';
 import type { DomainTag, LicenseEntry } from '@fred/pack-format';
 
-const EMBED_MODEL = `${process.env.HOME}/models/gte-small_fp16.gguf`;
-const EMBED_MODEL_ID = 'thenlper/gte-small';
+// ONNX rather than GGUF: the device must reproduce these vectors exactly, and
+// two llama.cpp wrappers did not agree with each other or with the reference
+// (docs/results-m3.md). rag-core supplies the tokenizer and pooling, so the only
+// thing that differs between here and the phone is the ONNX execution provider.
+const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
+const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
+const EMBED_MODEL_ID = 'Supabase/gte-small';
 
 const WHO_BEC_LICENSE: LicenseEntry = {
   id: 'who-bec',
@@ -77,7 +82,7 @@ const cleaned: SourcePage[] = pages.map((p) => ({
 console.log(`      removed ${boilerplate.size} boilerplate lines`);
 
 console.log(`[3/5] loading embedder ${EMBED_MODEL_ID}`);
-const embedder = await loadEmbedder(EMBED_MODEL, EMBED_MODEL_ID);
+const embedder = await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID);
 console.log(`      dim ${embedder.spec.dim}, calibrated cosineFloor ${embedder.spec.cosineFloor.toFixed(4)}`);
 
 console.log('[4/5] chunking');

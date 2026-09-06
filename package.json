@@ -12,7 +12,8 @@
   "scripts": {
     "test": "node --test packages/*/test/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "ingest": "node tools/ingest/src/index.ts"
+    "ingest": "node tools/ingest/src/index.ts",
+    "postinstall": "node scripts/patch-onnx-gradle.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

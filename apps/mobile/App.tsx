@@ -63,7 +63,8 @@ export default function App() {
       t = Date.now();
       const backend = await createDeviceBackend({
         modelPath: `${BASE.uri.replace(/^file:\/\//, '')}/Qwen3-0.6B-Q4_K_M.gguf`,
-        embedModelPath: `${BASE.uri.replace(/^file:\/\//, '')}/gte-small_fp16.gguf`,
+        embedModelPath: `${BASE.uri.replace(/^file:\/\//, '')}/gte-small.onnx`,
+        embedVocabPath: `${BASE.uri.replace(/^file:\/\//, '')}/gte-small-vocab.txt`,
         spec: manifest.embedding,
       });
       log('load models', Date.now() - t, 'SLM + embedder resident');

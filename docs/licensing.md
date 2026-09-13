@@ -8,7 +8,9 @@ for the project report.**
 |---|---|---|---|
 | `who-bec` | WHO/ICRC *Basic Emergency Care* (2018) | CC BY-NC-SA 3.0 IGO | ❌ No |
 | `who-pfa` | WHO *Psychological First Aid: Guide for Field Workers* | CC BY-NC-SA 3.0 IGO | ❌ No |
-| `fm-21-76` | US Army FM 21-76 / FM 21-76-1 *Survival* | Public domain (US Gov work) | ✅ Yes |
+| `atp-4-02-11` | US Army ATP 4-02.11 *Casualty Response, Tactical Combat Casualty Care, and First Aid* (Mar 2026) — used in `core-firstaid-army`, civilian-applicable chapters only | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
+| `atp-3-50-21` | US Army ATP 3-50.21 *Survival* (Sept 2018) — used in `core-survival` | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
+| `fm-21-76` | US Army FM 21-76 / FM 21-76-1 *Survival* — **not used**: superseded by FM 3-05.70 (2002), then ATP 3-50.21 | Public domain (US Gov work) | ✅ Yes |
 | `feis` | USFS *Fire Effects Information System* Species Reviews | Public domain (US Gov work) | ✅ Yes |
 | `usda-plants` | USDA PLANTS Database | Public domain (US Gov work) | ✅ Yes |
 | `usfws` | US Fish & Wildlife Service species data | Public domain (US Gov work) | ✅ Yes |

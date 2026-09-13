@@ -70,6 +70,28 @@ export function cosineInt8(query: Float32Array, candidate: Int8Array): number {
   return dot / (Math.sqrt(qq) * Math.sqrt(cc));
 }
 
+/**
+ * Bounds-checked view of one INT8 row inside a flat vectors.i8 buffer.
+ *
+ * Shared by the Node and device PackStores, which previously each open-coded
+ * this arithmetic. It returns a VIEW, not a copy, so scoring a candidate set
+ * allocates nothing — which matters on a phone. An out-of-range ordinal would
+ * otherwise silently alias a neighbouring row and produce a plausible but wrong
+ * similarity, so it throws.
+ */
+export function vectorRow(buffer: Uint8Array, ordinal: number, dim: number): Int8Array {
+  if (!Number.isInteger(ordinal) || ordinal < 0) {
+    throw new Error(`ordinal must be a non-negative integer, got ${ordinal}`);
+  }
+  const start = ordinal * dim;
+  if (start + dim > buffer.byteLength) {
+    throw new Error(
+      `row ${ordinal} (dim ${dim}) ends at ${start + dim}, past buffer length ${buffer.byteLength}`,
+    );
+  }
+  return new Int8Array(buffer.buffer, buffer.byteOffset + start, dim);
+}
+
 /** Reconstruct fp32 values from a per-row symmetric INT8 row. */
 export function dequantizeInt8(row: Int8Array, scale: number): Float32Array {
   const out = new Float32Array(row.length);

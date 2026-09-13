@@ -11,6 +11,7 @@ import type {
   LexicalHit,
   PackStore,
 } from '../src/backends.ts';
+import type { PromptParts } from '../src/prompt.ts';
 import { quantizeInt8 } from '../src/score.ts';
 import { chunkTermSet } from '../src/score.ts';
 
@@ -24,7 +25,13 @@ export const FAKE_SPEC: EmbeddingSpec = {
   // The hash embedding genuinely produces near-zero cosine for unrelated text,
   // unlike a real sentence encoder, so no floor correction is needed.
   cosineFloor: 0,
+  probe: { text: 'probe', vector: [...fakeEmbedNormalized('probe', FAKE_DIM)] },
 };
+
+/** Module-scope helper so FAKE_SPEC can carry a self-consistent probe. */
+function fakeEmbedNormalized(text: string, dim: number): Float32Array {
+  return fakeEmbed(text, dim);
+}
 
 /**
  * Deterministic bag-of-words hash embedding. Not semantic, but stable and
@@ -61,11 +68,11 @@ export class FakeBackend implements InferenceBackend {
   embeddingSpec(): EmbeddingSpec {
     return this.spec;
   }
-  countTokens(text: string): number {
-    return text.split(/\s+/).filter(Boolean).length;
+  async countTokens(texts: readonly string[]): Promise<number[]> {
+    return texts.map((t) => t.split(/\s+/).filter(Boolean).length);
   }
-  async *generate(prompt: string, opts: GenerateOptions): AsyncIterable<string> {
-    this.lastPrompt = prompt;
+  async *generate(prompt: PromptParts, opts: GenerateOptions): AsyncIterable<string> {
+    this.lastPrompt = `${prompt.system}\n\n${prompt.user}`;
     this.lastOptions = opts;
     yield 'FAKE ';
     yield 'ANSWER';

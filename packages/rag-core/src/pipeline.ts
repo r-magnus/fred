@@ -7,9 +7,9 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import { compressContext, estimateTokens, DEFAULT_COMPRESSION } from './compress.ts';
+import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPrompt, type ContextBlock } from './prompt.ts';
+import { buildPromptParts, type ContextBlock } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -128,7 +128,7 @@ export async function ask(
     };
   }
 
-  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts);
+  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
   const topScore = candidates[0]?.score ?? 0;
 
   if (candidates.length === 0 || topScore < threshold) {
@@ -147,10 +147,10 @@ export async function ask(
   }
 
   // Stage 3 — compress before prefill.
-  const compressed = compressContext(
+  const compressed = await compressContext(
     candidates.map((c) => c.chunk),
     keywords,
-    { ...DEFAULT_COMPRESSION, countTokens: (t) => backend.countTokens(t) || estimateTokens(t) },
+    { ...DEFAULT_COMPRESSION, countTokens: (texts) => backend.countTokens(texts) },
   );
 
   const blocks: ContextBlock[] = compressed.chunks.map((c) => ({
@@ -158,7 +158,7 @@ export async function ask(
     text: c.text,
   }));
 
-  const prompt = buildPrompt(query, blocks);
+  const prompt = buildPromptParts(query, blocks);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };

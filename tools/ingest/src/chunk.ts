@@ -40,6 +40,9 @@ export const DEFAULT_CHUNKING = { targetTokens: 300, overlapTokens: 50 } as cons
 export function isHeading(line: string): boolean {
   const t = line.trim();
   if (t.length === 0 || t.length > 80) return false;
+  // Admonition labels are uppercase but are not sections. Treated as headings,
+  // 16 survival chunks were cited as coming from section "CAUTION".
+  if (/^(?:warning|caution|note|important)[.!:]?$/i.test(t)) return false;
   if (/^(module|chapter|section|annex|appendix)\s+\d+/i.test(t)) return true;
   const letters = t.replace(/[^A-Za-z]/g, '');
   if (letters.length < 3) return false;

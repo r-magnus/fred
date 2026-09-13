@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
 import { ask, maxTokensForPressure, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
-import { assertCompatibleEmbedding } from '../src/retrieve.ts';
+import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL } from '../src/retrieve.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
 import { SYSTEM_PREFIX } from '../src/prompt.ts';
@@ -58,7 +58,10 @@ test('the generated prompt starts with the cacheable system prefix verbatim', as
   const prompt = d.backend.lastPrompt ?? '';
   assert.ok(prompt.startsWith(SYSTEM_PREFIX), 'prefix must be byte-identical for KV reuse');
   assert.ok(prompt.includes('SOURCES:'));
-  assert.ok(prompt.includes('[1]'), 'sources must be numbered for citation');
+  assert.ok(prompt.includes('SOURCE 1'), 'sources must be numbered so steps can refer to them');
+  assert.ok(!/Cite the sources/i.test(prompt),
+    'the model is not asked to cite: citations come from retrieval, and asking a ' +
+    '0.6B model to inline them produced answers consisting only of "[1], [3]"');
 });
 
 test('abstains rather than answering from weak context', async () => {
@@ -102,6 +105,29 @@ test('a pack from another state is never searched', async () => {
   assert.ok(r.reason.includes('outside OH'));
 });
 
+test('plural domain terms still route to their domain', () => {
+  // US-08-AC2's wording. Matching only the raw token left "animals" unrouted.
+  const r = route(extractKeywords('I have a cooler, can animals get in?'), PACKS, { state: 'CO' });
+  assert.ok(r.domains.includes('wildlife'), r.reason);
+  assert.deepEqual(r.packIds, ['state-CO-wildlife']);
+  const snakes = extractKeywords('are there snakes here').find((k) => k.term === 'snake');
+  assert.equal(snakes?.isDomainTerm, true, 'stem() turns "snakes" into "snak"; the trailing-s form must match');
+});
+
+test('lay injury wording routes to first aid, not the fallback', () => {
+  // US-02-AC1's wording. With no domain match it fell back to every pack.
+  const r = route(extractKeywords('I cut myself on a branch, what should I do?'), PACKS, { state: null });
+  assert.deepEqual(r.domains, ['first-aid-physical'], r.reason);
+  const ankle = route(extractKeywords('my friend twisted an ankle on the trail'), PACKS, { state: null });
+  assert.ok(ankle.domains.includes('first-aid-physical'), ankle.reason);
+});
+
+test('a bite routes to first aid even when the animal routes to wildlife', () => {
+  const r = route(extractKeywords('A rattlesnake bit my leg, what do I do?'), PACKS, { state: null });
+  assert.ok(r.domains.includes('first-aid-physical'), r.reason);
+  assert.ok(r.packIds.includes('core-firstaid'), 'first aid must be searched without a location');
+});
+
 test('diagnostics expose the numbers the debug overlay needs', async () => {
   const res = await ask('How do I control severe bleeding from a wound?', deps(), { state: 'CO' });
   assert.equal(res.kind, 'answer');
@@ -129,6 +155,37 @@ test('memory pressure actually reaches the generate call', async () => {
   assert.equal(res.kind, 'answer');
   for await (const _ of (res as { stream: AsyncIterable<string> }).stream) { /* drain */ }
   assert.equal(d.backend.lastOptions?.maxTokens, 256);
+});
+
+test('chunk domain, not just pack domain, decides what a query can retrieve', async () => {
+  const store = new FakePackStore();
+  store.addPack('core-survival', [
+    seed('Cut the snare cord where it crosses the branch.', { domain: 'survival', source: 'ATP 3-50.21' }),
+    seed('For a cut, rinse the wound with clean water and cover it.', { source: 'ATP 3-50.21' }),
+  ]);
+  const packs = [{ id: 'core-survival', domains: ['survival', 'first-aid-physical'] as const, scope: { kind: 'global' } as const }];
+  const res = await ask('I cut myself on a branch', { backend: new FakeBackend(), store, packs }, {
+    state: null,
+    abstainThreshold: 0,
+  });
+  assert.equal(res.kind, 'answer');
+  const got = res.diagnostics.candidates;
+  assert.ok(got.length > 0);
+  assert.ok(got.every((c) => c.chunk.domain === 'first-aid-physical'),
+    'a snare passage must not answer a first-aid question just because its pack routes for first aid');
+});
+
+test('one large pack cannot crowd another out of Stage 1', async () => {
+  const store = new FakePackStore();
+  store.addPack('big', Array.from({ length: 60 }, (_, i) => seed(`bleeding note ${i}`)));
+  store.addPack('small', [seed('bleeding control with direct pressure')]);
+  const hits = await retrieve(extractKeywords('bleeding'), ['big', 'small'], store, new FakeBackend(), {
+    ...DEFAULT_RETRIEVAL,
+    candidateLimit: 50,
+    topK: 100,
+  });
+  assert.ok(hits.some((h) => h.chunk.packId === 'small'),
+    'a pack listed second must still reach Stage 2 when the first has more hits than the limit');
 });
 
 test('mixing packs built with a different encoder throws instead of scoring nonsense', () => {

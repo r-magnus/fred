@@ -21,7 +21,14 @@ export interface CompressionOptions {
   readonly minReduction: number;
   /** Never remove more than this fraction. Paper: 0.40. */
   readonly maxReduction: number;
-  readonly countTokens: (text: string) => number;
+  /**
+   * Exact token counts for every sentence, in one call.
+   *
+   * Batched because llama.rn tokenizes across a native bridge; a per-sentence
+   * call would cost one round trip each, and a synchronous signature cannot be
+   * satisfied there at all.
+   */
+  readonly countTokens: (texts: readonly string[]) => Promise<number[]>;
 }
 
 export const DEFAULT_COMPRESSION: Omit<CompressionOptions, 'countTokens'> = {
@@ -47,12 +54,14 @@ export interface CompressionResult {
 }
 
 /**
- * Cheap token estimate for when no real tokenizer is available. English averages
- * roughly 4 characters per token. Backends with a tokenizer should pass their own
- * countTokens; the eval harness always does, so reported numbers are exact.
+ * Character-based fallback, for tests and for backends with no tokenizer at all.
+ *
+ * NOT for production paths: an approximation here makes compression ratios and
+ * the adaptive token budget diverge between device and harness, which defeats
+ * the point of sharing the pipeline. Both real backends tokenize exactly.
  */
-export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+export function estimateTokens(texts: readonly string[]): Promise<number[]> {
+  return Promise.resolve(texts.map((t) => Math.ceil(t.length / 4)));
 }
 
 const ABBREVIATIONS = new Set([
@@ -125,26 +134,41 @@ interface ScoredSentence {
 const W_OVERLAP = 0.7;
 const W_DENSITY = 0.3;
 
-export function compressContext(
+export async function compressContext(
   chunks: readonly ChunkRecord[],
   keywords: readonly Keyword[],
   opts: CompressionOptions,
-): CompressionResult {
+): Promise<CompressionResult> {
   const { countTokens, minReduction, maxReduction } = opts;
 
   const perChunkSentences: string[][] = [];
   const atomicFlags: boolean[] = [];
+
+  chunks.forEach((chunk) => {
+    perChunkSentences.push(splitSentences(chunk.text));
+    atomicFlags.push(chunk.blockKind === 'procedure' || looksLikeProcedure(chunk.text));
+  });
+
+  // One tokenizer call for every sentence across every chunk.
+  const flat = perChunkSentences.flat();
+  const counts = await countTokens(flat);
+  if (counts.length !== flat.length) {
+    throw new Error(`countTokens returned ${counts.length} counts for ${flat.length} strings`);
+  }
+  const tokensOf = new Map<string, number>();
+  flat.forEach((s, i) => tokensOf.set(`${i}`, counts[i] ?? 0));
+
   const scored: ScoredSentence[] = [];
   let tokensBefore = 0;
+  let flatIndex = 0;
 
   chunks.forEach((chunk, chunkIndex) => {
-    const atomic = chunk.blockKind === 'procedure' || looksLikeProcedure(chunk.text);
-    atomicFlags.push(atomic);
-    const sentences = splitSentences(chunk.text);
-    perChunkSentences.push(sentences);
+    const atomic = atomicFlags[chunkIndex] ?? false;
+    const sentences = perChunkSentences[chunkIndex] ?? [];
 
     sentences.forEach((text, sentenceIndex) => {
-      const tokens = countTokens(text);
+      const tokens = tokensOf.get(`${flatIndex}`) ?? 0;
+      flatIndex++;
       tokensBefore += tokens;
       const overlap = lexicalScore(keywords, chunkTermSet(text));
       const density = domainTermDensity(text);
@@ -181,7 +205,7 @@ export function compressContext(
 
   const outChunks: { chunk: ChunkRecord; text: string }[] = [];
   const perChunk: ChunkCompressionStat[] = [];
-  let tokensAfter = 0;
+  const keptTexts: string[] = [];
 
   chunks.forEach((chunk, chunkIndex) => {
     const sentences = perChunkSentences[chunkIndex] ?? [];
@@ -189,7 +213,7 @@ export function compressContext(
     // A chunk is never emptied: an empty citation is worse than a long one.
     const finalSentences = kept.length > 0 ? kept : sentences.slice(0, 1);
     const text = finalSentences.join(' ');
-    tokensAfter += countTokens(text);
+    keptTexts.push(text);
     outChunks.push({ chunk, text });
     perChunk.push({
       chunkId: chunk.id,
@@ -198,6 +222,10 @@ export function compressContext(
       sentencesTotal: sentences.length,
     });
   });
+
+  // Second and final tokenizer call, for the assembled result.
+  const afterCounts = await countTokens(keptTexts);
+  const tokensAfter = afterCounts.reduce((a, b) => a + b, 0);
 
   return {
     chunks: outChunks,

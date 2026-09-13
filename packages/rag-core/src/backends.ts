@@ -6,6 +6,7 @@
  * the numbers in the evaluation describe the system that actually ships.
  */
 import type { ChunkRecord, EmbeddingSpec } from '@fred/pack-format';
+import type { PromptParts } from './prompt.ts';
 
 export interface GenerateOptions {
   /** Upper bound on generated tokens. Set by the adaptive memory manager. */
@@ -20,10 +21,27 @@ export interface InferenceBackend {
   embed(text: string): Promise<Float32Array>;
   /** The encoder this backend is actually running, for compatibility checks. */
   embeddingSpec(): EmbeddingSpec;
-  /** Stream generated text. Implementations should reuse a cached system prefix. */
-  generate(prompt: string, opts: GenerateOptions): AsyncIterable<string>;
-  /** Approximate token count. Backends with a real tokenizer should use it. */
-  countTokens(text: string): number;
+  /**
+   * Stream generated text.
+   *
+   * Takes the prompt in halves rather than pre-joined so a backend with a chat
+   * template can render them as separate turns. That is not cosmetic: without a
+   * template the model receives no end-of-turn signal and generates until the
+   * context fills, which on device produced ~1000 tokens of repetition for a
+   * question needing about eighty.
+   */
+  generate(prompt: PromptParts, opts: GenerateOptions): AsyncIterable<string>;
+  /**
+   * Exact token counts for a batch of strings.
+   *
+   * Batched and async on purpose. node-llama-cpp tokenizes synchronously, but
+   * llama.rn crosses a native bridge, so a per-string synchronous signature
+   * cannot be satisfied on device — the first implementation there fell back to
+   * a chars/4 heuristic, which silently made on-device compression ratios and
+   * token budgets incomparable to the ones the eval harness reports. One call
+   * for every sentence keeps it exact on both sides at one round trip.
+   */
+  countTokens(texts: readonly string[]): Promise<number[]>;
 }
 
 /** One candidate surfaced by the Stage-1 lexical pre-filter. */

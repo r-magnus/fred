@@ -1,0 +1,13 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    // rag-core is consumed as TypeScript source with no build step, and its
+    // internal imports carry explicit .ts extensions because Node's type
+    // stripping requires them. Metro resolves those paths literally.
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../../packages/*/src/**/*.ts"],
+  "exclude": ["test", "android", "node_modules"]
+}

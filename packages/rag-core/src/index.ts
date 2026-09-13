@@ -1,4 +1,7 @@
 export * from './backends.ts';
+export * from './base64.ts';
+export * from './tokenizer.ts';
+export * from './pooling.ts';
 export * from './lexicon.ts';
 export * from './score.ts';
 export * from './compress.ts';

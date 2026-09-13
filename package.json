@@ -6,12 +6,14 @@
   "workspaces": [
     "packages/*",
     "tools/eval",
-    "tools/ingest"
+    "tools/ingest",
+    "apps/mobile"
   ],
   "scripts": {
     "test": "node --test packages/*/test/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "ingest": "node tools/ingest/src/index.ts"
+    "ingest": "node tools/ingest/src/index.ts",
+    "postinstall": "node scripts/patch-onnx-gradle.mjs && node scripts/patch-onnx-autolink.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

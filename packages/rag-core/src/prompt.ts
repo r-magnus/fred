@@ -17,15 +17,12 @@ export interface ContextBlock {
  * Invariant system prefix. Changing this string invalidates every cached prefix,
  * so treat edits as a deliberate act, not a tweak.
  */
-export const SYSTEM_PREFIX = `You are Fred, an offline field assistant for first aid, wilderness survival, and local plants and wildlife.
+export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival assistant. Answer using only the SOURCES below.
 
-Rules:
-- Answer ONLY from the numbered sources provided. Never use outside knowledge.
-- If the sources do not answer the question, say so plainly. Do not guess.
-- Cite the sources you used as [1], [2], and so on.
-- Reproduce procedures in their exact original order. Never omit, reorder, or merge steps.
-- Be direct and specific. Short numbered steps beat paragraphs.
-- For any life-threatening situation, say to contact emergency services first if that is at all possible.`;
+- If the sources do not contain the answer, say "I don't have reliable information on that."
+- Keep procedure steps in their original order. Never omit or reorder a step.
+- Reply with short numbered steps. No preamble, no commentary about your answer.
+- If life is at risk, say to contact emergency services first when possible.`;
 
 /** Rendered when the user is offline and the answer is medical. */
 export const MEDICAL_DISCLAIMER =
@@ -35,7 +32,7 @@ export function renderContext(blocks: readonly ContextBlock[]): string {
   return blocks
     .map((b, i) => {
       const page = b.chunk.page === null ? '' : `, p. ${b.chunk.page}`;
-      return `[${i + 1}] ${b.chunk.source}${page} — ${b.chunk.section}\n${b.text}`;
+      return `SOURCE ${i + 1} (${b.chunk.source}${page})\n${b.text}`;
     })
     .join('\n\n');
 }
@@ -45,6 +42,27 @@ export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[])
   return `\n\nSOURCES:\n${renderContext(blocks)}\n\nQUESTION: ${query}\n\nANSWER:`;
 }
 
+/**
+ * The prompt split into its stable and per-query halves.
+ *
+ * Kept separate because backends need to render it differently. A chat model
+ * needs these as distinct system and user turns so its template applies and it
+ * emits a proper end-of-turn token; concatenating them into one raw string
+ * leaves the model with no stopping signal, and it will generate until it hits
+ * the context limit. Keeping the system half intact is also what makes prefix
+ * KV caching possible.
+ */
+export interface PromptParts {
+  readonly system: string;
+  readonly user: string;
+}
+
+export function buildPromptParts(query: string, blocks: readonly ContextBlock[]): PromptParts {
+  return { system: SYSTEM_PREFIX, user: buildQuerySuffix(query, blocks).trimStart() };
+}
+
+/** Flattened form, for backends with no chat template. */
 export function buildPrompt(query: string, blocks: readonly ContextBlock[]): string {
-  return SYSTEM_PREFIX + buildQuerySuffix(query, blocks);
+  const { system, user } = buildPromptParts(query, blocks);
+  return `${system}\n\n${user}`;
 }

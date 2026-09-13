@@ -102,9 +102,39 @@ function isNoiseLine(line: string): boolean {
   return letters / t.length < 0.4 && t.length > 12;
 }
 
-export function cleanPage(page: PdfPage, boilerplate: ReadonlySet<string>): string {
-  const kept = page.text
-    .split('\n')
-    .filter((line) => !boilerplate.has(line.trim()) && !isNoiseLine(line));
-  return normalizeText(kept.join('\n'));
+/**
+ * Per-corpus furniture that the frequency heuristic in findBoilerplate misses.
+ *
+ * ATP 3-50.21 is why this exists. Its footer carries the page label
+ * ("4-10 ATP 3-50.21 September 2018"), so no two footers are identical and exact
+ * line counting never reaches threshold. Its running header alternates between
+ * "Chapter 4" and the chapter title, and a short title like "Food" is on too few
+ * pages to count as boilerplate but would otherwise land at the top of every
+ * chunk. Rules are explicit per corpus rather than a looser generic heuristic,
+ * because loosening the heuristic would silently change packs already built.
+ */
+export interface CleanRules {
+  /** Dropped wherever they appear. Anchor these: they run against every line. */
+  readonly dropLines?: readonly RegExp[];
+  /** Dropped only among a page's first and last two lines, i.e. running headers. */
+  readonly dropEdgeLines?: readonly RegExp[];
+  /** Applied after line filtering, before normalization. */
+  readonly rewrites?: readonly (readonly [RegExp, string])[];
+}
+
+export function cleanPage(page: PdfPage, boilerplate: ReadonlySet<string>, rules: CleanRules = {}): string {
+  const lines = page.text.split('\n');
+  const contentIdx = lines.flatMap((l, i) => (l.trim() === '' ? [] : [i]));
+  const edge = new Set([...contentIdx.slice(0, 2), ...contentIdx.slice(-2)]);
+  let text = lines
+    .filter((line, i) => {
+      const t = line.trim();
+      if (boilerplate.has(t) || isNoiseLine(line)) return false;
+      if (rules.dropLines?.some((re) => re.test(t))) return false;
+      if (edge.has(i) && rules.dropEdgeLines?.some((re) => re.test(t))) return false;
+      return true;
+    })
+    .join('\n');
+  for (const [pattern, replacement] of rules.rewrites ?? []) text = text.replace(pattern, replacement);
+  return normalizeText(text);
 }

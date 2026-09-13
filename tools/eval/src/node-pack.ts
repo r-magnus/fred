@@ -12,6 +12,7 @@ import type {
   ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest,
 } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
+import { vectorRow } from '@fred/rag-core';
 import { getLlama, LlamaChatSession, type LlamaContext, type LlamaModel } from 'node-llama-cpp';
 
 interface LoadedPack {
@@ -99,9 +100,7 @@ export class NodePackStore implements PackStore {
     return hits.map((h) => {
       const pack = this.packs.get(h.packId);
       if (!pack) throw new Error(`pack not loaded: ${h.packId}`);
-      const start = h.ordinal * pack.dim;
-      const slice = pack.vectors.subarray(start, start + pack.dim);
-      return { vec: new Int8Array(slice.buffer, slice.byteOffset, slice.length), scale: 1 };
+      return { vec: vectorRow(pack.vectors, h.ordinal, pack.dim), scale: 1 };
     });
   }
 
@@ -114,6 +113,7 @@ export interface NodeBackendOptions {
   readonly embedModelPath: string;
   readonly embedModelId: string;
   readonly cosineFloor: number;
+  readonly probe: EmbeddingSpec['probe'];
   readonly genModelPath?: string;
 }
 
@@ -135,6 +135,9 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     quantization: 'int8-per-row',
     normalized: true,
     cosineFloor: opts.cosineFloor,
+    // Supplied by the caller from the loaded manifest; this backend is the one
+    // the pack was built with, so it trivially satisfies its own probe.
+    probe: opts.probe,
   };
 
   return {
@@ -143,16 +146,29 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
       const e = await embedCtx.getEmbeddingFor(text);
       return Float32Array.from(e.vector);
     },
-    countTokens: (text: string) => (genModel ?? embedModel).tokenize(text).length,
-    async *generate(prompt: string, genOpts: GenerateOptions) {
+    async countTokens(texts: readonly string[]): Promise<number[]> {
+      const m = genModel ?? embedModel;
+      return texts.map((t) => m.tokenize(t).length);
+    },
+    async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
       if (!genCtx) throw new Error('no generation model loaded');
-      const session = new LlamaChatSession({ contextSequence: genCtx.getSequence() });
-      const chunks: string[] = [];
-      await session.prompt(prompt, {
-        maxTokens: genOpts.maxTokens,
-        onTextChunk: (t) => chunks.push(t),
-      });
-      for (const c of chunks) yield c;
+      // Acquire and release per call: a context owns a fixed pool of sequences,
+      // and leaking them fails with "No sequences left" on the second question.
+      const sequence = genCtx.getSequence();
+      try {
+        const session = new LlamaChatSession({
+          contextSequence: sequence,
+          systemPrompt: prompt.system,
+        });
+        const chunks: string[] = [];
+        await session.prompt(prompt.user, {
+          maxTokens: genOpts.maxTokens,
+          onTextChunk: (t) => chunks.push(t),
+        });
+        for (const c of chunks) yield c;
+      } finally {
+        sequence.dispose();
+      }
     },
     async dispose() {
       await embedCtx.dispose();

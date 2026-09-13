@@ -3,7 +3,7 @@
  * Verifies the pack round-trips and that ordinals align chunks with vectors.
  */
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
-import { extractKeywords, retrieve, route, compressContext, DEFAULT_COMPRESSION, estimateTokens } from '@fred/rag-core';
+import { extractKeywords, retrieve, route, compressContext, DEFAULT_COMPRESSION } from '@fred/rag-core';
 
 const store = new NodePackStore();
 const manifest = store.load('packs/core-firstaid-v1.0.0');
@@ -14,6 +14,7 @@ const backend = await createNodeBackend({
   embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: manifest.embedding.modelId,
   cosineFloor: manifest.embedding.cosineFloor,
+  probe: manifest.embedding.probe,
 });
 
 const packs = [{ id: manifest.id, domains: manifest.domains, scope: manifest.scope }];
@@ -36,8 +37,8 @@ for (const q of QUERIES) {
       `lex=${h.sLex.toFixed(2)} p.${h.chunk.page} [${h.chunk.blockKind}] ${h.chunk.section.slice(0, 40)}`);
     console.log(`      ${h.chunk.text.replace(/\n/g, ' ').slice(0, 110)}...`);
   }
-  const comp = compressContext(hits.map(h => h.chunk), kws,
-    { ...DEFAULT_COMPRESSION, countTokens: (t) => backend.countTokens(t) || estimateTokens(t) });
+  const comp = await compressContext(hits.map(h => h.chunk), kws,
+    { ...DEFAULT_COMPRESSION, countTokens: (texts) => backend.countTokens(texts) });
   console.log(`   compression: ${comp.tokensBefore} -> ${comp.tokensAfter} tokens (${(comp.reduction*100).toFixed(0)}% cut)\n`);
 }
 

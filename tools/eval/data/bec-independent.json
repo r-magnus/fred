@@ -1,0 +1,652 @@
+[
+ {
+  "id": "ind-01",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Where should the hands be placed to give chest compressions to an adult?",
+  "options": [
+   "Centre of the chest, on the lower half of the breastbone",
+   "Over the upper abdomen",
+   "Directly over the left nipple",
+   "On the collarbone"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-02",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the recommended rate of chest compressions for an adult in cardiac arrest?",
+  "options": [
+   "About 40 per minute",
+   "About 100 to 120 per minute",
+   "About 60 per minute",
+   "As fast as physically possible"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-03",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a minor thermal burn be cooled?",
+  "options": [
+   "Pack it with ice directly against the skin",
+   "Cover it with butter or cooking oil",
+   "With cool running water for several minutes",
+   "It should not be cooled at all"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-04",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A chemical has splashed into someone's eye. What is the immediate action?",
+  "options": [
+   "Rub the eye to disperse the chemical",
+   "Apply an eye patch and wait for help",
+   "Apply antibiotic ointment",
+   "Irrigate the eye with clean water for a prolonged period"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-05",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Someone has swallowed a corrosive substance. Should vomiting be induced?",
+  "options": [
+   "No, do not induce vomiting",
+   "Yes, immediately",
+   "Yes, using salt water",
+   "Only if they lose consciousness"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-06",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the main purpose of placing someone in the recovery position?",
+  "options": [
+   "To reduce swelling in the limbs",
+   "To keep the airway open and let fluids drain",
+   "To raise core body temperature",
+   "To immobilize the spine"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-07",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which finding is a classic early sign of stroke?",
+  "options": [
+   "Swelling in both legs",
+   "A persistent dry cough",
+   "Drooping on one side of the face",
+   "Rigidity of the abdomen"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-08",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a suspected broken forearm be managed before transport?",
+  "options": [
+   "Pull firmly to realign the bone",
+   "Massage the area to reduce swelling",
+   "Apply a heat pack",
+   "Immobilize it, including the joints above and below"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-09",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A conscious infant under one year old is choking. What is appropriate?",
+  "options": [
+   "Back blows alternating with chest thrusts",
+   "Standard adult abdominal thrusts",
+   "A blind finger sweep of the throat",
+   "Shaking the infant vigorously"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-10",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What most clearly distinguishes heat stroke from heat exhaustion?",
+  "options": [
+   "Heat stroke always involves heavy sweating",
+   "Altered mental status with a very high body temperature",
+   "Heat stroke lowers body temperature",
+   "There is no meaningful clinical difference"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-11",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should someone with severe hypothermia be rewarmed in a wilderness setting?",
+  "options": [
+   "Immerse them in hot water straight away",
+   "Rub their arms and legs vigorously",
+   "Gradually, with dry insulation and shelter, handling them gently",
+   "Give them alcohol to warm them up"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-12",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is correct first aid for a nosebleed?",
+  "options": [
+   "Tilt the head back and pinch the bony bridge",
+   "Lie flat on the back until it stops",
+   "Pack both nostrils tightly and lie down",
+   "Lean forward and pinch the soft part of the nose"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-13",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "After a head injury, which finding most warrants urgent medical attention?",
+  "options": [
+   "Repeated vomiting or increasing drowsiness",
+   "A small bruise at the point of impact",
+   "A mild headache that is improving",
+   "Feeling briefly startled by the impact"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-14",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "When is it appropriate to stop performing CPR?",
+  "options": [
+   "After exactly five minutes",
+   "When trained help takes over, the person recovers, or you are physically unable to continue",
+   "As soon as you hear ribs crack",
+   "If the person is still unresponsive after two cycles"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-15",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What should you do first on finding a collapsed person?",
+  "options": [
+   "Begin chest compressions immediately",
+   "Search them for identification",
+   "Check that the scene is safe to approach",
+   "Telephone a relative"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-16",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A wound has a knife still embedded in it. What is correct?",
+  "options": [
+   "Pull it out and apply pressure",
+   "Push it deeper to compress the vessel",
+   "Twist it to gauge the depth",
+   "Leave it in place and stabilize it"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-17",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How deep should chest compressions be on an adult?",
+  "options": [
+   "About 5-6 cm",
+   "About 1-2 cm",
+   "About 10 cm",
+   "Depth does not matter, only rate"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-18",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the standard compression-to-breath ratio for adult CPR by a single rescuer?",
+  "options": [
+   "15 to 1",
+   "30 to 2",
+   "5 to 1",
+   "10 to 5"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-19",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "An AED advises a shock. What must you do immediately before delivering it?",
+  "options": [
+   "Hold the patient's arm steady",
+   "Give two rescue breaths",
+   "Ensure nobody is touching the patient",
+   "Check the pulse for one minute"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-20",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Where should a tourniquet be placed for uncontrolled limb bleeding?",
+  "options": [
+   "Directly over the wound",
+   "Below the wound, away from the torso",
+   "Around the neck of the limb joint",
+   "Above the wound, between it and the torso"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-21",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Once applied for severe bleeding, when should a tourniquet be loosened?",
+  "options": [
+   "Not by a first aider; it stays until definitive care",
+   "Every ten minutes to restore circulation",
+   "As soon as bleeding slows",
+   "After one hour, then reapplied"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-22",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should you estimate the extent of a burn in the field?",
+  "options": [
+   "By the depth of blistering only",
+   "Using the patient's palm as roughly one percent of body surface",
+   "By counting the number of blisters",
+   "By how much pain the patient reports"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-23",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the first action for a dry chemical powder burn on skin?",
+  "options": [
+   "Pour water on immediately",
+   "Apply a neutralizing acid or base",
+   "Brush the powder off before irrigating",
+   "Cover it and wait for help"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-24",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Why are electrical burns often more serious than they appear?",
+  "options": [
+   "They always become infected",
+   "They cause immediate blindness",
+   "They cannot be cooled with water",
+   "Tissue damage can be extensive beneath small entry and exit wounds"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-25",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What distinguishes an open fracture from a closed one?",
+  "options": [
+   "The skin over the fracture is broken",
+   "The bone is broken in more than one place",
+   "The patient cannot move the limb",
+   "There is no swelling"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-26",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which finding after a fall most suggests a spinal injury?",
+  "options": [
+   "Bruising on the forearm",
+   "Numbness or tingling in the limbs",
+   "A mild headache",
+   "Feeling cold"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-27",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should you move someone with a suspected spinal injury if you must move them?",
+  "options": [
+   "Drag them by the arms",
+   "Lift them by the shoulders and knees separately",
+   "Keep the head, neck and spine aligned and move them as one unit",
+   "Sit them upright first"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-28",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What are the early signs of mild hypothermia?",
+  "options": [
+   "Absence of shivering with drowsiness",
+   "High fever and sweating",
+   "Rapid strong pulse",
+   "Shivering and clumsiness"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-29",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Why is a severely hypothermic person handled gently?",
+  "options": [
+   "Because rough handling can trigger a dangerous heart rhythm",
+   "Because the skin tears easily",
+   "Because it causes intense pain",
+   "Because it slows rewarming"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-30",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What should you avoid doing to frostbitten tissue in the field?",
+  "options": [
+   "Protecting it from further cold",
+   "Rubbing it to restore warmth",
+   "Removing wet gloves",
+   "Covering it loosely"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-31",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Why should frostbite not be thawed if refreezing is possible?",
+  "options": [
+   "Thawing is painless only when done once",
+   "Thawed tissue cannot be bandaged",
+   "Refreezing after thawing causes far worse tissue damage",
+   "It makes evacuation slower"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-32",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which is the correct first aid for a venomous snake bite on a limb?",
+  "options": [
+   "Apply a tight tourniquet above the bite",
+   "Cut the wound and suck out the venom",
+   "Pack the bite in ice",
+   "Keep the person calm and still, immobilize the limb, and get help"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-33",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should an embedded tick be removed?",
+  "options": [
+   "Grasp it close to the skin and pull steadily upward",
+   "Burn it off with a match",
+   "Smother it with petroleum jelly and wait",
+   "Twist it sharply anticlockwise"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-34",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the recognised first aid approach for a sprained ankle?",
+  "options": [
+   "Heat and vigorous massage",
+   "Rest, ice, compression and elevation",
+   "Immediate weight bearing to test it",
+   "Tight binding for 24 hours without checking"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-35",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a large intact blister on the foot be managed on a long hike?",
+  "options": [
+   "Cut the roof off completely",
+   "Drain it and remove the skin",
+   "Leave it intact and pad around it",
+   "Ignore it and continue"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-36",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Someone has been pulled from cold water and is not breathing. What comes first?",
+  "options": [
+   "Rewarming before anything else",
+   "Draining water from the lungs",
+   "Removing all clothing",
+   "Opening the airway and starting rescue breaths"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-37",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What should you do while someone is having a seizure?",
+  "options": [
+   "Clear the area around them and protect the head",
+   "Hold them still to stop the movements",
+   "Put something in their mouth to protect the tongue",
+   "Splash cold water on the face"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-38",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A conscious diabetic feels shaky, sweaty and confused. What should you give?",
+  "options": [
+   "Water only",
+   "Something sugary to eat or drink",
+   "Nothing by mouth",
+   "A salt tablet"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-39",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should someone having an asthma attack be positioned?",
+  "options": [
+   "Lying flat on the back",
+   "Head lower than the body",
+   "Sitting upright, leaning slightly forward",
+   "Lying on the stomach"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-40",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which chest pain feature most suggests a heart attack rather than a strain?",
+  "options": [
+   "Sharp pain only when pressing the spot",
+   "Pain that changes with arm position",
+   "Pain relieved entirely by stretching",
+   "Crushing central pain spreading to the arm or jaw"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-41",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "In the FAST stroke check, what does the T stand for?",
+  "options": [
+   "Time to call emergency services",
+   "Temperature",
+   "Tourniquet",
+   "Tingling"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-42",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Someone has inhaled fumes in an enclosed space. What is your first priority?",
+  "options": [
+   "Give them water",
+   "Ensure your own safety before entering",
+   "Start compressions immediately",
+   "Lay them flat inside"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-43",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should a penetrating eye injury be managed?",
+  "options": [
+   "Remove the object and flush the eye",
+   "Apply firm pressure to stop bleeding",
+   "Cover both eyes without pressure and get help",
+   "Rinse with saline under pressure"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-44",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A tooth has been knocked out. What gives the best chance of saving it?",
+  "options": [
+   "Scrub it clean and wrap it in tissue",
+   "Store it dry in a sealed bag",
+   "Rinse it in disinfectant",
+   "Keep it in milk or saliva and seek dental care quickly"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-45",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Which sign most suggests a wound has become infected?",
+  "options": [
+   "Spreading redness, warmth, swelling and pus",
+   "Slight redness on the first day",
+   "A dry scab forming",
+   "Mild itching as it heals"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-46",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the definitive treatment for altitude sickness that is worsening?",
+  "options": [
+   "Rest at the same altitude and continue tomorrow",
+   "Descend to a lower altitude",
+   "Drink more water and continue ascending",
+   "Breathe into a paper bag"
+  ],
+  "answer": 1
+ },
+ {
+  "id": "ind-47",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "Someone has been struck by lightning and is unresponsive. Is it safe to touch them?",
+  "options": [
+   "No, they retain a dangerous electrical charge",
+   "Only after ten minutes have passed",
+   "Yes, they carry no charge; treat them immediately",
+   "Only while wearing rubber gloves"
+  ],
+  "answer": 2
+ },
+ {
+  "id": "ind-48",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "What is the most reliable field method to make questionable water safe to drink?",
+  "options": [
+   "Letting it stand overnight to settle",
+   "Adding salt",
+   "Straining it through cloth",
+   "Bringing it to a rolling boil"
+  ],
+  "answer": 3
+ },
+ {
+  "id": "ind-49",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "A hiker is confused, has stopped sweating and has hot dry skin on a hot day. What is this?",
+  "options": [
+   "Heat stroke, a medical emergency",
+   "Simple dehydration",
+   "Mild sunburn",
+   "Hypothermia"
+  ],
+  "answer": 0
+ },
+ {
+  "id": "ind-50",
+  "domain": "first-aid-physical",
+  "provenance": "independent",
+  "question": "How should severe bleeding be managed if a dressing soaks through?",
+  "options": [
+   "Remove it and apply a fresh one",
+   "Add another dressing on top and keep pressure",
+   "Loosen pressure to let it clot",
+   "Wash the wound and start again"
+  ],
+  "answer": 1
+ }
+]

@@ -22,6 +22,15 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'concussion', 'sprain', 'dislocation', 'laceration', 'infection', 'sepsis',
     'defibrillator', 'aed', 'recovery', 'position', 'triage', 'trauma', 'injury',
     'chest', 'abdominal', 'spinal', 'artery', 'vein', 'swelling', 'fainting',
+    // How hikers describe injuries, as opposed to how clinicians do. Without
+    // these, the proposal's own US-02 question ("I cut myself on a branch")
+    // matched no domain, fell back to every pack, and ranked a bird snare first
+    // on the word "cut".
+    'cut', 'gash', 'scrape', 'graze', 'blood', 'bleed', 'blister', 'ankle',
+    'twisted', 'broken', 'hurt',
+    // Shared with wildlife on purpose. Listed only there, "a rattlesnake bit my
+    // leg" routed to wildlife alone and never reached a first-aid pack.
+    'bite', 'bit', 'bitten', 'sting', 'stung', 'venom', 'venomous', 'snakebite',
   ],
   'first-aid-psychological': [
     'panic', 'anxiety', 'distress', 'trauma', 'grief', 'calm', 'reassure',
@@ -121,6 +130,19 @@ export function tokenize(text: string): string[] {
 }
 
 /**
+ * The lexicon entry a query token refers to, if any.
+ *
+ * The lexicon lists mostly singular forms, and matching only the raw token meant
+ * "can animals get in?" carried no wildlife signal at all — the proposal's own
+ * US-08-AC2 wording. stem() alone is not enough either: it maps "snakes" to
+ * "snak", so the plain trailing-s form is tried as well.
+ */
+function lexiconFormOf(token: string): string | null {
+  const candidates = [token, stem(token), token.endsWith('s') ? token.slice(0, -1) : token];
+  return candidates.find((c) => ALL_DOMAIN_TERMS.has(c)) ?? null;
+}
+
+/**
  * Build K_q, the query keyword set of PocketRAG Eq. 2.
  *
  * The paper says "medical keywords extracted from the query" without defining the
@@ -134,8 +156,9 @@ export function extractKeywords(query: string): Keyword[] {
   const out: Keyword[] = [];
   for (const raw of tokenize(query)) {
     if (STOPWORDS.has(raw)) continue;
-    const isDomain = ALL_DOMAIN_TERMS.has(raw);
-    const term = isDomain ? raw : stem(raw);
+    const lexiconTerm = lexiconFormOf(raw);
+    const isDomain = lexiconTerm !== null;
+    const term = lexiconTerm ?? stem(raw);
     if (term.length < 2 || seen.has(term)) continue;
     seen.add(term);
     out.push({

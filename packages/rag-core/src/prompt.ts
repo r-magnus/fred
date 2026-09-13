@@ -17,7 +17,7 @@ export interface ContextBlock {
  * Invariant system prefix. Changing this string invalidates every cached prefix,
  * so treat edits as a deliberate act, not a tweak.
  */
-export const SYSTEM_PREFIX = `You are a field first-aid assistant. Answer using only the SOURCES below.
+export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival assistant. Answer using only the SOURCES below.
 
 - If the sources do not contain the answer, say "I don't have reliable information on that."
 - Keep procedure steps in their original order. Never omit or reorder a step.

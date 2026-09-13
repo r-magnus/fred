@@ -128,7 +128,7 @@ export async function ask(
     };
   }
 
-  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts);
+  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
   const topScore = candidates[0]?.score ?? 0;
 
   if (candidates.length === 0 || topScore < threshold) {

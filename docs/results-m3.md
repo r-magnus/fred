@@ -321,3 +321,76 @@ worth a runtime migration.
 
 Until one lands, on-device retrieval remains unfixed and `verifyEmbedderParity`
 reports the mismatch at startup rather than letting it pass silently.
+
+---
+
+## Correction: the blocker was autolinking, not the New Architecture
+
+The section above concluded that `onnxruntime-react-native` and `llama.rn` cannot
+coexist, because the former needs `RCTBridge` and bridgeless mode removed it. That
+diagnosis is wrong, and the three options it framed were answers to a problem that
+does not exist.
+
+**The error is a JavaScript null, not a native failure.** `lib/binding.ts` is:
+
+```ts
+export const Module = NativeModules.Onnxruntime;
+if (typeof globalThis.OrtApi === 'undefined') {
+  Module.install();
+}
+```
+
+`NativeModules.Onnxruntime` is `null`, so reading `.install` off it throws
+`Cannot read property 'install' of null`. The JSI binding is never reached.
+
+**The module is null because it is never registered.** `MainApplication.kt` builds
+its package list from `PackageList(this).packages`, which is autolinking output.
+Running the autolinker directly is the one-command check:
+
+```
+$ expo-modules-autolinking react-native-config --platform android
+dependencies: { '@op-engineering/op-sqlite': …, expo: …, 'llama.rn': … }
+```
+
+Three entries, no onnxruntime. It is absent because 1.24.3 ships no
+`react-native.config.js` and, unlike `llama.rn` and `op-sqlite`, has no
+`codegenConfig`, so nothing marks it as a native module to link. Its
+`app.plugin.js` would have patched Gradle and the Podfile, but it was never listed
+in `app.json`'s `plugins`, so it never ran either — which is also why
+`android/app/build.gradle` contains no reference to it.
+
+**Bridgeless mode was never the problem.** `ReactContext` declares
+`getJSCallInvokerHolder()` as an abstract method and `BridgelessReactContext`
+implements it (`reactHost.jsCallInvokerHolder`), and RN deliberately keeps
+`BridgelessCatalystInstance.getJSCallInvokerHolder` — the source comments it
+"needed to keep backward compatibility". `getJavaScriptContextHolder()` works
+bridgeless too. The install path the module actually uses is intact under the New
+Architecture.
+
+**Upstream fixed this and never shipped it.** microsoft/onnxruntime#28266 adds
+exactly this `react-native.config.js`, merged 2026-04-30. The newest published
+version is 1.24.3, from 2026-03-05, so no release contains it. Note that issue
+\#19510 — the one matching this error — is closed by that PR, which makes it look
+resolved from the outside while every published artifact still has the bug.
+
+`scripts/patch-onnx-autolink.mjs` applies it from postinstall, alongside the
+existing Gradle 9 patch, and steps aside if a release ever ships the file. After
+it, the autolinker reports the package with the correct
+`packageImportPath`/`packageInstance`.
+
+### Status and what is still unverified
+
+Autolinking discovery is **verified locally**. The device half is **not**: no
+Android device was attached to this session, so the APK has not been rebuilt and
+`install()` has not been observed succeeding. What remains to confirm on hardware:
+
+1. `libonnxruntimejsi.so` is packaged and `System.loadLibrary` succeeds.
+2. The legacy-bridge module's `isBlockingSynchronousMethod` `install()` works
+   through the New Architecture's interop layer. This is the residual risk: it is
+   a legacy `ReactPackage` module, not a TurboModule.
+3. `verifyEmbedderParity` reports OK rather than `MISMATCH cos=0.8313`, which is
+   the actual goal — ONNX on both sides, parity structural rather than detected.
+
+If all three hold, options 1–3 above are moot: no executorch migration, no
+on-device indexing pass, no reproducing llama.rn's embedder. The committed design
+was correct and was blocked by a packaging bug.

@@ -235,7 +235,7 @@ const chunks = chunkPages(cleaned, {
   ...DEFAULT_CHUNKING,
   domain: def.domain,
   tokenize: (t) => embedder.tokenCount(t),
-}).map((c) => ({ ...c, domain: def.domainForPage?.(c.page) ?? c.domain }));
+}).map((c) => ({ ...c, domain: (c.page === null ? undefined : def.domainForPage?.(c.page)) ?? c.domain }));
 const scaffolding = chunks.filter((c) => classifyChunk(c.text).drop);
 const excluded = chunks.filter((c) => !classifyChunk(c.text).drop && def.dropChunks?.some((re) => re.test(c.text)));
 const kept = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));

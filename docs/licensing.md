@@ -11,7 +11,7 @@ for the project report.**
 | `atp-4-02-11` | US Army ATP 4-02.11 *Casualty Response, Tactical Combat Casualty Care, and First Aid* (Mar 2026) — used in `core-firstaid-army`, civilian-applicable chapters only | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `atp-3-50-21` | US Army ATP 3-50.21 *Survival* (Sept 2018) — used in `core-survival` | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `fm-21-76` | US Army FM 21-76 / FM 21-76-1 *Survival* — **not used**: superseded by FM 3-05.70 (2002), then ATP 3-50.21 | Public domain (US Gov work) | ✅ Yes |
-| `feis` | USFS *Fire Effects Information System* Species Reviews | Public domain (US Gov work) | ✅ Yes |
+| `feis` | USFS *Fire Effects Information System* Species Reviews — used in `state-CA-flora-fauna`, `state-OR-flora-fauna`; review text only (images carry third-party photo credits and are not ingested) | Public domain (US Gov work) | ✅ Yes |
 | `usda-plants` | USDA PLANTS Database | Public domain (US Gov work) | ✅ Yes |
 | `usfws` | US Fish & Wildlife Service species data | Public domain (US Gov work) | ✅ Yes |
 | `osm` | OpenStreetMap via Geofabrik extracts | ODbL 1.0 | ✅ With attribution + share-alike |
@@ -37,6 +37,11 @@ Use them in combination:
 FEIS coverage is the highest-risk assumption in the data plan. **Validate coverage
 for your pilot states in M1, before committing to those states.** If FEIS is thin for
 a chosen state, switch states rather than degrading the corpus.
+
+*Outcome (Alpha):* the USDA PLANTS / USFWS filter was not needed. Each FEIS review
+carries a structured "States and Provinces" list, which gives California 531 species
+and Oregon 470. Animal coverage is the thin part: 79 and 81 species, mostly birds and
+game mammals. See `docs/results-alpha.md`.
 
 ## ODbL and maps
 OpenStreetMap-derived tiles require attribution and carry share-alike obligations on

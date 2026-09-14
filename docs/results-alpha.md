@@ -3,223 +3,244 @@
 The proposal (README §06) sets A-KR1 for 9/18/2026: *"The following corpora are all
 accounted for: First Aid · Per-state flora & fauna · Survival skills"*, verified by
 *"when asked a corpora-relevant question, Fred uses RAG on the proper material."*
-This is where that stands.
 
-| Corpus | Pack | Status |
+| Corpus | Pack | Size |
 |---|---|---|
-| First aid | `core-firstaid` v1.0.0 — WHO BEC 2018, 667 chunks, 1 pack routing domain | Built (M1–M3). No minor-injury care. |
-| First aid (military) | `core-firstaid-army` v1.0.0 — US Army ATP 4-02.11 (2026), 406 chunks, 0.90 MB | **New.** |
-| Survival skills | `core-survival` v1.0.0 — US Army ATP 3-50.21 (2018), 559 chunks, 1.24 MB | **New.** |
-| Per-state flora & fauna | — | **Not started.** US-01 and the Figure 2 example cannot be answered. |
+| First aid | `core-firstaid` v1.0.0 — WHO BEC 2018, 667 chunks | 1.1 MB |
+| First aid (military) | `core-firstaid-army` v1.0.0 — US Army ATP 4-02.11 (2026), 406 chunks | 0.90 MB |
+| Survival skills | `core-survival` v1.0.0 — US Army ATP 3-50.21 (2018), 559 chunks | 1.24 MB |
+| Flora & fauna, California | `state-CA-flora-fauna` v1.0.0 — USFS FEIS, 531 species, 5,773 chunks | 9.64 MB |
+| Flora & fauna, Oregon | `state-OR-flora-fauna` v1.0.0 — USFS FEIS, 470 species, 5,124 chunks | 8.58 MB |
 
-All three packs share one ONNX encoder and calibrated `cosineFloor` (0.7492), and all
-pass `verifyEmbedderParity` in the harness (cos 1.0000).
+**All three corpus types now exist, for two pilot states.** All five packs share one
+ONNX encoder and calibrated `cosineFloor` (0.7492), and all pass `verifyEmbedderParity`
+on desktop and on the phone (cos 1.0000).
+
+Storage (R-02): the global packs total 3.2 MB, a state pack is roughly 9 MB. Fifty states
+would be ~450 MB, which is the proposal's own fallback: let the user pick which states to
+download.
 
 ## Sources
 
-**Survival — ATP 3-50.21, *Survival* (September 2018).** `docs/licensing.md` planned
-on FM 21-76 (1992), which was superseded by FM 3-05.70 (2002) and then by this. Same
-public-domain status, 26 years newer.
+**Survival — ATP 3-50.21, *Survival* (September 2018).** `docs/licensing.md` had planned
+on FM 21-76 (1992). That manual was superseded by FM 3-05.70 (2002), which was in turn
+superseded by this one. Same public-domain status, 26 years newer.
 
 **First aid — ATP 4-02.11, *Casualty Response, Tactical Combat Casualty Care, and First
-Aid* (March 2026).** The proposal names "a USA military first aid knowledge corpus".
-This is the Army's current first-aid manual for nonmedical personnel. It supersedes
-TC 4-02.1 (2016), which superseded FM 4-25.11 (2002). FM 4-25.11 is closer to lay first
-aid, but it predates current tourniquet guidance.
+Aid* (March 2026).** The proposal names "a USA military first aid knowledge corpus". This
+is the Army's current first-aid manual for nonmedical personnel. It supersedes TC 4-02.1
+(2016), which superseded FM 4-25.11 (2002).
 
 Both manuals are "approved for public release; distribution is unlimited" and have a
-real text layer: pdfjs suspect ratio 0.0000, no OCR.
+real text layer.
+
+**Flora & fauna — USFS Fire Effects Information System (FEIS).** 1,092 peer-reviewed
+species reviews, public domain. `docs/licensing.md` planned to use USDA PLANTS and USFWS
+as the per-state filter and FEIS as the text. That turned out unnecessary: each FEIS
+review carries its own structured state list ("United States: CA OR WA").
 
 ## Building the packs
 
-### Cleaning needed corpus-specific rules
+### Army manuals: cleaning needed corpus-specific rules
 
-The generic frequency heuristic removed **zero** boilerplate lines from ATP 3-50.21
-and two from ATP 4-02.11. `CleanRules` (`tools/ingest/src/clean.ts`) makes the rules
-explicit per corpus rather than loosening the heuristic, which would silently change
-`core-firstaid` on its next rebuild.
+The generic frequency heuristic removed zero boilerplate lines from ATP 3-50.21 and two
+from ATP 4-02.11. Footers carry the page label, so no two repeat exactly. One footer date
+is set in a font pdfjs cannot map (it arrives as `6HSWHPEHU` for "September"). Running
+headers alternate with chapter titles. Bullets extract as `z` or `▪`. Word-export
+bookmark ids are fused onto headings (`208BOVERVIEW OF…`).
 
-- **Footers carry the page label.** `4-10 ATP 3-50.21 September 2018` and `23 March 2026
-  ATP 4-02.11 139` never repeat exactly. With digits normalized they sit on 171 of 206
-  and 221 of 254 pages.
-- **Unmapped font.** ATP 3-50.21's footer date arrives Caesar-shifted with control
-  characters (`6HSWHPEHU` for "September").
-- **Running headers alternate** between `Chapter 4` and the chapter title. A title like
-  `Food` is on too few pages to count as boilerplate.
-- **Bullets.** ATP 3-50.21 uses a Wingdings glyph that extracts as a literal `z ` (827
-  times). ATP 4-02.11 uses `▪`.
-- **Bookmark ids.** ATP 4-02.11 carries Word-export bookmark ids fused onto headings
-  (`208BOVERVIEW OF MASSIVE BLEEDING CONTROL`), which defeated heading detection.
+`CleanRules` (`tools/ingest/src/clean.ts`) makes these explicit per corpus rather than
+loosening the heuristic, which would silently change `core-firstaid` on its next rebuild.
+`WARNING` / `CAUTION` are no longer treated as section headings: 16 survival chunks had
+been cited as coming from section "CAUTION".
 
-A scan of all survival chunks after cleaning finds 0 footers, 0 garbled dates, 0 chapter
-header lines, 0 stray bullets and 0 control characters.
-
-**`WARNING` / `CAUTION` are no longer section headings** (`tools/ingest/src/chunk.ts`).
-They are uppercase, so the heuristic took them as headings, and 16 survival chunks
-were cited as coming from section "CAUTION". Citations are user-visible (US-03). This
-affects `core-firstaid` too if it is rebuilt; it was not rebuilt here.
-
-### What was kept from ATP 4-02.11
-
-PDF pages 37–39, 57–106, 111–164 and 173–197, which cover:
-- casualty carries
+**ATP 4-02.11 keeps only chapters a civilian can act on:**
+- carries
 - bleeding, airway, breathing and shock
 - hypothermia
 - eye and head injuries, burns
-- fractures and splinting, bandaging
+- fractures and bandaging
 - bites and stings, heat and cold injuries
 
-Excluded chapters:
+Unit operations, TCCC doctrine, combat medication packs, evacuation, sickle cell trait,
+CBRN, combat stress and appendices are excluded.
 
-| Chapter | Why excluded |
-|---|---|
-| Ch 1 — unit casualty-response operations | Military procedure |
-| Ch 3 — TCCC doctrine | Military procedure |
-| Ch 9 — combat wound medication packs | Drugs issued to soldiers |
-| Ch 15 — evacuation and DD Form 1380 | Military procedure |
-| Ch 18 — sickle cell trait screening | Irrelevant to a hiker |
-| Ch 19 — chemical and nerve agents | Irrelevant to a hiker |
-| Ch 20 — combat stress | Military context |
-| Appendices, front and back matter | Kit inventories and apparatus |
-
-**Invasive procedures are dropped by content** (`dropChunks`): 12 chunks. A hiker must
-not be walked through a needle chest decompression by a 0.6B model.
-
-The first version matched any *mention* of a nasopharyngeal airway and dropped 19
-chunks, including the recovery position (p.79) and CPR (p.94), which share chunks
-with a passing reference. The rules now match *instructions*:
-- any needle decompression
-- inserting, sizing or lubricating an NPA
-- cricothyrotomy, intraosseous access, autoinjectors
-
-The one CPR chunk still dropped deserves the drop. It advises bilateral needle
+**Twelve chunks that teach invasive procedures are dropped:** needle chest decompression,
+airway-tube insertion, cricothyrotomy. The first rule matched mentions and dropped 19,
+including CPR and the recovery position. The one CPR chunk still dropped advises needle
 decompression *instead of* CPR, which is wrong for a civilian cardiac arrest.
 
-Still present and worth knowing: references to the Combat Wound Medication Pack
-(e.g. a splinting step "administering the CWMP"). A hiker does not carry one, so
-this is useless rather than dangerous. It was left rather than cutting steps out of
-procedures.
+**ATP 3-50.21 Chapter 2 (Survival Medicine) is tagged medical.** Its answers carry the
+disclaimer, and the survival pack also routes for first aid, because that chapter holds
+the minor-wound and sprain care the first-aid manuals lack. It is written for isolated
+soldiers facing delayed evacuation; whether it belongs in a hiker app is an open product
+decision.
 
-### Survival medicine
+### FEIS: fetch once, filter by state, keep the sections a hiker needs
 
-ATP 3-50.21 Chapter 2 (PDF pp. 19–54, 130 chunks) is chunk-domain
-`first-aid-physical`, so answers drawn from it carry the medical disclaimer. The pack
-routes as both `survival` and `first-aid-physical`, because that chapter is where
-minor-wound cleaning ("Rinse (DO NOT SCRUB)") and sprained-ankle care (RICE) live.
-Neither first-aid manual covers those well.
+`tools/ingest/src/feis-fetch.ts` downloads the review index and every review page once,
+into `corpora/feis/` (not committed), at a polite rate. `feis-pack.ts <states>` builds
+packs from that cache without touching the network.
 
-It is written for isolated soldiers facing delayed evacuation, so parts of it are
-improvised care (poultices, leaving wounds open). Whether it belongs in a hiker-facing
-app is an open product decision.
+**The state parser failed silently at first.** The heading is
+`<h3><strong>States and Provinces</strong></h3>`, and a regex anchored to the heading tag
+found nothing for 420 reviews. That left 641 of 1,092 without a state list and California
+at 264 species. Matching on stripped text, and accepting older reviews' "States" heading,
+brings it to **147 without a list, California 531, Oregon 470**. The 147 give distribution
+only as prose ("New York, Virginia, and Colorado"); they are left out of every state pack
+rather than guessed from place names. `tools/ingest/test/feis.test.ts` pins both formats.
+
+**FEIS is a fire-ecology database**, so most of each review answers the wrong question.
+Kept for plants:
+- general distribution
+- site characteristics
+- botanical description
+- seasonal development
+- importance to wildlife and palatability
+- other uses
+- other management considerations, which carries the "Safety/Medical" notes (urushiol)
+
+Kept for animals:
+- general distribution
+- biological characteristics
+- predators
+- diet
+- preferred habitat
+- cover requirements
+
+Everything else is dropped: fire effects, regeneration strategy, plant-community tables,
+appendices, references. Inline citations (`[29,30,32]`) are stripped.
+
+**Every chunk names its species.** Each opens with "Pacific poison-oak (Toxicodendron
+diversilobum) — Botanical Description". A mid-review chunk without the name could not be
+retrieved by it. Plant and animal reviews are told apart by a heading every plant review
+has, and chunks carry that domain.
+
+**Coverage is uneven.** California's 531 species are 452 plants and 79 animals, mostly
+birds and game mammals. FEIS has nothing on treating a poison-oak rash or on bear-encounter
+safety; those have to come from the first-aid and survival packs.
 
 ## Two retrieval bugs that multiple packs exposed
 
-**1. One pack could starve the others at Stage 1.** Both stores searched packs in turn
-and truncated the combined hit list at `candidateLimit`. With ATP 4-02.11 loaded first,
-a common query filled all 50 slots from it alone, and WHO BEC chunks could never reach
-Stage 2. `retrieve()` now queries each pack separately, so the limit is a per-pack
-quota. The fix lives in rag-core, so neither the Node nor the device store changed.
+1. **One pack could starve the others at Stage 1.** The stores searched packs in turn and
+   truncated the combined list, so a large pack listed first filled every candidate slot.
+   `retrieve()` now queries each pack separately.
+2. **Routing was by pack only.** Letting core-survival route for first aid exposed its
+   snare and woodcraft chunks to first-aid questions ("I cut myself on a branch" ranked a
+   bird snare first). `retrieve()` now scores only chunks whose own domain was routed.
 
-**2. Routing was by pack only.** Letting core-survival route for first aid, so that its
-medical chapter could be searched, meant every other survival chunk was searched for
-first-aid questions too. "I cut myself on a branch" then ranked a snare that "will cut
-off the bird's feet" first (U=0.427). `retrieve()` now takes the routed domains and
-scores only chunks whose own domain matches.
-
-Both have regression tests in `packages/rag-core/test/pipeline.test.ts`.
+Both have regression tests.
 
 ## A-KR1 verification
 
 `tools/eval/src/coverage.ts` runs the proposal's acceptance-criteria wording through
-routing and retrieval over every pack under `packs/`, without generation. A probe
-passes if the top chunk's **own domain** is the expected one. That judges "proper
-material" rather than which pack shipped it. A question no pack covers must
-**decline**.
+routing and retrieval over every pack under `packs/`, without generation. A probe passes
+if the top chunk's own domain is expected. Where a question should decline (no location
+given), declining is the pass.
 
-| Story | Question | Expected | Outcome | Top citation | |
-|---|---|---|---|---|:---:|
-| US-02-AC1 | I cut myself on a branch, what should I do? | first aid | abstain | — | ❌ |
-| US-08-AC1 | I have no idea how to start a fire! I have matches, a knife and some dry grass. | survival | answer | ATP 3-50.21 p.120 — TINDER | ✅ |
-| US-08-AC2 | I have a cooler with some sandwiches and breakfast sausages in it, can animals get in? | (decline) | abstain | — | ✅ |
-| US-12-AC1 | How do I build a shelter? | survival | answer | ATP 3-50.21 p.137 — CONSTRUCTION METHODS | ✅ |
-| US-01-AC1 | What plants and animals are near me? | (decline) | abstain | — | ✅ |
-| Figure 2 | What does poison ivy look like, and how do I treat the rash? | (decline) | abstain | — | ✅ |
-| Problem statement | My friend badly twisted their ankle on the trail, what should we do? | first aid | abstain | — | ❌ |
-| survival | How do I make water from a stream safe to drink? | survival | answer | ATP 3-50.21 p.66 — PREPARING WATER | ✅ |
-| survival | How can I find north without a compass? | survival | answer | ATP 3-50.21 p.170 — NAVIGATION FUNDAMENTALS | ✅ |
-| survival | How do I tie a knot to secure a tarp to a tree? | survival | answer | ATP 3-50.21 p.205 — HITCHES | ✅ |
-| first aid | How do I control severe external bleeding? | first aid | answer | ATP 4-02.11 p.61 — TIER 1 SKILLS FOR MASSIVE BLEEDING | ✅ |
-| first aid | Someone is unconscious but breathing, what position do I put them in? | first aid | answer | ATP 3-50.21 p.23 — HYPOXIA | ✅ |
-| first aid | A rattlesnake bit my leg, what do I do? | first aid | answer | ATP 4-02.11 p.176 — SNAKE BITES | ✅ |
-| first aid | What are the signs of heat exhaustion and how do I treat it? | first aid | answer | ATP 4-02.11 p.188 — HEAT EXHAUSTION | ✅ |
-| first aid | How do I splint a broken arm with sticks? | first aid | answer | ATP 4-02.11 p.144 — IMMOBILIZING A FRACTURE | ✅ |
+| Story | Question | State | Expected | Outcome | Top citation | |
+|---|---|---|---|---|---|:---:|
+| US-02-AC1 | I cut myself on a branch, what should I do? | — | first aid | abstain | — | ❌ |
+| US-08-AC1 | I have no idea how to start a fire! I have matches, a knife and some dry grass. | — | survival | answer | ATP 3-50.21 p.120 — TINDER | ✅ |
+| US-08-AC2 | I have a cooler with some sandwiches and breakfast sausages in it, can animals get in? | CA | wildlife / survival | abstain | — | ❌ |
+| US-12-AC1 | How do I build a shelter? | — | survival | answer | ATP 3-50.21 p.137 — CONSTRUCTION METHODS | ✅ |
+| US-01-AC1 | What plants and animals are near me? | OR | plants / wildlife | answer | FEIS — winterfat > Importance to Wildlife | ✅ |
+| US-01 | Are there mountain lions around here, and what do they eat? | CA | wildlife | answer | FEIS — mountain lion > Predators | ✅ |
+| Figure 2 | What does poison oak look like, and how do I treat the rash? | CA | plants | answer | FEIS — Pacific poison-oak > General Distribution | ✅ |
+| no location | What does poison oak look like? | — | (decline) | needs-location | — | ✅ |
+| Problem statement | My friend badly twisted their ankle on the trail, what should we do? | — | first aid | abstain | — | ❌ |
+| survival | How do I make water from a stream safe to drink? | — | survival | answer | ATP 3-50.21 p.66 — PREPARING WATER | ✅ |
+| survival | How can I find north without a compass? | — | survival | answer | ATP 3-50.21 p.170 — NAVIGATION FUNDAMENTALS | ✅ |
+| survival | How do I tie a knot to secure a tarp to a tree? | — | survival | answer | ATP 3-50.21 p.205 — HITCHES | ✅ |
+| first aid | How do I control severe external bleeding? | — | first aid | answer | ATP 4-02.11 p.61 — TIER 1 SKILLS FOR MASSIVE BLEEDING | ✅ |
+| first aid | Someone is unconscious but breathing, what position do I put them in? | — | first aid | answer | ATP 3-50.21 p.23 — HYPOXIA | ✅ |
+| first aid | A rattlesnake bit my leg, what do I do? | — | first aid | answer | ATP 4-02.11 p.176 — SNAKE BITES | ✅ |
+| first aid | What are the signs of heat exhaustion and how do I treat it? | — | first aid | answer | ATP 4-02.11 p.188 — HEAT EXHAUSTION | ✅ |
+| first aid | How do I splint a broken arm with sticks? | — | first aid | answer | ATP 4-02.11 p.144 — IMMOBILIZING A FRACTURE | ✅ |
 
-**13/15.** Read it with three caveats:
+**14/17.** Several passes are weaker than the checkmark:
 
-- **Three passes are correct refusals, not answers.** US-01, US-08-AC2 and Figure 2
-  need the flora & fauna packs.
-- **"Unconscious" passes on domain, but the top chunk is the jaw-thrust passage.** The
-  recovery position, which is the answer, ranks second and third. That is an A-KR2
-  answer-quality issue, not a routing one.
-- **WHO BEC is never the top citation.** Every first-aid question is now led by ATP
-  4-02.11 or survival Ch 2. That may be fine (they are written for responders rather than
-  clinicians), but it means WHO BEC contributes little once the Army manual is loaded.
+- **US-01 passes on domain only.** "What plants and animals are near me?" is a list
+  question; the top chunk is winterfat's value as livestock forage. RAG cannot enumerate
+  a state's species. Answering US-01 needs a structured species list per state, not
+  retrieval.
+- **Figure 2 gets identification but not treatment.** "Rash" routes nowhere, so the
+  question reaches only the plants pack, and FEIS has no rash care.
+- **"Unconscious" ranks jaw-thrust above the recovery position**, which is the answer.
 
-### Lexicon fixes found by these probes
+### The three failures
 
-`packages/rag-core/src/lexicon.ts`, each with a test:
+**Cut and twisted ankle are scoring problems, not missing content.** The right passages
+exist but score below the 0.35 abstention gate:
 
-- **Lay injury words.** Hikers say "cut" and "twisted ankle", not "laceration". Without
-  them US-02 matched no domain and fell back to every pack.
-- **Plural matching.** Only the raw token was matched, so "animals" never signalled
-  wildlife (US-08-AC2's wording). "snakes" didn't either, since `stem()` maps it to
-  "snak".
-- **Bite/sting/venom are first aid too.** Listed only under wildlife, "a rattlesnake bit
-  my leg" routed to wildlife alone and reached no first-aid pack.
-
-## The two failures are not fixable by adding content
-
-A diagnostic (Stage-1 position and Stage-2 scores of the passages that *should*
-answer) shows both abstentions are scoring problems:
-
-| Question | Right passage | Stage 1 | U | Would win if gate lowered |
+| Question | Right passage | Stage 1 | U | Would win if the gate were lowered |
 |---|---|---|---|---|
-| cut on a branch | survival p.22 "minor cuts and scrapes" | position 90 of 119, **past the 50 limit** | 0.307 | "PREPARE TO LIFT" litter command (0.345) |
+| cut on a branch | survival p.22 "minor cuts and scrapes" | position 90 of 119, past the limit | 0.307 | "PREPARE TO LIFT" litter command (0.345) |
 | twisted ankle | survival p.45 RICE | position 12 of 48 | 0.288 | splint jewelry removal (0.332) |
 | twisted ankle | army p.195 "twisted ankles or muscle strains" | position 1 of 22 | 0.322 | ″ |
 
-- **The gate is right to fire.** Lowering `DEFAULT_ABSTAIN_THRESHOLD` (0.35) would make
-  both questions answer, from the wrong chunk.
-- **Embedding the full question** instead of the joined keywords barely moves these
-  scores (0.307 → 0.319 for p.22).
-- **Lay phrasing dilutes S_lex.** "friend", "badly" and "trail" count against every chunk.
+Lowering the gate would answer both from the wrong chunk. What would move them:
+1. Calibrate the gate against labelled answerable and unanswerable questions (it has only
+   ever been set by hand).
+2. Apply the domain filter inside Stage 1 rather than after it.
+3. Down-weight lay filler words in S_lex.
 
-What would actually move them, in order of expected value:
+**The cooler question regressed from "correct decline" to "abstain".** Before the
+flora-fauna packs existed, declining was right. Now "animals" routes to the California
+wildlife pack, whose nearest chunk is chickadees caching food (0.332). The useful answer,
+food storage at camp, is survival material that "animals" does not route to.
 
-1. **Calibrate the gate against labelled answerable/unanswerable questions.**
-   `pipeline.ts` has always said to tune τ against abstention precision and recall. It
-   has only ever been set by hand against WHO BEC.
-2. **Apply the domain filter inside Stage 1 (the FTS query), not after it.** The p.22
-   minor-cuts chunk is excluded before scoring because "cut" matches ~90 snare,
-   butchering and woodcraft chunks first. This needs a `domains` argument on
-   `PackStore.searchLexical`, so the device store changes too.
-3. **Weight stopword-like lay filler down in S_lex.**
+## Lexicon fixes found by these probes
+
+`packages/rag-core/src/lexicon.ts`, each with a test:
+- **Lay injury words.** Added "cut", "twisted", "ankle" and similar.
+- **Plural matching.** "animals" now matches "animal"; "snakes", which `stem()` turns into "snak", now matches "snake".
+- **Bites are first aid too.** Bite/sting/venom now route to first aid as well as wildlife, where they had been listed alone.
+
+## On the phone
+
+Parity, CPU-only generation and the GPU-offload finding are in `docs/results-m3.md`.
+The device harness (`apps/mobile/App.tsx`) loaded four packs (core-firstaid,
+core-firstaid-army, core-survival and state-CA-flora-fauna; 7,405 chunks in 218 ms) and
+ran one question per domain:
+
+| Question | Routed to | Top chunk | Retrieve | TTFT | Total |
+|---|---|---|---|---|---|
+| How do I control severe external bleeding? | 3 first-aid packs | army p.61 | 94 ms | 2.9 s | **5.2 s** |
+| How do I build a shelter? | survival | survival p.137 | 83 ms | 3.3 s | 13.2 s |
+| A rattlesnake bit my leg, what do I do? | 3 first-aid packs | army p.176 | 77 ms | 3.6 s | **7.6 s** |
+| What does poison oak look like? (CA) | CA flora-fauna | poison-oak | 83 ms | 2.5 s | **9.5 s** |
+
+**A-KR3 (< 10 s):** 3 of 4 answers are under 10 s. Shelter runs over because its answer is
+long (811 characters); retrieval is never the cost. Four questions is not a timed series.
+
+**A-KR2 is now the real problem.** The pipeline is correct end to end, and the answers
+show what that does and does not buy:
+- **Bleeding** invents "if bleeding continues after 30 minutes, apply a dressing". That is
+  dangerous, and in no source.
+- **Snakebite** says to wash the area and seek care, calls a bite a "sting", and omits
+  immobilization.
+- **Poison oak** copies the chunk header ("— General Distribution Also called:") into the
+  answer. The header format should read as a sentence.
+
+Memory with CPU-only generation: 1.72 GB PSS.
 
 ## Changes that affect earlier numbers
 
-- `SYSTEM_PREFIX` now reads "field first-aid **and wilderness survival** assistant".
-  M2's MCQ accuracy was measured under the old prefix.
-- The lexicon additions, per-pack Stage 1 and chunk-domain filtering all change what the
-  MCQ eval would retrieve. The M2 table describes the old configuration; it was not re-run
-  here.
+- `SYSTEM_PREFIX` now covers wilderness survival as well as first aid.
+- Retrieval changes: per-pack Stage 1, chunk-domain filtering and lexicon additions.
+
+M2's MCQ table describes the old configuration and was not re-run.
 
 ## Not done
 
-- **Per-state flora & fauna** — the largest remaining A-KR1 gap. `docs/licensing.md`
-  already plans it: USDA PLANTS / USFWS as the per-state filter, FEIS Species Reviews as
-  the text. It also flags FEIS coverage as the highest-risk assumption.
-- **The app loads one pack.** `App.tsx` points `DevicePackStore` at a single `pack/`
-  directory, so the device has neither new pack.
-- **Device parity is unchanged.** The `onnxruntime-react-native` autolinking patch
-  (`docs/results-m3.md`) is still unverified on hardware; no Android device or `adb` was
-  available.
+- **A-KR2 grading harness.** The proposal verifies accuracy by having Claude Opus 5 grade
+  Fred's free-form answers against an answer sheet; the current eval is multiple choice.
+  The same labelled set would calibrate the abstention gate.
+- **US-01 as a list.** A per-state species index answered without retrieval.
+- **Routing fixes.** Food storage should reach survival from wildlife words; rash should
+  reach first aid.
+- **Chunk header** phrasing for FEIS chunks.
+- **Oregon on device.** Only the California pack has been run on the phone.
+- **App.** Packs are copied in by hand and the state is hard-coded. There is no pack
+  download or state selection yet.

@@ -18,7 +18,8 @@ export interface SourcePage {
 export interface DraftChunk {
   readonly text: string;
   readonly section: string;
-  readonly page: number;
+  /** Null for sources with no pages, such as FEIS web reviews. */
+  readonly page: number | null;
   readonly domain: DomainTag;
   readonly blockKind: BlockKind;
 }

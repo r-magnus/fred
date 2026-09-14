@@ -579,5 +579,7 @@ npm run typecheck
 - [`docs/results-alpha.md`](docs/results-alpha.md) — corpora against the proposal's A-KR1
 
 Build packs with `node tools/ingest/src/index.ts <who-bec|atp-3-50-21|atp-4-02-11>`
-(source PDFs go under `corpora/`, which is not committed) and check corpus coverage
-with `node tools/eval/src/coverage.ts`.
+(source PDFs go under `corpora/`, which is not committed). Per-state plant and wildlife
+packs come from USFS FEIS: `node tools/ingest/src/feis-fetch.ts` once, then
+`node tools/ingest/src/feis-pack.ts CA OR`. Check corpus coverage with
+`node tools/eval/src/coverage.ts`.

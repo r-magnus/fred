@@ -394,3 +394,111 @@ Android device was attached to this session, so the APK has not been rebuilt and
 If all three hold, options 1–3 above are moot: no executorch migration, no
 on-device indexing pass, no reproducing llama.rn's embedder. The committed design
 was correct and was blocked by a packaging bug.
+
+---
+
+## Verified on hardware: parity holds on device
+
+All three items above now hold on the Nothing Phone (3), 2026-09-13, same
+Qwen3-0.6B-Q4_K_M and `core-firstaid` pack:
+
+```
+[fred] load pack: 40ms (667 chunks)
+[fred] load models: 4784ms (SLM + embedder resident)
+[fred] embedder parity: 35ms (OK cos=1.0000)
+[fred] retrieve: 80ms (answer)
+[fred] cand U=0.630 … p.169
+[fred] cand U=0.629 … p.170
+[fred] cand U=0.610 … p.27
+[fred] TTFT: 2035ms
+[fred] generate total: 11988ms (4 citations)
+```
+
+`embedder parity` went from `MISMATCH cos=0.8313` to `OK cos=1.0000`, and the
+device's top chunks and fused scores for the bleeding query now equal the desktop
+harness's to three decimals. **Harness retrieval numbers now describe the device.**
+
+Memory with the ONNX runtime added: **967 MB PSS / 1.09 GB RSS**, up from 860 MB /
+983 MB, so ONNX costs roughly 107 MB.
+
+Getting there took two more fixes, neither of which the autolinker check could see:
+
+1. **The Android build cached stale autolinking output.** `build/generated/autolinking/`
+   is regenerated only when `package.json` or the lockfile changes; adding
+   `react-native.config.js` inside `node_modules` changes neither. The first rebuild
+   after the patch shipped `libonnxruntime.so` and `libonnxruntimejsi.so` yet
+   generated a `PackageList.java` without `OnnxruntimePackage`, and failed with the
+   identical `install of null`. The CLI autolinker reported the package correctly the
+   whole time, so the one-command check above was necessary but not sufficient.
+   `scripts/patch-onnx-autolink.mjs` now deletes a cache that predates it.
+2. **The vocabulary read had never run.** `new File(path).textSync()` was given a bare
+   path and expo-file-system rejected it (`URI is not absolute`). It was masked
+   because the ONNX import had always crashed first. `device-pack.ts` now passes a
+   `file://` URI.
+
+A third problem cost a relaunch cycle without being a bug in this code: Metro kept
+serving the pre-fix `device-pack.ts` for the device's lazy Hermes bundle URL while
+serving the fixed file for a plain bundle request. `expo start --clear` resolved it.
+When a JS change seems not to take effect on device, fetch the device's exact bundle
+URL and grep it before debugging further. (The cause here turned out to be starting
+Metro with `CI=1`, which disables file watching.)
+
+## Finding: on-device garbage was GPU offload, not the model
+
+With retrieval fixed, the device answer to the bleeding query was still unusable:
+
+> `(':')[1] | - [1] Please check if you have a source that includes the information. If not, please check your textbook or other sources. | - [2] Please check…`
+
+The M3 commit that fixed the chat template had called this "what a 0.6B model does".
+It is not. Isolating it layer by layer, same model file and same retrieved prompt:
+
+| Path | Output |
+|---|---|
+| node-llama-cpp, desktop, thinking auto | coherent (16.7 s) |
+| node-llama-cpp, desktop, thinking off, penalty 1.15, greedy (device settings) | coherent (4.9 s) |
+| **native llama.cpp CLI on this phone**, same settings | **coherent**, word-for-word the desktop answer |
+| llama.rn, messages + jinja | garbage |
+| llama.rn, pre-rendered prompt bypassing jinja | garbage |
+
+The prompt llama.rn renders is **byte-identical** to the one the CLI answers
+correctly (4,117 chars, compared exactly), so templating and prompt construction are
+ruled out. So is Qwen3 thinking: disabling it on desktop costs nothing in coherence and
+saves 3–4× latency.
+
+The difference is the backend. llama.rn's Android build ships an OpenCL + Hexagon
+variant, and llama.cpp defaults `n_gpu_layers` to `-1` ("auto"), so the context
+initialized with `gpu: true, devices: ["GPUOpenCL", "HTP0"]` without being asked to.
+The CLI binary on the phone is CPU-only.
+
+| llama.rn context | TTFT | Total | Output |
+|---|---|---|---|
+| default (auto GPU offload) | 1,963 ms | 12,133 ms | garbage |
+| **`n_gpu_layers: 0`** | 3,268 ms | **4,786 ms** | coherent: pressure, elevate, tourniquet |
+| `n_gpu_layers: 0`, `flash_attn_type: 'off'` | 6,590 ms | 8,297 ms | coherent |
+
+CPU-only is correct **and** faster end to end: GPU offload won on prefill but its
+decode ran to the token cap producing noise. `device-pack.ts` now sets
+`n_gpu_layers: 0`. Flash attention stays at llama.cpp's `auto`; forcing it off only
+made it slower.
+
+Consequences:
+
+- **A-KR3 (< 10 s per response) is met on device for this query**: 4.8 s end to end,
+  after 4.7 s one-time model load. One query is not a measurement; it needs a timed
+  series.
+- **The M3 KV-quantization finding is confounded and should be retested.** The "word
+  salad" with `q8_0` KV cache + flash attention was produced on this same auto-GPU
+  context, so it may be the OpenCL/Hexagon path rather than KV quantization.
+- **Earlier "the model produces meta-commentary" conclusions about device answer
+  quality are withdrawn.** They were measuring the GPU backend.
+- **CPU-only costs memory.** With the diagnostic code removed and `n_gpu_layers: 0` as
+  the default, the bleeding query ran 5.2 s end to end (TTFT 2.9 s, model load 1.2 s
+  warm), but the app now sits at **1.72 GB PSS / 1.84 GB RSS**, against 967 MB with GPU
+  offload. The likely cause is llama.cpp repacking Q4_K weights into CPU-optimized
+  buffers (anonymous memory) instead of serving them from the mmap'd file; that is
+  unverified. Fine on this 12 GB phone, but it matters for US-11 (weaker devices).
+  `no_extra_bufts: true` disables repacking and is the obvious experiment: less memory,
+  probably slower decode.
+- The answer includes "Elevate the limb above the heart", which is not current
+  bleeding-control guidance and comes from the model rather than the retrieved WHO
+  text. That is an A-KR2 quality issue on a correct pipeline, not a device issue.

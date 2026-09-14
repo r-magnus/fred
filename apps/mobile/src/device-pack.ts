@@ -197,9 +197,15 @@ class TokenStream {
   }
 }
 
+export type DeviceBackend = InferenceBackend & {
+  release(): Promise<void>;
+  /** What llama.rn actually initialized. Logged because GPU offload is silent. */
+  readonly genInfo: Readonly<Record<string, unknown>>;
+};
+
 export async function createDeviceBackend(
   opts: DeviceBackendOptions,
-): Promise<InferenceBackend & { release(): Promise<void> }> {
+): Promise<DeviceBackend> {
   // llama.rn defaults to 4 threads. The Snapdragon 8s Gen 4 has 8 cores, and M0
   // measured its prefill at 8 threads, so leaving the default in place both
   // halves throughput and makes on-device numbers incomparable to the baseline.
@@ -213,21 +219,32 @@ export async function createDeviceBackend(
     n_ctx: N_CTX,
     n_batch: 512,
     n_threads: N_THREADS,
-    // flash_attn and cache_type_k/v (PocketRAG §3.4.3) are both OFF.
-    //
-    // Enabled together they produced word salad ("URAIN. PRORPURINATION.").
-    // flash_attn alone produced coherent text that drifted into another
-    // language. Neither result is trustworthy yet: on-device retrieval parity is
-    // currently broken, so the model is being handed irrelevant context and any
-    // conclusion about generation settings is confounded. Re-isolate these only
-    // after verifyEmbedderParity passes.
+    // CPU only. llama.cpp defaults n_gpu_layers to auto, and this llama.rn build
+    // ships OpenCL and Hexagon backends, so the context silently offloaded to
+    // GPUOpenCL + HTP0 and produced fluent nonsense ("Please check your textbook")
+    // from a prompt byte-identical to one CPU llama.cpp answers correctly on the
+    // same phone. CPU-only was also faster end to end: 4.8 s vs 12.1 s for the
+    // bleeding query (docs/results-m3.md).
+    n_gpu_layers: 0,
+    // flash_attn is left at llama.cpp's default (auto). Forcing it off was
+    // coherent but slower (8.3 s). KV cache quantization (PocketRAG §3.4.3) is
+    // not set: its "word salad" result in M3 was measured on the GPU-offloaded
+    // context and needs retesting on CPU before it means anything.
   });
 
   const embedSession = await ort.InferenceSession.create(opts.embedModelPath);
-  const vocabText = new File(opts.embedVocabPath).textSync();
+  // expo-file-system's File wants a URI. Given the bare path that ONNX Runtime
+  // and op-sqlite need, textSync is "rejected" rather than failing to find the
+  // file. Never reached until the ONNX module actually registered.
+  const vocabUri = opts.embedVocabPath.startsWith('file://') ? opts.embedVocabPath : `file://${opts.embedVocabPath}`;
+  const vocabText = new File(vocabUri).textSync();
   const tokenizer = buildVocab(vocabText);
 
-  return {
+  const info = gen as unknown as Record<string, unknown>;
+  // "gpu: true" here means a GPU device exists, not that layers are on it; the
+  // devices list is what would reveal an offload if n_gpu_layers regressed.
+  const backend: DeviceBackend = {
+    genInfo: { gpu: info.gpu, devices: info.devices, reasonNoGPU: info.reasonNoGPU, androidLib: info.androidLib },
     embeddingSpec: () => opts.spec,
     embed: (text: string) => embedWithOnnx(embedSession, tokenizer, text),
     async countTokens(texts: readonly string[]): Promise<number[]> {
@@ -279,4 +296,5 @@ export async function createDeviceBackend(
       await embedSession.release();
     },
   };
+  return backend;
 }

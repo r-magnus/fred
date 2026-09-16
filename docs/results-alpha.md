@@ -7,8 +7,8 @@ accounted for: First Aid · Per-state flora & fauna · Survival skills"*, verifi
 | Corpus | Pack | Size |
 |---|---|---|
 | First aid | `core-firstaid` v1.0.0 — WHO BEC 2018, 667 chunks | 1.1 MB |
-| First aid (military) | `core-firstaid-army` v1.0.0 — US Army ATP 4-02.11 (2026), 410 chunks | 0.90 MB |
-| Survival skills | `core-survival` v1.0.0 — US Army ATP 3-50.21 (2018), 563 chunks | 1.25 MB |
+| First aid (military) | `core-firstaid-army` v1.1.0 — US Army ATP 4-02.11 (2026), 410 chunks | 0.90 MB |
+| Survival skills | `core-survival` v1.1.0 — US Army ATP 3-50.21 (2018), 563 chunks | 1.25 MB |
 | Flora & fauna, California | `state-CA-flora-fauna` v1.0.0 — USFS FEIS, 531 species, 5,773 chunks | 9.64 MB |
 | Flora & fauna, Oregon | `state-OR-flora-fauna` v1.0.0 — USFS FEIS, 470 species, 5,124 chunks | 8.58 MB |
 
@@ -355,6 +355,27 @@ lists — the defect is specific to doctrinal manuals. After rebuilding
 `core-survival` (559 to 563 chunks) and `core-firstaid-army` (406 to 410), the
 survey reports zero. `core-firstaid` was not rebuilt: it has no instances, and
 leaving it untouched keeps the WHO BEC numbers in `docs/results-m2.md` comparable.
+
+### The fix is only useful if you can tell which packs have it
+
+Packs are build artifacts and `packs/*` is gitignored, so merging the chunker
+change ships the fix but not the corrected packs. Both corpora were rebuilt in
+place at `v1.0.0` while this was being investigated, which made a pack containing
+the fix indistinguishable from one that does not — same id, same version, same
+`ingestVersion`, differing only in `builtAt`.
+
+That is the situation `pack-format` already legislates against: packs are
+"replaced wholesale, never patched in place". So the two rebuilt corpora are now
+**`core-survival` v1.1.0** and **`core-firstaid-army` v1.1.0**, built by
+`INGEST_VERSION` **0.2.0**. `core-firstaid` and the two FEIS packs stay at v1.0.0
+and ingest 0.1.0: they contain no inversions, and leaving them untouched keeps the
+WHO BEC numbers in `docs/results-m2.md` comparable.
+
+The version change also renames the pack directory, so a stale build cannot sit
+silently beside a corrected one — the loaders enumerate every directory under
+`packs/`, so the old ones have to be removed, which is the intended forcing
+function. Any device with packs side-loaded before this can now be identified by
+reading its manifest.
 
 ### What this says about A-KR2
 

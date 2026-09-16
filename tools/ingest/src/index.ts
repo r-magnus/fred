@@ -124,7 +124,8 @@ const CORPORA: Record<string, CorpusDef> = {
     domainForPage: (page) => (page >= 19 && page <= 54 ? 'first-aid-physical' : undefined),
     input: {
       id: 'core-survival',
-      version: '1.0.0',
+      // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
+      version: '1.1.0',
       displayName: 'Wilderness Survival',
       description: 'US Army ATP 3-50.21 Survival — water, food, fire, shelter, navigation, knots.',
       domains: ['survival', 'first-aid-physical'],
@@ -187,7 +188,8 @@ const CORPORA: Record<string, CorpusDef> = {
     ],
     input: {
       id: 'core-firstaid-army',
-      version: '1.0.0',
+      // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
+      version: '1.1.0',
       displayName: 'Field First Aid',
       description: 'US Army ATP 4-02.11 — first aid for nonmedical responders: bleeding, airway, burns, fractures, bites, heat and cold.',
       domains: ['first-aid-physical'],

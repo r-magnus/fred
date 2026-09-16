@@ -175,6 +175,37 @@ test('chunk domain, not just pack domain, decides what a query can retrieve', as
     'a snare passage must not answer a first-aid question just because its pack routes for first aid');
 });
 
+test('a question about plant food safety does not demand a location', () => {
+  // The answer is in ATP 3-50.21's edibility chapter and is not state-specific,
+  // but 'plant' routed only to the state-scoped plants domain, so the pipeline
+  // asked the user where they were before it would answer.
+  const r = route(extractKeywords('How do I know if a wild plant is safe to eat?'), PACKS, { state: null });
+  assert.ok(r.domains.includes('survival'), r.reason);
+  assert.ok(r.packIds.includes('core-survival'), `expected a global pack, got [${r.packIds.join(', ')}]`);
+});
+
+test('which species are here does not route to the survival manual', () => {
+  // The converse of the test above, and it caught a real regression: routing
+  // bare 'plant' to survival made ATP 3-50.21's PLANTS chapter outrank the FEIS
+  // species reviews for "what plants and animals are near me?". Only the eating
+  // vocabulary is shared, so a species question must not reach survival at all.
+  const r = route(extractKeywords('What plants and animals are near me?'), PACKS, { state: 'CO' });
+  assert.ok(r.packIds.includes('state-CO-wildlife'), `expected the state pack, got [${r.packIds.join(', ')}]`);
+  assert.ok(!r.domains.includes('survival'), `species questions must not route to survival: ${r.reason}`);
+});
+
+test('"mountain" alone does not route to wildlife', () => {
+  // It sent "can you write me a poem about the mountains?" to a state pack, so
+  // the pipeline asked for the user's location. 'lion'/'cougar'/'puma' cover the
+  // animal 'mountain' was listed for.
+  const poem = route(extractKeywords('Can you write me a poem about the mountains?'), PACKS, { state: null });
+  assert.ok(!poem.domains.includes('wildlife'), poem.reason);
+  assert.equal(poem.skippedStatePacks.length, 0, 'must not gate a non-geographic query on location');
+
+  const lion = route(extractKeywords('Are there mountain lions around here?'), PACKS, { state: 'CO' });
+  assert.ok(lion.domains.includes('wildlife'), lion.reason);
+});
+
 test('wrong-domain chunks do not consume the Stage-1 candidate quota', async () => {
   // US-02-AC1 in miniature. The survival pack routes for first aid, and its
   // woodcraft chunks all match "cut" lexically. With the domain filter applied

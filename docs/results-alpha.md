@@ -120,6 +120,55 @@ has, and chunks carry that domain.
 birds and game mammals. FEIS has nothing on treating a poison-oak rash or on bear-encounter
 safety; those have to come from the first-aid and survival packs.
 
+## How many states? The coverage data
+
+A-KR1's A grade is "all needed corpora are functional", and Alpha shipped two
+states. Rather than argue the scope, here is what FEIS actually supports, counted
+from the cached reviews (`corpora/feis/reviews.json`, no rebuild required):
+
+| | |
+|---|---|
+| States with any coverage | **50 of 50** |
+| Best covered | CA 531, OR 470, MT 450, UT 448, CO 443 |
+| Median | 337 species |
+| Worst covered | HI 153, FL 249, LA 249, AK 260, MS 260 |
+| Reviews with no structured state list | 147 of 1,092 (excluded from every pack) |
+
+**The two pilot states are the two best-covered in the country.** That is worth
+saying plainly in the report: CA and OR were picked first and they flatter the
+corpus. The median state has about 63% of California's species count.
+
+**Every state is viable, and the total is smaller than feared.** At the measured
+rate (CA 531 species → 9.64 MB, OR 470 → 8.58 MB), all fifty states come to roughly
+**310 MB**, against the ~450 MB that R-02 estimated. Packs are per-state downloads
+already, so no user ever holds all of it.
+
+Build cost is real but not prohibitive: Hawaii, the smallest, built in **71 seconds**
+(153 species, 1,649 chunks, 2.78 MB). Extrapolating over all fifty states' species
+instances gives roughly two hours of single-threaded batch, and `feis-pack.ts`
+already takes a state list.
+
+**So the recommendation is to build all fifty.** The cost is an overnight batch and
+310 MB of build output; the benefit is that A-KR1 stops being a scoping argument.
+
+### The real coverage weakness is animals, not states
+
+| State | Plants | Animals |
+|---|---:|---:|
+| California | 452 | 79 |
+| Oregon | 389 | 81 |
+| Hawaii | 139 | **14** |
+| Median state | ~276 | **61** |
+
+`docs/licensing.md` set the risk as "FEIS is thin for a chosen state — switch states
+rather than degrading the corpus". Measured, that risk did not land on states; it
+landed on a *domain*. FEIS is a fire-ecology database, so its animal reviews exist
+mainly where fire ecology touches wildlife habitat, and they are sparse everywhere.
+
+A Hawaii user asking "what animals are around me" is choosing from fourteen species.
+That is a limitation to state in the report, not one to discover in a demo, and it is
+not fixable by building more states — it needs a second wildlife source.
+
 ## Two retrieval bugs that multiple packs exposed
 
 1. **One pack could starve the others at Stage 1.** The stores searched packs in turn and

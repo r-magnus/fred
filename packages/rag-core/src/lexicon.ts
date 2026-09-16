@@ -45,6 +45,18 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'rescue', 'whistle', 'mirror', 'knot', 'cordage', 'rope', 'lashing',
     'forage', 'trap', 'snare', 'fishing', 'ration', 'exposure', 'windchill',
     'bivouac', 'campsite', 'stove', 'fuel', 'flint', 'tarp', 'sleeping',
+    // Eating vocabulary, shared with plants on purpose. ATP 3-50.21 chapter 4
+    // holds the edibility and avoid lists, and those chunks carry domain
+    // 'survival' — so "how do I know if a wild plant is safe to eat?" routed
+    // only to 'plants', reached nothing but state packs, and asked for a
+    // location it does not need.
+    //
+    // Note what is NOT here: bare 'plant'. Adding it put the survival manual's
+    // PLANTS chapter in competition with the state packs, and it won — "what
+    // plants and animals are near me?" started citing ATP 3-50.21 p.77 instead
+    // of a species review. Whether something is safe to eat is survival
+    // knowledge; which species grow here is not.
+    'eat', 'eating', 'edible', 'edibility', 'poisonous',
   ],
   plants: [
     'plant', 'tree', 'shrub', 'grass', 'forb', 'flower', 'leaf', 'leaves',
@@ -54,7 +66,11 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'habitat', 'bloom', 'thorn', 'sap', 'conifer', 'pine', 'aspen', 'willow',
   ],
   wildlife: [
-    'animal', 'wildlife', 'bear', 'cougar', 'mountain', 'lion', 'wolf', 'coyote',
+    // 'mountain' is deliberately absent: alone it is not a wildlife signal, and
+    // it routed "write me a poem about the mountains" to a state pack, which then
+    // asked the user for their location. 'lion', 'cougar' and 'puma' already
+    // cover the animal it was there for.
+    'animal', 'wildlife', 'bear', 'cougar', 'puma', 'lion', 'wolf', 'coyote',
     'moose', 'elk', 'deer', 'bison', 'snake', 'rattlesnake', 'venomous', 'venom',
     'spider', 'scorpion', 'tick', 'mosquito', 'insect', 'bite', 'sting', 'attack',
     'predator', 'nest', 'den', 'tracks', 'scat', 'encounter', 'aggressive',

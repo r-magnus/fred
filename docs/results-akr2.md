@@ -72,6 +72,9 @@ provably unchanged (every fused score identical to 1e-9):
 | Answers over 10 s | 39 / 52 | **1 / 52** |
 | Outcome matches | 47 / 68 | 47 / 68 |
 
+That is a controlled A/B: identical questions, identical retrieval, only the
+generation settings changed.
+
 This is the same 2.4× that `docs/results-m3.md` measured on desktop (16.7 s with
 thinking auto, 4.9 s with it off) — it had simply never been applied to the harness.
 
@@ -82,13 +85,25 @@ prevent, one layer above the embedder mismatch it already caught once.
 
 ### A-KR3, incidentally
 
-52 answered questions, mean 5.1 s, p95 8.4 s, and **51 of 52 under 10 seconds**.
-The proposal's A-KR3 verification asks for "a series of queries, timing each
-response"; `docs/results-alpha.md` could only offer four. This is a real series.
+After the routing fixes below, the current run answers 53 questions:
+
+| | |
+|---|---:|
+| Mean | 4,659 ms |
+| Median | 4,321 ms |
+| p95 | 7,400 ms |
+| Slowest | 9,072 ms |
+| **Over 10 s** | **0 of 53** |
+
+**Every answer lands under ten seconds.** The proposal's A-KR3 verification asks for
+"a series of queries, timing each response"; `docs/results-alpha.md` could only offer
+four. This is a real series, and it clears the bar with the slowest query a second
+under it.
 
 The caveat is that it is the desktop harness, not the phone. It is now a defensible
 proxy — the device measured 4.8 s for the bleeding query and the aligned harness
-measures 4.6 s — but A-KR3 should still be confirmed on hardware.
+measures 4.9 s — but A-KR3 should still be confirmed on hardware, and on the v1.1.0
+packs rather than whatever is currently side-loaded.
 
 ---
 
@@ -158,17 +173,30 @@ Things that would actually move it, in rough order of expected value:
 - An explicit scope check before retrieval for categories known to be out of scope
   (dosing, invasive procedures, weather, location).
 
-## Routing bugs this surfaced
+## Routing bugs this surfaced — both fixed
 
-- **"How do I know if a wild plant is safe to eat?" returns needs-location.** A
-  general foraging-safety question routes to `plants`, which is state-scoped, so
-  with no state given the pipeline asks for one. The answer is in `core-survival`
-  and is not state-specific at all.
-- **"Can you write me a poem about the mountains?" returns needs-location**, because
-  `mountain` is wildlife vocabulary (for mountain lion).
+Both were the same shape: a state-scoped domain capturing a query with no geographic
+content, so the pipeline asked for a location it did not need.
 
-Both are the same shape: a state-scoped domain captures a query that has no
-geographic content.
+- **"How do I know if a wild plant is safe to eat?"** routed to `plants`, which only
+  state packs serve. The answer is ATP 3-50.21's edibility chapter, whose chunks
+  carry domain `survival`. Fixed by sharing the *eating* vocabulary — `eat`,
+  `eating`, `edible`, `edibility`, `poisonous` — with survival.
+
+  The first attempt shared bare `plant` and regressed something else: ATP 3-50.21's
+  PLANTS chapter then outranked the FEIS species reviews, and "what plants and
+  animals are near me?" started citing p.77 of the survival manual instead of a
+  species review. Coverage caught it at 14/17. Whether something is safe to eat is
+  survival knowledge; which species grow here is not, and the lexicon now says only
+  the first.
+- **"Can you write me a poem about the mountains?"** routed to `wildlife`, because
+  `mountain` was listed there for mountain lion. Removed; `lion`, `cougar` and `puma`
+  already cover the animal.
+
+Measured over the graded set, outcome agreement went **47/68 → 49/68**, both changes
+are fixes, and nothing regressed. Questions wrongly answered with "which state are
+you in?" went from 2 to 0. False answers are unchanged at 13, as expected — routing
+was never what let those through.
 
 ## What is not done
 

@@ -43,6 +43,14 @@ carries a structured "States and Provinces" list, which gives California 531 spe
 and Oregon 470. Animal coverage is the thin part: 79 and 81 species, mostly birds and
 game mammals. See `docs/results-alpha.md`.
 
+*Outcome (state coverage):* counted across all fifty states, **every state has FEIS
+coverage** — median 337 species, worst Hawaii at 153 — so the "switch states" fallback
+above is never needed. All fifty come to roughly 310 MB, under the ~450 MB R-02
+assumed. The risk did not land where this file predicted: it landed on a *domain*
+rather than a state. FEIS animal reviews are sparse everywhere (median 61 per state,
+Hawaii 14), because FEIS covers wildlife only where fire ecology touches habitat.
+Closing that gap needs a second wildlife source, not more states.
+
 ## ODbL and maps
 OpenStreetMap-derived tiles require attribution and carry share-alike obligations on
 the derived database. Display the attribution in the map view, not buried in an

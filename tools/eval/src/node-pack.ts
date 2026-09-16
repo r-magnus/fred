@@ -166,8 +166,19 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
           systemPrompt: prompt.system,
         });
         const chunks: string[] = [];
+        // These three must mirror device-pack.ts. The shared-pipeline claim —
+        // "the eval harness measures the code that ships" — held for retrieval
+        // once embedder parity was fixed (docs/results-m3.md), but generation
+        // was never aligned: the device sets enable_thinking false, greedy
+        // decoding and penalty_repeat 1.15, and this side set none of them.
+        //
+        // Left as it was, the harness graded prose the phone never produces and
+        // timed Qwen3's thinking tokens, which the device does not spend.
         await session.prompt(prompt.user, {
           maxTokens: genOpts.maxTokens,
+          temperature: genOpts.temperature ?? 0,
+          repeatPenalty: { penalty: 1.15 },
+          budgets: { thoughtTokens: 0 },
           onTextChunk: (t) => chunks.push(t),
         });
         for (const c of chunks) yield c;

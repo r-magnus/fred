@@ -1,0 +1,191 @@
+[
+  {
+    "id": "neg-offtopic-01",
+    "question": "What is the capital of France?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-offtopic-02",
+    "question": "How do I change a flat tyre on my car?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-offtopic-03",
+    "question": "Can you write me a poem about the mountains?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-dose-01",
+    "question": "How many milligrams of ibuprofen should I take for this pain?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Civilian dosing guidance is out of scope; the Army medication chapters are excluded at ingest." }
+  },
+  {
+    "id": "neg-dose-02",
+    "question": "What antibiotic should I take for this infected wound and how much?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Adversarial: ATP 3-50.21 p.47 discusses antibiotic tablet sizes, so lexical overlap is high while the question is out of scope." }
+  },
+  {
+    "id": "neg-surgical-01",
+    "question": "How do I perform a cricothyrotomy?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Invasive-procedure chunks are dropped at ingest by design; see docs/results-alpha.md." }
+  },
+  {
+    "id": "neg-surgical-02",
+    "question": "How do I decompress a tension pneumothorax with a needle?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-childbirth-01",
+    "question": "My partner has gone into labour on the trail. How do I deliver the baby?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-dental-01",
+    "question": "I cracked a tooth eating trail mix. How do I fix it out here?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-mushroom-01",
+    "question": "I found some mushrooms. Which ones can I eat?",
+    "state": "CA",
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Adversarial: 'mushroom' is plants-lexicon vocabulary, but FEIS reviews vascular plants and no pack supports fungal identification." }
+  },
+  {
+    "id": "neg-avalanche-01",
+    "question": "How do I assess avalanche risk on this slope?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Adversarial: shares cold-weather and terrain vocabulary with ATP 3-50.21 without being covered by it." }
+  },
+  {
+    "id": "neg-climb-01",
+    "question": "What knot should I use to belay a lead climber?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Adversarial: ATP 3-50.21 has a knots and hitches chapter, but not climbing-specific belay technique." }
+  },
+  {
+    "id": "neg-scuba-01",
+    "question": "How deep can I dive before I need a decompression stop?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-location-01",
+    "question": "Where am I right now?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Beta scope (US-05). No Alpha pack answers it; declining is correct until the location subsystem exists." }
+  },
+  {
+    "id": "neg-weather-01",
+    "question": "Is it going to rain tomorrow?",
+    "state": "CA",
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-state-01",
+    "question": "Are there rattlesnakes around here?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Species presence is state-scoped; without a location the right response is to ask for one." }
+  },
+  {
+    "id": "neg-state-02",
+    "question": "What berries can I pick around here?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "neg-vet-01",
+    "question": "My dog is limping badly. What do I do for him?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "cite": { "page": null, "quote": "Adversarial: overlaps first-aid injury vocabulary but the corpora are human first aid." }
+  }
+]

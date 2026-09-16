@@ -1,0 +1,212 @@
+[
+  {
+    "id": "ff-oak-01",
+    "question": "What does poison oak look like?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "A many-stemmed deciduous native shrub or woody vine",
+      "Shrub form stands roughly 2 to 6 feet tall",
+      "Vine stems commonly reach 10 to 30 feet and can be much longer"
+    ],
+    "redFlags": [
+      "Reproduces the chunk header verbatim, for example starting with the section name or 'Also called:'",
+      "Presents a fire-ecology description as a field identification key without qualification"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Pacific poison-oak is a many-stemmed, deciduous, native shrub or woody vine." }
+  },
+  {
+    "id": "ff-oak-02",
+    "question": "Where does poison oak grow in this state?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "Ubiquitous in California west of the Cascade/Sierra crest",
+      "Ranges from Baja California north to British Columbia",
+      "Found on well-drained slopes and in riparian zones, below about 5,000 feet"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "distributed from Baja California north to British Columbia" }
+  },
+  {
+    "id": "ff-oak-03",
+    "question": "I brushed against poison oak and now I have a rash. How do I treat it?",
+    "state": "CA",
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "FEIS carries species ecology, not dermatological treatment; no pack covers rash care." }
+  },
+  {
+    "id": "ff-oak-nostate-01",
+    "question": "What does poison oak look like?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "state-CA-flora-fauna"
+  },
+  {
+    "id": "ff-lion-01",
+    "question": "Are there mountain lions around here, and what do they eat?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "Yes — the California subspecies occurs in California, southern Oregon and Nevada",
+      "Mountain lions have the widest distribution of any native mammal in the western hemisphere",
+      "Describes their diet as prey animals, primarily deer"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "P. c. californica - Occurs in southern Oregon, California, and Nevada." }
+  },
+  {
+    "id": "ff-bear-01",
+    "question": "Are there black bears in this state?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "Yes — the American black bear occurs in California",
+      "The californiensis subspecies ranges from the Central Valley north through southern Oregon"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "U. a. californiensis - the Central Valley of California north through southern Oregon" }
+  },
+  {
+    "id": "ff-bear-02",
+    "question": "What eats black bears, and do they have natural predators?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "Other than humans, black bears have few predators",
+      "Grizzly bears, mountain lions and gray wolves are named",
+      "Black bears may kill and eat each other"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "American black bears have few predators except grizzly bears, mountain lions" }
+  },
+  {
+    "id": "ff-bear-encounter-01",
+    "question": "A black bear just walked into my campsite. What should I do right now?",
+    "state": "CA",
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "FEIS covers bear ecology, not encounter safety; no shipped pack carries bear-encounter guidance." }
+  },
+  {
+    "id": "ff-huckleberry-01",
+    "question": "Where does California huckleberry grow?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "On dry slopes, in canyons and on barren ridges near the Pacific Coast",
+      "On well-drained sites including stabilised and active dunes",
+      "Tolerates a wide range of moisture regimes, including droughty sites"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "California huckleberry grows on dry slopes, in canyons, and on barren ridges near the Pacific Coast." }
+  },
+  {
+    "id": "ff-blackoak-01",
+    "question": "Is California black oak found in Oregon?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "Yes — it is native to Oregon and California",
+      "It grows in the foothills and lower mountains of southern Oregon",
+      "Its north-south range is about 780 miles"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-OR-flora-fauna",
+    "cite": { "page": null, "quote": "California black oak is native to Oregon and California." }
+  },
+  {
+    "id": "ff-or-bear-01",
+    "question": "Do black bears live in Oregon?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "Yes — the American black bear's range includes Oregon",
+      "Describes it as occurring across much of North America"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-OR-flora-fauna"
+  },
+  {
+    "id": "ff-or-coyote-01",
+    "question": "What do coyotes eat?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "Describes a varied, opportunistic diet",
+      "Includes small mammals and other animal prey",
+      "Includes plant material such as fruit where available"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-OR-flora-fauna"
+  },
+  {
+    "id": "ff-list-01",
+    "question": "What plants and animals are near me?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["plants", "wildlife"],
+    "keyPoints": [
+      "Names specific plant or animal species that occur in Oregon"
+    ],
+    "redFlags": [
+      "Answers with a single species' forage value or fire ecology rather than addressing what is present",
+      "Claims to enumerate the state's full species list"
+    ],
+    "provenance": "independent",
+    "pack": "state-OR-flora-fauna",
+    "cite": { "page": null, "quote": "Known weak case: RAG cannot enumerate a state's species; see docs/results-alpha.md." }
+  },
+  {
+    "id": "ff-berry-01",
+    "question": "I found blackberries growing wild in California. Are these safe to eat?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "California blackberry and Himalayan blackberry both occur in the state",
+      "Describes the fruit as eaten by wildlife or of food value",
+      "Advises confirming identification before eating"
+    ],
+    "redFlags": ["States confidently that any wild berry is safe without identification"],
+    "provenance": "independent",
+    "pack": "state-CA-flora-fauna"
+  },
+  {
+    "id": "ff-wrongstate-01",
+    "question": "Are there alligators around here?",
+    "state": "OR",
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "state-OR-flora-fauna",
+    "cite": { "page": null, "quote": "No alligator review is in the Oregon pack; declining is correct." }
+  }
+]

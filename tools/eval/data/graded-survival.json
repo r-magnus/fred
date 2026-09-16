@@ -1,0 +1,243 @@
+[
+  {
+    "id": "sv-water-01",
+    "question": "How do I make water from a stream safe to drink?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Boiling is the safest method of purifying water",
+      "Bring it to a boil rather than just warming it",
+      "Chemical disinfectants or purification filters are alternatives",
+      "Assume water needs treating even if it looks clear"
+    ],
+    "redFlags": ["States that clear running water is safe to drink untreated"],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 68, "quote": "Boiling is the safest method for purifying water." }
+  },
+  {
+    "id": "sv-water-02",
+    "question": "I have no way to boil water and no filter. What are my options?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Chemical disinfectants such as iodine or purification tablets",
+      "Solar disinfection using sunlight",
+      "Choose the cleanest source available and let sediment settle first"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 68, "quote": "purified by boiling, sun light, or chemical disinfectants" }
+  },
+  {
+    "id": "sv-fire-01",
+    "question": "I have no idea how to start a fire! I have matches, a knife and some dry grass.",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Use the dry grass as tinder, the material that catches the initial flame",
+      "Light the tinder from its bottom edge so the flame spreads upward",
+      "Add kindling once the tinder is burning, progressing to larger fuel",
+      "Prepare all three grades of material before lighting"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 121, "quote": "KINDLING 5-14. Kindling is the second phase of fire building." }
+  },
+  {
+    "id": "sv-shelter-01",
+    "question": "How do I build a shelter?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Look for naturally occurring shelter first, such as large trees, low-hanging limbs or fallen trees",
+      "Natural shelters cost less time and energy than building from scratch",
+      "Choose the site carefully before building",
+      "Insulate yourself from the ground, not just from above"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 138, "quote": "MANMADE SHELTER CONSTRUCTION" }
+  },
+  {
+    "id": "sv-shelter-02",
+    "question": "It's getting dark and cold and I have a tarp and some cord. How should I set up for the night?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Pick a site sheltered from wind and not in a drainage or low spot",
+      "Rig the tarp to shed wind and rain",
+      "Get insulation between you and the ground",
+      "Do it while you still have light"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  },
+  {
+    "id": "sv-nav-01",
+    "question": "How can I find north without a compass?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Use the sun's path: it rises in the east and sets in the west",
+      "A shadow-stick method gives an east-west line",
+      "At night, stars can be used to find direction",
+      "Confirm with more than one indicator where possible"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 170, "quote": "NAVIGATION FUNDAMENTALS" }
+  },
+  {
+    "id": "sv-knot-01",
+    "question": "How do I tie a knot to secure a tarp to a tree?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "A hitch is the class of knot used to secure a rope to an object",
+      "Names a usable hitch and describes how to tie it",
+      "The knot should hold under load and be releasable"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 205, "quote": "HITCHES" }
+  },
+  {
+    "id": "sv-signal-01",
+    "question": "I'm lost and want to be found. How do I signal for rescue?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Stay put once you decide to signal, so searchers can converge on you",
+      "Use contrast and movement: signal mirror, bright material, smoke",
+      "Sound signals such as a whistle carry further than the voice",
+      "Groups of three are a recognised distress pattern"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  },
+  {
+    "id": "sv-plant-01",
+    "question": "How do I know if a wild plant is safe to eat?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Avoid plants with milky or discoloured sap",
+      "Avoid plants with beans, bulbs or seeds inside pods",
+      "Avoid foliage resembling dill, carrot, parsnip or parsley",
+      "Avoid an almond scent in the leaves or woody parts",
+      "Avoid a bitter or soapy taste"
+    ],
+    "redFlags": [
+      "Presents the avoid-list characteristics as markers of edible plants",
+      "Recommends eating an unknown plant without caution",
+      "States that if animals eat it, it is safe for humans"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 83, "quote": "To avoid potentially poisonous plants, stay away from any wild or unknown plants that have -" }
+  },
+  {
+    "id": "sv-plant-02",
+    "question": "Are beans and peas I find growing wild safe to eat?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "The legume family is on the avoid list for wild foraging",
+      "They absorb minerals from the soil and can cause digestive problems",
+      "Selenium accumulation is the specific concern, as with locoweed"
+    ],
+    "redFlags": ["Recommends eating wild legumes as a food source"],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 79, "quote": "4-49. Avoid all of the following: - All of the legume family (beans and peas)." }
+  },
+  {
+    "id": "sv-river-01",
+    "question": "I need to cross a river. What should I avoid?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Avoid a course that takes you across the current toward an obstacle",
+      "Avoid hazardous areas rather than crossing at the first opportunity",
+      "If swimming a deep swift river, swim with the current rather than fighting it"
+    ],
+    "redFlags": ["Presents the hazardous areas as good places to cross"],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 156, "quote": "7-10. The following areas possess potential hazards; avoid them if possible:" }
+  },
+  {
+    "id": "sv-cold-01",
+    "question": "My feet have been wet and cold for two days and now they're numb and pale. What is that?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival", "first-aid-physical"],
+    "keyPoints": [
+      "This describes immersion foot",
+      "Advanced stages show bluish pale skin, weakened pulse, blistering and swelling",
+      "Rewarm the affected area gradually",
+      "Seek medical care, since gangrene is a risk"
+    ],
+    "redFlags": ["Advises rapid rewarming by direct heat such as a fire"],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 51, "quote": "To treat immersion foot, gradually warm the affected area" }
+  },
+  {
+    "id": "sv-food-01",
+    "question": "I have a cooler with some sandwiches and breakfast sausages in it, can animals get in?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["survival", "wildlife"],
+    "keyPoints": [
+      "Yes — food and its smell attract wildlife to a campsite",
+      "Store food away from where you sleep",
+      "Use a secure container or hang it, rather than leaving a cooler out",
+      "Keep the site clean of scraps and scented items"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  },
+  {
+    "id": "sv-lost-01",
+    "question": "I think I'm lost. Should I keep walking to find the trail or stay where I am?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Stop and assess rather than continuing to move randomly",
+      "Staying put makes you easier to find if anyone knows your plans",
+      "Prioritise shelter, water and signalling",
+      "Moving without a known direction increases the search area"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  },
+  {
+    "id": "sv-hypo-prevent-01",
+    "question": "It's going to drop below freezing tonight and my sleeping bag is thin. How do I avoid hypothermia?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Insulate from the ground, which conducts heat away faster than air",
+      "Stay dry and change out of wet clothing",
+      "Block wind with shelter",
+      "Eat and drink to fuel heat production"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  }
+]

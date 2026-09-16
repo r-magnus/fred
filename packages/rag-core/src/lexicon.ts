@@ -92,6 +92,27 @@ const STOPWORDS: ReadonlySet<string> = new Set([
   'why', 'how', 'all', 'any', 'both', 'each', 'more', 'most', 'other', 'some',
   'such', 'no', 'not', 'only', 'own', 'same', 'too', 'very', 's', 't', 'just',
   'now', 'get', 'got', 'go', 'going', 'there', 'here', 'as', 'also',
+  // Lay phrasing carries function words that the clinical corpora do not, and
+  // S_lex divides by total keyword weight, so each one dilutes the terms that
+  // actually discriminate. "I cut myself on a branch" scored 'cut' at 2 of 4
+  // weight; "my friend badly twisted their ankle" scored 'twisted'+'ankle' at
+  // 4 of 7. These carry no retrievable content in any corpus.
+  //
+  // Reflexive and indefinite pronouns:
+  'myself', 'yourself', 'yourselves', 'himself', 'herself', 'itself',
+  'ourselves', 'themselves', 'someone', 'somebody', 'something', 'anyone',
+  'anybody', 'anything', 'everyone', 'everybody', 'everything', 'nothing',
+  'nobody',
+  // Degree adverbs: they modify severity without naming it. "Badly" twisted is
+  // still a twist, and no chunk is retrievable by the word.
+  'really', 'quite', 'extremely', 'badly', 'pretty', 'somewhat', 'rather',
+  'fairly',
+  // Light verbs and placeholder nouns. Note 'bit' is deliberately absent: it is
+  // first-aid/wildlife vocabulary ("a rattlesnake bit my leg"), which is exactly
+  // the collision the test below guards against.
+  'need', 'want', 'know', 'think', 'feel', 'look', 'seem', 'help', 'try',
+  'use', 'give', 'come', 'take', 'make', 'put', 'keep', 'tell', 'ask',
+  'please', 'thing', 'things', 'lot', 'way', 'time',
 ]);
 
 /** A query term plus how much it counts toward S_lex. */
@@ -155,8 +176,12 @@ export function extractKeywords(query: string): Keyword[] {
   const seen = new Set<string>();
   const out: Keyword[] = [];
   for (const raw of tokenize(query)) {
-    if (STOPWORDS.has(raw)) continue;
+    // Lexicon first, so domain vocabulary can never be deleted by a stopword
+    // that happens to share its spelling — "a rattlesnake bit my leg" must keep
+    // 'bit'. Then test the stem as well, so inflected function words ("needs",
+    // "looks") drop out alongside their base form.
     const lexiconTerm = lexiconFormOf(raw);
+    if (lexiconTerm === null && (STOPWORDS.has(raw) || STOPWORDS.has(stem(raw)))) continue;
     const isDomain = lexiconTerm !== null;
     const term = lexiconTerm ?? stem(raw);
     if (term.length < 2 || seen.has(term)) continue;

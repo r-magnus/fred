@@ -27,17 +27,23 @@ interface Probe {
   readonly story: string;
   readonly query: string;
   readonly state: string | null;
-  /** Domain the top chunk must belong to, or null if no shipped pack covers it yet. */
-  readonly expect: DomainTag | null;
+  /**
+   * Domain(s) the top chunk may belong to, or null when the right outcome is to
+   * decline: no pack covers it, or it needs a location that was not given.
+   */
+  readonly expect: DomainTag | readonly DomainTag[] | null;
 }
 
 const PROBES: readonly Probe[] = [
   { story: 'US-02-AC1', query: 'I cut myself on a branch, what should I do?', state: null, expect: 'first-aid-physical' },
   { story: 'US-08-AC1', query: 'I have no idea how to start a fire! I have matches, a knife and some dry grass.', state: null, expect: 'survival' },
-  { story: 'US-08-AC2', query: 'I have a cooler with some sandwiches and breakfast sausages in it, can animals get in?', state: 'OR', expect: null },
+  { story: 'US-08-AC2', query: 'I have a cooler with some sandwiches and breakfast sausages in it, can animals get in?', state: 'CA', expect: ['wildlife', 'survival'] },
   { story: 'US-12-AC1', query: 'How do I build a shelter?', state: null, expect: 'survival' },
-  { story: 'US-01-AC1', query: 'What plants and animals are near me?', state: 'OR', expect: null },
-  { story: 'Figure 2', query: 'What does poison ivy look like, and how do I treat the rash?', state: null, expect: null },
+  { story: 'US-01-AC1', query: 'What plants and animals are near me?', state: 'OR', expect: ['plants', 'wildlife'] },
+  { story: 'US-01 (CA)', query: 'Are there mountain lions around here, and what do they eat?', state: 'CA', expect: 'wildlife' },
+  { story: 'Figure 2', query: 'What does poison oak look like, and how do I treat the rash?', state: 'CA', expect: 'plants' },
+  // Without a location a state-scoped question must ask for one, not guess.
+  { story: 'no location', query: 'What does poison oak look like?', state: null, expect: null },
   { story: 'Problem', query: 'My friend badly twisted their ankle on the trail, what should we do?', state: null, expect: 'first-aid-physical' },
   { story: 'survival', query: 'How do I make water from a stream safe to drink?', state: null, expect: 'survival' },
   { story: 'survival', query: 'How can I find north without a compass?', state: null, expect: 'survival' },
@@ -78,7 +84,8 @@ let passed = 0;
 for (const p of PROBES) {
   const res = await ask(p.query, { backend, store, packs }, { state: p.state });
   const top = res.kind === 'answer' ? res.diagnostics.candidates[0]?.chunk : undefined;
-  const ok = p.expect === null ? res.kind !== 'answer' : top?.domain === p.expect;
+  const allowed: readonly DomainTag[] | null = p.expect === null ? null : typeof p.expect === 'string' ? [p.expect] : p.expect;
+  const ok = allowed === null ? res.kind !== 'answer' : top !== undefined && allowed.includes(top.domain);
   if (ok) passed++;
 
   const d = res.diagnostics;
@@ -90,8 +97,8 @@ for (const p of PROBES) {
   }
   console.log();
 
-  const where = top ? `${top.source} p.${top.page} — ${top.section.slice(0, 32)}` : '—';
-  rows.push(`| ${p.story} | ${p.query} | ${p.expect ?? '(decline)'} | ${res.kind} | ${where} | ${ok ? '✅' : '❌'} |`);
+  const where = top ? `${top.source}${top.page === null ? '' : ` p.${top.page}`} — ${top.section.slice(0, 40)}` : '—';
+  rows.push(`| ${p.story} | ${p.query} | ${allowed?.join(' / ') ?? '(decline)'} | ${res.kind} | ${where} | ${ok ? '✅' : '❌'} |`);
 }
 
 console.log('| story | question | expected | outcome | top citation | pass |');

@@ -18,7 +18,8 @@ export interface SourcePage {
 export interface DraftChunk {
   readonly text: string;
   readonly section: string;
-  readonly page: number;
+  /** Null for sources with no pages, such as FEIS web reviews. */
+  readonly page: number | null;
   readonly domain: DomainTag;
   readonly blockKind: BlockKind;
 }
@@ -48,6 +49,24 @@ export function isHeading(line: string): boolean {
   if (letters.length < 3) return false;
   const upper = t.replace(/[^A-Z]/g, '').length;
   return upper / letters.length > 0.7;
+}
+
+/** A bullet or dash list item. These manuals emit bullets as \x83, z or dashes. */
+export function isListItem(line: string): boolean {
+  return /^[\u0083\u2021\u2020\u25aa\u2022\u2013zZ\-]\s+\S/.test(line.trim());
+}
+
+/**
+ * A line that introduces a list. ATP manuals use both "...:" and "... -".
+ *
+ * Polarity lives here and nowhere else: "Do not -" governs every item beneath
+ * it, and the items themselves are written as bare imperatives.
+ */
+export function isListHeader(line: string): boolean {
+  const t = line.trim();
+  if (t.length === 0 || t.length > 200) return false;
+  if (isListItem(t)) return false;
+  return /[:\u2014-]$/.test(t);
 }
 
 export function chunkPages(pages: readonly SourcePage[], opts: ChunkOptions): DraftChunk[] {
@@ -80,6 +99,44 @@ export function chunkPages(pages: readonly SourcePage[], opts: ChunkOptions): Dr
       carry.unshift(entry);
       carried += tokenize(entry.line);
     }
+    // A window that opens inside a list loses the line that governs it, and for a
+    // negated list that inverts every item. ATP 3-50.21 p.48 is the case that
+    // found this: "Do not -" stayed in the previous chunk, leaving "Make any
+    // deep cuts at the bite site", "Put the hands on the face or rub the eyes"
+    // and "Break open the large blisters" standing alone as instructions. The
+    // overlap cannot catch it, because it carries the tail and a header sits
+    // above the items.
+    //
+    // Carried for every list, not only negated ones: "Examine the eyes for the
+    // following:" is equally the thing that makes its items mean anything.
+    // Items wrap onto unmarked continuation lines ("...administer atropine," /
+    // "morphine or other central nervous system depressors."), and a window can
+    // open on one of those rather than on a bullet. So look for a list item
+    // anywhere in the carry ahead of any header it already has, and walk back a
+    // bounded distance for the governing line rather than stopping at the first
+    // unmarked line.
+    const headerInCarry = carry.findIndex((c) => isListHeader(c.line));
+    const itemInCarry = carry.findIndex((c) => isListItem(c.line));
+    const opensInsideList = itemInCarry !== -1
+      && (headerInCarry === -1 || headerInCarry > itemInCarry);
+
+    if (opensInsideList) {
+      const start = buffer.indexOf(carry[0] as { line: string; page: number });
+      const LOOKBACK = 15;
+      for (let i = start - 1; i >= 0 && i >= start - LOOKBACK; i--) {
+        const entry = buffer[i];
+        if (!entry) continue;
+        // A section heading means the list began after it; give up rather than
+        // reach across a section boundary for an unrelated header.
+        if (isHeading(entry.line)) break;
+        if (isListHeader(entry.line)) {
+          carry.unshift(entry);
+          carried += tokenize(entry.line);
+          break;
+        }
+      }
+    }
+
     buffer = carry;
     bufferTokens = carried;
   };

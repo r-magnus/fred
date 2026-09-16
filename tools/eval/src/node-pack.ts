@@ -51,11 +51,16 @@ export class NodePackStore implements PackStore {
     packIds: readonly string[],
     terms: readonly string[],
     limit: number,
+    domains?: readonly DomainTag[],
   ): Promise<readonly LexicalHit[]> {
     if (terms.length === 0) return [];
     // OR the terms: Stage 1 is a recall filter, precision comes from Stage 2.
     // Quoted to keep FTS5 from interpreting a term as an operator.
     const query = terms.map((t) => `"${t.replace(/"/g, '')}"`).join(' OR ');
+    // Domain narrowing rides inside the statement so LIMIT applies after it.
+    const domainClause = domains === undefined || domains.length === 0
+      ? ''
+      : ` AND c.domain IN (${domains.map(() => '?').join(',')})`;
     const hits: LexicalHit[] = [];
     for (const packId of packIds) {
       const pack = this.packs.get(packId);
@@ -63,8 +68,8 @@ export class NodePackStore implements PackStore {
       const rows = pack.db
         .prepare(`SELECT c.ordinal AS ordinal, c.id AS id
                   FROM chunks_fts f JOIN chunks c ON c.ordinal = f.rowid
-                  WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?`)
-        .all(query, limit) as { ordinal: number; id: string }[];
+                  WHERE chunks_fts MATCH ?${domainClause} ORDER BY rank LIMIT ?`)
+        .all(query, ...(domains ?? []), limit) as { ordinal: number; id: string }[];
       for (const r of rows) hits.push({ chunkId: r.id, packId, ordinal: r.ordinal });
     }
     return hits.slice(0, limit);
@@ -161,8 +166,19 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
           systemPrompt: prompt.system,
         });
         const chunks: string[] = [];
+        // These three must mirror device-pack.ts. The shared-pipeline claim —
+        // "the eval harness measures the code that ships" — held for retrieval
+        // once embedder parity was fixed (docs/results-m3.md), but generation
+        // was never aligned: the device sets enable_thinking false, greedy
+        // decoding and penalty_repeat 1.15, and this side set none of them.
+        //
+        // Left as it was, the harness graded prose the phone never produces and
+        // timed Qwen3's thinking tokens, which the device does not spend.
         await session.prompt(prompt.user, {
           maxTokens: genOpts.maxTokens,
+          temperature: genOpts.temperature ?? 0,
+          repeatPenalty: { penalty: 1.15 },
+          budgets: { thoughtTokens: 0 },
           onTextChunk: (t) => chunks.push(t),
         });
         for (const c of chunks) yield c;

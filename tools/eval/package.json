@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@fred/rag-core": "*",
+    "@anthropic-ai/sdk": "^0.71.2",
     "@fred/pack-format": "*",
+    "@fred/rag-core": "*",
     "node-llama-cpp": "^3.14.0"
   }
 }

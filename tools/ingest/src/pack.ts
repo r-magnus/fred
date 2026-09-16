@@ -16,7 +16,11 @@ import { SCHEMA_VERSION } from '@fred/pack-format';
 import { quantizeInt8 } from '@fred/rag-core';
 import type { DraftChunk } from './chunk.ts';
 
-export const INGEST_VERSION = '0.1.0';
+// 0.2.0: chunkPages carries a list's governing header across window boundaries.
+// Packs built before this can contain negated lists stripped of their "Do not -",
+// which inverts every item (docs/results-alpha.md). Bumped so a pack's provenance
+// records whether it has the fix.
+export const INGEST_VERSION = '0.2.0';
 
 export interface PackInput {
   readonly id: string;

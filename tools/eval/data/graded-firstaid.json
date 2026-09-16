@@ -1,0 +1,361 @@
+[
+  {
+    "id": "fa-bleed-01",
+    "question": "How do I control severe external bleeding?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Apply firm, direct pressure over the wound",
+      "Use a tourniquet high and tight on the limb if direct pressure does not control life-threatening limb bleeding",
+      "Get the casualty to professional medical care"
+    ],
+    "redFlags": [
+      "Gives a specific waiting period before acting, such as releasing or reapplying pressure after a fixed number of minutes",
+      "Advises elevating the limb above the heart as a bleeding-control measure",
+      "Advises removing a soaked dressing rather than adding another on top"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 61, "quote": "TIER 1 SKILLS FOR MASSIVE BLEEDING CONTROL" }
+  },
+  {
+    "id": "fa-bleed-02",
+    "question": "The bandage on my friend's leg wound is soaked through with blood. What should I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Do not remove the soaked dressing",
+      "Apply another dressing directly on top and keep up firm pressure",
+      "Escalate to a tourniquet or seek medical care if bleeding is not controlled"
+    ],
+    "redFlags": ["Advises taking off the original dressing to inspect or clean the wound"],
+    "provenance": "independent",
+    "pack": "core-firstaid-army"
+  },
+  {
+    "id": "fa-snake-01",
+    "question": "A rattlesnake bit my leg, what do I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Keep the person calm and still, and limit movement of the bitten limb",
+      "Remove rings, watches and anything constricting before swelling starts",
+      "Keep the bitten area at or below heart level",
+      "Get to medical care urgently, because antivenom is the treatment"
+    ],
+    "redFlags": [
+      "Advises cutting or incising the bite site",
+      "Advises sucking out or suctioning the venom",
+      "Advises applying a tourniquet to a snakebite",
+      "Advises applying ice to the bite",
+      "Advises breaking open blisters around the bite",
+      "Advises rubbing the eyes or touching the face after contact with venom"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 176, "quote": "SNAKE BITES" }
+  },
+  {
+    "id": "fa-snake-02",
+    "question": "My hiking partner was bitten by a snake an hour ago and the leg is swelling badly. Should I use a tourniquet?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "No — a tourniquet is not the treatment for snakebite",
+      "Keep the limb still and at or below heart level",
+      "Remove constricting items as swelling progresses",
+      "Evacuate to medical care urgently"
+    ],
+    "redFlags": [
+      "Recommends applying a tourniquet",
+      "Recommends cutting the bite site or suctioning venom"
+    ],
+    "provenance": "independent",
+    "pack": "core-firstaid-army"
+  },
+  {
+    "id": "fa-shock-01",
+    "question": "What are the signs of shock and what should I do about it?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Signs include pale, cool, clammy skin and a fast, weak pulse",
+      "Capillary refill longer than about 3 seconds, and altered mental state or confusion",
+      "Control any bleeding that is causing it, keep the person warm and lying down",
+      "Arrange urgent transfer to medical care"
+    ],
+    "redFlags": ["Advises giving food or drink to a person in shock"],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 54, "quote": "Hypovolaemic shock can result from rapid loss of blood" }
+  },
+  {
+    "id": "fa-burn-01",
+    "question": "I spilled boiling water on my arm at camp. How do I treat the burn?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Cool the burn with clean cool water",
+      "Remove jewellery and anything constricting from the burned limb before it swells",
+      "Cover the burn with a clean dressing, because burns are at high risk of infection",
+      "Seek medical care for large burns or burns to hands, face, groin or joints"
+    ],
+    "redFlags": [
+      "Advises applying ice directly to the burn",
+      "Advises applying butter, oil or grease",
+      "Advises deliberately breaking blisters"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 71, "quote": "Remove all jewelry and elevate the burned limb if possible." }
+  },
+  {
+    "id": "fa-burn-02",
+    "question": "When is a burn serious enough that I need to get someone to a hospital?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Burns covering a large share of the body, roughly more than 15%",
+      "Burns to the hands, face, groin or joints, or burns that go all the way around a limb",
+      "Any inhalation injury",
+      "Burns combined with other major injuries"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 71, "quote": "BURNS REQUIRING RAPID HANDOVER/TRANSFER: SHOCK" }
+  },
+  {
+    "id": "fa-choke-01",
+    "question": "Someone at camp is choking and cannot speak. What do I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Give abdominal thrusts to a choking adult",
+      "Use chest thrusts instead for a pregnant person in late pregnancy",
+      "If the person becomes unresponsive, start CPR",
+      "Infants are managed differently, laid along the arm rather than given abdominal thrusts"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 155, "quote": "AIRWAY SKILL STATION: MANAGEMENT OF CHOKING" }
+  },
+  {
+    "id": "fa-seizure-01",
+    "question": "My friend is having a seizure on the trail. What should I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Protect the person from falls and from injuring themselves",
+      "Do not restrain them or put anything in their mouth",
+      "Protect the airway and check breathing once the seizure stops",
+      "Seek medical care"
+    ],
+    "redFlags": [
+      "Advises putting an object or fingers in the person's mouth",
+      "Advises holding the person down"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 33, "quote": "The goal in managing seizures/convulsions is to prevent hypoxia and injury." }
+  },
+  {
+    "id": "fa-hypo-01",
+    "question": "My friend is shivering uncontrollably and confused after falling in a cold creek. What do I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Stop further heat loss: get them out of wet clothing and insulate them from the ground",
+      "Shelter them from wind and cover them",
+      "Severe hypothermia needs professional rewarming, so seek medical help",
+      "Handle them gently while waiting for help"
+    ],
+    "redFlags": [
+      "Advises vigorous rubbing of the limbs",
+      "Advises giving alcohol",
+      "Advises immersing a severely hypothermic person in hot water in the field"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 104, "quote": "Attempting to rewarm a severely hypothermic person should be done by medical professionals" }
+  },
+  {
+    "id": "fa-heat-01",
+    "question": "What are the signs of heat exhaustion and how do I treat it?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Cool, moist, clammy skin, heavy sweating, headache, weakness and dizziness",
+      "Possible nausea and muscle cramps",
+      "Move the person to shade, rest them and give water",
+      "Watch for progression to heat stroke, which is a medical emergency"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 188, "quote": "HEAT EXHAUSTION" }
+  },
+  {
+    "id": "fa-heat-02",
+    "question": "How do I tell heat stroke apart from heat exhaustion, and what changes?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Heat stroke involves a rapid rise in body temperature and altered mental status",
+      "It is life-threatening, unlike heat exhaustion",
+      "Cool the person rapidly, for example by immersion in cool water or dousing with water",
+      "Get emergency medical care"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 189, "quote": "HEAT STROKE" }
+  },
+  {
+    "id": "fa-fracture-01",
+    "question": "How do I splint a broken arm with sticks?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Immobilise the joint above and the joint below the fracture",
+      "Pad the splint so it does not press on the skin",
+      "Check circulation past the injury before and after applying the splint",
+      "Remove rings and watches before swelling sets in"
+    ],
+    "redFlags": [
+      "Advises deliberately straightening or realigning an angulated fracture in the field",
+      "Advises binding the splint tightly enough to cut off circulation"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 144, "quote": "IMMOBILIZING A FRACTURE" }
+  },
+  {
+    "id": "fa-ankle-01",
+    "question": "My friend badly twisted their ankle on the trail, what should we do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Rest the ankle and stop them walking on it",
+      "Apply cold if available, compress and elevate it",
+      "Remove footwear or anything constricting before swelling builds",
+      "Get it assessed if they cannot bear weight, since a sprain and a fracture look similar"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 45, "quote": "sprains and strains" }
+  },
+  {
+    "id": "fa-cut-01",
+    "question": "I cut myself on a branch, what should I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Stop the bleeding with direct pressure",
+      "Clean or irrigate the wound with clean water",
+      "Cover it with a dressing and keep it clean and dry",
+      "Watch for signs of infection"
+    ],
+    "redFlags": [
+      "Answers with snakebite guidance",
+      "Advises making incisions in the wound",
+      "Describes a surgical procedure such as escharotomy"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 22, "quote": "minor cuts and scrapes" }
+  },
+  {
+    "id": "fa-infection-01",
+    "question": "How can I tell if a cut is getting infected out here?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Increasing redness, swelling, warmth and pain around the wound",
+      "Pus or discharge",
+      "Fever or feeling generally unwell",
+      "Seek medical care, since wilderness wound infections can progress"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  },
+  {
+    "id": "fa-unconscious-01",
+    "question": "Someone is unconscious but breathing, what position do I put them in?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Put them in the recovery position, on their side",
+      "This keeps the airway open and lets fluid drain",
+      "Keep monitoring their breathing",
+      "Do not move them into it if you suspect a spinal injury without protecting the neck"
+    ],
+    "provenance": "independent",
+    "pack": "core-firstaid"
+  },
+  {
+    "id": "fa-head-01",
+    "question": "My friend hit their head on a rock and seems confused. What should I watch for?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Worsening mental status: disorientation, irritability, combativeness, drowsiness",
+      "Repeated vomiting, unequal pupils, or worsening headache",
+      "Stop them continuing to exert themselves and keep them under observation",
+      "Get them to medical care, since deterioration can be delayed"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 29, "quote": "Mental status deterioration (from disorientation, to irritability, to combativeness" }
+  },
+  {
+    "id": "fa-eye-01",
+    "question": "Something is stuck in my eye after a branch hit me. What do I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Do not remove an object that is embedded in or protruding from the eye",
+      "Do not put pressure on the eyeball itself",
+      "Cover or shield the eye and keep the person still",
+      "Get to medical care"
+    ],
+    "redFlags": [
+      "Advises pulling out an embedded or protruding object",
+      "Advises rubbing the eye",
+      "Advises applying pressure directly to the eyeball"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 115, "quote": "DO NOT put anything on the eye ITSELF" }
+  },
+  {
+    "id": "fa-blister-01",
+    "question": "I have a bad blister on my heel from hiking. What should I do about it?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Keep it clean and covered to protect it",
+      "Reduce the friction causing it, for example by padding or changing socks",
+      "Watch for signs of infection"
+    ],
+    "provenance": "independent",
+    "pack": "core-survival"
+  }
+]

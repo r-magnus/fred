@@ -126,9 +126,14 @@ export async function retrieve(
   // their packs in order and truncate the combined list, so one call across all
   // packs let the first pack fill the whole limit on its own; with ATP 4-02.11
   // loaded first, no WHO BEC chunk could reach Stage 2 on a common query.
+  //
+  // The routed domains go into the query itself, so the quota is spent only on
+  // chunks that survive the filter. See PackStore.searchLexical.
   const terms = keywords.map((k) => k.term);
   const hits = (
-    await Promise.all(packIds.map((id) => store.searchLexical([id], terms, opts.candidateLimit)))
+    await Promise.all(
+      packIds.map((id) => store.searchLexical([id], terms, opts.candidateLimit, domains)),
+    )
   ).flat();
   if (hits.length === 0) return [];
   const wanted = domains === undefined ? null : new Set<DomainTag>(domains);
@@ -158,6 +163,9 @@ export async function retrieve(
     const chunk = byId.get(hit.chunkId);
     const v = vectors[i];
     if (!chunk || !v) continue;
+    // Backstop: searchLexical takes the same domains and should have excluded
+    // these already. Kept because the store parameter is optional, and because a
+    // wrong-domain chunk reaching the generator is the failure this prevents.
     if (wanted !== null && !wanted.has(chunk.domain)) continue;
     const sLex = lexicalScore(keywords, chunkTermSet(chunk.text));
     if (queryVec === null) {

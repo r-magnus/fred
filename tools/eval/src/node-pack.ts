@@ -51,11 +51,16 @@ export class NodePackStore implements PackStore {
     packIds: readonly string[],
     terms: readonly string[],
     limit: number,
+    domains?: readonly DomainTag[],
   ): Promise<readonly LexicalHit[]> {
     if (terms.length === 0) return [];
     // OR the terms: Stage 1 is a recall filter, precision comes from Stage 2.
     // Quoted to keep FTS5 from interpreting a term as an operator.
     const query = terms.map((t) => `"${t.replace(/"/g, '')}"`).join(' OR ');
+    // Domain narrowing rides inside the statement so LIMIT applies after it.
+    const domainClause = domains === undefined || domains.length === 0
+      ? ''
+      : ` AND c.domain IN (${domains.map(() => '?').join(',')})`;
     const hits: LexicalHit[] = [];
     for (const packId of packIds) {
       const pack = this.packs.get(packId);
@@ -63,8 +68,8 @@ export class NodePackStore implements PackStore {
       const rows = pack.db
         .prepare(`SELECT c.ordinal AS ordinal, c.id AS id
                   FROM chunks_fts f JOIN chunks c ON c.ordinal = f.rowid
-                  WHERE chunks_fts MATCH ? ORDER BY rank LIMIT ?`)
-        .all(query, limit) as { ordinal: number; id: string }[];
+                  WHERE chunks_fts MATCH ?${domainClause} ORDER BY rank LIMIT ?`)
+        .all(query, ...(domains ?? []), limit) as { ordinal: number; id: string }[];
       for (const r of rows) hits.push({ chunkId: r.id, packId, ordinal: r.ordinal });
     }
     return hits.slice(0, limit);

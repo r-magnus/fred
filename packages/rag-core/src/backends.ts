@@ -5,7 +5,7 @@
  * them with node-llama-cpp + better-sqlite3. Same pipeline code runs in both, so
  * the numbers in the evaluation describe the system that actually ships.
  */
-import type { ChunkRecord, EmbeddingSpec } from '@fred/pack-format';
+import type { ChunkRecord, DomainTag, EmbeddingSpec } from '@fred/pack-format';
 import type { PromptParts } from './prompt.ts';
 
 export interface GenerateOptions {
@@ -61,11 +61,24 @@ export interface PackStore {
    * Deliberately diverges from PocketRAG §3.2.1, which uses a hashmap capped at
    * 5,000 keyword entries. FTS5 is faster, unbounded, and already present. The
    * hashmap variant lives in tools/eval as an ablation baseline.
+   *
+   * `domains` restricts the search to chunks carrying one of those domain tags,
+   * and must be applied *inside* the query rather than by the caller afterwards.
+   * `limit` is a quota, so filtering after the fact spends it on chunks that were
+   * never eligible: "I cut myself on a branch" routes to first aid, but the
+   * survival pack's woodcraft chunks match "cut" lexically and filled all 50
+   * slots, leaving the minor-wound passage at rank 90 — outside the candidate set
+   * and therefore unreachable by any amount of re-ranking. Filtering first makes
+   * the quota mean "50 candidates we might actually use".
+   *
+   * Optional for implementers; retrieve() re-checks each chunk's domain, so a
+   * store that ignores this stays correct and merely wastes candidate slots.
    */
   searchLexical(
     packIds: readonly string[],
     terms: readonly string[],
     limit: number,
+    domains?: readonly DomainTag[],
   ): Promise<readonly LexicalHit[]>;
 
   getChunks(chunkIds: readonly string[]): Promise<readonly ChunkRecord[]>;

@@ -4,7 +4,7 @@
  * Lets the full pipeline be exercised deterministically with no model, no SQLite,
  * and no device — which is what makes the retrieval logic testable in CI.
  */
-import type { ChunkRecord, EmbeddingSpec } from '@fred/pack-format';
+import type { ChunkRecord, DomainTag, EmbeddingSpec } from '@fred/pack-format';
 import type {
   GenerateOptions,
   InferenceBackend,
@@ -100,16 +100,25 @@ export class FakePackStore implements PackStore {
     return s;
   }
 
-  /** Stands in for FTS5 MATCH: any chunk sharing at least one term, best first. */
+  /**
+   * Stands in for FTS5 MATCH: any chunk sharing at least one term, best first.
+   *
+   * Applies `domains` before `limit`, as the real stores' SQL does. Filtering in
+   * the wrong order here would let a test pass against a fake that is kinder than
+   * SQLite, which is the exact bug this parameter exists to fix.
+   */
   async searchLexical(
     packIds: readonly string[],
     terms: readonly string[],
     limit: number,
+    domains?: readonly DomainTag[],
   ): Promise<readonly LexicalHit[]> {
     const want = new Set(terms);
+    const wantedDomains = domains === undefined ? null : new Set<DomainTag>(domains);
     const out: { hit: LexicalHit; overlap: number }[] = [];
     for (const c of this.chunks.values()) {
       if (!packIds.includes(c.packId)) continue;
+      if (wantedDomains !== null && !wantedDomains.has(c.domain)) continue;
       const cset = chunkTermSet(c.text);
       let overlap = 0;
       for (const t of want) if (cset.has(t)) overlap++;

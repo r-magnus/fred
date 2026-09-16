@@ -175,6 +175,47 @@ test('chunk domain, not just pack domain, decides what a query can retrieve', as
     'a snare passage must not answer a first-aid question just because its pack routes for first aid');
 });
 
+test('wrong-domain chunks do not consume the Stage-1 candidate quota', async () => {
+  // US-02-AC1 in miniature. The survival pack routes for first aid, and its
+  // woodcraft chunks all match "cut" lexically. With the domain filter applied
+  // after Stage 1 they filled the whole quota and the one wound-care passage —
+  // ranked last on lexical overlap — never reached the re-ranker at all.
+  const store = new FakePackStore();
+  store.addPack('core-survival', [
+    ...Array.from({ length: 50 }, (_, i) =>
+      seed(`Cut the snare cord ${i} where it crosses the branch, then cut again.`,
+        { domain: 'survival', source: 'ATP 3-50.21' })),
+    seed('For a cut, rinse the wound with clean water and cover it.', { source: 'ATP 3-50.21' }),
+  ]);
+  const hits = await retrieve(
+    extractKeywords('I cut myself on a branch, what should I do?'),
+    ['core-survival'],
+    store,
+    new FakeBackend(),
+    { ...DEFAULT_RETRIEVAL, candidateLimit: 50, topK: 4 },
+    ['first-aid-physical'],
+  );
+  assert.ok(hits.length > 0, 'the wound-care chunk must survive Stage 1');
+  assert.ok(hits.every((h) => h.chunk.domain === 'first-aid-physical'));
+});
+
+test('an empty domain list is not treated as "no filter"', async () => {
+  // A store building `domain IN ()` from an empty array would match nothing;
+  // one skipping the clause would match everything. Only route() produces this
+  // input, so pin the behaviour rather than leaving it to each store's SQL.
+  const store = new FakePackStore();
+  store.addPack('core-survival', [seed('Build a fire with dry tinder.', { domain: 'survival' })]);
+  const hits = await retrieve(
+    extractKeywords('fire tinder'),
+    ['core-survival'],
+    store,
+    new FakeBackend(),
+    DEFAULT_RETRIEVAL,
+    [],
+  );
+  assert.equal(hits.length, 0, 'no routed domain means nothing is eligible');
+});
+
 test('one large pack cannot crowd another out of Stage 1', async () => {
   const store = new FakePackStore();
   store.addPack('big', Array.from({ length: 60 }, (_, i) => seed(`bleeding note ${i}`)));

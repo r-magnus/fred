@@ -7,8 +7,8 @@ accounted for: First Aid · Per-state flora & fauna · Survival skills"*, verifi
 | Corpus | Pack | Size |
 |---|---|---|
 | First aid | `core-firstaid` v1.0.0 — WHO BEC 2018, 667 chunks | 1.1 MB |
-| First aid (military) | `core-firstaid-army` v1.0.0 — US Army ATP 4-02.11 (2026), 406 chunks | 0.90 MB |
-| Survival skills | `core-survival` v1.0.0 — US Army ATP 3-50.21 (2018), 559 chunks | 1.24 MB |
+| First aid (military) | `core-firstaid-army` v1.0.0 — US Army ATP 4-02.11 (2026), 410 chunks | 0.90 MB |
+| Survival skills | `core-survival` v1.0.0 — US Army ATP 3-50.21 (2018), 563 chunks | 1.25 MB |
 | Flora & fauna, California | `state-CA-flora-fauna` v1.0.0 — USFS FEIS, 531 species, 5,773 chunks | 9.64 MB |
 | Flora & fauna, Oregon | `state-OR-flora-fauna` v1.0.0 — USFS FEIS, 470 species, 5,124 chunks | 8.58 MB |
 

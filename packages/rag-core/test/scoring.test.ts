@@ -4,7 +4,7 @@ import {
   chunkTermSet, cosineInt8, dequantizeInt8, fuse, lexicalScore, quantizeInt8, DEFAULT_ALPHA,
   rescaleCosine,
 } from '../src/score.ts';
-import { extractKeywords } from '../src/lexicon.ts';
+import { DOMAIN_LEXICON, extractKeywords } from '../src/lexicon.ts';
 import { fakeEmbed } from './fakes.ts';
 
 test('fuse matches PocketRAG Eq. 3 by hand', () => {
@@ -38,10 +38,51 @@ test('lexicalScore stays in [0,1] with domain weighting', () => {
 });
 
 test('lexicalScore is defined for a query with no domain vocabulary', () => {
-  const kws = extractKeywords('what should someone do about that thing');
+  // Non-domain content words still form K_q, so S_lex has a denominator.
+  const kws = extractKeywords('what should the ranger radio about that ridge');
   assert.ok(kws.length > 0, 'content words must survive stopword removal');
   const s = lexicalScore(kws, chunkTermSet('unrelated text'));
   assert.ok(Number.isFinite(s) && s >= 0, 'must not be NaN from a 0/0 division');
+});
+
+test('a query of pure function words yields no keywords, and S_lex stays 0', () => {
+  // "what should someone do about that thing" is all function words once
+  // reflexives, indefinites and light verbs are stopped. Retrieval then finds
+  // no candidates and the pipeline abstains, which is the right outcome — but
+  // S_lex must not divide 0 by 0 on the way there.
+  const kws = extractKeywords('what should someone do about that thing');
+  assert.equal(kws.length, 0);
+  assert.equal(lexicalScore(kws, chunkTermSet('unrelated text')), 0);
+});
+
+test('domain vocabulary is never removed by a colliding stopword', () => {
+  // extractKeywords consults the lexicon before STOPWORDS precisely so that a
+  // word can be both. 'bit' is the live case: a light-verb stopword by spelling,
+  // first-aid and wildlife vocabulary in "a rattlesnake bit my leg".
+  for (const [domain, terms] of Object.entries(DOMAIN_LEXICON)) {
+    for (const term of terms) {
+      const kws = extractKeywords(term);
+      assert.equal(kws.length, 1, `${domain} term "${term}" was dropped entirely`);
+      assert.equal(kws[0]?.term, term, `${domain} term "${term}" did not survive as itself`);
+      assert.ok(kws[0]?.isDomainTerm, `${domain} term "${term}" lost its domain weighting`);
+    }
+  }
+});
+
+test('lay phrasing concentrates weight on the injury words', () => {
+  // The proposal's own US-02-AC1 and problem-statement wordings. Before the
+  // function-word pass, 'cut' held 2 of 4 total weight and 'twisted'+'ankle'
+  // held 4 of 7, so a chunk matching only filler scored a third of the way to
+  // the abstention gate on noise alone.
+  const cut = extractKeywords('I cut myself on a branch, what should I do?');
+  assert.deepEqual(cut.map((k) => k.term), ['cut', 'branch']);
+
+  const ankle = extractKeywords('My friend badly twisted their ankle on the trail, what should we do?');
+  assert.ok(!ankle.some((k) => k.term === 'badly'), 'degree adverbs carry no content');
+  const total = ankle.reduce((n, k) => n + k.weight, 0);
+  const injury = ankle.filter((k) => k.term === 'twisted' || k.term === 'ankle')
+    .reduce((n, k) => n + k.weight, 0);
+  assert.ok(injury / total >= 0.6, `injury terms hold ${injury}/${total} of the weight`);
 });
 
 test('INT8 round-trip keeps cosine >= 0.99 (ingest tolerance)', () => {

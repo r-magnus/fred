@@ -244,3 +244,127 @@ M2's MCQ table describes the old configuration and was not re-run.
 - **Oregon on device.** Only the California pack has been run on the phone.
 - **App.** Packs are copied in by hand and the state is hard-coded. There is no pack
   download or state selection yet.
+
+---
+
+## Three retrieval fixes, and a corpus defect they uncovered
+
+The three failures above were attributed to scoring, with three named remedies.
+Two are now done; the third is blocked on the labelled set.
+
+### 1. The domain filter moved inside Stage 1
+
+`candidateLimit` is a quota, and filtering by domain *after* the lexical search
+spent it on chunks that were never eligible. `searchLexical` now takes the routed
+domains and applies them in SQL. Eligible candidates reaching the re-ranker:
+
+| Query | Before | After |
+|---|---:|---:|
+| cut on a branch | 43 | 53 |
+| twisted ankle | 35 | 35 |
+| cooler / animals | 8 | 42 |
+
+The ankle query never had a binding quota, which is why it did not move. The
+cooler query gained 5x, and still abstains: 42 wildlife chunks is plenty, and FEIS
+simply has no camp-food-storage content. That confirms the diagnosis above — it is
+a routing gap, not a candidacy one.
+
+`retrieve()` keeps its post-filter as a backstop, because the store parameter is
+optional and a wrong-domain chunk reaching the generator is worth preventing twice.
+
+### 2. Function words are stopped
+
+`S_lex` divides by total keyword weight, so filler dilutes the discriminating
+terms. `cut` held 2 of 4 weight; `twisted`+`ankle` held 4 of 7. Reflexive and
+indefinite pronouns, degree adverbs and light verbs are now stopped, and
+`extractKeywords` consults the lexicon *before* the stopword list — `bit` is a
+light verb by spelling and snakebite vocabulary in use. A test sweeps every
+`DOMAIN_LEXICON` term so no future stopword can silently delete domain vocabulary.
+
+**Coverage went 14/17 to 15/17, and the new pass is not real.** "I cut myself on a
+branch" now answers from ATP 3-50.21's SNAKEBITES chunk. Concentrating weight on
+`cut` amplified a term the corpora use as a verb — "cutting opens capillaries",
+"a surgical procedure to cut and release burned tissue" — rather than as the noun
+the question means. The top three chunks all match `cut` in the wrong sense.
+
+`coverage.ts` judges a probe by the top chunk's *domain*, so all three count as
+first aid and the probe passes. Retrieval got no better for that question; the
+measurement stopped being able to tell. This is the same failure mode as the MCQ
+eval hiding generation defects, one level down, and it is why gate calibration
+is **not** worth attempting before the labelled set exists: calibrating against a
+metric that cannot see word sense would fit the threshold to a bad ranking.
+
+### 3. The gate is still uncalibrated
+
+Unchanged and deliberately so. The twisted-ankle probe still abstains at 0.340,
+with the right passage (army p.195, "twisted ankles or muscle strains") third at
+0.331. The margin narrowed but the ordering did not change.
+
+## The corpus defect: negated lists lost their polarity
+
+Chasing the snakebite chunk above turned up something worse than a ranking bug.
+ATP 3-50.21 p.48 was stored as:
+
+```
+‡ Make any deep cuts at the bite site. Cutting opens capillaries...
+‡ Put the hands on the face or rub the eyes, as venom may be on hands.
+‡ Break open the large blisters that form around the bite site.
+```
+
+In the manual that list is governed by `Do not -`. The 300-token window opened
+below the header, and the 50-token overlap could not recover it because the
+overlap carries the *tail* of the previous window while a list header sits *above*
+its items. The result is a retrievable chunk of three imperatives that mean the
+exact opposite of the source, on a question a user in trouble would actually ask.
+
+ATP 3-50.21 p.83 was the same shape and arguably worse: "stay away from any wild
+or unknown plants that have -" orphaned from "Foliage that resembles dill, carrot,
+parsnip, or parsley" and "An almond scent". That is the water-hemlock and cyanide
+indicator list, presented as a list of plants to look for.
+
+**Nothing in the pipeline could have caught this.** The chunks are well-formed,
+correctly sectioned, correctly page-numbered, correctly domain-tagged, and embed
+to sensible vectors. Retrieval ranks them accurately. The defect is entirely in
+what the text *means* once a line is missing, which no test of the retrieval path
+inspects.
+
+### The fix and the survey
+
+`chunkPages` now walks back from the overlap window for the governing list header
+and carries it in. Two details cost a rebuild each: list items wrap onto unmarked
+continuation lines, so the walk cannot stop at the first non-bullet line; and a
+window can open on such a continuation rather than on a bullet. The walk is
+bounded at 15 lines and stops at a section heading.
+
+Headers are carried for every list, not only negated ones — "Examine the eyes for
+the following:" is equally the thing that makes its items mean anything.
+
+Surveyed across all five packs by locating chunks that open inside a list whose
+governing header lies outside them:
+
+| Pack | Candidates | Genuine |
+|---|---:|---:|
+| core-firstaid-army | 2 | 1 |
+| core-firstaid (WHO BEC) | 0 | 0 |
+| core-survival | 4 | 4 |
+| state-CA-flora-fauna | 0 | 0 |
+| state-OR-flora-fauna | 0 | 0 |
+
+The FEIS packs are clean because species reviews are prose, with no imperative
+lists — the defect is specific to doctrinal manuals. After rebuilding
+`core-survival` (559 to 563 chunks) and `core-firstaid-army` (406 to 410), the
+survey reports zero. `core-firstaid` was not rebuilt: it has no instances, and
+leaving it untouched keeps the WHO BEC numbers in `docs/results-m2.md` comparable.
+
+### What this says about A-KR2
+
+The proposal verifies accuracy by grading Fred's answers against an answer sheet.
+That would not have caught this either, unless the question set happened to ask
+about snakebite treatment or plant edibility. A grading harness measures the
+answers you think to ask for; it does not survey the corpus for passages that
+changed meaning in transit.
+
+Both belong in the Alpha evidence: the labelled set for A-KR2, and a structural
+check over the packs for defects that make a confident answer wrong. The latter
+is cheap — it is a query over `chunks.sqlite` — and it is the kind of check worth
+running on every rebuild rather than when something looks odd.

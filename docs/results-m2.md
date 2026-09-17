@@ -307,3 +307,58 @@ which `docs/results-m3.md` establishes reproduces the reference implementation t
 four decimals. They are therefore valid. They are **not** currently reproduced on
 device, because llama.rn's embedding path diverges; that is a defect in the device
 runtime, not in these measurements.
+
+---
+
+## Re-run under the Alpha changes (2026-09-17)
+
+The Stage-1 domain filter, the function-word stopwords, the conditional response
+shape in `SYSTEM_PREFIX`, the chunk-polarity fix and rank-aware compression all
+landed after these numbers were taken. Re-run on the same 109 questions and the
+same unchanged `core-firstaid-v1.0.0` pack, to check whether A-KR2 work had been
+bought at the MCQ benchmark's expense.
+
+**It had not.** Paired McNemar on the same questions:
+
+| Condition | Before | After | Δ | lost / gained | p |
+|---|---:|---:|---:|:---:|---:|
+| vanilla | 57.8% | 57.8% | 0.0 | 0 / 0 | 1.000 |
+| rag | 67.9% | 70.6% | +2.8 | 7 / 10 | 0.629 |
+| rag-rerank | 76.1% | 73.4% | −2.8 | 10 / 7 | 0.629 |
+| rag-rerank-compress | 77.1% | 74.3% | −2.8 | 10 / 7 | 0.629 |
+
+Nothing moved significantly. **`vanilla` returned bit-identical results — zero
+discordant pairs** — which is the control: it uses neither `SYSTEM_PREFIX` nor
+retrieval, so an exact match confirms the harness is deterministic and the
+comparison is measuring only what changed.
+
+By provenance, on the shipping condition:
+
+| | Before | After | lost / gained | p |
+|---|---:|---:|:---:|---:|
+| corpus-derived (n=59) | 88.1% | **91.5%** | 2 / 4 | 0.688 |
+| independent (n=50) | 64.0% | 54.0% | 8 / 3 | 0.227 |
+
+Corpus-derived is the highest it has been. **The independent set is the one to
+watch**: a 10-point drop is the largest single movement in the table, and at
+p = 0.227 it is not significant at n = 50, but that set is precisely the one that
+tests whether retrieval helps on questions not written from the indexed text. Not
+grounds to act on yet; grounds to re-check whenever retrieval changes again.
+
+**Ignore the latency column from this run.** The `rag` condition reports a mean of
+88 seconds because one question recorded 9,233,015 ms — the machine sleeping
+overnight, not generation. Medians are normal: vanilla 216 ms, rag 3,882 ms,
+rag-rerank 3,583 ms, rag-rerank-compress 2,888 ms.
+
+### What this does and does not say
+
+The MCQ ladder still shows what it always showed: retrieval produces a large gain
+on questions whose answers are in the corpus. That claim is intact and is
+independently corroborated by the graded eval's finding that the answering
+material was present in the retrieved context for 21 of 23 failures.
+
+It says nothing about whether the answers are *usable*, because a single
+constrained token cannot carry a fabricated duration or an inverted avoid-list.
+Those cost real points in `docs/results-akr2.md` and are invisible here. The two
+evals are complementary, and A-KR2 is scored on the other one.
+

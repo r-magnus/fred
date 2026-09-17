@@ -148,8 +148,14 @@ Build cost is real but not prohibitive: Hawaii, the smallest, built in **71 seco
 instances gives roughly two hours of single-threaded batch, and `feis-pack.ts`
 already takes a state list.
 
-**So the recommendation is to build all fifty.** The cost is an overnight batch and
-310 MB of build output; the benefit is that A-KR1 stops being a scoping argument.
+**All fifty are now built.** 50 state packs, **309 MB** on disk against the
+~310 MB estimated above and the ~450 MB R-02 assumed — the estimate held to within 2%.
+The batch took about two hours on one machine. A-KR1 is no longer a scoping argument:
+every US state has a flora-fauna pack.
+
+One operational note earned the hard way: the batch saturates every core, and an eval
+run started alongside it went from 5 s per question to 98 s. Ingest and measurement
+must not share a machine, or the latency numbers are contention, not the system.
 
 ### The real coverage weakness is animals, not states
 

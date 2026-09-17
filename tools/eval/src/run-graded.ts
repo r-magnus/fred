@@ -14,17 +14,32 @@
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ask, verifyEmbedderParity } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, DEFAULT_RETRIEVAL } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
 import { loadGradedSet, describeSet, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
+/**
+ * TOPK overrides how many chunks reach the generator, so the distractor question
+ * can be swept without editing rag-core. Three of the four graded "wrong passage"
+ * failures had the right chunk at SOURCE 1 and were answered from SOURCE 4
+ * (docs/results-akr2.md), which is a generation problem wearing a retrieval
+ * costume — and the obvious thing to test is whether fewer sources fixes it.
+ */
+const topK = process.env.TOPK === undefined ? DEFAULT_RETRIEVAL.topK : Number(process.env.TOPK);
+if (!Number.isInteger(topK) || topK < 1) throw new Error(`TOPK must be a positive integer, got ${process.env.TOPK}`);
+const retrieval = { ...DEFAULT_RETRIEVAL, topK };
+
 const questions: GradedQuestion[] = GRADED_SETS.flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
 );
 console.log(describeSet(questions));
+const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`;
+// Printed because these two settings are what an A/B between runs is varying,
+// and a results file that does not say which model produced it is not evidence.
+console.log(`topK=${topK}  model=${genModelPath.split('/').pop()}`);
 
 const store = new NodePackStore();
 const manifests = readdirSync('packs')
@@ -39,7 +54,7 @@ const backend = await createNodeBackend({
   embedModelId: base.embedding.modelId,
   cosineFloor: base.embedding.cosineFloor,
   probe: base.embedding.probe,
-  genModelPath: process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`,
+  genModelPath,
 });
 
 // A parity failure invalidates every number below it, so check before spending
@@ -57,7 +72,7 @@ const runs: GradedRun[] = [];
 
 for (const [i, q] of questions.entries()) {
   const t0 = Date.now();
-  const res = await ask(q.question, { backend, store, packs }, { state: q.state });
+  const res = await ask(q.question, { backend, store, packs }, { state: q.state, retrieval });
 
   let answer = '';
   if (res.kind === 'answer') {

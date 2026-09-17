@@ -1,0 +1,384 @@
+{
+  "grader": "Claude Opus 5 (in-session, per README \u00a704 QR-02)",
+  "gradedAt": "2026-09-16",
+  "runs": "docs/graded-runs.jsonl",
+  "gradedByJudge": 40,
+  "verdicts": [
+    {
+      "questionId": "fa-bleed-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Direct pressure and escalation to emergency services are right, but the tourniquet step is missing and it invents 'if bleeding continues after 30 minutes' \u2014 a fixed waiting period that appears in no source and would delay a tourniquet past the point it helps."
+    },
+    {
+      "questionId": "fa-bleed-02",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "The whole answer to a soaked dressing is 'do not remove it, add another on top'. This says neither, and step 2 directs the user to wipe blood off the wound, which requires lifting the dressing it should be preserving."
+    },
+    {
+      "questionId": "fa-snake-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Keeps the victim still, which is correct, then stops at washing the bite. No red flags, but it omits urgent evacuation entirely \u2014 for a rattlesnake bite, antivenom is the treatment and nothing else substitutes. The omission changes what the person does."
+    },
+    {
+      "questionId": "fa-snake-02",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Never answers the tourniquet question directly, which is a gap, but every step given is correct: still, limb below heart, remove constricting items, evacuate urgently. Someone following all six steps would not apply a tourniquet."
+    },
+    {
+      "questionId": "fa-shock-01",
+      "acceptable": false,
+      "pointsHit": [
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Asked for the signs of shock and gave almost none of them \u2014 the answer is about breath sounds, pneumonia and diabetic ketoacidosis. Bleeding control and calling for help are correct but do not cover recognition, which is what was asked."
+    },
+    {
+      "questionId": "fa-burn-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Cooling and covering are right, but it omits seeking care for a scald, and step 4 \u2014 'use salt water (cooked eyes or blood) to replace lost minerals' \u2014 is incoherent fabrication in the middle of first-aid instructions."
+    },
+    {
+      "questionId": "fa-burn-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Asked which burns need a hospital and named none of the criteria: not the body-surface threshold, not hands/face/groin/joints, not inhalation injury. Instead it tells a layperson to commence fluid resuscitation."
+    },
+    {
+      "questionId": "fa-choke-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Stand behind, lean forward, repeat abdominal thrusts is the correct immediate action and is actionable. It trails off at 'or becomes unconscious' without naming CPR, which is a real gap, but the life-saving manoeuvre is present and correct."
+    },
+    {
+      "questionId": "fa-seizure-01",
+      "acceptable": false,
+      "pointsHit": [
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Tells a hiker to give a benzodiazepine and arrange transfer to a surgical centre. None of the lay actions \u2014 protect from injury, do not restrain, nothing in the mouth \u2014 appear. Clinically framed and not actionable by the person asking."
+    },
+    {
+      "questionId": "fa-hypo-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "The four field actions are correct and complete for the immediate situation: out of the cold, out of wet clothing, insulate, cover head to toe. Omits seeking help for a confused patient, which is a gap, but nothing advised is wrong or unsafe."
+    },
+    {
+      "questionId": "fa-heat-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Full sign list including clammy skin, weakness, dizziness, headache, nausea and cramps, then move to shade. Distinguishes it from heat stroke. Water is not mentioned, which is a minor omission against an otherwise complete answer."
+    },
+    {
+      "questionId": "fa-heat-02",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recognition is right \u2014 altered mental state, hot dry skin, temperature over 104F. But the question was what *changes*, and the change is that heat stroke is life-threatening and needs rapid cooling and emergency care. 'Move to a cooler area' is not rapid cooling."
+    },
+    {
+      "questionId": "fa-fracture-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Asked how to splint an arm with sticks and never describes splinting. Checking pulses is correct; the rest is military documentation procedure \u2014 administering the CWMP and filling in a DD Form 1380 \u2014 which a civilian cannot act on."
+    },
+    {
+      "questionId": "fa-cut-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Answers a branch cut with snakebite guidance: 'do not make any deep cuts at the bite site'. Correct polarity now that the chunk carries its header, but it is the wrong passage \u2014 no pressure, no irrigation, no dressing."
+    },
+    {
+      "questionId": "fa-infection-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names the signs the question asked for \u2014 pain, swelling, redness, raised temperature, pus \u2014 and follows with warm-compress care that is corpus-derived rather than invented. Does not say to seek care, which is a gap, but recognition was the ask."
+    },
+    {
+      "questionId": "fa-unconscious-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovery position, named, with the reason: fluid drains rather than being inhaled. Directly and correctly answers the question asked."
+    },
+    {
+      "questionId": "fa-head-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "A thorough watch-list including confusion, repeated vomiting, unequal pupils and drowsiness, plus log-rolling on vomiting and keeping someone with the patient. Does not say to seek care, but observation was the question."
+    },
+    {
+      "questionId": "fa-eye-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Builds dressings around the object to support it and minimise movement, then seeks medical aid immediately. Never advises removing it or pressing on the globe \u2014 the two things that would cause harm."
+    },
+    {
+      "questionId": "fa-blister-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Moleskin doughnut centred over the blister is exactly the right friction fix, plus clean dry socks and proper fit. Mentions reducing infection risk. Cluttered with irrelevant steps but correct throughout."
+    },
+    {
+      "questionId": "sv-water-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Boiling named first, with chemical disinfectants and filters as alternatives, and framed so that water is purified rather than assumed safe. Does not specify bringing to a full boil."
+    },
+    {
+      "questionId": "sv-water-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "The question ruled out boiling and step 1 suggests boiling anyway, which is non-responsive. But both options that actually apply \u2014 sunlight and chemical disinfectants \u2014 are given."
+    },
+    {
+      "questionId": "sv-fire-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "The user said they have matches. The answer describes striking sparks off a ferro rod with a knife, equipment they did not list, and never mentions using the matches, lighting the tinder from below, or progressing to kindling."
+    },
+    {
+      "questionId": "sv-shelter-01",
+      "acceptable": true,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Substantive and actionable: hazards overhead, venomous animals at the site, Y-fork supports, 40-60 degree pitch, three feet of debris. Skips looking for natural shelter first, but what it describes is a real shelter a person could build."
+    },
+    {
+      "questionId": "sv-nav-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Asked how to find north *without* a compass and answered by telling the user to align a compass needle with magnetic north. Entirely non-responsive to the stated constraint."
+    },
+    {
+      "questionId": "sv-knot-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Describes building a snare with a slip noose and a perch. No hitch, no tarp, no tree \u2014 wrong passage retrieved and nothing in the answer addresses the question."
+    },
+    {
+      "questionId": "sv-plant-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        4
+      ],
+      "redFlagsHit": [],
+      "reasoning": "The avoid list is conveyed with correct polarity \u2014 milky sap, seeds in pods, bitter or soapy taste all framed as things to avoid. This is the passage whose header was stripped before the chunker fix; it now reads correctly."
+    },
+    {
+      "questionId": "sv-plant-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "The corpus says to avoid all legumes. The answer says beans and peas can be eaten if they pass a taste test, which inverts the source's advice on the exact family the question asked about."
+    },
+    {
+      "questionId": "sv-river-01",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Two disconnected fragments. Identifies a rock ledge as indicating dangerous rapids, then trails into a generic sentence about rivers varying. No usable guidance on choosing a crossing or on swimming with the current."
+    },
+    {
+      "questionId": "sv-cold-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Asked what the condition *is* and never names immersion foot. Rewarming advice is correct and appropriately gradual, but after two days of numb, pale feet the gangrene risk and the need for medical care go unmentioned."
+    },
+    {
+      "questionId": "sv-hypo-prevent-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Hits the two things that matter most for the situation described: stay dry, and get a barrier between the body and the ground. Concise and correct."
+    },
+    {
+      "questionId": "ff-oak-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Three chunk headers and no content. The answer is literally the section titles \u2014 'Pacific poison-oak (Toxicodendron diversilobum) \u2014 General Distribution' \u2014 with nothing describing what the plant looks like."
+    },
+    {
+      "questionId": "ff-oak-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Echoes its own instructions back as the answer: 'check the sources', 'if information is available, specify where it grows'. No distribution information at all, though the pack contains it."
+    },
+    {
+      "questionId": "ff-lion-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Another instruction echo \u2014 'check the sources', 'identify what they eat based on their diet mentioned in the sources' \u2014 plus an irrelevant line about contacting emergency services. Answers neither half of the question."
+    },
+    {
+      "questionId": "ff-bear-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Instruction echo. 'Check the distribution' and 'use the provided sources to determine if they are present or absent' is not an answer to a yes/no question the pack can answer."
+    },
+    {
+      "questionId": "ff-bear-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct and specific: few predators other than humans, naming grizzly bears, mountain lions and gray wolves. Trailing lines about coyotes and badgers are retrieval bleed but harmless."
+    },
+    {
+      "questionId": "ff-blackoak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Answers the yes/no question correctly and immediately \u2014 native to Oregon and California \u2014 and adds a real range detail. Misses the southern-Oregon specifics but is correct as far as it goes."
+    },
+    {
+      "questionId": "ff-or-bear-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Echoes its instructions, then declines with 'I don't have reliable information on that' \u2014 for a question the Oregon pack does contain the answer to."
+    },
+    {
+      "questionId": "ff-or-coyote-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "The best answer in the set. Opportunistic feeder, roughly 90 percent animal matter, a specific prey list, and named plant foods including juniper berries and prickly pear."
+    },
+    {
+      "questionId": "ff-list-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Opens by telling the user to contact emergency services, then lists three species by their forage value to livestock. Names species but never addresses what is present around the user, which is what was asked."
+    },
+    {
+      "questionId": "ff-berry-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Ends with 'if they appear to be edible, consider them safe to eat' \u2014 the opposite of confirming identification, and exactly the reasoning that gets foragers poisoned."
+    }
+  ]
+}

@@ -16,18 +16,12 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ask, verifyEmbedderParity } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
-import { loadGradedSet, describeSet, type GradedQuestion, type GradedRun } from './graded-types.ts';
+import { loadGradedSet, describeSet, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
-const SETS = [
-  'tools/eval/data/graded-firstaid.json',
-  'tools/eval/data/graded-survival.json',
-  'tools/eval/data/graded-flora-fauna.json',
-  'tools/eval/data/graded-negative.json',
-];
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
-const questions: GradedQuestion[] = SETS.flatMap((s) =>
+const questions: GradedQuestion[] = GRADED_SETS.flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
 );
 console.log(describeSet(questions));

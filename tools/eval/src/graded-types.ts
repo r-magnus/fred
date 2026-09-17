@@ -59,6 +59,14 @@ export interface GradedQuestion {
   readonly cite?: { readonly page: number | null; readonly quote: string };
 }
 
+/** The shipped graded sets. Kept here so no script can drift from the others. */
+export const GRADED_SETS = [
+  'tools/eval/data/graded-firstaid.json',
+  'tools/eval/data/graded-survival.json',
+  'tools/eval/data/graded-flora-fauna.json',
+  'tools/eval/data/graded-negative.json',
+] as const;
+
 /** One question run through the real pipeline, before grading. */
 export interface GradedRun {
   readonly questionId: string;
@@ -141,4 +149,63 @@ export function describeSet(qs: readonly GradedQuestion[]): string {
       return a;
     }, {})).sort().map(([k, n]) => `${k}=${n}`).join(' ');
   return `n=${qs.length}  outcome: ${by((q) => q.expect)}  provenance: ${by((q) => q.provenance)}  pack: ${by((q) => q.pack)}`;
+}
+
+/**
+ * Load grader verdicts and check them against the runs they judge.
+ *
+ * Grading is done by reading `grading-packet.ts` output, so the verdict file is
+ * written by hand rather than emitted by a program. That makes validation matter
+ * more, not less: a question silently missing its verdict would quietly shrink
+ * the denominator and inflate the score.
+ */
+export function loadVerdicts(
+  path: string,
+  read: (p: string) => string,
+  questions: ReadonlyMap<string, GradedQuestion>,
+  runs: readonly GradedRun[],
+): Verdict[] {
+  const raw = JSON.parse(read(path)) as { verdicts?: unknown };
+  if (!Array.isArray(raw.verdicts)) throw new Error(`${path}: expected a "verdicts" array`);
+
+  const seen = new Set<string>();
+  const verdicts = raw.verdicts.map((entry, i) => {
+    const v = entry as Partial<Verdict>;
+    const where = `${path}.verdicts[${i}]`;
+    if (typeof v.questionId !== 'string') throw new Error(`${where}: missing questionId`);
+    if (!questions.has(v.questionId)) throw new Error(`${where}: unknown question "${v.questionId}"`);
+    if (seen.has(v.questionId)) throw new Error(`${where}: duplicate verdict for "${v.questionId}"`);
+    seen.add(v.questionId);
+    if (typeof v.acceptable !== 'boolean') throw new Error(`${where}: acceptable must be a boolean`);
+    if (!Array.isArray(v.pointsHit) || !Array.isArray(v.redFlagsHit)) {
+      throw new Error(`${where}: pointsHit and redFlagsHit must be arrays`);
+    }
+    // The safety rule is enforced here rather than trusted: a verdict that
+    // reports a red flag and still passes the answer has contradicted itself.
+    if (v.redFlagsHit.length > 0 && v.acceptable) {
+      throw new Error(`${where}: "${v.questionId}" trips red flags ${JSON.stringify(v.redFlagsHit)} but is marked acceptable`);
+    }
+    const q = questions.get(v.questionId)!;
+    for (const n of v.pointsHit) {
+      if (typeof n !== 'number' || n < 0 || n >= q.keyPoints.length) {
+        throw new Error(`${where}: pointsHit index ${n} is outside 0..${q.keyPoints.length - 1}`);
+      }
+    }
+    for (const n of v.redFlagsHit) {
+      if (typeof n !== 'number' || n < 0 || n >= (q.redFlags?.length ?? 0)) {
+        throw new Error(`${where}: redFlagsHit index ${n} is outside this question's red flags`);
+      }
+    }
+    return v as Verdict;
+  });
+
+  const needed = runs.filter((r) => {
+    const q = questions.get(r.questionId);
+    return q !== undefined && q.expect === 'answer' && r.outcome === 'answer';
+  });
+  const missing = needed.filter((r) => !seen.has(r.questionId)).map((r) => r.questionId);
+  if (missing.length > 0) {
+    throw new Error(`${path}: ${missing.length} answered question(s) have no verdict: ${missing.join(', ')}`);
+  }
+  return verdicts;
 }

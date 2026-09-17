@@ -20,20 +20,14 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { DEFAULT_ABSTAIN_THRESHOLD } from '@fred/rag-core';
-import { loadGradedSet, type GradedQuestion, type GradedRun, type Verdict } from './graded-types.ts';
+import { loadGradedSet, loadVerdicts, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
-const SETS = [
-  'tools/eval/data/graded-firstaid.json',
-  'tools/eval/data/graded-survival.json',
-  'tools/eval/data/graded-flora-fauna.json',
-  'tools/eval/data/graded-negative.json',
-];
 
 const runsPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 const verdictsPath = process.argv[3] ?? 'docs/graded-verdicts.json';
 
 const questions = new Map<string, GradedQuestion>(
-  SETS.flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
+  GRADED_SETS.flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
 );
 const runs: GradedRun[] = readFileSync(runsPath, 'utf8')
   .split('\n').filter((l) => l.trim() !== '')
@@ -41,8 +35,8 @@ const runs: GradedRun[] = readFileSync(runsPath, 'utf8')
 
 let accepted: Set<string> | null = null;
 if (existsSync(verdictsPath)) {
-  const v = JSON.parse(readFileSync(verdictsPath, 'utf8')) as { verdicts: Verdict[] };
-  accepted = new Set(v.verdicts.filter((x) => x.acceptable).map((x) => x.questionId));
+  const v = loadVerdicts(verdictsPath, (p) => readFileSync(p, 'utf8'), questions, runs);
+  accepted = new Set(v.filter((x) => x.acceptable).map((x) => x.questionId));
   console.log(`using judge verdicts from ${verdictsPath}: an answer counts only if accepted\n`);
 } else {
   console.log(`no ${verdictsPath}; scoring an answered question as correct without judging its content`);

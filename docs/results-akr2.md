@@ -334,6 +334,76 @@ are fixes, and nothing regressed. Questions wrongly answered with "which state a
 you in?" went from 2 to 0. False answers are unchanged at 13, as expected — routing
 was never what let those through.
 
+## Improving it: what moved the number
+
+The graded failures pointed at three levers, and the 91%-in-context finding ruled
+out a fourth. Retrieval already supplies the answer in almost every failure, so
+tuning retrieval further has nearly no headroom on A-KR2. What is left is the
+prompt, the context handed to the generator, and the generator itself.
+
+Each was measured on the same 68 questions with retrieval held identical.
+
+### Lever 1 — the prompt: 42.5% -> 52.5%
+
+Three changes, all diagnosed from verdicts rather than guessed:
+
+- **The response shape is chosen per query** from the retrieved chunks'
+  `blockKind`, instead of the prefix always demanding numbered steps. A species
+  question has no steps, and demanding them is what produced "1. Check the
+  distribution of American black bears in the state."
+- **The emergency-services line only fires on first-aid domains.** It had been
+  appearing on "what plants and animals are near me?"
+- **Added explicit bans** on describing how it would answer, on inventing numbers
+  or doses absent from the sources, and an instruction to preserve "avoid" and
+  "do not" framing.
+
+Both conditional rules live in the per-query half, not `SYSTEM_PREFIX`, because
+the prefix has to stay byte-identical for prefix KV caching and the suffix is
+rebuilt every query anyway.
+
+| Group | Baseline | After | Change |
+|---|---|---|---|
+| Flora and fauna | 3/10 | **7/10** | **+4** |
+| Survival | 5/11 | 6/11 | +1 |
+| First aid | 9/19 | 8/19 | −1 |
+| **Total** | **17/40** | **21/40** | **+4** |
+
+**Red flags tripped fell from 7 to 2**, which matters more than the headline: the
+answers that remained wrong became less dangerous. Nine answers were fixed
+outright — poison-oak identification went from three bare chunk headers to a real
+botanical description, the tarp question from snare construction to two half
+hitches, "do black bears live in Oregon" from an instruction echo to "yes".
+
+**Five regressions shared one cause, and it was self-inflicted.** The first
+attempt capped prose answers at "two or three short sentences and nothing else",
+which truncated four good answers: a fifteen-sign head-injury watch-list collapsed
+to three signs, the eye-injury answer lost the dressings-around-the-object
+instruction and kept only "seek medical aid", and a complete shelter-building
+answer was reduced to two insulation steps. Brevity was never the failure mode;
+shape was. The cap is gone.
+
+The fifth was worse and more interesting: asked about a cut on a branch, the
+entire answer came back as *"If life is at risk, say to contact emergency services
+first"* — the prompt's own instruction, echoed verbatim, because the rules sat
+immediately above `ANSWER:`. The rules now sit before the question, so the
+question is the last thing the model reads.
+
+### Lever 2 — context compression
+
+Compression scored every sentence across every chunk on one scale, ignoring the
+ranking Stage 2 had just produced, so the top chunk could be thinned while a
+distractor survived intact. It is also actively wrong on negated questions: for
+"find north *without* a compass", overlap scoring keeps every sentence containing
+"compass" and drops the star-navigation sentences that do not.
+
+Sentence scores now decay with chunk rank. Measured alone at 0.6B the effect was a
+wash — it fixed the choking answer, which now describes the abdominal-thrust
+technique properly, and broke the burn answer back into the "cooked eyes or blood"
+hallucination. **That instability is itself the finding:** at this model size,
+small changes to the context flip answers near-randomly, so a wash here is weak
+evidence either way and the change is kept on its principle rather than tuned
+against noise.
+
 ## What is not done
 
 - **`DEFAULT_ABSTAIN_THRESHOLD` is still 0.35.** The graded sweep says no value is

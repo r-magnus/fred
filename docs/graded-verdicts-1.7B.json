@@ -1,0 +1,391 @@
+{
+  "grader": "Claude Opus 5 (in-session)",
+  "variant": "F: Qwen3-1.7B, conditional prompt, rank-aware compression",
+  "runs": "/tmp/claude-1000/-home-odysseus-code-fred/692ee784-15ab-407e-9230-36c5e7ca9a0e/scratchpad/runs-F-1.7B-Aprompt.jsonl",
+  "gradedByJudge": 40,
+  "verdicts": [
+    {
+      "questionId": "fa-bleed-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Still the invented 30-minute wait."
+    },
+    {
+      "questionId": "fa-bleed-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "'Remove the soaked bandage and replace it' \u2014 the one thing not to do, now stated outright."
+    },
+    {
+      "questionId": "fa-snake-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovered from the decline: stay calm, move away, wash, seek medical attention immediately. The urgent-care step that was missing in every earlier run is present."
+    },
+    {
+      "questionId": "fa-snake-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovered: no tourniquet, limb still and below heart level, immediate medical assistance."
+    },
+    {
+      "questionId": "fa-shock-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Capillary refill over 3 seconds, altered mental status, pale skin, weak radial pulse, then control bleeding and alert medical personnel."
+    },
+    {
+      "questionId": "fa-burn-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Cool 20 minutes, no ice, sterile cover, elevate, remove jewellery. Complete."
+    },
+    {
+      "questionId": "fa-burn-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "All four criteria plus pre-burn illness."
+    },
+    {
+      "questionId": "fa-choke-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Regression, and a dangerous one: 'do not perform abdominal thrusts' for a person who cannot speak. That is the opposite of the indicated action."
+    },
+    {
+      "questionId": "fa-seizure-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Protects from injury and keeps the airway clear. Weaker than the other 1.7B run \u2014 the do-not-restrain and nothing-in-the-mouth points are gone \u2014 but nothing advised is unsafe."
+    },
+    {
+      "questionId": "fa-hypo-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Wet clothing off, insulate, avoid unnecessary movement, warm sweet fluids only if conscious, seek aid. The most complete version of this answer in any run."
+    },
+    {
+      "questionId": "fa-heat-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Full signs and full treatment."
+    },
+    {
+      "questionId": "fa-heat-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Side-by-side comparison with the temperature threshold and the severity difference."
+    },
+    {
+      "questionId": "fa-fracture-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Unchanged in substance: circulation checks without the joints above and below."
+    },
+    {
+      "questionId": "fa-cut-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "All four points: wash, pressure, cover, escalate if deep."
+    },
+    {
+      "questionId": "fa-infection-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovered: redness, swelling, pain, pus, raised temperature."
+    },
+    {
+      "questionId": "fa-unconscious-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovery position, named."
+    },
+    {
+      "questionId": "fa-head-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Watch-list plus airway and spinal caution."
+    },
+    {
+      "questionId": "fa-eye-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Regression to chunk-quoting. Recites the examine-the-eyes list and never says not to remove the object or to shield it \u2014 the two things that matter."
+    },
+    {
+      "questionId": "fa-blister-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Clean, moleskin over the blister, dry, two pairs of socks."
+    },
+    {
+      "questionId": "sv-water-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Boiling, chemicals or filters, and states stream water must be treated."
+    },
+    {
+      "questionId": "sv-water-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still declines, on a question the survival pack answers."
+    },
+    {
+      "questionId": "sv-fire-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Still the metal match the user does not have."
+    },
+    {
+      "questionId": "sv-shelter-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Site selection with hazards, then natural materials and screens."
+    },
+    {
+      "questionId": "sv-nav-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "'Use a magnetic variation adjustment or orient the map' \u2014 still no sun, no shadow stick, no stars."
+    },
+    {
+      "questionId": "sv-knot-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declines, having answered with two half hitches under the 0.6B."
+    },
+    {
+      "questionId": "sv-plant-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        4
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Avoid list intact with correct polarity."
+    },
+    {
+      "questionId": "sv-plant-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Regression from the other 1.7B run, which said 'avoid all plants in the legume family'. This one says to identify the type and test for edibility before consuming, which leaves the door open on the family the corpus says to avoid entirely."
+    },
+    {
+      "questionId": "sv-river-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovered, and better: rock ledge, estuary, and eddies with the backward pull explained."
+    },
+    {
+      "questionId": "sv-cold-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct care and the warning off direct heat, but no longer names immersion foot \u2014 and the question is 'what is that?'"
+    },
+    {
+      "questionId": "sv-hypo-prevent-01",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "'Use a thicker sleeping bag' answers a question the user did not ask; theirs is thin and that is the premise. No ground insulation."
+    },
+    {
+      "questionId": "ff-oak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Leaflet shape, oak-like resemblance, white drupes, stem lengths."
+    },
+    {
+      "questionId": "ff-oak-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still fails to localise within California."
+    },
+    {
+      "questionId": "ff-lion-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Present, with ungulate prey and carrion."
+    },
+    {
+      "questionId": "ff-bear-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still declines on a question the California pack answers."
+    },
+    {
+      "questionId": "ff-bear-02",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names the three real predators but drops 'few other than humans' and asserts badgers kill black bears \u2014 the source has it the other way round."
+    },
+    {
+      "questionId": "ff-blackoak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Yes, with the southern Oregon foothills detail the key points asked for."
+    },
+    {
+      "questionId": "ff-or-bear-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Direct yes."
+    },
+    {
+      "questionId": "ff-or-coyote-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Opportunistic, animal and vegetable matter, berries."
+    },
+    {
+      "questionId": "ff-list-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Recovered: names winterfat and Drummond's willow with what eats them."
+    },
+    {
+      "questionId": "ff-berry-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still wrong about the family."
+    }
+  ]
+}

@@ -484,6 +484,31 @@ Three things worth trying before accepting the trade:
    garbage, but that was diagnosed as an OpenCL/Hexagon decode problem on a
    specific llama.rn build, and it won prefill decisively before it broke.
 
+#### And the prompt stops mattering
+
+Running the 1.7B a second time with the conditional prompt restored — the
+configuration worth ten points on the 0.6B — gave **24/40, 60.0%**, against E's
+25/40. One answer apart at n = 40 is noise.
+
+| Model | Original / degraded prompt | Conditional prompt | Prompt effect |
+|---|---:|---:|---:|
+| Qwen3-0.6B | 42.5% | 52.5% | **+10.0** |
+| Qwen3-1.7B | 62.5% | 60.0% | **−2.5 (noise)** |
+
+**Prompt sensitivity falls away with model size.** The 0.6B needed to be told what
+shape to answer in, and got it wrong when the instruction did not fit the question.
+The 1.7B works it out from the question either way. That is worth knowing before
+spending more effort on prompt tuning: at 0.6B it was the cheapest lever available,
+and at 1.7B it has essentially no headroom left.
+
+The two 1.7B runs also disagree about *which* answers they get right, while landing
+in the same place overall — the conditional-prompt run recovered five declines and
+lost four others to regressions (the choking answer flipped to "do not perform
+abdominal thrusts", the eye answer reverted to chunk-quoting, the legume answer
+lost "avoid all plants in the legume family"). Individual answers are far less
+stable than the aggregate, which is a caution against reading single-question
+improvements as progress.
+
 #### Unmeasured
 
 Device memory. The 0.6B sits at 1.72 GB PSS CPU-only; the 1.7B's weights are 2.8x

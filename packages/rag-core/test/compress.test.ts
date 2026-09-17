@@ -146,3 +146,24 @@ test('exact token counts drive the reduction, not a character heuristic', async 
   assert.equal(a.tokensAfter, b.tokensAfter);
   assert.equal(a.chunks[0]!.text, b.chunks[0]!.text);
 });
+
+test('a sentence from the top chunk outranks an equally relevant one further down', async () => {
+  // Compression used to score every sentence on one scale regardless of which
+  // chunk it came from, so the chunk Stage 2 ranked first could be thinned while
+  // a distractor survived intact. With 21 of 23 graded failures having the right
+  // material already in context, that is the wrong direction to be trimming in.
+  const mk = (id: string, text: string): ChunkRecord => ({
+    id, packId: 'p', ordinal: 0, text, section: 's', source: 'src', page: 1,
+    domain: 'first-aid-physical', licenseId: 'l', blockKind: 'prose',
+  });
+  // Identical bodies, so only rank can separate them.
+  const body = 'Topic sentence about bleeding.\nA filler sentence with no query terms at all.';
+  const res = await compressContext(
+    [mk('best', body), mk('worst', body)],
+    extractKeywords('bleeding'),
+    { ...DEFAULT_COMPRESSION, countTokens: async (t) => t.map((x) => x.split(/\s+/).length) },
+  );
+  const kept = (i: number): number => res.perChunk[i]!.sentencesKept;
+  assert.ok(kept(0) >= kept(1),
+    `top chunk kept ${kept(0)} sentences, lower chunk kept ${kept(1)}`);
+});

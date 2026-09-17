@@ -134,6 +134,37 @@ interface ScoredSentence {
 const W_OVERLAP = 0.7;
 const W_DENSITY = 0.3;
 
+/**
+ * Per-rank decay applied to a sentence's keep-score.
+ *
+ * Compression used to score every sentence across every chunk on one scale, with
+ * no notion that Stage 2 had already ranked the chunks. A sentence from the
+ * best-matching chunk competed on equal terms with one from the fourth, so the
+ * winning chunk could be trimmed while a distractor was preserved whole.
+ *
+ * That matters because the graded eval found the answering material present in
+ * the retrieved context for 21 of 23 failures (docs/results-akr2.md) — retrieval
+ * was right and the generator read the wrong part. Handing it a context where the
+ * top chunk has been thinned makes that worse.
+ *
+ * It is also actively wrong when the question carries a negation. For "how can I
+ * find north WITHOUT a compass", overlap scoring keeps every sentence containing
+ * "compass" and drops the star-navigation sentences that do not — so compression
+ * selects against the answer. Rank decay does not fix negation, but it stops the
+ * distractor outranking the passage retrieval actually chose.
+ *
+ * 0.75 per rank: at topK=4 the fourth chunk's sentences score 0.42x the first's,
+ * enough to be dropped first without ever emptying it (a chunk is never emptied).
+ *
+ * RANK_FLOOR exists because decay alone cannot separate a tie at zero. A sentence
+ * with no query overlap and no domain terms scores 0, and 0 x 0.75^n is still 0 at
+ * every rank — so the top chunk's filler and the fourth chunk's filler tied, and
+ * the tie broke on array order, which dropped the top chunk's sentence first. The
+ * floor is added before the decay so every sentence carries some rank signal.
+ */
+const RANK_DECAY = 0.75;
+const RANK_FLOOR = 0.05;
+
 export async function compressContext(
   chunks: readonly ChunkRecord[],
   keywords: readonly Keyword[],
@@ -180,7 +211,7 @@ export async function compressContext(
         sentenceIndex,
         text,
         tokens,
-        score: W_OVERLAP * overlap + W_DENSITY * density,
+        score: (W_OVERLAP * overlap + W_DENSITY * density + RANK_FLOOR) * Math.pow(RANK_DECAY, chunkIndex),
         droppable,
       });
     });

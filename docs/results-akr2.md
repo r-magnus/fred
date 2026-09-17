@@ -422,6 +422,75 @@ small changes to the context flip answers near-randomly, so a wash here is weak
 evidence either way and the change is kept on its principle rather than tuned
 against noise.
 
+### Lever 3 — model size: the big one, and it costs A-KR3
+
+The 91%-in-context finding predicted this. If retrieval already supplies the answer
+in almost every failure, the generator is the bottleneck, and the generator is a
+0.6B model.
+
+Swapped for **Qwen3-1.7B-Q4_K_M** (1.11 GB against 0.40 GB), everything else held.
+
+| Run | Model | Prompt | Acceptable |
+|---|---|---|---:|
+| Baseline | 0.6B | original | 17/40 — 42.5% |
+| A | 0.6B | conditional | 21/40 — 52.5% |
+| E | **1.7B** | *degraded* | **25/40 — 62.5%** |
+
+Run E is the strong result because of the handicap: it ran the reverted prompt
+variant, the one that cost the 0.6B seven passing answers. **Ten of E's fifteen
+failures are that prompt's declines and echoes, not model errors.** The larger
+model beat the smaller one by ten points while carrying a prompt known to be bad,
+and it was also more robust to it — 9 declines where the 0.6B produced 16.
+
+What it fixed is the part that matters. Questions that failed in *every* 0.6B
+configuration:
+
+- **Signs of shock** — finally lists them (confusion, weak radial pulse, cool
+  clammy skin, excessive thirst) instead of discussing pneumonia and diabetic
+  ketoacidosis.
+- **When a burn needs a hospital** — every criterion, having previously named none.
+- **Wild beans and peas** — "avoid all plants in the legume family, including beans
+  and peas". Every 0.6B run either inverted this or declined. This is the
+  safety-critical one.
+- **Immersion foot** — names the condition, rewarms gradually, and explicitly warns
+  off fires and heating pads.
+- **A cut on a branch** — irrigate, pressure, escalate. No snakebite content at all.
+
+Mean answer length went from 251 to 344 characters: the answers are not just more
+often right, they carry more of the source.
+
+#### The cost
+
+| | 0.6B | 1.7B |
+|---|---:|---:|
+| Mean latency | 4,270 ms | **11,342 ms** |
+| p95 | 6,710 ms | **17,059 ms** |
+| Answers over 10 s | **0 / 53** | **27 / 53** |
+
+**This fails A-KR3.** The 0.6B clears the ten-second target with every answer; the
+1.7B misses it on half of them, on a desktop that has been a good proxy for the
+phone (4.9 s here against 4.8 s on device for the same query). A-KR2 and A-KR3 are
+now in direct tension, and that is a product decision rather than a tuning problem:
+62.5% of answers usable at 11 s, or 52.5% at 4 s.
+
+Three things worth trying before accepting the trade:
+
+1. **Lower `topK`.** Four sources is 4x the prefill, and prefill dominates TTFT.
+   Three of the four "wrong passage" failures had the right chunk at SOURCE 1 and
+   were answered from SOURCE 4, so fewer sources may help accuracy *and* latency at
+   once. `TOPK` is already an environment override on the runner for exactly this.
+2. **A 1B model** as a middle point, if one exists in a comparable quant.
+3. **Re-test GPU offload.** `docs/results-m3.md` disabled it because it produced
+   garbage, but that was diagnosed as an OpenCL/Hexagon decode problem on a
+   specific llama.rn build, and it won prefill decisively before it broke.
+
+#### Unmeasured
+
+Device memory. The 0.6B sits at 1.72 GB PSS CPU-only; the 1.7B's weights are 2.8x
+larger, so 2.5-3 GB is a reasonable guess and fine on a 12 GB phone. It is not fine
+for US-11 ("a user with a weaker mobile device"), and it is a guess until it runs on
+hardware.
+
 ## What is not done
 
 - **`DEFAULT_ABSTAIN_THRESHOLD` is still 0.35.** The graded sweep says no value is

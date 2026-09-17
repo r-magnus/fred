@@ -6,6 +6,13 @@
 
 ## Headline
 
+> **Superseded.** The two tables in this section are the first run, at n = 46 and
+> under a prompt that no longer exists. They are kept because the McNemar analysis
+> below refers to them. **The current MCQ numbers are the n = 109 re-run at the end
+> of this file**, and the free-form graded numbers that A-KR2 is actually scored on
+> are in `docs/results-akr2.md` — that eval measures a different task and does not
+> reproduce this ordering.
+
 | Condition | Accuracy | Mean ms | Prompt tokens |
 |---|---:|---:|---:|
 | vanilla | 63.0% | 191 | 55 |

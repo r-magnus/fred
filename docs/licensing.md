@@ -51,6 +51,16 @@ rather than a state. FEIS animal reviews are sparse everywhere (median 61 per st
 Hawaii 14), because FEIS covers wildlife only where fire ecology touches habitat.
 Closing that gap needs a second wildlife source, not more states.
 
+## FCC mobile coverage (Beta)
+
+| id | Source | License | Commercial use |
+|---|---|---|---|
+| `fcc-bdc` | FCC Broadband Data Collection — mobile broadband and voice availability | Public domain (US Gov work) | ✅ Yes |
+
+Carrier-reported propagation modelling, published as H3 resolution-9 hexagons. Public
+domain, so it raises none of the questions WHO BEC's NonCommercial terms do. The
+caveat is accuracy rather than licensing — see `docs/beta-service-coverage.md`.
+
 ## ODbL and maps
 OpenStreetMap-derived tiles require attribution and carry share-alike obligations on
 the derived database. Display the attribution in the map view, not buried in an

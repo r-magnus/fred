@@ -374,19 +374,37 @@ outright — poison-oak identification went from three bare chunk headers to a r
 botanical description, the tarp question from snare construction to two half
 hitches, "do black bears live in Oregon" from an instruction echo to "yes".
 
-**Five regressions shared one cause, and it was self-inflicted.** The first
-attempt capped prose answers at "two or three short sentences and nothing else",
-which truncated four good answers: a fifteen-sign head-injury watch-list collapsed
-to three signs, the eye-injury answer lost the dressings-around-the-object
-instruction and kept only "seek medical aid", and a complete shelter-building
-answer was reduced to two insulation steps. Brevity was never the failure mode;
-shape was. The cap is gone.
+**Five regressions shared one cause.** The prose shape instruction ends "and
+nothing else", which truncated four good answers: a fifteen-sign head-injury
+watch-list collapsed to three signs, the eye-injury answer lost the
+dressings-around-the-object instruction and kept only "seek medical aid", and a
+complete shelter-building answer was reduced to two insulation steps. The fifth
+was the prompt echoing itself — asked about a cut on a branch, the entire answer
+was *"If life is at risk, say to contact emergency services first"*, the
+instruction verbatim, because the rules sit immediately above `ANSWER:`.
 
-The fifth was worse and more interesting: asked about a cut on a branch, the
-entire answer came back as *"If life is at risk, say to contact emergency services
-first"* — the prompt's own instruction, echoed verbatim, because the rules sat
-immediately above `ANSWER:`. The rules now sit before the question, so the
-question is the last thing the model reads.
+### The obvious fix for those made things much worse
+
+Loosening the cap to "reply in plain sentences" and moving the rules above the
+question — so the question is the last thing before `ANSWER:` — fixed the echo
+and cost far more than it saved:
+
+| | Run A | "fixed" |
+|---|---:|---:|
+| Answers collapsing to "I don't have reliable information on that" | 1 | **16** |
+| ...of which had been passing | — | **7** |
+| Mean answer length | 251 chars | 152 chars |
+
+Seven working answers — the tourniquet question, both water-purification answers,
+the river crossing, mountain lions, Oregon black bears, the species list — became
+refusals. Whatever "and nothing else" is doing, it is holding a 0.6B model to the
+task, and removing the scaffolding let it opt out instead.
+
+This was not graded in full; the decline count settles it. Reverted to the
+measured configuration, with the truncation cost recorded as a known defect rather
+than traded for a worse one. It is a reminder that on a model this small, prompt
+changes have to be measured rather than reasoned about — the change that looked
+strictly better on inspection was a third of the score.
 
 ### Lever 2 — context compression
 

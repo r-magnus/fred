@@ -25,6 +25,12 @@ interface Metrics {
   readability: { clean: number; total: number; defects: { n: number; what: string }[] };
   mcq: { note: string; conditions: { name: string; acc: number }[]; corpusDerived: number; independent: number; reference: string };
   corpora: { pack: string; version: string; chunks: number; source: string }[];
+  device?: {
+    hardware: string; model: string; packLoadMs: number; modelLoadMs: number;
+    retrieveMs: number[]; answers: { q: string; totalMs: number; ttftMs: number }[];
+    meanMs: number; peakPssMb: number; peakRssMb: number; idlePssMb: number;
+    embedderParity: string; note: string;
+  };
 }
 
 const m = JSON.parse(readFileSync('docs/metrics.json', 'utf8')) as Metrics;
@@ -108,6 +114,34 @@ p('```');
 p();
 p(`**${m.latency.overTenSeconds} of ${m.latency.ofQueries}** queries exceed ten seconds. ${m.latency.note}`);
 p();
+
+if (m.device) {
+  const d = m.device;
+  p('## On the actual phone');
+  p();
+  p(`\`${d.hardware}\`  ·  ${d.model}`);
+  p();
+  p('| | |');
+  p('|---|---|');
+  p(`| Pack load | ${d.packLoadMs} ms (four packs) |`);
+  p(`| Model load | ${(d.modelLoadMs / 1000).toFixed(1)} s |`);
+  p(`| Retrieval | ${Math.min(...d.retrieveMs)}-${Math.max(...d.retrieveMs)} ms |`);
+  p(`| Answer, mean | **${(d.meanMs / 1000).toFixed(1)} s** |`);
+  p(`| Peak memory | **${(d.peakPssMb / 1024).toFixed(2)} GB PSS** / ${(d.peakRssMb / 1024).toFixed(2)} GB RSS |`);
+  p(`| Idle after run | ${d.idlePssMb} MB PSS |`);
+  p(`| Embedder parity | ${d.embedderParity} |`);
+  p();
+  p('```');
+  const wq = Math.max(...d.answers.map((a) => a.q.length));
+  for (const a of d.answers) {
+    p(`${a.q.padEnd(wq)}  ${bar(Math.min(100, (a.totalMs / 25000) * 100))}  ${(a.totalMs / 1000).toFixed(1).padStart(5)} s   (TTFT ${(a.ttftMs / 1000).toFixed(1)}s)`);
+  }
+  p(`${'10s target'.padEnd(wq)}  ${bar(40)}`);
+  p('```');
+  p();
+  p(`> ${d.note}`);
+  p();
+}
 
 p('## Readability of the answers Fred gives');
 p();

@@ -1,94 +1,281 @@
 {
-  "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md — it is generated.",
+  "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md \u2014 it is generated.",
   "updated": "2026-09-17",
   "config": {
     "model": "Qwen3-1.7B-Q4_K_M",
     "embedder": "gte-small (ONNX)",
     "abstainThreshold": 0.29,
     "topK": 4,
-    "measuredOn": "desktop harness (node-llama-cpp), settings aligned to device"
+    "measuredOn": "desktop harness for accuracy; Nothing Phone (3) for device latency and memory"
   },
-
   "krs": [
     {
-      "id": "A-KR1", "name": "Necessary knowledge corpora", "due": "2026-09-18",
-      "value": "all 3 types, 50 states", "unit": "",
-      "bands": ["All needed corpora functional", "Most functional", "Bare minimum", "Missing", "Non-functional"],
+      "id": "A-KR1",
+      "name": "Necessary knowledge corpora",
+      "due": "2026-09-18",
+      "value": "all 3 types, 50 states",
+      "unit": "",
+      "bands": [
+        "All needed corpora functional",
+        "Most functional",
+        "Bare minimum",
+        "Missing",
+        "Non-functional"
+      ],
       "grade": "A",
       "note": "First aid, survival, flora/fauna. 53 packs, 186,855 chunks."
     },
     {
-      "id": "A-KR2", "name": "Response accuracy", "due": "2026-10-12",
-      "value": 70.6, "unit": "%", "target": 90,
-      "bands": [">90", "90-80", "79-70", "69-60", "<60"],
+      "id": "A-KR2",
+      "name": "Response accuracy",
+      "due": "2026-10-12",
+      "value": 70.6,
+      "unit": "%",
+      "target": 90,
+      "bands": [
+        ">90",
+        "90-80",
+        "79-70",
+        "69-60",
+        "<60"
+      ],
       "grade": "C",
       "note": "Free-form answers graded against an answer sheet, all five corpora."
     },
     {
-      "id": "A-KR3", "name": "Response time", "due": "2026-10-19",
-      "value": 11.4, "unit": "s", "target": 10, "lowerIsBetter": true,
-      "bands": ["<10s", "10-20s", "21-40s", "1-3m", ">3m"],
+      "id": "A-KR3",
+      "name": "Response time",
+      "due": "2026-10-19",
+      "value": 14.7,
+      "unit": "s",
+      "target": 10,
+      "lowerIsBetter": true,
+      "bands": [
+        "<10s",
+        "10-20s",
+        "21-40s",
+        "1-3m",
+        ">3m"
+      ],
       "grade": "B",
-      "note": "Desktop mean. NOT yet measured on device at this model size."
+      "note": "Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band."
     },
-    { "id": "B-KR1", "name": "Location while in service", "due": "2026-10-26", "value": null, "grade": "—", "note": "Not started. No location code exists." },
-    { "id": "B-KR2", "name": "Offline location estimate", "due": "2026-11-10", "value": null, "grade": "—", "note": "Not started. The harder half of Beta." },
-    { "id": "B-KR3", "name": "Predicted service zone", "due": "2026-11-16", "value": null, "grade": "—", "note": "Data source identified (FCC BDC, ~310MB at H3 res 7). No code." },
-    { "id": "RC-KR1", "name": "iOS and Android app", "due": "2026-11-25", "value": null, "grade": "—", "note": "Android harness only. iOS never built." },
-    { "id": "RC-KR2", "name": "Product page", "due": "2026-12-02", "value": null, "grade": "—", "note": "Not started." },
-    { "id": "RC-KR3", "name": "Promotional material", "due": "2026-12-09", "value": null, "grade": "—", "note": "Not started." }
+    {
+      "id": "B-KR1",
+      "name": "Location while in service",
+      "due": "2026-10-26",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Not started. No location code exists."
+    },
+    {
+      "id": "B-KR2",
+      "name": "Offline location estimate",
+      "due": "2026-11-10",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Not started. The harder half of Beta."
+    },
+    {
+      "id": "B-KR3",
+      "name": "Predicted service zone",
+      "due": "2026-11-16",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Data source identified (FCC BDC, ~310MB at H3 res 7). No code."
+    },
+    {
+      "id": "RC-KR1",
+      "name": "iOS and Android app",
+      "due": "2026-11-25",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Android harness only. iOS never built."
+    },
+    {
+      "id": "RC-KR2",
+      "name": "Product page",
+      "due": "2026-12-02",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Not started."
+    },
+    {
+      "id": "RC-KR3",
+      "name": "Promotional material",
+      "due": "2026-12-09",
+      "value": null,
+      "grade": "\u2014",
+      "note": "Not started."
+    }
   ],
-
   "akr2History": [
-    { "label": "baseline (0.6B)",            "overall": 38.2, "model": "0.6B" },
-    { "label": "+ conditional prompt",       "overall": 44.1, "model": "0.6B" },
-    { "label": "+ Qwen3-1.7B",               "overall": 48.5, "model": "1.7B" },
-    { "label": "+ scope gate, lay lexicon",  "overall": 69.1, "model": "1.7B" },
-    { "label": "+ gate 0.29",                "overall": 70.6, "model": "1.7B" }
+    {
+      "label": "baseline (0.6B)",
+      "overall": 38.2,
+      "model": "0.6B"
+    },
+    {
+      "label": "+ conditional prompt",
+      "overall": 44.1,
+      "model": "0.6B"
+    },
+    {
+      "label": "+ Qwen3-1.7B",
+      "overall": 48.5,
+      "model": "1.7B"
+    },
+    {
+      "label": "+ scope gate, lay lexicon",
+      "overall": 69.1,
+      "model": "1.7B"
+    },
+    {
+      "label": "+ gate 0.29",
+      "overall": 70.6,
+      "model": "1.7B"
+    }
   ],
-
   "akr2Breakdown": {
-    "judged":  { "pass": 32, "total": 46, "what": "questions Fred answered, prose graded against an answer sheet" },
-    "outcome": { "pass": 16, "total": 22, "what": "questions Fred should decline or ask location for, scored on what he did" }
+    "judged": {
+      "pass": 32,
+      "total": 46,
+      "what": "questions Fred answered, prose graded against an answer sheet"
+    },
+    "outcome": {
+      "pass": 16,
+      "total": 22,
+      "what": "questions Fred should decline or ask location for, scored on what he did"
+    }
   },
-
   "remainingLosses": [
-    { "n": 14, "what": "answered but the prose was not good enough", "fix": "NLI grounding verifier (~1 day); catches fabrication and inversion" },
-    { "n": 6,  "what": "answered a question no corpus covers",       "fix": "sufficient-context classifier (~4 hrs); these contain domain words so routing cannot see them" }
+    {
+      "n": 14,
+      "what": "answered but the prose was not good enough",
+      "fix": "NLI grounding verifier (~1 day); catches fabrication and inversion"
+    },
+    {
+      "n": 6,
+      "what": "answered a question no corpus covers",
+      "fix": "sufficient-context classifier (~4 hrs); these contain domain words so routing cannot see them"
+    }
   ],
-
   "latency": {
-    "mean": 11.4, "median": 11.0, "p95": 17.7, "overTenSeconds": 30, "ofQueries": 68,
-    "note": "Desktop, 1.7B. The 0.6B was 4.3s mean with 0 over ten seconds."
+    "mean": 11.4,
+    "median": 11.0,
+    "p95": 17.7,
+    "overTenSeconds": 30,
+    "ofQueries": 68,
+    "note": "Desktop, 1.7B. On device the mean is 14.7s over four questions (10.1 / 22.8 / 15.8 / 10.0). The 0.6B was 4.3s on desktop."
   },
-
   "readability": {
-    "clean": 42, "total": 46,
+    "clean": 42,
+    "total": 46,
     "defects": [
-      { "n": 4, "what": "military register (casualty, Service member)" },
-      { "n": 1, "what": "cites \"SOURCE 1\", meaningless to a user" },
-      { "n": 0, "what": "leaks manual paragraph numbers" },
-      { "n": 0, "what": "truncated mid-sentence" }
+      {
+        "n": 4,
+        "what": "military register (casualty, Service member)"
+      },
+      {
+        "n": 1,
+        "what": "cites \"SOURCE 1\", meaningless to a user"
+      },
+      {
+        "n": 0,
+        "what": "leaks manual paragraph numbers"
+      },
+      {
+        "n": 0,
+        "what": "truncated mid-sentence"
+      }
     ]
   },
-
   "mcq": {
     "note": "Different test: four options, one correct, 25% chance floor, WHO BEC only. Measures whether retrieval found the right page, not whether the answer is usable.",
     "conditions": [
-      { "name": "vanilla (no retrieval)", "acc": 57.8 },
-      { "name": "rag (lexical only)",     "acc": 70.6 },
-      { "name": "rag + rerank",           "acc": 73.4 },
-      { "name": "rag + rerank + compress","acc": 74.3 }
+      {
+        "name": "vanilla (no retrieval)",
+        "acc": 57.8
+      },
+      {
+        "name": "rag (lexical only)",
+        "acc": 70.6
+      },
+      {
+        "name": "rag + rerank",
+        "acc": 73.4
+      },
+      {
+        "name": "rag + rerank + compress",
+        "acc": 74.3
+      }
     ],
     "corpusDerived": 91.5,
     "independent": 54.0,
     "reference": "PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived)."
   },
-
   "corpora": [
-    { "pack": "core-firstaid",        "version": "1.0.0", "chunks": 667,  "source": "WHO BEC 2018" },
-    { "pack": "core-firstaid-army",   "version": "1.1.0", "chunks": 410,  "source": "US Army ATP 4-02.11" },
-    { "pack": "core-survival",        "version": "1.1.0", "chunks": 563,  "source": "US Army ATP 3-50.21" },
-    { "pack": "state-XX-flora-fauna", "version": "1.0.0", "chunks": 185215, "source": "USFS FEIS, 50 states, 309 MB" }
-  ]
+    {
+      "pack": "core-firstaid",
+      "version": "1.0.0",
+      "chunks": 667,
+      "source": "WHO BEC 2018"
+    },
+    {
+      "pack": "core-firstaid-army",
+      "version": "1.1.0",
+      "chunks": 410,
+      "source": "US Army ATP 4-02.11"
+    },
+    {
+      "pack": "core-survival",
+      "version": "1.1.0",
+      "chunks": 563,
+      "source": "US Army ATP 3-50.21"
+    },
+    {
+      "pack": "state-XX-flora-fauna",
+      "version": "1.0.0",
+      "chunks": 185215,
+      "source": "USFS FEIS, 50 states, 309 MB"
+    }
+  ],
+  "device": {
+    "hardware": "Nothing Phone (3), Snapdragon 8s Gen 4, Android 15, 11.5 GB RAM",
+    "model": "Qwen3-1.7B-Q4_K_M, CPU only (n_gpu_layers 0)",
+    "packLoadMs": 249,
+    "modelLoadMs": 1770,
+    "retrieveMs": [
+      54,
+      106
+    ],
+    "answers": [
+      {
+        "q": "control severe external bleeding",
+        "totalMs": 10065,
+        "ttftMs": 7469
+      },
+      {
+        "q": "build a shelter",
+        "totalMs": 22788,
+        "ttftMs": 7004
+      },
+      {
+        "q": "rattlesnake bit my leg",
+        "totalMs": 15805,
+        "ttftMs": 8719
+      },
+      {
+        "q": "what does poison oak look like",
+        "totalMs": 9999,
+        "ttftMs": 5951
+      }
+    ],
+    "meanMs": 14664,
+    "peakPssMb": 3088,
+    "peakRssMb": 3194,
+    "idlePssMb": 411,
+    "embedderParity": "OK cos=1.0000 on all four packs",
+    "note": "Peak memory is during generation; it falls to ~411 MB once the context is released, so sample while it is working."
+  }
 }

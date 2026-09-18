@@ -7,7 +7,7 @@ model              Qwen3-1.7B-Q4_K_M
 embedder           gte-small (ONNX)
 abstainThreshold   0.29
 topK               4
-measuredOn         desktop harness (node-llama-cpp), settings aligned to device
+measuredOn         desktop harness for accuracy; Nothing Phone (3) for device latency and memory
 ```
 
 ## Milestone scorecard
@@ -16,7 +16,7 @@ measuredOn         desktop harness (node-llama-cpp), settings aligned to device
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
 | `A-KR2` | Response accuracy | 2026-10-12 | **70.6%** / 90% | 🟠 C |
-| `A-KR3` | Response time | 2026-10-19 | **11.4s** / 10s | 🟡 B |
+| `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
 | `B-KR1` | Location while in service | 2026-10-26 | — | ⚪ not started |
 | `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
 | `B-KR3` | Predicted service zone | 2026-11-16 | — | ⚪ not started |
@@ -26,7 +26,7 @@ measuredOn         desktop harness (node-llama-cpp), settings aligned to device
 
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
 - `A-KR2` — Free-form answers graded against an answer sheet, all five corpora.
-- `A-KR3` — Desktop mean. NOT yet measured on device at this model size.
+- `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
 - `B-KR1` — Not started. No location code exists.
 - `B-KR2` — Not started. The harder half of Beta.
 - `B-KR3` — Data source identified (FCC BDC, ~310MB at H3 res 7). No code.
@@ -72,7 +72,31 @@ median   11.0 s   ███████████████░░░░░�
 p95      17.7 s   █████████████████████████░░░
 ```
 
-**30 of 68** queries exceed ten seconds. Desktop, 1.7B. The 0.6B was 4.3s mean with 0 over ten seconds.
+**30 of 68** queries exceed ten seconds. Desktop, 1.7B. On device the mean is 14.7s over four questions (10.1 / 22.8 / 15.8 / 10.0). The 0.6B was 4.3s on desktop.
+
+## On the actual phone
+
+`Nothing Phone (3), Snapdragon 8s Gen 4, Android 15, 11.5 GB RAM`  ·  Qwen3-1.7B-Q4_K_M, CPU only (n_gpu_layers 0)
+
+| | |
+|---|---|
+| Pack load | 249 ms (four packs) |
+| Model load | 1.8 s |
+| Retrieval | 54-106 ms |
+| Answer, mean | **14.7 s** |
+| Peak memory | **3.02 GB PSS** / 3.12 GB RSS |
+| Idle after run | 411 MB PSS |
+| Embedder parity | OK cos=1.0000 on all four packs |
+
+```
+control severe external bleeding  ███████████░░░░░░░░░░░░░░░░░   10.1 s   (TTFT 7.5s)
+build a shelter                   ██████████████████████████░░   22.8 s   (TTFT 7.0s)
+rattlesnake bit my leg            ██████████████████░░░░░░░░░░   15.8 s   (TTFT 8.7s)
+what does poison oak look like    ███████████░░░░░░░░░░░░░░░░░   10.0 s   (TTFT 6.0s)
+10s target                        ███████████░░░░░░░░░░░░░░░░░
+```
+
+> Peak memory is during generation; it falls to ~411 MB once the context is released, so sample while it is working.
 
 ## Readability of the answers Fred gives
 

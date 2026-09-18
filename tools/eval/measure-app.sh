@@ -11,14 +11,26 @@
 # for M4's adaptive memory manager.
 #
 # Usage: tools/eval/measure-app.sh [--no-install]
+#
+# UNVERIFIED since the 1.7B switch. The staging flow below was rewritten to match
+# apps/mobile/App.tsx — multiple packs, internal storage, copied in as the app
+# user — but no device has been attached since, so treat the first run as a
+# debugging session rather than a measurement.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ADB="${ADB:-$HOME/toolchain/platform-tools/adb}"
 PKG=dev.fred.app
 APK="$ROOT/apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk"
-PACK="$ROOT/packs/core-firstaid-v1.0.0"
-REMOTE="/sdcard/Android/data/$PKG/files"
+# Every global pack, plus one state pack so the flora/fauna path is exercised.
+# Add or swap states by editing this list.
+PACKS=(core-firstaid-v1.0.0 core-firstaid-army-v1.1.0 core-survival-v1.1.0 state-CA-flora-fauna-v1.0.0)
+MODEL=Qwen3-1.7B-Q4_K_M.gguf
+# Staged through /data/local/tmp and copied in as the app user. Android 15 scoped
+# storage denies the app read access to files adb places in its external dir —
+# they are owned by shell — so the external path App.tsx used to use no longer
+# works. See the comment at the top of apps/mobile/App.tsx.
+STAGE=/data/local/tmp/fred
 
 "$ADB" get-state >/dev/null 2>&1 || { echo "no device; re-pair wireless debugging first" >&2; exit 1; }
 
@@ -27,21 +39,33 @@ if [ "${1:-}" != "--no-install" ]; then
   "$ADB" install -r "$APK"
 fi
 
-# The app-specific external dir is created by the installer, but only once the
-# app has been launched at least on some ROMs, so make it explicitly.
-"$ADB" shell mkdir -p "$REMOTE/pack"
+echo "== staging model + packs =="
+"$ADB" shell mkdir -p "$STAGE/packs"
 
-echo "== pushing model + pack =="
-for f in Qwen3-1.7B-Q4_K_M.gguf gte-small_fp16.gguf; do
-  sz=$("$ADB" shell "stat -c%s $REMOTE/$f 2>/dev/null || echo 0" | tr -d '\r')
+for f in "$MODEL" gte-small.onnx gte-small-vocab.txt; do
+  sz=$("$ADB" shell "stat -c%s $STAGE/$f 2>/dev/null || echo 0" | tr -d '\r')
   if [ "$sz" = "$(stat -c%s "$HOME/models/$f")" ]; then
-    echo "  $f already present"
+    echo "  $f already staged"
   else
-    "$ADB" push "$HOME/models/$f" "$REMOTE/$f"
+    echo "  pushing $f"
+    "$ADB" push "$HOME/models/$f" "$STAGE/$f"
   fi
 done
-"$ADB" push "$PACK/." "$REMOTE/pack/" >/dev/null
-echo "  pack pushed"
+
+for pk in "${PACKS[@]}"; do
+  id="${pk%-v*}"
+  [ -d "$ROOT/packs/$pk" ] || { echo "missing pack: $pk — build it first" >&2; exit 1; }
+  "$ADB" shell mkdir -p "$STAGE/packs/$id"
+  "$ADB" push "$ROOT/packs/$pk/." "$STAGE/packs/$id/" >/dev/null
+  echo "  staged $id"
+done
+
+echo "== copying in as the app user =="
+"$ADB" shell run-as $PKG sh -c "mkdir -p files/packs && cp -r $STAGE/packs/. files/packs/"
+for f in "$MODEL" gte-small.onnx gte-small-vocab.txt; do
+  "$ADB" shell run-as $PKG cp "$STAGE/$f" "files/$f"
+done
+echo "  copied"
 
 echo
 echo "== launching =="

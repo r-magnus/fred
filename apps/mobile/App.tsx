@@ -5,6 +5,15 @@
  * logged to adb. The engine now lives in src/engine.ts and stays resident; this
  * file is only the screen.
  *
+ * Insets are handled by hand rather than with SafeAreaView. React Native 0.86
+ * turns on edge-to-edge for Android 15+, so the app draws under the status bar —
+ * the first build rendered "Fred" on top of the clock. Core SafeAreaView is also
+ * deprecated in favour of react-native-safe-area-context, which SDK 57 confirms
+ * is the right answer, but it is a native module and this project cannot rebuild
+ * (no JDK on the build host). StatusBar.currentHeight is core, needs no rebuild,
+ * and is correct on Android; swap to safe-area-context at the next rebuild,
+ * which is also what iOS will need.
+ *
  * Three outcomes have to be visible, not just the happy one. `ask()` can return
  * an answer, an abstention, or a request for a location, and each means something
  * different to a person in the field — "I don't know" and "which state are you
@@ -13,10 +22,10 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, SafeAreaView,
-  ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable,
+  ScrollView, StatusBar, StyleSheet, Text, TextInput, View,
 } from 'react-native';
-import { MEDICAL_DISCLAIMER, type Citation } from '@fred/rag-core';
+import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
 import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
 
 interface Turn {
@@ -32,6 +41,10 @@ interface Turn {
   candidateStates: readonly string[];
   done: boolean;
 }
+
+const TOP_INSET = StatusBar.currentHeight ?? 0;
+/** Gesture bar. Approximate — the exact value needs safe-area-context. */
+const BOTTOM_INSET = Platform.OS === 'android' ? 12 : 0;
 
 export default function App() {
   const [load, setLoad] = useState<LoadPhase>({ phase: 'idle' });
@@ -94,7 +107,10 @@ export default function App() {
         text += tok;
         update(id, { text });
       }
-      update(id, { done: true });
+      // The model can decline even when retrieval scored above the gate. Showing
+      // that with sources and a medical disclaimer would read as a sourced
+      // answer, so it is rendered as the abstention it is.
+      update(id, isRefusal(text) ? { kind: 'abstain', done: true } : { done: true });
     } catch (e) {
       update(id, { kind: 'error', text: e instanceof Error ? e.message : String(e), done: true });
     } finally {
@@ -105,17 +121,17 @@ export default function App() {
   if (load.phase !== 'ready') {
     const failed = load.phase === 'failed';
     return (
-      <SafeAreaView style={[styles.root, styles.centre]}>
+      <View style={[styles.root, styles.centre]}>
         <Text style={styles.wordmark}>Fred</Text>
         {!failed && <ActivityIndicator color="#6ca" style={{ marginVertical: 18 }} />}
         <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.root}>
-      <View style={styles.header}>
+    <View style={styles.root}>
+      <View style={[styles.header, { paddingTop: TOP_INSET + 12 }]}>
         <Text style={styles.wordmarkSmall}>Fred</Text>
         <Pressable onPress={() => setState(null)} hitSlop={8}>
           <Text style={styles.stateChip}>{state ?? 'no location'}</Text>
@@ -187,7 +203,11 @@ export default function App() {
                     {/* US-03. The only way a reader can tell a good answer from a
                         confident wrong one, so it is not hidden behind a tap. */}
                     <Text style={styles.sourcesTitle}>Sources</Text>
-                    {t.citations.map((c) => (
+                    {/* Two chunks can share a page and section, which renders as
+                        the same line twice. Dedupe on what the reader sees. */}
+                    {[...new Map(t.citations.map((c) => [
+                      `${c.source}|${c.page}|${c.section}`, c,
+                    ])).values()].map((c) => (
                       <Text key={c.chunkId} style={styles.source}>
                         {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
                       </Text>
@@ -200,7 +220,11 @@ export default function App() {
         ))}
       </ScrollView>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* 'padding' on Android too. The usual Android answer is adjustResize in
+          the manifest, but edge-to-edge (RN 0.86, Android 15+) means the window
+          no longer resizes for the keyboard — the first build buried the
+          composer under it. */}
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
         <View style={styles.composer}>
           <TextInput
             style={styles.input}
@@ -221,7 +245,7 @@ export default function App() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -235,7 +259,7 @@ const styles = StyleSheet.create({
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 18, paddingTop: 14, paddingBottom: 10,
+    paddingHorizontal: 18, paddingBottom: 10,
     borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#232a2d',
   },
   stateChip: {
@@ -269,7 +293,7 @@ const styles = StyleSheet.create({
 
   composer: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 10,
-    paddingHorizontal: 14, paddingVertical: 12,
+    paddingHorizontal: 14, paddingTop: 12, paddingBottom: 12 + BOTTOM_INSET,
     borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d',
   },
   input: {

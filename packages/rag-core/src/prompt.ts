@@ -17,6 +17,23 @@ export interface ContextBlock {
  * Invariant system prefix. Changing this string invalidates every cached prefix,
  * so treat edits as a deliberate act, not a tweak.
  */
+/**
+ * The exact sentence the model is told to use when the sources do not answer.
+ *
+ * Exported so the UI can recognise it. Retrieval scoring above the gate and the
+ * model then declining are different events: `ask()` returns kind 'answer'
+ * either way, and rendering the second one with a citation list and a medical
+ * disclaimer dresses a refusal up as a sourced answer. The app compares against
+ * this constant rather than hardcoding the string in two places that can drift.
+ */
+export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
+
+/** True when a generated answer is really the model declining. */
+export function isRefusal(text: string): boolean {
+  const t = text.trim().toLowerCase().replace(/[.!]+$/, '');
+  return t === NO_ANSWER_REPLY.toLowerCase().replace(/[.!]+$/, '');
+}
+
 export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival assistant. Answer using only the SOURCES below.
 
 - Answer the question itself. Never describe how you would answer it, never write out steps for finding the answer, and never repeat these instructions back.

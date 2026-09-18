@@ -35,6 +35,8 @@ interface Turn {
   /** Streams in as tokens arrive. */
   text: string;
   kind: 'answer' | 'abstain' | 'needs-location' | 'error';
+  /** True when the reader stopped it; the partial answer is kept. */
+  stopped: boolean;
   citations: readonly Citation[];
   medical: boolean;
   /** State packs that would have answered, when the location is unknown. */
@@ -52,6 +54,7 @@ export default function App() {
   const [draft, setDraft] = useState('');
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const abort = useRef<AbortController | null>(null);
   const engine = useRef<Engine | null>(null);
   const scroller = useRef<ScrollView | null>(null);
   const nextId = useRef(1);
@@ -80,13 +83,15 @@ export default function App() {
     const askState = withState === undefined ? state : withState;
     setTurns((ts) => [...ts, {
       id, question, state: askState, text: '', kind: 'answer',
-      citations: [], medical: false, candidateStates: [], done: false,
+      citations: [], medical: false, candidateStates: [], done: false, stopped: false,
     }]);
     setDraft('');
     setBusy(true);
 
+    const ctrl = new AbortController();
+    abort.current = ctrl;
     try {
-      const res = await eng.ask(question, askState);
+      const res = await eng.ask(question, askState, ctrl.signal);
       if (res.kind === 'needs-location') {
         update(id, {
           kind: 'needs-location', done: true,
@@ -110,10 +115,13 @@ export default function App() {
       // The model can decline even when retrieval scored above the gate. Showing
       // that with sources and a medical disclaimer would read as a sourced
       // answer, so it is rendered as the abstention it is.
-      update(id, isRefusal(text) ? { kind: 'abstain', done: true } : { done: true });
+      update(id, isRefusal(text)
+        ? { kind: 'abstain', done: true }
+        : { done: true, stopped: ctrl.signal.aborted });
     } catch (e) {
       update(id, { kind: 'error', text: e instanceof Error ? e.message : String(e), done: true });
     } finally {
+      abort.current = null;
       setBusy(false);
     }
   }, [draft, state, busy, update]);
@@ -192,9 +200,19 @@ export default function App() {
 
             {t.kind === 'answer' && (
               <View style={styles.card}>
-                {t.text === '' && !t.done
-                  ? <ActivityIndicator color="#6ca" />
-                  : <Text style={styles.body}>{t.text}</Text>}
+                {t.text === '' && !t.done && <ActivityIndicator color="#6ca" />}
+                {t.text !== '' && <Text style={styles.body}>{t.text}</Text>}
+
+                {/* Time-to-first-token is ~7 s on device, so a reader who stops
+                    early gets no text at all. Rendering an empty body plus
+                    "incomplete" reads as a bug; say what actually happened. */}
+                {t.stopped && (
+                  <Text style={styles.stoppedNote}>
+                    {t.text === ''
+                      ? 'Stopped before Fred began answering.'
+                      : 'Stopped — this answer is incomplete.'}
+                  </Text>
+                )}
 
                 {t.medical && t.done && <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>}
 
@@ -236,12 +254,19 @@ export default function App() {
             multiline
             onSubmitEditing={() => void send()}
           />
+          {/* US-07. One button: Ask, then Stop while an answer is running. A
+              separate control would be dead weight most of the time, and at ~15 s
+              per answer the reader needs the exit where their thumb already is. */}
           <Pressable
-            style={[styles.send, (busy || draft.trim() === '') && styles.sendOff]}
-            onPress={() => void send()}
-            disabled={busy || draft.trim() === ''}
+            style={[
+              styles.send,
+              busy && styles.sendStop,
+              !busy && draft.trim() === '' && styles.sendOff,
+            ]}
+            onPress={() => (busy ? abort.current?.abort() : void send())}
+            disabled={!busy && draft.trim() === ''}
           >
-            <Text style={styles.sendText}>{busy ? '…' : 'Ask'}</Text>
+            <Text style={styles.sendText}>{busy ? 'Stop' : 'Ask'}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -302,5 +327,7 @@ const styles = StyleSheet.create({
   },
   send: { backgroundColor: '#2f7d63', borderRadius: 10, paddingHorizontal: 18, paddingVertical: 12 },
   sendOff: { backgroundColor: '#243029' },
+  sendStop: { backgroundColor: '#7d3a2f' },
+  stoppedNote: { color: '#d9a', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
   sendText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

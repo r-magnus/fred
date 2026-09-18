@@ -261,6 +261,19 @@ export async function createDeviceBackend(
     },
     generate(prompt: PromptParts, genOpts: GenerateOptions): AsyncIterable<string> {
       const stream = new TokenStream();
+
+      // US-07. An answer runs ~15 s on device, so a user who asked the wrong
+      // thing, or who is watching their battery, needs a way out. llama.rn's
+      // stopCompletion() ends the native decode loop; without it, aborting would
+      // only stop the JS consumer while the phone kept generating and burning
+      // power, which is the opposite of what the story asks for.
+      const onAbort = (): void => { void gen.stopCompletion(); };
+      if (genOpts.signal !== undefined) {
+        if (genOpts.signal.aborted) onAbort();
+        else genOpts.signal.addEventListener('abort', onAbort, { once: true });
+      }
+      const detach = (): void => genOpts.signal?.removeEventListener('abort', onAbort);
+
       void gen
         .completion(
           {
@@ -292,8 +305,10 @@ export async function createDeviceBackend(
           },
           (tok) => stream.push(tok.token),
         )
-        .then(() => stream.finish())
-        .catch((e: unknown) => stream.finish(e));
+        // A stopped completion resolves normally with what it produced, so the
+        // partial answer is kept rather than thrown away.
+        .then(() => { detach(); stream.finish(); })
+        .catch((e: unknown) => { detach(); stream.finish(e); });
       return stream.iterate();
     },
     async release() {

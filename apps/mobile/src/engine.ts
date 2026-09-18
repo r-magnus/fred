@@ -32,7 +32,8 @@ export type LoadPhase =
   | { readonly phase: 'failed'; readonly message: string };
 
 export interface Engine {
-  ask(question: string, state: string | null): Promise<AskResult>;
+  /** `signal` aborts generation; see US-07. */
+  ask(question: string, state: string | null, signal?: AbortSignal): Promise<AskResult>;
   /** States with a flora-fauna pack installed, for the location picker. */
   availableStates(): readonly string[];
   release(): Promise<void>;
@@ -92,7 +93,8 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     });
 
     return {
-      ask: (question, state) => ask(question, { backend, store, packs }, { state }),
+      ask: (question, state, signal) =>
+        ask(question, { backend, store, packs }, signal ? { state, signal } : { state }),
       availableStates: () => states,
       release: () => backend.release(),
     };

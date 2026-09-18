@@ -1,8 +1,8 @@
 {
   "grader": "Claude Opus 5 (in-session)",
-  "variant": "G: 1.7B, scope gate, lay lexicon",
-  "runs": "/tmp/claude-1000/-home-odysseus-code-fred/692ee784-15ab-407e-9230-36c5e7ca9a0e/scratchpad/runs-G-scope-1.7B.jsonl",
-  "gradedByJudge": 43,
+  "variant": "H: 1.7B, scope gate, lay lexicon, gate 0.29",
+  "runs": "docs/graded-runs-1.7B.jsonl",
+  "gradedByJudge": 46,
   "verdicts": [
     {
       "questionId": "ff-oak-01",
@@ -110,6 +110,13 @@
       "reasoning": "Site selection, hazards, space, wind direction."
     },
     {
+      "questionId": "sv-shelter-02",
+      "acceptable": true,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Thin but responsive and correct: rig the tarp with the cord to shed wind and rain. Misses ground insulation, which is the bigger overnight risk, and trails into irrelevant fire-safety text."
+    },
+    {
       "questionId": "sv-nav-01",
       "acceptable": false,
       "pointsHit": [],
@@ -157,6 +164,13 @@
       "pointsHit": [],
       "redFlagsHit": [],
       "reasoning": "Correct care, still never names immersion foot, and the question is 'what is that?'"
+    },
+    {
+      "questionId": "sv-food-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Recovered by the lower gate and then declined anyway."
     },
     {
       "questionId": "sv-lost-01",
@@ -262,6 +276,13 @@
       "pointsHit": [],
       "redFlagsHit": [],
       "reasoning": "Unchanged in substance: circulation checks without the joints above and below. (answer unchanged)"
+    },
+    {
+      "questionId": "fa-ankle-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Treats a twisted ankle as a fracture \u2014 immobilise, splint, pad the splints. No rest, cold, compression or elevation, which is what the question needs."
     },
     {
       "questionId": "fa-cut-01",

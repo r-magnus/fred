@@ -21,7 +21,25 @@ import { route, type RoutablePack, type RouteResult } from './router.ts';
  * confident wrong answer is worse than no answer. Tune against the eval set's
  * abstention precision/recall, not by feel.
  */
-export const DEFAULT_ABSTAIN_THRESHOLD = 0.35;
+/**
+ * Fused-score floor below which the pipeline declines.
+ *
+ * 0.35 was set by hand and never validated. It could not be lowered while the
+ * router searched first aid for every unrecognised query, because the gate was
+ * the only thing standing between a scuba question and an answer.
+ *
+ * With the scope gate in router.ts doing that job, this threshold is no longer
+ * load-bearing for out-of-scope queries and only has to separate weak retrieval
+ * from usable retrieval. Measured over the graded set, every out-of-scope query
+ * that survives routing scores 0.277 or above 0.39, while three answerable ones
+ * sit at 0.293, 0.332 and 0.341 — a sprained ankle, a tarp shelter at dusk, and
+ * food storage at camp. Moving to 0.29 recovers all three and admits none.
+ *
+ * Fitted to 68 examples with a 0.016 margin, so treat it as provisional: the
+ * durable version of this is a sufficient-context signal rather than one scalar
+ * on a similarity score (docs/results-akr2.md).
+ */
+export const DEFAULT_ABSTAIN_THRESHOLD = 0.29;
 
 /** PocketRAG §3.5 — generation budget under memory pressure. */
 export function maxTokensForPressure(pressure: number): number {

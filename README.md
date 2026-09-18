@@ -581,6 +581,8 @@ npm run typecheck
   NonCommercial constraint
 - `docs/results-m0.md` … `docs/results-m3.md` — measured results per milestone
 - [`docs/results-alpha.md`](docs/results-alpha.md) — corpora against the proposal's A-KR1
+- [`docs/results-nli-research.md`](docs/results-nli-research.md) — whether an NLI
+  grounding verifier would fix A-KR2's lost points, and the desktop test to run
 
 Build packs with `node tools/ingest/src/index.ts <who-bec|atp-3-50-21|atp-4-02-11>`
 (source PDFs go under `corpora/`, which is not committed). Per-state plant and wildlife

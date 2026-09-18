@@ -11,6 +11,10 @@
 
 ---
 
+> **📊 [Current metrics](docs/METRICS.md)** — milestone scorecard, accuracy over
+> time, response time and corpora, in one place. Generated from
+> `docs/metrics.json` by `npm run metrics`.
+
 ## Contents
 
 1. [Project & Course Information](#01--project--course-information)

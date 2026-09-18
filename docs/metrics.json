@@ -1,6 +1,6 @@
 {
   "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md \u2014 it is generated.",
-  "updated": "2026-09-17",
+  "updated": "2026-09-18",
   "config": {
     "model": "Qwen3-1.7B-Q4_K_M",
     "embedder": "gte-small (ONNX)",
@@ -150,14 +150,24 @@
   },
   "remainingLosses": [
     {
-      "n": 14,
-      "what": "answered but the prose was not good enough",
-      "fix": "NLI grounding verifier (~1 day); catches fabrication and inversion"
+      "n": 6,
+      "what": "answered a question no corpus covers",
+      "fix": "sufficient-context classifier (~4 hrs); these carry domain words so routing cannot see them"
     },
     {
       "n": 6,
-      "what": "answered a question no corpus covers",
-      "fix": "sufficient-context classifier (~4 hrs); these contain domain words so routing cannot see them"
+      "what": "grounded in the right chunk but the wrong focus, or incomplete",
+      "fix": "retrieval and prompt work; no latency cost. The largest single group"
+    },
+    {
+      "n": 4,
+      "what": "declined despite retrieval succeeding",
+      "fix": "prompt or model; two had the answer in the top chunk. No latency cost"
+    },
+    {
+      "n": 4,
+      "what": "fabricated or inverted a fact",
+      "fix": "NLI grounding verifier \u2014 the only technique that catches these, but ~2s per answer (docs/results-nli-research.md)"
     }
   ],
   "latency": {

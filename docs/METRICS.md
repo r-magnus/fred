@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-17**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-18**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -58,8 +58,10 @@ The score has two halves:
 
 | Lost | Why | What would fix it |
 |---:|---|---|
-| 14 | answered but the prose was not good enough | NLI grounding verifier (~1 day); catches fabrication and inversion |
-| 6 | answered a question no corpus covers | sufficient-context classifier (~4 hrs); these contain domain words so routing cannot see them |
+| 6 | answered a question no corpus covers | sufficient-context classifier (~4 hrs); these carry domain words so routing cannot see them |
+| 6 | grounded in the right chunk but the wrong focus, or incomplete | retrieval and prompt work; no latency cost. The largest single group |
+| 4 | declined despite retrieval succeeding | prompt or model; two had the answer in the top chunk. No latency cost |
+| 4 | fabricated or inverted a fact | NLI grounding verifier — the only technique that catches these, but ~2s per answer (docs/results-nli-research.md) |
 
 ## A-KR3 — response time
 

@@ -599,3 +599,50 @@ hitch and the legume avoid-list all came back correct.
   unconscious" without naming CPR — would be reasonable and might move a point or two
   either way. It was there with thinking on
   and is still there with greedy decoding, so it is the model, not the sampler.
+
+---
+
+## Decision: Fred ships on Qwen3-1.7B (2026-09-17)
+
+Accuracy is prioritised over response time. The trade, against the proposal's own
+grading bands (README §07):
+
+| KR | Metric | Before (0.6B) | After (1.7B) |
+|---|---|---|---|
+| A-KR2 | Accuracy | 38.2% — **F** | 70.6% — **C** |
+| A-KR3 | Response time | 4.3 s — **A** | 11.4 s — **B** |
+
+An F traded for a B is the right direction, and A-KR2 was the KR at risk.
+
+Switched: `App.tsx`, `run-graded.ts`, `answer-quality.ts`, `measure-app.sh`,
+`bench-device.sh`, `bench-model.mjs`. **`run.ts` stays on the 0.6B** — it exists to
+compare against M2's ablation ladder, and re-pointing it would break the only
+comparison it is for.
+
+### What is measured, and what is not
+
+**Measured, desktop harness:** 48/68 = 70.6% overall, 32/46 judged, 16/22 outcome.
+Mean 11.4 s, p95 17.7 s, 30 of 68 queries over ten seconds.
+
+**Not measured, and both matter:**
+
+1. **Device memory.** The 0.6B sits at 1.72 GB PSS CPU-only (`docs/results-m3.md`).
+   The 1.7B's weights are 2.8x larger, so 2.5-3 GB is a reasonable guess — fine on a
+   12 GB phone, and the open question for US-11 ("a user with a weaker mobile
+   device"). This is a guess until `measure-app.sh` runs on hardware.
+2. **Device latency.** The desktop has tracked the phone closely at 0.6B (4.9 s here
+   against 4.8 s there for the bleeding query), but that correspondence has never
+   been checked at 1.7B, and a larger model is more likely to be memory-bandwidth
+   bound on a phone than on a desktop.
+
+Neither blocks the decision, but A-KR3's grade depends on the second and US-11
+depends on the first, so both want a device run before the Alpha writeup.
+
+### The 0.6B path was never measured under the final configuration
+
+The scope gate and the 0.29 threshold were measured only on the 1.7B. The 0.6B's
+last measurement was 44.1%, taken before both. Since routing and gating happen
+before the model is called, the outcome half of that gain (9/28 -> 16/22) is
+model-independent and would transfer; the judged half would not. If the 1.7B turns
+out not to fit on device, re-measure rather than assuming either number.
+

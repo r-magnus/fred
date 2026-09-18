@@ -21,6 +21,13 @@ import { loadDataset, answerBalance } from './dataset.ts';
 import { CONDITIONS, type ConditionId, type ConditionSummary, type EvalQuestion, type QuestionResult } from './types.ts';
 
 const PACK_DIR = 'packs/core-firstaid-v1.0.0';
+/**
+ * Pinned to the 0.6B on purpose, while the rest of the project has moved to the
+ * 1.7B. This harness exists to compare against M2's ablation ladder, and those
+ * numbers were taken on the 0.6B — re-pointing it would silently break the one
+ * comparison it is for. Pass a different model here only alongside a fresh
+ * baseline.
+ */
 const GEN_MODEL = `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`;
 const EMBED_MODEL = `${process.env.HOME}/models/gte-small_fp16.gguf`;
 const LETTERS = ['A', 'B', 'C', 'D'] as const;

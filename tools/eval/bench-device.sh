@@ -16,7 +16,7 @@ set -euo pipefail
 ADB="${ADB:-$HOME/toolchain/platform-tools/adb}"
 BENCH="${BENCH:-$HOME/toolchain/llama.cpp/build-android/bin/llama-bench}"
 COMPLETION="${COMPLETION:-$HOME/toolchain/llama.cpp/build-android/bin/llama-completion}"
-MODEL="${1:-$HOME/models/Qwen3-0.6B-Q4_K_M.gguf}"
+MODEL="${1:-$HOME/models/Qwen3-1.7B-Q4_K_M.gguf}"
 PP="${2:-512}"   # prompt tokens — drives the TTFT estimate
 TG="${3:-128}"   # tokens to generate
 REMOTE=/data/local/tmp/fred

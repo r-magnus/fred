@@ -36,7 +36,7 @@ const questions: GradedQuestion[] = GRADED_SETS.flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
 );
 console.log(describeSet(questions));
-const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`;
+const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
 // Printed because these two settings are what an A/B between runs is varying,
 // and a results file that does not say which model produced it is not evidence.
 console.log(`topK=${topK}  model=${genModelPath.split('/').pop()}`);

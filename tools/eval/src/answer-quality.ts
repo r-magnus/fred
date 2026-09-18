@@ -15,7 +15,7 @@ const backend = await createNodeBackend({
   embedModelId: manifest.embedding.modelId,
   cosineFloor: manifest.embedding.cosineFloor,
   probe: manifest.embedding.probe,
-  genModelPath: process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`,
+  genModelPath: process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`,
 });
 const packs = [{ id: manifest.id, domains: manifest.domains, scope: manifest.scope }];
 

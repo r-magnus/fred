@@ -32,7 +32,7 @@ fi
 "$ADB" shell mkdir -p "$REMOTE/pack"
 
 echo "== pushing model + pack =="
-for f in Qwen3-0.6B-Q4_K_M.gguf gte-small_fp16.gguf; do
+for f in Qwen3-1.7B-Q4_K_M.gguf gte-small_fp16.gguf; do
   sz=$("$ADB" shell "stat -c%s $REMOTE/$f 2>/dev/null || echo 0" | tr -d '\r')
   if [ "$sz" = "$(stat -c%s "$HOME/models/$f")" ]; then
     echo "  $f already present"

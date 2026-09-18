@@ -63,7 +63,7 @@ export default function App() {
 
       t = Date.now();
       const backend = await createDeviceBackend({
-        modelPath: `${BASE_PATH}/Qwen3-0.6B-Q4_K_M.gguf`,
+        modelPath: `${BASE_PATH}/Qwen3-1.7B-Q4_K_M.gguf`,
         embedModelPath: `${BASE_PATH}/gte-small.onnx`,
         embedVocabPath: `${BASE_PATH}/gte-small-vocab.txt`,
         spec: manifests[0]!.embedding,

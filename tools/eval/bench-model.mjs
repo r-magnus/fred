@@ -11,7 +11,7 @@
  */
 import { getLlama, LlamaChatSession } from 'node-llama-cpp';
 
-const modelPath = process.argv[2] ?? `${process.env.HOME}/models/Qwen3-0.6B-Q4_K_M.gguf`;
+const modelPath = process.argv[2] ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
 const contextSize = Number(process.argv[3] ?? 2048);
 
 const PROMPT = 'In three short numbered steps, how do you control severe external bleeding?';

@@ -516,6 +516,74 @@ larger, so 2.5-3 GB is a reasonable guess and fine on a 12 GB phone. It is not f
 for US-11 ("a user with a weaker mobile device"), and it is a guess until it runs on
 hardware.
 
+### Lever 4 — refusing to guess: the largest gain of all
+
+The graded eval said the 13 false answers were each worth a full point on the
+headline, which made abstention worth more than the prompt and the model combined:
+
+| Config | Measured | If abstention were perfect |
+|---|---:|---:|
+| 0.6B | 44.1% | 63.2% |
+| 1.7B | 48.5% | 67.6% |
+
+The literature said the obvious fix would not work. [A controlled study of small
+frozen RAG models](https://arxiv.org/abs/2608.22228) found that with explicit
+abstention prompting, 3.8B-8B models still answered 41.6% of questions they should
+have refused. Ours ignores its own "reply: I don't have reliable information"
+instruction in exactly the same way. Prompting is not the lever.
+
+**The signal was already in the router, and was being deliberately discarded.**
+Four of five out-of-scope questions matched *zero* domain vocabulary, and
+`route()` searched first aid and survival anyway, on the reasoning that "the cost
+of over-searching is latency". The graded eval priced that trade properly: the
+cost of over-searching was answering "how do I perform a cricothyrotomy" and "how
+deep can I dive before I need a decompression stop", both from chapters
+deliberately dropped at ingest.
+
+**But removing the fallback blindly would have been worse.** Measured first: it
+would have refused eight genuine questions, including *"my friend is shivering
+uncontrollably and confused after falling in a cold creek"* — a hypothermia
+emergency described without one clinical word. The comment defending the fallback
+was right about the risk and wrong about the price.
+
+So the lexicon was extended with the vocabulary hikers actually use — body parts
+(`eye`, `head`, `feet`), described symptoms (`shivering`, `numb`, `confused`,
+`dizzy`), terrain and predicament (`river`, `crossing`, `lost`, `stranded`) —
+before the fallback was removed. After that:
+
+| | Before | After |
+|---|---:|---:|
+| Answerable questions matching no vocabulary | 8 / 46 | **0 / 46** |
+| Out-of-scope questions matching no vocabulary | 13 / 22 | 12 / 22 |
+
+Then `route()` declines on no match. Measured end to end:
+
+| | Fallback on | Scope gate |
+|---|---:|---:|
+| Outcome matches expectation | 49 / 68 | **59 / 68** |
+| False answers | 13 / 19 | **6 / 19** |
+| Answerable wrongly gated off | 6 / 46 | **3 / 46** |
+| Judged answer quality | 24/40 — 60.0% | **31/43 — 72.1%** |
+| **Overall A-KR2** | 33/68 — 48.5% | **47 / 68 — 69.1%** |
+
+Ten outcomes changed and **all ten were fixes**. Both invasive-procedure questions
+now decline, along with scuba depth, avalanche risk, weather, "where am I", and
+alligators in Oregon. Three previously unanswerable questions started working,
+because the lay vocabulary that let the gate close also let them route.
+
+Answer quality rose as a side effect: the lexicon changes altered retrieval for 21
+of the judged questions, and the net was positive — the eye-injury answer, the tarp
+hitch and the legume avoid-list all came back correct.
+
+**Cumulative, from the session's starting point:**
+
+| Config | Overall |
+|---|---:|
+| Baseline: 0.6B, original prompt, blind fallback | 26/68 — 38.2% |
+| + conditional response shape | 30/68 — 44.1% |
+| + Qwen3-1.7B | 33/68 — 48.5% |
+| + scope gate and lay lexicon | **47/68 — 69.1%** |
+
 ## What is not done
 
 - **`DEFAULT_ABSTAIN_THRESHOLD` is still 0.35.** The graded sweep says no value is

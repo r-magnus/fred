@@ -31,6 +31,17 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     // Shared with wildlife on purpose. Listed only there, "a rattlesnake bit my
     // leg" routed to wildlife alone and never reached a first-aid pack.
     'bite', 'bit', 'bitten', 'sting', 'stung', 'venom', 'venomous', 'snakebite',
+    // Body parts, because a hiker names where it hurts rather than the injury.
+    // "Something is stuck in my eye" carried no domain vocabulary at all.
+    'eye', 'head', 'face', 'neck', 'back', 'leg', 'arm', 'hand', 'foot', 'feet',
+    'finger', 'toe', 'knee', 'shoulder', 'rib', 'skin',
+    // Symptoms as described rather than diagnosed. "Shivering uncontrollably and
+    // confused" is hypothermia, but the word hypothermia never appears.
+    'shivering', 'shiver', 'numb', 'pale', 'dizzy', 'dizziness', 'nausea',
+    'vomiting', 'confused', 'confusion', 'faint', 'weak', 'weakness', 'pain',
+    'painful', 'sore', 'swollen', 'bruise', 'rash', 'itch',
+    // Heat and cold as lay words; the lexicon had only the clinical names.
+    'heat', 'exhaustion', 'cold', 'freezing', 'overheated',
   ],
   'first-aid-psychological': [
     'panic', 'anxiety', 'distress', 'trauma', 'grief', 'calm', 'reassure',
@@ -45,6 +56,10 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'rescue', 'whistle', 'mirror', 'knot', 'cordage', 'rope', 'lashing',
     'forage', 'trap', 'snare', 'fishing', 'ration', 'exposure', 'windchill',
     'bivouac', 'campsite', 'stove', 'fuel', 'flint', 'tarp', 'sleeping',
+    // Terrain and predicament words. "I need to cross a river" and "I think I'm
+    // lost" are core survival questions that matched no domain vocabulary.
+    'river', 'stream', 'creek', 'cross', 'crossing', 'ford', 'current',
+    'lost', 'stranded', 'night', 'dark', 'wind',
     // Eating vocabulary, shared with plants on purpose. ATP 3-50.21 chapter 4
     // holds the edibility and avoid lists, and those chunks carry domain
     // 'survival' — so "how do I know if a wild plant is safe to eat?" routed
@@ -64,6 +79,9 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'edible', 'poisonous', 'toxic', 'toxicity', 'ivy', 'oak', 'sumac', 'nettle',
     'hemlock', 'nightshade', 'forage', 'identify', 'identification', 'species',
     'habitat', 'bloom', 'thorn', 'sap', 'conifer', 'pine', 'aspen', 'willow',
+    // "Where does California huckleberry grow?" names a species the lexicon
+    // cannot contain — there are 1,092 of them — so the question verb carries it.
+    'grow', 'grows',
   ],
   wildlife: [
     // 'mountain' is deliberately absent: alone it is not a wildlife signal, and

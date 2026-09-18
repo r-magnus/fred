@@ -37,13 +37,26 @@ export interface RouteResult {
 }
 
 /**
- * Domains always searched when the query gives no clear signal.
+ * There is no fallback. A query matching no domain vocabulary is not searched.
  *
- * Biased toward first aid on purpose: an unrecognized query during an emergency
- * should still reach medical content. The cost of over-searching is latency; the
- * cost of under-searching is a missed answer when it matters most.
+ * This used to search first aid and survival anyway, on the reasoning that "the
+ * cost of over-searching is latency; the cost of under-searching is a missed
+ * answer when it matters most". The graded eval priced that trade properly: the
+ * cost of over-searching was answering "how do I perform a cricothyrotomy", "how
+ * deep can I dive before I need a decompression stop" and "is it going to rain
+ * tomorrow" — 13 of 19 questions no pack covers (docs/results-akr2.md).
+ *
+ * The reasoning was sound about the risk, though, and removing the fallback
+ * blindly would have refused eight genuine questions, including "my friend is
+ * shivering uncontrollably and confused after falling in a cold creek" — a
+ * hypothermia emergency described without a single clinical word. So the lexicon
+ * was extended with lay vocabulary first: body parts, described symptoms,
+ * terrain. Measured over the graded set after that, declining on no-match
+ * refuses 0 of 46 answerable questions and correctly declines 12 of 22.
+ *
+ * The invariant to preserve: before narrowing this further, check the answerable
+ * side of the graded set, not just the decline side.
  */
-const FALLBACK_DOMAINS: readonly DomainTag[] = ['first-aid-physical', 'survival'];
 
 /** A domain must reach this share of the top domain's score to be searched. */
 const RELATIVE_THRESHOLD = 0.4;
@@ -72,8 +85,16 @@ export function route(
   let reason: string;
 
   if (entries.length === 0) {
-    domains = [...FALLBACK_DOMAINS];
-    reason = 'no domain vocabulary matched; searching fallback domains';
+    // Nothing recognisable: decline rather than guess. Returning no domains also
+    // leaves skippedStatePacks empty, so the pipeline abstains instead of asking
+    // for a location it has no use for.
+    return {
+      packIds: [],
+      domains: [],
+      scores,
+      skippedStatePacks: [],
+      reason: 'no domain vocabulary matched; out of scope',
+    };
   } else {
     const top = Math.max(...entries.map(([, v]) => v));
     domains = entries

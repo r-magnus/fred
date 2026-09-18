@@ -175,6 +175,38 @@ test('chunk domain, not just pack domain, decides what a query can retrieve', as
     'a snare passage must not answer a first-aid question just because its pack routes for first aid');
 });
 
+test('a query with no domain vocabulary is declined, not searched', () => {
+  // The router used to search first aid and survival on no match, which is how
+  // "how do I perform a cricothyrotomy" got answered from adjacent chapters.
+  for (const q of [
+    'What is the capital of France?',
+    'How do I perform a cricothyrotomy?',
+    'How deep can I dive before I need a decompression stop?',
+  ]) {
+    const r = route(extractKeywords(q), PACKS, { state: null });
+    assert.equal(r.packIds.length, 0, `${q} -> [${r.packIds.join(', ')}]`);
+    assert.equal(r.skippedStatePacks.length, 0, 'must abstain, not ask for a location');
+  }
+});
+
+test('lay descriptions of emergencies still route', () => {
+  // The other half of that trade, and the reason the fallback existed. These
+  // describe real emergencies without a single clinical word; before the lexicon
+  // carried body parts and described symptoms, every one matched nothing and
+  // would have been refused outright.
+  for (const [q, domain] of [
+    ['My friend is shivering uncontrollably and confused after falling in a cold creek', 'first-aid-physical'],
+    ['Something is stuck in my eye after a branch hit me', 'first-aid-physical'],
+    ['My friend hit their head on a rock and seems confused', 'first-aid-physical'],
+    ['I need to cross a river, what should I avoid?', 'survival'],
+    ['I think I am lost, should I keep walking?', 'survival'],
+  ] as [string, string][]) {
+    const r = route(extractKeywords(q), PACKS, { state: null });
+    assert.ok(r.packIds.length > 0, `refused: ${q}`);
+    assert.ok(r.domains.includes(domain as never), `${q} -> [${r.domains.join(', ')}]`);
+  }
+});
+
 test('a question about plant food safety does not demand a location', () => {
   // The answer is in ATP 3-50.21's edibility chapter and is not state-specific,
   // but 'plant' routed only to the state-scoped plants domain, so the pipeline

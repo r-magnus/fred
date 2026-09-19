@@ -12,6 +12,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 interface Kr {
   id: string; name: string; due: string;
   value: number | string | null; unit?: string; target?: number;
+  /** A second reading of the same KR, shown alongside. See A-KR2. */
+  secondary?: { value: number; label: string };
   lowerIsBetter?: boolean; bands?: string[]; grade: string; note: string;
 }
 interface Metrics {
@@ -84,7 +86,12 @@ for (const k of m.krs) {
   const val = k.value === null ? '—'
     : typeof k.value === 'number' ? `**${k.value}${k.unit ?? ''}**${k.target !== undefined ? ` / ${k.target}${k.unit ?? ''}` : ''}`
     : `**${k.value}**`;
-  p(`| \`${k.id}\` | ${k.name} | ${k.due} | ${val} | ${GRADE_MARK[k.grade] ?? k.grade} |`);
+  // A secondary reading sits next to the primary rather than replacing it, so a
+  // KR measured two ways cannot quietly report the flattering one.
+  const both = k.secondary === undefined
+    ? val
+    : `${val}<br><sub>${k.secondary.value}${k.unit ?? ''} ${k.secondary.label}</sub>`;
+  p(`| \`${k.id}\` | ${k.name} | ${k.due} | ${both} | ${GRADE_MARK[k.grade] ?? k.grade} |`);
 }
 p();
 for (const k of m.krs) if (k.note) p(`- \`${k.id}\` — ${k.note}`);

@@ -5,14 +5,12 @@
  * logged to adb. The engine now lives in src/engine.ts and stays resident; this
  * file is only the screen.
  *
- * Insets are handled by hand rather than with SafeAreaView. React Native 0.86
- * turns on edge-to-edge for Android 15+, so the app draws under the status bar —
- * the first build rendered "Fred" on top of the clock. Core SafeAreaView is also
- * deprecated in favour of react-native-safe-area-context, which SDK 57 confirms
- * is the right answer, but it is a native module and this project cannot rebuild
- * (no JDK on the build host). StatusBar.currentHeight is core, needs no rebuild,
- * and is correct on Android; swap to safe-area-context at the next rebuild,
- * which is also what iOS will need.
+ * Insets come from react-native-safe-area-context. React Native 0.86 turns on
+ * edge-to-edge for Android 15+, so the app draws under the status bar — the
+ * first build rendered "Fred" on top of the clock. That was held together with
+ * StatusBar.currentHeight while the project had no JDK to rebuild native
+ * modules with; the real measurement is back now, and it is also what iOS will
+ * need, where StatusBar.currentHeight is undefined.
  *
  * Three outcomes have to be visible, not just the happy one. `ask()` can return
  * an answer, an abstention, or a request for a location, and each means something
@@ -22,11 +20,13 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable,
-  ScrollView, StatusBar, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, KeyboardAvoidingView, Pressable,
+  ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
 import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
+import { currentFix, lastKnownFix, describeAccuracy, type LocationFix } from './src/location.ts';
 
 interface Turn {
   readonly id: number;
@@ -44,16 +44,25 @@ interface Turn {
   done: boolean;
 }
 
-const TOP_INSET = StatusBar.currentHeight ?? 0;
-/** Gesture bar. Approximate — the exact value needs safe-area-context. */
-const BOTTOM_INSET = Platform.OS === 'android' ? 12 : 0;
-
+/** The provider has to sit above anything calling useSafeAreaInsets. */
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <Screen />
+    </SafeAreaProvider>
+  );
+}
+
+function Screen() {
+  const insets = useSafeAreaInsets();
   const [load, setLoad] = useState<LoadPhase>({ phase: 'idle' });
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState('');
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [fix, setFix] = useState<LocationFix | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locNote, setLocNote] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const engine = useRef<Engine | null>(null);
   const scroller = useRef<ScrollView | null>(null);
@@ -68,6 +77,40 @@ export default function App() {
       live = false;
       void engine.current?.release();
     };
+  }, []);
+
+  /**
+   * A cached fix costs nothing and prompts for nothing — getLastKnownPositionAsync
+   * returns null unless permission is already granted — so the second run of the
+   * app knows the state before the reader types anything. A cold GPS lock takes
+   * 5-30 s outdoors and longer under canopy, which is too long to block on.
+   */
+  useEffect(() => {
+    let live = true;
+    void lastKnownFix().then((f) => {
+      if (!live || f === null || f.state === null) return;
+      setFix(f);
+      setState((s) => s ?? f.state);
+    });
+    return () => { live = false; };
+  }, []);
+
+  const locate = useCallback(async (): Promise<string | null> => {
+    setLocating(true);
+    setLocNote(null);
+    try {
+      const res = await currentFix();
+      if (!res.ok) { setLocNote(res.message); return null; }
+      setFix(res.fix);
+      if (res.fix.state === null) {
+        setLocNote("You're outside the states Fred carries guides for.");
+        return null;
+      }
+      setState(res.fix.state);
+      return res.fix.state;
+    } finally {
+      setLocating(false);
+    }
   }, []);
 
   const update = useCallback((id: number, patch: Partial<Turn>): void => {
@@ -139,12 +182,27 @@ export default function App() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: TOP_INSET + 12 }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={styles.wordmarkSmall}>Fred</Text>
-        <Pressable onPress={() => setState(null)} hitSlop={8}>
-          <Text style={styles.stateChip}>{state ?? 'no location'}</Text>
+        {/* B-KR1. The accuracy is on screen rather than in a log because the
+            key result is verified by standing somewhere and reading it, and
+            because a ±2 km fix and a ±8 m one should not look the same to a
+            reader deciding whether to trust the local guide. */}
+        <Pressable onPress={() => void locate()} hitSlop={8} disabled={locating}>
+          <Text style={styles.stateChip}>
+            {locating ? 'locating…'
+              : state === null ? 'use location'
+              : fix !== null && fix.state === state ? `${state} ${describeAccuracy(fix)}`
+              : state}
+          </Text>
         </Pressable>
       </View>
+
+      {locNote !== null && (
+        <Pressable onPress={() => setLocNote(null)}>
+          <Text style={styles.locNote}>{locNote}</Text>
+        </Pressable>
+      )}
 
       <ScrollView
         ref={scroller}
@@ -168,6 +226,15 @@ export default function App() {
                 <Text style={styles.body}>
                   That depends on where you are. Which state?
                 </Text>
+                <Pressable
+                  style={styles.locateButton}
+                  disabled={locating}
+                  onPress={() => void locate().then((s) => { if (s !== null) void send(t.question, s); })}
+                >
+                  <Text style={styles.locateButtonText}>
+                    {locating ? 'Locating…' : 'Use my location'}
+                  </Text>
+                </Pressable>
                 <View style={styles.stateRow}>
                   {(t.candidateStates.length > 0 ? t.candidateStates : engine.current?.availableStates() ?? [])
                     .slice(0, 12)
@@ -243,7 +310,7 @@ export default function App() {
           no longer resizes for the keyboard — the first build buried the
           composer under it. */}
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
-        <View style={styles.composer}>
+        <View style={[styles.composer, { paddingBottom: insets.bottom + 12 }]}>
           <TextInput
             style={styles.input}
             value={draft}
@@ -312,13 +379,22 @@ const styles = StyleSheet.create({
   sourcesTitle: { color: '#6ca', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
   source: { color: '#8b9a95', fontSize: 12, lineHeight: 18 },
 
+  locNote: {
+    color: '#e0c98a', fontSize: 13, backgroundColor: '#241f16',
+    paddingHorizontal: 16, paddingVertical: 10,
+  },
+  locateButton: {
+    alignSelf: 'flex-start', marginTop: 12, borderRadius: 8,
+    borderWidth: 1, borderColor: '#2f4a42', paddingHorizontal: 12, paddingVertical: 8,
+  },
+  locateButtonText: { color: '#6ca', fontSize: 13, fontWeight: '600' },
   stateRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   stateButton: { backgroundColor: '#1d2529', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
   stateButtonText: { color: '#d7e0dd', fontSize: 13, fontWeight: '600' },
 
   composer: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 10,
-    paddingHorizontal: 14, paddingTop: 12, paddingBottom: 12 + BOTTOM_INSET,
+    paddingHorizontal: 14, paddingTop: 12,
     borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d',
   },
   input: {

@@ -10,7 +10,18 @@
       "largeHeap": false
     },
     "plugins": [
-      ["llama.rn", { "forceCxx20": true }]
+      [
+        "llama.rn",
+        {
+          "forceCxx20": true
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Fred uses your location to pick the right local plant and animal guide. It stays on the device."
+        }
+      ]
     ]
   }
 }

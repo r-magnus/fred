@@ -31,6 +31,12 @@ interface Metrics {
     meanMs: number; peakPssMb: number; peakRssMb: number; idlePssMb: number;
     embedderParity: string; note: string;
   };
+  location?: {
+    implemented: string; stateResolution: string; whyNotReverseGeocode: string;
+    stateAccuracy: string;
+    samples: { when: string; where: string; state: string; accuracyMeters: number; note: string }[];
+    note: string;
+  };
 }
 
 const m = JSON.parse(readFileSync('docs/metrics.json', 'utf8')) as Metrics;
@@ -180,6 +186,29 @@ for (const c of m.corpora) p(`| \`${c.pack}\` | ${c.version} | ${c.chunks.toLoca
 p();
 const totalChunks = m.corpora.reduce((s, c) => s + c.chunks, 0);
 p(`**${totalChunks.toLocaleString()} chunks** across ${m.corpora.length} pack types.`);
+
+if (m.location !== undefined) {
+  const l = m.location;
+  p();
+  p('---');
+  p();
+  p('## Location (B-KR1)');
+  p();
+  p(`Implemented ${l.implemented}.`);
+  p();
+  p('| Fix | Where | State | Accuracy |');
+  p('|---|---|---|---:|');
+  for (const s of l.samples) {
+    p(`| ${s.when} | ${s.where} | ${s.state} | ±${s.accuracyMeters} m |`);
+  }
+  p();
+  p(`**State resolution** — ${l.stateResolution}. ${l.whyNotReverseGeocode}`);
+  p();
+  p(`**State accuracy** — ${l.stateAccuracy}. This is separate from the fix accuracy above: it bounds *which guide* Fred opens, not where it thinks you are.`);
+  p();
+  p(`⚠️ ${l.note}`);
+}
+
 p();
 p('---');
 p();

@@ -64,9 +64,19 @@
       "id": "B-KR1",
       "name": "Location while in service",
       "due": "2026-10-26",
-      "value": null,
-      "grade": "\u2014",
-      "note": "Not started. No location code exists."
+      "value": 73,
+      "grade": "C",
+      "note": "Implemented and working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 73 m is a single indoor sample on the first fix after granting permission, so it is a floor, not the number. The KR is verified by driving to different locations outdoors, which has not been done yet.",
+      "unit": "m",
+      "target": 10,
+      "lowerIsBetter": true,
+      "bands": [
+        "\u00b110m",
+        "\u00b150m",
+        "\u00b1200m",
+        "\u00b1500m",
+        ">\u00b11km"
+      ]
     },
     {
       "id": "B-KR2",
@@ -287,5 +297,21 @@
     "idlePssMb": 411,
     "embedderParity": "OK cos=1.0000 on all four packs",
     "note": "Peak memory is during generation; it falls to ~411 MB once the context is released, so sample while it is working."
+  },
+  "location": {
+    "implemented": "2026-09-18",
+    "stateResolution": "offline, bundled Census 1:20M boundaries, 52 regions / 3,539 vertices / 63 KB",
+    "whyNotReverseGeocode": "Location.reverseGeocodeAsync goes through the Android platform Geocoder, which needs a network round trip, so it fails in exactly the situation Fred exists for.",
+    "stateAccuracy": "a few hundred metres along a state line; up to ~9 km on a simplified coastline, recovered by a bounded 15 km snap",
+    "samples": [
+      {
+        "when": "2026-09-18T21:05",
+        "where": "indoors, wifi on",
+        "state": "CA",
+        "accuracyMeters": 73,
+        "note": "first fix after the permission grant"
+      }
+    ],
+    "note": "Repeat and outdoor samples are still owed. Wireless ADB dropped its port before the second reading, and the proposal verifies this KR by driving."
   }
 }

@@ -17,7 +17,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
 | `A-KR2` | Response accuracy | 2026-10-12 | **70.6%** / 90% | 🟠 C |
 | `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
-| `B-KR1` | Location while in service | 2026-10-26 | — | ⚪ not started |
+| `B-KR1` | Location while in service | 2026-10-26 | **73m** / 10m | 🟠 C |
 | `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
 | `B-KR3` | Predicted service zone | 2026-11-16 | — | ⚪ not started |
 | `RC-KR1` | iOS and Android app | 2026-11-25 | — | ⚪ not started |
@@ -27,7 +27,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
 - `A-KR2` — Free-form answers graded against an answer sheet, all five corpora.
 - `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
-- `B-KR1` — Not started. No location code exists.
+- `B-KR1` — Implemented and working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 73 m is a single indoor sample on the first fix after granting permission, so it is a floor, not the number. The KR is verified by driving to different locations outdoors, which has not been done yet.
 - `B-KR2` — Not started. The harder half of Beta.
 - `B-KR3` — Data source identified (FCC BDC, ~310MB at H3 res 7). No code.
 - `RC-KR1` — Android harness only. iOS never built.
@@ -141,6 +141,22 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 | `state-XX-flora-fauna` | 1.0.0 | 185,215 | USFS FEIS, 50 states, 309 MB |
 
 **186,855 chunks** across 4 pack types.
+
+---
+
+## Location (B-KR1)
+
+Implemented 2026-09-18.
+
+| Fix | Where | State | Accuracy |
+|---|---|---|---:|
+| 2026-09-18T21:05 | indoors, wifi on | CA | ±73 m |
+
+**State resolution** — offline, bundled Census 1:20M boundaries, 52 regions / 3,539 vertices / 63 KB. Location.reverseGeocodeAsync goes through the Android platform Geocoder, which needs a network round trip, so it fails in exactly the situation Fred exists for.
+
+**State accuracy** — a few hundred metres along a state line; up to ~9 km on a simplified coastline, recovered by a bounded 15 km snap. This is separate from the fix accuracy above: it bounds *which guide* Fred opens, not where it thinks you are.
+
+⚠️ Repeat and outdoor samples are still owed. Wireless ADB dropped its port before the second reading, and the proposal verifies this KR by driving.
 
 ---
 

@@ -33,7 +33,8 @@ interface Metrics {
   };
   location?: {
     implemented: string; stateResolution: string; whyNotReverseGeocode: string;
-    stateAccuracy: string;
+    stateAccuracy: string; fixStrategy: string; lockMs: number; lockNote: string;
+    methodComparison: Record<string, { samples: number[]; median: number; note: string }>;
     samples: { when: string; where: string; state: string; accuracyMeters: number; note: string }[];
     note: string;
   };
@@ -201,6 +202,16 @@ if (m.location !== undefined) {
   for (const s of l.samples) {
     p(`| ${s.when} | ${s.where} | ${s.state} | ±${s.accuracyMeters} m |`);
   }
+  p();
+  p(`**Getting the fix** — ${l.fixStrategy}`);
+  p();
+  p('| Method | Indoor samples (m) | Median |');
+  p('|---|---|---:|');
+  for (const [name, c] of Object.entries(l.methodComparison)) {
+    p(`| ${name} | ${c.samples.join(', ')} | **${c.median} m** |`);
+  }
+  p();
+  p(`Lock time is ${(l.lockMs / 1000).toFixed(0)} s. ${l.lockNote}`);
   p();
   p(`**State resolution** — ${l.stateResolution}. ${l.whyNotReverseGeocode}`);
   p();

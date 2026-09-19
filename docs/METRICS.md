@@ -17,7 +17,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
 | `A-KR2` | Response accuracy | 2026-10-12 | **70.6%** / 90% | 🟠 C |
 | `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
-| `B-KR1` | Location while in service | 2026-10-26 | **73m** / 10m | 🟠 C |
+| `B-KR1` | Location while in service | 2026-10-26 | **33.5m** / 10m | 🟡 B |
 | `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
 | `B-KR3` | Predicted service zone | 2026-11-16 | — | ⚪ not started |
 | `RC-KR1` | iOS and Android app | 2026-11-25 | — | ⚪ not started |
@@ -27,7 +27,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
 - `A-KR2` — Free-form answers graded against an answer sheet, all five corpora.
 - `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
-- `B-KR1` — Implemented and working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 73 m is a single indoor sample on the first fix after granting permission, so it is a floor, not the number. The KR is verified by driving to different locations outdoors, which has not been done yet.
+- `B-KR1` — Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.
 - `B-KR2` — Not started. The harder half of Beta.
 - `B-KR3` — Data source identified (FCC BDC, ~310MB at H3 res 7). No code.
 - `RC-KR1` — Android harness only. iOS never built.
@@ -151,12 +151,22 @@ Implemented 2026-09-18.
 | Fix | Where | State | Accuracy |
 |---|---|---|---:|
 | 2026-09-18T21:05 | indoors, wifi on | CA | ±73 m |
+| 2026-09-18T21:15 | indoors, wifi on | CA | ±33.5 m |
+
+**Getting the fix** — watchPositionAsync at Accuracy.Highest, keeping the best reading for up to 15 s and returning early at ≤10 m. A single getCurrentPositionAsync returns as soon as the platform meets its own bar, which is not ±10 m.
+
+| Method | Indoor samples (m) | Median |
+|---|---|---:|
+| singleShot | 64.3, 74, 75.3, 75.1, 76.1 | **75.1 m** |
+| refiningWatch | 66, 33.5, 33.5, 32.9, 20, 35.8, 76.6, 21.3 | **33.5 m** |
+
+Lock time is 15 s. Always the full window indoors, because the ≤10 m early exit never fires there. Outdoors it should return in seconds. Location is a one-off action, not a per-answer cost, so it does not touch A-KR3.
 
 **State resolution** — offline, bundled Census 1:20M boundaries, 52 regions / 3,539 vertices / 63 KB. Location.reverseGeocodeAsync goes through the Android platform Geocoder, which needs a network round trip, so it fails in exactly the situation Fred exists for.
 
 **State accuracy** — a few hundred metres along a state line; up to ~9 km on a simplified coastline, recovered by a bounded 15 km snap. This is separate from the fix accuracy above: it bounds *which guide* Fred opens, not where it thinks you are.
 
-⚠️ Repeat and outdoor samples are still owed. Wireless ADB dropped its port before the second reading, and the proposal verifies this KR by driving.
+⚠️ Outdoor and driving samples are still owed — the proposal verifies this KR by driving to different physical locations. Every reading so far is indoors, which is the worst case for GPS.
 
 ---
 

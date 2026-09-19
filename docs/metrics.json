@@ -64,9 +64,9 @@
       "id": "B-KR1",
       "name": "Location while in service",
       "due": "2026-10-26",
-      "value": 73,
-      "grade": "C",
-      "note": "Implemented and working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 73 m is a single indoor sample on the first fix after granting permission, so it is a floor, not the number. The KR is verified by driving to different locations outdoors, which has not been done yet.",
+      "value": 33.5,
+      "grade": "B",
+      "note": "Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.",
       "unit": "m",
       "target": 10,
       "lowerIsBetter": true,
@@ -309,9 +309,46 @@
         "where": "indoors, wifi on",
         "state": "CA",
         "accuracyMeters": 73,
-        "note": "first fix after the permission grant"
+        "note": "single getCurrentPositionAsync, before the refining watch existed"
+      },
+      {
+        "when": "2026-09-18T21:15",
+        "where": "indoors, wifi on",
+        "state": "CA",
+        "accuracyMeters": 33.5,
+        "note": "median of 8 refining-watch samples; range 20.0-76.6 m"
       }
     ],
-    "note": "Repeat and outdoor samples are still owed. Wireless ADB dropped its port before the second reading, and the proposal verifies this KR by driving."
+    "note": "Outdoor and driving samples are still owed \u2014 the proposal verifies this KR by driving to different physical locations. Every reading so far is indoors, which is the worst case for GPS.",
+    "fixStrategy": "watchPositionAsync at Accuracy.Highest, keeping the best reading for up to 15 s and returning early at \u226410 m. A single getCurrentPositionAsync returns as soon as the platform meets its own bar, which is not \u00b110 m.",
+    "methodComparison": {
+      "singleShot": {
+        "samples": [
+          64.3,
+          74.0,
+          75.3,
+          75.1,
+          76.1
+        ],
+        "median": 75.1,
+        "note": "getCurrentPositionAsync, one call each. Settles on the indoor WiFi floor."
+      },
+      "refiningWatch": {
+        "samples": [
+          66.0,
+          33.5,
+          33.5,
+          32.9,
+          20.0,
+          35.8,
+          76.6,
+          21.3
+        ],
+        "median": 33.5,
+        "note": "watchPositionAsync, best of 15 s. Halves the median indoor error."
+      }
+    },
+    "lockMs": 15000,
+    "lockNote": "Always the full window indoors, because the \u226410 m early exit never fires there. Outdoors it should return in seconds. Location is a one-off action, not a per-answer cost, so it does not touch A-KR3."
   }
 }

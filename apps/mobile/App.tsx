@@ -62,6 +62,7 @@ function Screen() {
   const [busy, setBusy] = useState(false);
   const [fix, setFix] = useState<LocationFix | null>(null);
   const [locating, setLocating] = useState(false);
+  const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const engine = useRef<Engine | null>(null);
@@ -97,9 +98,10 @@ function Screen() {
 
   const locate = useCallback(async (): Promise<string | null> => {
     setLocating(true);
+    setLocProgress(null);
     setLocNote(null);
     try {
-      const res = await currentFix();
+      const res = await currentFix({ onProgress: setLocProgress });
       if (!res.ok) { setLocNote(res.message); return null; }
       setFix(res.fix);
       if (res.fix.state === null) {
@@ -110,6 +112,7 @@ function Screen() {
       return res.fix.state;
     } finally {
       setLocating(false);
+      setLocProgress(null);
     }
   }, []);
 
@@ -190,7 +193,7 @@ function Screen() {
             reader deciding whether to trust the local guide. */}
         <Pressable onPress={() => void locate()} hitSlop={8} disabled={locating}>
           <Text style={styles.stateChip}>
-            {locating ? 'locating…'
+            {locating ? (locProgress === null ? 'locating…' : `±${Math.round(locProgress)} m…`)
               : state === null ? 'use location'
               : fix !== null && fix.state === state ? `${state} ${describeAccuracy(fix)}`
               : state}

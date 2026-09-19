@@ -25,14 +25,17 @@ export interface LocationFix {
   readonly timestamp: number;
   /** True when this came from the OS cache rather than a fresh GPS read. */
   readonly cached: boolean;
+  /** Wall time spent waiting on the GPS, ms. 0 for a cached fix. */
+  readonly tookMs: number;
 }
 
 export type LocationResult =
   | { readonly ok: true; readonly fix: LocationFix }
   | { readonly ok: false; readonly reason: 'denied' | 'disabled' | 'unavailable'; readonly message: string };
 
-function toFix(loc: Location.LocationObject, cached: boolean): LocationFix {
+function toFix(loc: Location.LocationObject, cached: boolean, tookMs: number): LocationFix {
   return {
+    tookMs,
     latitude: loc.coords.latitude,
     longitude: loc.coords.longitude,
     accuracyMeters: loc.coords.accuracy,
@@ -53,16 +56,35 @@ export async function lastKnownFix(maxAgeMs = 120_000): Promise<LocationFix | nu
   const granted = await Location.getForegroundPermissionsAsync();
   if (!granted.granted) return null;
   const loc = await Location.getLastKnownPositionAsync({ maxAge: maxAgeMs });
-  return loc === null ? null : toFix(loc, true);
+  return loc === null ? null : toFix(loc, true, 0);
 }
 
+/** The B-KR1 target. Stop early once the fix is this good. */
+const TARGET_METERS = 10;
+/** How long to keep refining before taking the best so far. */
+const REFINE_MS = 15_000;
+
 /**
- * Prompt if needed, then read the GPS.
+ * Prompt if needed, then watch the GPS until it is good enough.
  *
- * `Accuracy.Highest` is what B-KR1's ±10 m target requires; the lower settings
- * fall back to network and cell positioning, which Fred will not have.
+ * getCurrentPositionAsync returns as soon as the platform meets its own
+ * internal bar, which is not ±10 m. Measured indoors on the Nothing Phone (3),
+ * six consecutive calls gave 20 m, 64, 74, 75, 75, 76 — the first was a good
+ * cached fix handed straight back, and the rest were WiFi positioning settling
+ * on its own floor around 75 m. A satellite fix tightens over tens of seconds
+ * as more birds lock, so the way to reach the target is to watch and keep the
+ * best rather than to ask once.
+ *
+ * Returns early the moment it sees `targetMeters`, so a clear sky outdoors
+ * costs a second or two, not the full window.
  */
-export async function currentFix(): Promise<LocationResult> {
+export async function currentFix(
+  { targetMeters = TARGET_METERS, timeoutMs = REFINE_MS, onProgress }: {
+    targetMeters?: number; timeoutMs?: number;
+    /** Best accuracy so far, metres, as the watch tightens. */
+    onProgress?: (accuracyMeters: number | null) => void;
+  } = {},
+): Promise<LocationResult> {
   if (!(await Location.hasServicesEnabledAsync())) {
     return { ok: false, reason: 'disabled', message: 'Location is turned off on this phone.' };
   }
@@ -78,9 +100,60 @@ export async function currentFix(): Promise<LocationResult> {
     };
   }
 
+  const started = Date.now();
+  // A cached fix is a free starting bid — the platform will not always beat it,
+  // as the 20 m reading above shows, and discarding it can lose real accuracy.
+  let best = await Location.getLastKnownPositionAsync({ maxAge: 60_000 });
+
   try {
-    const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-    return { ok: true, fix: toFix(loc, false) };
+    const fix = await new Promise<LocationFix>((resolve, reject) => {
+      let sub: Location.LocationSubscription | null = null;
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      let settled = false;
+
+      const finish = (): void => {
+        if (settled) return;
+        settled = true;
+        if (timer !== null) clearTimeout(timer);
+        sub?.remove();
+        if (best === null) {
+          reject(new Error('No location fix within the time limit.'));
+        } else {
+          resolve(toFix(best, false, Date.now() - started));
+        }
+      };
+
+      timer = setTimeout(finish, timeoutMs);
+
+      void Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.Highest, timeInterval: 1000, distanceInterval: 0 },
+        (loc) => {
+          // A reading with no accuracy figure cannot be compared, so it only
+          // wins when there is nothing to compare it against.
+          const a = loc.coords.accuracy;
+          const bestA = best?.coords.accuracy ?? null;
+          if (best === null || bestA === null || (a !== null && a < bestA)) {
+            best = loc;
+            onProgress?.(a);
+          }
+          if (a !== null && a <= targetMeters) finish();
+        },
+        (message) => { if (best !== null) finish(); else { settled = true; reject(new Error(message)); } },
+      ).then((s) => {
+        sub = s;
+        // finish() may already have run, in which case nothing removes this.
+        if (settled) s.remove();
+      }, reject);
+    });
+
+    // B-KR1 is verified by driving somewhere and reading the number, so it has
+    // to leave a trace that survives not looking at the screen. Accuracy, state
+    // and lock time only — never the coordinates, which would write the user's
+    // actual position into a log that outlives the session.
+    console.log(
+      `[B-KR1] state=${fix.state ?? 'none'} accuracy=${fix.accuracyMeters ?? 'unknown'}m ` +
+      `lock=${fix.tookMs}ms`);
+    return { ok: true, fix };
   } catch (e) {
     return {
       ok: false,

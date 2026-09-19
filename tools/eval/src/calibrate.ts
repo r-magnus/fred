@@ -26,6 +26,30 @@ import { loadGradedSet, loadVerdicts, setsFor, type GradedQuestion, type GradedR
 const runsPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 const verdictsPath = process.argv[3] ?? 'docs/graded-verdicts.json';
 
+/**
+ * Sweeping a threshold over the held-out set is how it stops being held out.
+ *
+ * Nothing about the resulting number would look wrong afterwards — that is
+ * precisely the problem, and why this is a refusal in code rather than a line
+ * in docs/results-holdout.md. The escape hatch exists because there are
+ * legitimate reasons to look (checking a fitted gate generalises, say), but it
+ * has to be typed out on purpose.
+ */
+if (process.env.EVAL_SET === 'holdout' || process.env.EVAL_SET === 'all') {
+  if (process.env.I_AM_NOT_FITTING_TO_THE_HOLDOUT !== 'yes') {
+    console.error(
+      'Refusing to sweep thresholds over the held-out set.\n' +
+      'The gate, the lexicon and the prompt are tuned on EVAL_SET=tuning. Fitting\n' +
+      'anything to the holdout set silently turns it into a second training set,\n' +
+      'and A-KR2 loses the only number it can honestly quote.\n\n' +
+      'If you are reading rather than fitting, re-run with\n' +
+      '  I_AM_NOT_FITTING_TO_THE_HOLDOUT=yes',
+    );
+    process.exit(2);
+  }
+  console.error('warning: reading the held-out set. Do not move a threshold based on it.\n');
+}
+
 const questions = new Map<string, GradedQuestion>(
   setsFor(process.env.EVAL_SET).flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
 );

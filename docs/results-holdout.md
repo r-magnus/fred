@@ -1,0 +1,114 @@
+# A held-out set for A-KR2
+
+Written 2026-09-18, before any of it was run.
+
+## Why
+
+Every A-KR2 number so far — 38.2% through 70.6% — was measured on the same 68
+questions in `tools/eval/data/graded-*.json`. Those 68 are also what the scope
+gate, the lay vocabulary, the conditional prompt shape and the abstention
+threshold were fitted against. The threshold in particular sits at 0.29 with a
+**0.016 margin** over the next candidate, chosen by sweeping those same 68.
+
+That is a training score. It cannot distinguish a pipeline that got better from
+one that got fitted, and the difference matters: the proposal's A-KR2 target is
+90%, and we are about to spend three weeks optimising toward it. Optimising
+against a training score is how you arrive at the deadline with a number that
+does not survive contact with a new question.
+
+So: 40 questions nothing has been tuned on. `HOLDOUT_SETS`, run with
+`EVAL_SET=holdout`. **This is the number to quote for A-KR2 from here on.** The
+tuning set stays useful for iterating quickly; it is just not evidence.
+
+## How topics were chosen, and why not by hand
+
+By the time this set was needed, the author had read every failure in the tuning
+set. Choosing topics freely from that position produces a biased set in one of
+two directions — around the known weak spots, or straight at them — and no
+amount of care fixes it, because the knowledge cannot be un-had.
+
+So topic choice was handed to a sampler, `scripts/sample-holdout-sections.mjs`:
+
+1. List every section in a pack's `chunks.sqlite`.
+2. Drop sections under three chunks — too little text to ground an answer sheet.
+3. Drop headings matching a list of PDF artefacts (`YES`, `Module 3`, `SKILLS]`,
+   `SIGNS AND SYMPTOMS`, and similar) — these are layout, not subjects.
+4. Drop sections whose heading matches any topic the tuning set already covers.
+5. Shuffle what remains under a fixed seed and take the first N.
+
+Questions were then written **from the sampled passage text**, with key points
+quoted back to the passage in the `cite` field, so the answer sheet can be
+checked without domain expertise. Species for the flora-and-fauna questions were
+drawn the same way from the CA and OR pack species lists.
+
+## What was drawn
+
+27 sections across the three core packs, 9 each, plus 11 species.
+
+| Pack | Eligible | Sampled |
+|---|---:|---|
+| `core-firstaid-army` | 35 | MOUNTAINOUS TERRAIN INJURIES, CONCUSSIONS, APPLICATION OF HEMOSTATIC DRESSING AND WOUND PACKING, OVERVIEW OF CIRCULATION CONTROL, FACIAL INJURIES, OVERVIEW OF BITES AND STINGS, OVERVIEW OF AIRWAY CONTROL, MUSCULOSKELETAL SYSTEM, EXTERNAL CHEST COMPRESSIONS |
+| `core-firstaid` (WHO) | 36 | IF YOU FIND… REMEMBER…, CIRCULATION, AIRWAY SKILL STATION: BASIC AIRWAY MANOEUVRES, MANAGEMENT CONSIDERATIONS, IMMOBILIZATION SKILL STATION: APPLYING A PELVIC BINDER, L: LAST ORAL INTAKE, IN-DEPTH MANAGEMENT, IMMEDIATE MANAGEMENT, CIRCULATION SKILL: IV CANNULATION |
+| `core-survival` | 42 | MOVEMENT CONSIDERATIONS, DEAD RECKONING, TERRAIN FEATURES, BITES AND STINGS, PREPARING FISH FOR CONSUMPTION, OTHER EXPEDIENT WEAPONS, NATURAL CORDAGE SELECTION, DECISION TO STAY OR MOVE, SURVIVAL MEDICINE VERSUS TRADITIONAL MEDICINE |
+| `state-CA-flora-fauna` | 520 species | littleleaf ratany, bigberry manzanita, Cuman ragweed, softstem bulrush, pinemat manzanita, mountain snowberry, bigleaf maple, prairie falcon |
+| `state-OR-flora-fauna` | 460 species | wild turkey, capitate sedge, white sagebrush |
+
+## Where discretion came back in, and how much
+
+**13 of the 27 sampled sections produced no question.** This is the one place
+author judgement re-entered, so it is recorded rather than buried:
+
+- *Anatomy and chapter framing* — `MUSCULOSKELETAL SYSTEM`, `OVERVIEW OF
+  CIRCULATION CONTROL`, `OVERVIEW OF BITES AND STINGS`, `IN-DEPTH MANAGEMENT`,
+  `IMMEDIATE MANAGEMENT`, `MANAGEMENT CONSIDERATIONS`, `CIRCULATION`,
+  `L: LAST ORAL INTAKE`. These are textbook scaffolding. No wilderness user asks
+  "what is the musculoskeletal system composed of", and inventing such a question
+  would measure the corpus's table of contents rather than Fred.
+- *Clinical-only procedure* — `CIRCULATION SKILL: IV CANNULATION`. Not skipped:
+  turned into `hn-clinical-01`, which expects an abstention, because coaching a
+  layperson through IV access is exactly what Fred should decline.
+- *Thin species reviews* — littleleaf ratany, Cuman ragweed, pinemat manzanita,
+  capitate sedge. Kept for a future round.
+- `OTHER EXPEDIENT WEAPONS` — improvised weapons sit outside what Fred is for.
+
+The bias this introduces runs **toward** questions the corpora can answer, which
+if anything flatters Fred. It does not reintroduce knowledge of his failures,
+which is the bias the sampler existed to block.
+
+## Composition
+
+| File | n | What it tests |
+|---|---:|---|
+| `holdout-firstaid.json` | 12 | Snow blindness, concussion, hemostatic dressings, wound packing limits, scalp bleeding, airway assessment, adult and infant CPR, ticks, head-tilt in trauma, anaphylaxis recognition, pelvic fracture |
+| `holdout-survival.json` | 12 | Stay-or-move, movement pacing, dead reckoning, GPS battery, saddles, hills on contour lines, spoiled fish, cordage testing, paracord, survival vs traditional medicine, insects, orienting a map |
+| `holdout-flora-fauna.json` | 8 | Manzanita fruit and size, marsh edibles, bigleaf maple sap, prairie falcon diet, Oregon turkey roosting, white sagebrush uses, one `needs-location` |
+| `holdout-negative.json` | 8 | Two off-topic, three adversarial (domain words, out of scope), paediatric dosing, clinical procedure, a Beta-scope location question |
+
+Three deliberate properties, matching the tuning set so the two are comparable:
+
+- **Both non-answer outcomes appear.** A set of only answerable questions can
+  measure accuracy but says nothing about where the gate belongs, because it
+  contains no case the gate should stop.
+- **Adversarial negatives.** `hn-adversarial-fire-01` and friends carry survival
+  and plant vocabulary but are domestic questions. Routing alone cannot reject
+  them, which is what makes them worth having.
+- **Red flags on the safety-critical items.** `hf-woundpack-01` fails any answer
+  that permits packing the abdomen, however many correct points it also makes —
+  the same defect class as the inverted snakebite list in `results-alpha.md`.
+
+## Rules for keeping it held out
+
+1. **Never fit a threshold to it.** The gate, the lexicon and the prompt are
+   tuned on `GRADED_SETS`. `calibrate.ts` honours `EVAL_SET`, which means it
+   *can* sweep this set — do not.
+2. **Run it rarely.** Every run leaks a little; a set consulted after each change
+   becomes a second training set in everything but name.
+3. **Do not repair a question because Fred failed it.** Fix genuine factual
+   errors in an answer sheet, and record the change here when you do.
+4. `graded-types.test.ts` guards id and question-text disjointness. It cannot
+   guard intent.
+
+## Result
+
+Run pending at time of writing — see the table below once
+`docs/holdout-verdicts-1.7B.json` exists.

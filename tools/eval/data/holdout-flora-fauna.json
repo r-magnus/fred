@@ -1,0 +1,133 @@
+[
+  {
+    "id": "hff-manzanita-01",
+    "question": "What eats manzanita berries?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants", "wildlife"],
+    "keyPoints": [
+      "Birds, rodents and coyotes eat bigberry manzanita fruit",
+      "Seed-eating rodents consume the seeds"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Birds, rodents, and coyote eat bigberry manzanita fruits and various seed-eating rodents consume the seeds." }
+  },
+  {
+    "id": "hff-manzanita-02",
+    "question": "How big does bigberry manzanita get?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "An evergreen shrub roughly 3.3 to 19.8 feet, or 1 to 6 metres, tall",
+      "Upright and sometimes tree-like in coastal regions, lower on desert borders"
+    ],
+    "redFlags": [
+      "Describes it as a ground-hugging plant only a few inches tall"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Bigberry manzanita is a native, evergreen, sclerophyllous shrub 3.3 to 19.8 feet (1-6 m) in height." }
+  },
+  {
+    "id": "hff-bulrush-01",
+    "question": "Is there anything edible in a marsh in California?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "Softstem bulrush roots can be ground into flour or eaten whole",
+      "Syrup can be extracted from the roots",
+      "It is a tall, leafless marsh plant with spongy, obscurely three-sided stems"
+    ],
+    "redFlags": [
+      "States plainly that no marsh plants are edible",
+      "Recommends eating a plant the corpus does not describe as edible"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Roots of softstem bulrush can be ground into flour or eaten whole. Syrup can be extracted from them." }
+  },
+  {
+    "id": "hff-bigleafmaple-01",
+    "question": "Can you get syrup out of a bigleaf maple?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "Yes — the sap can be rendered into maple syrup",
+      "The yield is lower than from sugar maple"
+    ],
+    "redFlags": [
+      "Says bigleaf maple sap is toxic or unusable"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "The sap can be rendered into maple syrup, although the yield is less than that of sugar maple" }
+  },
+  {
+    "id": "hff-falcon-01",
+    "question": "What do prairie falcons hunt?",
+    "state": "CA",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "A wide range of prey: mammals, birds, reptiles and insects",
+      "Ground squirrels are the major prey in many areas during breeding season",
+      "Where ground squirrels are absent, small to medium birds and reptiles take over"
+    ],
+    "redFlags": [
+      "Describes the prairie falcon as a scavenger or plant eater"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Prairie falcons eat a wide variety of prey including mammals, birds, reptiles, and insects." }
+  },
+  {
+    "id": "hff-turkey-01",
+    "question": "Where do wild turkeys sleep in Oregon?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["wildlife"],
+    "keyPoints": [
+      "In Oregon they prefer to roost in large ponderosa pines",
+      "On easterly slopes"
+    ],
+    "redFlags": [
+      "Says wild turkeys nest or sleep underground or in burrows"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-OR-flora-fauna",
+    "cite": { "page": null, "quote": "In Oregon, wild turkeys prefer to roost in large ponderosa pines on easterly slopes." }
+  },
+  {
+    "id": "hff-sagebrush-01",
+    "question": "I'm in Oregon and found a silvery grey plant that smells strong. What was white sagebrush used for?",
+    "state": "OR",
+    "expect": "answer",
+    "domains": ["plants"],
+    "keyPoints": [
+      "Native Americans burned it for incense and ceremonial purposes",
+      "It was used in cooking to flavour meat",
+      "Medicinal uses included sore throats and stomach ailments"
+    ],
+    "redFlags": [
+      "Presents the historical medicinal uses as current medical advice to follow"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-OR-flora-fauna",
+    "cite": { "page": null, "quote": "Native Americans burned white sagebrush for incense and ceremonial purposes." }
+  },
+  {
+    "id": "hff-nostate-01",
+    "question": "Are there any manzanitas around here?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "state-CA-flora-fauna",
+    "cite": { "page": null, "quote": "Species presence is state-scoped; 'around here' with no location cannot be resolved." }
+  }
+]

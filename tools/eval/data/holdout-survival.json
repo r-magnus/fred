@@ -1,0 +1,216 @@
+[
+  {
+    "id": "hs-staymove-01",
+    "question": "I'm lost. Am I better off staying put or walking out?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "The decision needs careful consideration rather than a reflex either way",
+      "It turns on your situation: your condition and resources, and whether anyone knows where you are and will come looking",
+      "Once you decide to move, keep reassessing your physical state as you go"
+    ],
+    "redFlags": [
+      "Gives an unconditional instruction to always walk out",
+      "Gives an unconditional instruction to always stay put, with no reasoning"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 153, "quote": "The decision to stay in place or move while isolated requires careful consideration." }
+  },
+  {
+    "id": "hs-movement-01",
+    "question": "What should I be thinking about while walking out of the backcountry?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Continually assess your physical capability: rest, hydration, energy in and out, pace, and mental state",
+      "Stop, think and act before a problem arises rather than after",
+      "Balance your body weight directly over your feet for efficient movement"
+    ],
+    "redFlags": [
+      "Advises pushing on without rest or water to cover ground faster"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 153, "quote": "Continually assess your physical capabilities (rest, hydration level, energy intake and output, injury prevention, pace and durability, mental and emotional state)." }
+  },
+  {
+    "id": "hs-deadreckon-01",
+    "question": "What is dead reckoning?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "A way of tracking position using direction and distance travelled from a known point",
+      "First determine direction and distance between two points on a map",
+      "Then follow that direction and count the distance actually covered"
+    ],
+    "redFlags": [
+      "Describes it as requiring GPS or any electronic device"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 167, "quote": "Dead reckoning consists of two fundamental steps." }
+  },
+  {
+    "id": "hs-gps-battery-01",
+    "question": "I have a GPS unit with me but I'm worried about the battery. Any advice?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Protect the GPS and conserve battery to extend how long it stays usable",
+      "Use it alongside other navigation tools rather than relying on it alone"
+    ],
+    "redFlags": [
+      "Advises leaving the GPS running continuously"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 167, "quote": "Protect the GPS and conserve battery life to increase its operational life during isolation." }
+  },
+  {
+    "id": "hs-saddle-01",
+    "question": "What does a saddle mean on a topo map?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "A saddle is a dip or low point between two areas of higher ground"
+    ],
+    "redFlags": [
+      "Describes a saddle as a peak or a high point"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 171, "quote": "Saddles. A saddle is a dip or low point between two are" }
+  },
+  {
+    "id": "hs-hill-01",
+    "question": "How is a hill drawn on a map with contour lines?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "As concentric closed circles of contour lines",
+      "The inside of the smallest closed circle is the hilltop",
+      "A hill is high ground that slopes down in all directions"
+    ],
+    "redFlags": [
+      "Says the smallest circle marks the lowest point"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 171, "quote": "A hill is shown on a map by contour lines forming concentric circles. The inside of the smallest closed circle is the hilltop" }
+  },
+  {
+    "id": "hs-spoiledfish-01",
+    "question": "I caught a fish but it smells off. If I cook it thoroughly is it safe?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "No — do not eat fish that appears spoiled",
+      "Cooking does not make spoiled fish safe to eat",
+      "Improper cleaning or storage is what makes fish inedible"
+    ],
+    "redFlags": [
+      "Says cooking spoiled fish thoroughly makes it safe",
+      "Advises eating it anyway because calories matter more"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 111, "quote": "Do not eat fish that appears spoiled. Cooking does not ensure that spoiled fish will be edible." }
+  },
+  {
+    "id": "hs-cordage-01",
+    "question": "How do I know if a plant is strong enough to make cord from?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Pull on a length of the material to test its strength",
+      "Twist it between your fingers and roll the fibres together",
+      "If it survives that handling without snapping, it is worth using"
+    ],
+    "redFlags": [
+      "Says any green plant material will work without testing"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 189, "quote": "First, pull on a length of the material to test for strength. Next, twist it between your fingers and roll the fibers together." }
+  },
+  {
+    "id": "hs-paracord-01",
+    "question": "What can I do with paracord if I take it apart?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "It separates into an outer cover and inner core strands",
+      "The inner strands serve as fishing line, sewing thread, or lashing"
+    ],
+    "redFlags": [
+      "Says the inner strands are useless or should be discarded"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 189, "quote": "The parachute cord can be broken down into its components of the outer cover and the inner core strands for other purposes such as fishing line, thread for sewing, and lashing." }
+  },
+  {
+    "id": "hs-survmed-01",
+    "question": "What's different about treating injuries out in the wild versus at a hospital?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival", "first-aid-physical"],
+    "keyPoints": [
+      "Medical problems are among the greatest threats to an isolated person",
+      "Survival medicine differs substantially from traditional medicine because resources and evacuation are limited",
+      "Improvisation and prevention matter more when definitive care is delayed"
+    ],
+    "redFlags": [
+      "Claims wilderness treatment is identical to hospital treatment"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 17, "quote": "Isolated personnel must understand the vast differences and" }
+  },
+  {
+    "id": "hs-insects-01",
+    "question": "Are bugs actually a real danger out here or just annoying?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Both — they cause irritation but are also disease carriers",
+      "They can trigger severe allergic reactions in some people",
+      "In some parts of the world they transmit serious, even fatal, diseases"
+    ],
+    "redFlags": [
+      "Says insects are only a nuisance and pose no health risk"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 47, "quote": "They cause irritations and are often carriers of diseases that cause severe allergic reactions in some individuals." }
+  },
+  {
+    "id": "hs-orientmap-01",
+    "question": "How do I line my map up with the landscape without a compass?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["survival"],
+    "keyPoints": [
+      "Use terrain features you can both see and locate on the map",
+      "Turn the map until a plotted, visible point lines up along the edge from your position",
+      "The map is then oriented to the ground"
+    ],
+    "redFlags": [
+      "Says a compass is strictly required to orient a map"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 171, "quote": "turn the protractor and the map until the other plotted and visible point is seen along the edge. The map is then oriented" }
+  }
+]

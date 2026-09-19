@@ -21,12 +21,12 @@
  * measurement; those are scored by outcome in `verdicts.ts`.
  */
 import { readFileSync } from 'node:fs';
-import { loadGradedSet, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
+import { loadGradedSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
 const runsPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
 const questions = new Map<string, GradedQuestion>(
-  GRADED_SETS.flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
+  setsFor(process.env.EVAL_SET).flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
 );
 const runs: GradedRun[] = readFileSync(runsPath, 'utf8')
   .split('\n').filter((l) => l.trim() !== '')

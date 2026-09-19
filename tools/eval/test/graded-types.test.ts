@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { loadGradedSet, describeSet } from '../src/graded-types.ts';
+import { loadGradedSet, describeSet, GRADED_SETS, HOLDOUT_SETS, setsFor } from '../src/graded-types.ts';
 
 const read = (p: string): string => readFileSync(p, 'utf8');
 const SETS = [
@@ -101,4 +101,53 @@ test('describeSet reports composition rather than just a count', () => {
   assert.match(d, /n=1/);
   assert.match(d, /answer=1/);
   assert.match(d, /corpus-derived=1/);
+});
+
+/**
+ * The held-out set only means anything while it stays separate from the set
+ * everything was tuned on. These guard that property, because nothing about the
+ * files themselves would reveal that it had been broken.
+ */
+test('every holdout set parses', () => {
+  for (const path of HOLDOUT_SETS) {
+    const qs = loadGradedSet(path, read);
+    assert.ok(qs.length > 0, `${path} is empty`);
+  }
+});
+
+test('no question appears in both the tuning and holdout sets', () => {
+  const ids = new Map<string, string>();
+  for (const path of [...GRADED_SETS, ...HOLDOUT_SETS]) {
+    for (const q of loadGradedSet(path, read)) {
+      const clash = ids.get(q.id);
+      assert.equal(clash, undefined, `id "${q.id}" is in both ${clash} and ${path}`);
+      ids.set(q.id, path);
+    }
+  }
+
+  const norm = (s: string): string => s.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+  const tuning = new Set(GRADED_SETS.flatMap((p) => loadGradedSet(p, read)).map((q) => norm(q.question)));
+  for (const path of HOLDOUT_SETS) {
+    for (const q of loadGradedSet(path, read)) {
+      assert.ok(!tuning.has(norm(q.question)), `"${q.question}" is already in the tuning set`);
+    }
+  }
+});
+
+test('setsFor selects a family and rejects anything else', () => {
+  assert.deepEqual(setsFor(undefined), GRADED_SETS);
+  assert.deepEqual(setsFor('tuning'), GRADED_SETS);
+  assert.deepEqual(setsFor('holdout'), HOLDOUT_SETS);
+  assert.equal(setsFor('all').length, GRADED_SETS.length + HOLDOUT_SETS.length);
+  assert.throws(() => setsFor('graded'), /tuning \| holdout \| all/);
+});
+
+test('the holdout set covers every corpus and both non-answer outcomes', () => {
+  const qs = HOLDOUT_SETS.flatMap((p) => loadGradedSet(p, read));
+  for (const pack of ['core-firstaid-army', 'core-firstaid', 'core-survival',
+                      'state-CA-flora-fauna', 'state-OR-flora-fauna']) {
+    assert.ok(qs.some((q) => q.pack === pack), `no holdout question for ${pack}`);
+  }
+  assert.ok(qs.some((q) => q.expect === 'abstain'), 'no abstain case');
+  assert.ok(qs.some((q) => q.expect === 'needs-location'), 'no needs-location case');
 });

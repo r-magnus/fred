@@ -16,7 +16,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ask, verifyEmbedderParity, DEFAULT_RETRIEVAL } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
-import { loadGradedSet, describeSet, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
+import { loadGradedSet, describeSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
@@ -32,7 +32,7 @@ const topK = process.env.TOPK === undefined ? DEFAULT_RETRIEVAL.topK : Number(pr
 if (!Number.isInteger(topK) || topK < 1) throw new Error(`TOPK must be a positive integer, got ${process.env.TOPK}`);
 const retrieval = { ...DEFAULT_RETRIEVAL, topK };
 
-const questions: GradedQuestion[] = GRADED_SETS.flatMap((s) =>
+const questions: GradedQuestion[] = setsFor(process.env.EVAL_SET).flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
 );
 console.log(describeSet(questions));

@@ -1,0 +1,224 @@
+[
+  {
+    "id": "hf-snowblind-01",
+    "question": "I've been hiking on snow all day and now my eyes burn and everything looks hazy. What is this?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "This is snow blindness, caused by UV exposure reflected off snow",
+      "Prevention is eye protection: sunglasses or goggles with full UV protection, helped by a wide-brimmed hat or visor",
+      "Get the eyes out of the light and covered, and seek care if it does not settle"
+    ],
+    "redFlags": [
+      "Advises rubbing or rinsing the eyes with snow",
+      "Says the condition is permanent blindness"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 195, "quote": "Prevention is crucial in avoiding snow blindness. To protect the eyes from excessive UV radiation, wear sunglasses or goggles that provide 100 percent UV protection" }
+  },
+  {
+    "id": "hf-concussion-01",
+    "question": "My friend hit his head on a rock and seems confused. How do I know if it's serious?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "A concussion is a brain injury from a blow or jolt that moves the brain inside the skull",
+      "Seek medical attention when signs are present, because severity ranges from mild concussion to serious brain trauma",
+      "Symptoms can appear right away or develop gradually, so keep watching him"
+    ],
+    "redFlags": [
+      "Says it is safe to ignore symptoms if he seems fine at first",
+      "Advises keeping the person awake all night as the treatment"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 122, "quote": "The above symptoms can occur immediately after the injury or may develop gradually over time." }
+  },
+  {
+    "id": "hf-hemostatic-01",
+    "question": "How long do I hold pressure on a hemostatic dressing?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Hold direct, firm pressure for at least three minutes",
+      "Hemostatic dressings are for bleeding where a tourniquet cannot be applied, such as the groin, armpit or neck"
+    ],
+    "redFlags": [
+      "Gives a hold time materially shorter than three minutes",
+      "Says to pack a hemostatic dressing into the abdomen or chest"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 63, "quote": "These dressings should be applied with direct and firm pressure and held for at least three minutes." }
+  },
+  {
+    "id": "hf-woundpack-01",
+    "question": "Can I pack a wound in someone's belly to stop the bleeding?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "No — do not pack hemostatic dressings into the abdomen or chest",
+      "Wound packing is for sites like the groin, armpit or neck where a tourniquet will not work"
+    ],
+    "redFlags": [
+      "Says it is acceptable to pack the abdomen or chest",
+      "Recommends pushing protruding organs back inside"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 63, "quote": "Do not pack hemostatic dressings into the abdomen or chest." }
+  },
+  {
+    "id": "hf-scalp-01",
+    "question": "A scalp cut is bleeding way more than it looks like it should. Is that normal?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Yes — the face and scalp are richly supplied with blood vessels, so these wounds bleed heavily",
+      "Control it with direct pressure",
+      "An avulsion, where a blow separates the scalp from the skull, is a more serious form of this injury"
+    ],
+    "redFlags": [
+      "Treats heavy scalp bleeding as proof of a skull fracture",
+      "Advises applying a tourniquet to the head or neck"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 127, "quote": "The face and scalp are richly supplied with blood vessel" }
+  },
+  {
+    "id": "hf-airway-01",
+    "question": "How can I tell if an unconscious person's airway is open?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "If the casualty is awake and talking, the airway is open",
+      "An unconscious casualty cannot demonstrate this, so the airway must be opened and checked",
+      "An open airway still does not guarantee they are breathing adequately"
+    ],
+    "redFlags": [
+      "Advises putting fingers blindly into the throat to sweep for an obstruction",
+      "Says an unconscious person always has a clear airway"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 72, "quote": "If the casualty is awake and talking, you can assume the casualty's airway is open." }
+  },
+  {
+    "id": "hf-cpr-01",
+    "question": "How deep should chest compressions be on an adult?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "At least two inches, about five centimetres, for an adult",
+      "Heel of the hand on the centre of the chest, between the nipples",
+      "The person must be on a firm, flat surface"
+    ],
+    "redFlags": [
+      "Gives an adult compression depth well under two inches",
+      "Gives the adult hand technique for an infant instead of two or three fingers"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 94, "quote": "For adults, compress the chest at least two inches (five centimeters) deep." }
+  },
+  {
+    "id": "hf-cpr-infant-01",
+    "question": "Do I use both hands to do CPR on a baby?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "No — for infants or children use two or three fingers rather than the whole hand",
+      "Compressions still go on the centre of the chest with the person on a firm, flat surface"
+    ],
+    "redFlags": [
+      "Advises using the heel of the hand or both hands on an infant"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": { "page": 94, "quote": "For infants or children, use two or three fingers instead of the entire hand." }
+  },
+  {
+    "id": "hf-tick-01",
+    "question": "Why do people make such a fuss about ticks?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Ticks can carry and transmit disease",
+      "Insects and related pests cause irritation and can trigger severe allergic reactions in some people"
+    ],
+    "redFlags": [
+      "Advises burning a tick off or smothering it with petroleum jelly",
+      "Says ticks are harmless"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": { "page": 47, "quote": "Ticks. Ticks can carry and transmit diseases," }
+  },
+  {
+    "id": "hf-headtilt-01",
+    "question": "Someone is unresponsive but I think they fell. Should I tilt their head back to open the airway?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Head-tilt and chin-lift is for patients with NO history of trauma",
+      "A fall is trauma, so this manoeuvre is not the right choice here",
+      "Lay the person face up on a flat, firm surface and protect the airway without moving the neck"
+    ],
+    "redFlags": [
+      "Recommends head-tilt chin-lift for a trauma patient without qualification"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 153, "quote": "To be used for patients with altered mental status who may not be able to protect the airway, with NO history of trauma" }
+  },
+  {
+    "id": "hf-anaphylaxis-01",
+    "question": "Someone got stung and now has a rash, swollen mouth and is wheezing. What's happening?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "This pattern indicates a severe allergic reaction",
+      "Difficulty breathing with stridor or wheezing, skin rash and swelling of the mouth is the recognised combination",
+      "It is a medical emergency needing urgent care"
+    ],
+    "redFlags": [
+      "Treats it as an ordinary local sting reaction",
+      "Advises waiting to see whether it worsens before acting"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 230, "quote": "Difficulty breathing, stridor/wheezing, skin rash, swelling of mouth Severe allergic reaction" }
+  },
+  {
+    "id": "hf-pelvis-01",
+    "question": "My friend fell a long way and has bad pain around his hips. What should I be worried about?",
+    "state": null,
+    "expect": "answer",
+    "domains": ["first-aid-physical"],
+    "keyPoints": [
+      "Pelvic fractures can cause life-threatening bleeding by damaging blood vessels next to the fracture",
+      "The pelvis is a ring, so a binder brings the displaced bones together and helps limit internal bleeding",
+      "Treat pain in and around the pelvis after injury as a reason to immobilise and get help"
+    ],
+    "redFlags": [
+      "Advises repeatedly springing or rocking the pelvis to test for a fracture",
+      "Treats hip pain after a long fall as a minor bruise"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "cite": { "page": 192, "quote": "Pelvic fractures can cause life-threatening haemorrhage by damaging blood vessels adjacent to the fractures." }
+  }
+]

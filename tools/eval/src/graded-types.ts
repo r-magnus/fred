@@ -59,13 +59,51 @@ export interface GradedQuestion {
   readonly cite?: { readonly page: number | null; readonly quote: string };
 }
 
-/** The shipped graded sets. Kept here so no script can drift from the others. */
+/**
+ * The tuning set: 68 questions, and the one every measurement so far was taken
+ * on. The scope gate, the lay lexicon, the prompt shape and the abstention
+ * threshold were all fitted against it — the threshold with a 0.016 margin —
+ * so a score here is a training score and cannot tell improvement from
+ * overfitting.
+ */
 export const GRADED_SETS = [
   'tools/eval/data/graded-firstaid.json',
   'tools/eval/data/graded-survival.json',
   'tools/eval/data/graded-flora-fauna.json',
   'tools/eval/data/graded-negative.json',
 ] as const;
+
+/**
+ * The held-out set: 40 questions nothing has been tuned against, and the number
+ * to quote for A-KR2.
+ *
+ * Topic choice was taken out of the author's hands on purpose, because the
+ * author had already seen every failure in the tuning set and could not unsee
+ * them. scripts/build-state-boundaries.mjs has no bearing here; the relevant
+ * tool is the sampler recorded in docs/results-holdout.md, which drew sections
+ * from the pack databases under a fixed seed after excluding topics the tuning
+ * set already covers. The questions were then written from the sampled passage
+ * text, not from anything Fred got wrong.
+ *
+ * Keep it that way. The moment a threshold is fitted to this set it stops being
+ * held out, and there is no way to tell from the file that it happened.
+ */
+export const HOLDOUT_SETS = [
+  'tools/eval/data/holdout-firstaid.json',
+  'tools/eval/data/holdout-survival.json',
+  'tools/eval/data/holdout-flora-fauna.json',
+  'tools/eval/data/holdout-negative.json',
+] as const;
+
+/** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
+export function setsFor(name: string | undefined): readonly string[] {
+  switch (name ?? 'tuning') {
+    case 'tuning': return GRADED_SETS;
+    case 'holdout': return HOLDOUT_SETS;
+    case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
+    default: throw new Error(`EVAL_SET must be tuning | holdout | all, got "${name}"`);
+  }
+}
 
 /** One question run through the real pipeline, before grading. */
 export interface GradedRun {

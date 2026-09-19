@@ -20,14 +20,14 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { DEFAULT_ABSTAIN_THRESHOLD } from '@fred/rag-core';
-import { loadGradedSet, loadVerdicts, GRADED_SETS, type GradedQuestion, type GradedRun } from './graded-types.ts';
+import { loadGradedSet, loadVerdicts, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
 
 const runsPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 const verdictsPath = process.argv[3] ?? 'docs/graded-verdicts.json';
 
 const questions = new Map<string, GradedQuestion>(
-  GRADED_SETS.flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
+  setsFor(process.env.EVAL_SET).flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8'))).map((q) => [q.id, q]),
 );
 const runs: GradedRun[] = readFileSync(runsPath, 'utf8')
   .split('\n').filter((l) => l.trim() !== '')

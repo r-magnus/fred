@@ -41,6 +41,15 @@ import { route, type RoutablePack, type RouteResult } from './router.ts';
  */
 export const DEFAULT_ABSTAIN_THRESHOLD = 0.29;
 
+/**
+ * The bar when routing matched no vocabulary and searched everything anyway.
+ *
+ * Higher than the normal gate on purpose: on this path the only evidence that
+ * the query is in scope is the retrieval score itself, so it has to carry the
+ * weight the lexicon usually carries. Provisional — see docs/results-holdout.md.
+ */
+export const DEFAULT_FALLBACK_THRESHOLD = 0.45;
+
 /** PocketRAG §3.5 — generation budget under memory pressure. */
 export function maxTokensForPressure(pressure: number): number {
   if (pressure >= 0.85) return 256; // critical
@@ -57,6 +66,10 @@ export interface PipelineDeps {
 
 export interface AskOptions {
   readonly state: string | null;
+  /** Search every domain when no vocabulary matches. See RouteContext. */
+  readonly allowRoutingFallback?: boolean;
+  /** Overrides DEFAULT_FALLBACK_THRESHOLD on the fallback path. */
+  readonly fallbackThreshold?: number;
   readonly retrieval?: RetrievalOptions;
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
@@ -121,7 +134,13 @@ export async function ask(
   const maxTokens = maxTokensForPressure(pressure);
 
   const keywords = extractKeywords(query);
-  const routed = route(keywords, packs, { state: opts.state });
+  const routed = route(keywords, packs, {
+    state: opts.state,
+    ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
+  });
+  const effectiveThreshold = routed.fallback
+    ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD)
+    : threshold;
 
   const baseDiag = {
     keywords,
@@ -149,7 +168,7 @@ export async function ask(
   const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
   const topScore = candidates[0]?.score ?? 0;
 
-  if (candidates.length === 0 || topScore < threshold) {
+  if (candidates.length === 0 || topScore < effectiveThreshold) {
     return {
       kind: 'abstain',
       nearest: candidates.slice(0, 2).map(toCitation),

@@ -6,7 +6,7 @@
  * later, but it costs a generation pass on the critical path, which is exactly
  * what the latency work is trying to protect.
  */
-import type { DomainTag, PackScope } from '@fred/pack-format';
+import { DOMAIN_TAGS, type DomainTag, type PackScope } from '@fred/pack-format';
 import { DOMAIN_LEXICON, domainsForTerm, type Keyword } from './lexicon.ts';
 
 /** The routing-relevant subset of a pack manifest. */
@@ -19,6 +19,16 @@ export interface RoutablePack {
 export interface RouteContext {
   /** USPS code resolved from last known location, or chosen manually. */
   readonly state: string | null;
+  /**
+   * Search every domain when no vocabulary matches, instead of declining.
+   *
+   * Off by default. The held-out eval showed declining on no-match refuses 15
+   * of 31 answerable questions, against 0 of 46 on the set the lexicon was
+   * built from (docs/results-holdout.md) — so the no-match rule is measuring
+   * the lexicon's vocabulary, not the query's scope. This exists to measure
+   * what a fallback recovers; the pipeline raises its threshold when it fires.
+   */
+  readonly allowFallback?: boolean;
 }
 
 export interface RouteResult {
@@ -32,6 +42,8 @@ export interface RouteResult {
    * this into a "pick your state" prompt rather than a generic "I don't know".
    */
   readonly skippedStatePacks: readonly string[];
+  /** True when no vocabulary matched and every domain was searched anyway. */
+  readonly fallback: boolean;
   /** Human-readable explanation, surfaced in the debug overlay. */
   readonly reason: string;
 }
@@ -84,7 +96,9 @@ export function route(
   let domains: DomainTag[];
   let reason: string;
 
-  if (entries.length === 0) {
+  let fallback = false;
+
+  if (entries.length === 0 && ctx.allowFallback !== true) {
     // Nothing recognisable: decline rather than guess. Returning no domains also
     // leaves skippedStatePacks empty, so the pipeline abstains instead of asking
     // for a location it has no use for.
@@ -93,8 +107,15 @@ export function route(
       domains: [],
       scores,
       skippedStatePacks: [],
+      fallback: false,
       reason: 'no domain vocabulary matched; out of scope',
     };
+  } else if (entries.length === 0) {
+    // Vocabulary told us nothing, so let retrieval decide on the evidence. The
+    // pipeline demands a higher score before answering on this path.
+    fallback = true;
+    domains = [...DOMAIN_TAGS];
+    reason = 'no domain vocabulary matched; searching everything on a raised bar';
   } else {
     const top = Math.max(...entries.map(([, v]) => v));
     domains = entries
@@ -127,7 +148,7 @@ export function route(
       : `; skipped state packs outside ${ctx.state}`;
   }
 
-  return { packIds: selected, domains, scores, skippedStatePacks: skippedForState, reason };
+  return { packIds: selected, domains, scores, skippedStatePacks: skippedForState, fallback, reason };
 }
 
 /** Domains with no vocabulary at all — a lexicon coverage check for tests. */

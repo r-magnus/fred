@@ -72,7 +72,14 @@ const runs: GradedRun[] = [];
 
 for (const [i, q] of questions.entries()) {
   const t0 = Date.now();
-  const res = await ask(q.question, { backend, store, packs }, { state: q.state, retrieval });
+  const res = await ask(q.question, { backend, store, packs }, {
+    state: q.state, retrieval,
+    // ROUTING_FALLBACK=1 measures what searching everything on a no-match
+    // recovers. Off by default so a plain run reflects what ships.
+    ...(process.env.ROUTING_FALLBACK === '1' ? { allowRoutingFallback: true } : {}),
+    ...(process.env.FALLBACK_THRESHOLD !== undefined
+      ? { fallbackThreshold: Number(process.env.FALLBACK_THRESHOLD) } : {}),
+  });
 
   let answer = '';
   if (res.kind === 'answer') {

@@ -29,7 +29,7 @@
       "id": "A-KR2",
       "name": "Response accuracy",
       "due": "2026-10-12",
-      "value": 70.6,
+      "value": 35.0,
       "unit": "%",
       "target": 90,
       "bands": [
@@ -39,8 +39,8 @@
         "69-60",
         "<60"
       ],
-      "grade": "C",
-      "note": "Free-form answers graded against an answer sheet, all five corpora."
+      "grade": "F",
+      "note": "Held-out set, 40 questions nothing was tuned on (docs/results-holdout.md). The 70.6% previously reported here is the score on the 68 questions the scope gate, lay lexicon, prompt shape and abstention threshold were all fitted against \u2014 a training score. The gap is almost entirely routing: the lexicon reaches 46/46 answerable questions on the set it was built from and 16/31 on new ones."
     },
     {
       "id": "A-KR3",
@@ -350,5 +350,36 @@
     },
     "lockMs": 15000,
     "lockNote": "Always the full window indoors, because the \u226410 m early exit never fires there. Outdoors it should return in seconds. Location is a one-off action, not a per-answer cost, so it does not touch A-KR3."
+  },
+  "akr2Holdout": {
+    "overall": 35.0,
+    "correct": 14,
+    "total": 40,
+    "judgedAcceptable": 8,
+    "judged": 16,
+    "nonAnswerCorrect": 6,
+    "tuningComparison": 70.6,
+    "routingRecall": {
+      "tuning": {
+        "reached": 46,
+        "answerable": 46
+      },
+      "holdout": {
+        "reached": 16,
+        "answerable": 31
+      },
+      "note": "Answerable questions that got any retrieval at all. 15 of 18 holdout failures scored U=0.000 \u2014 the router matched no domain vocabulary, so nothing was searched and the abstention gate never ran."
+    },
+    "newSafetyDefects": [
+      {
+        "id": "hf-woundpack-01",
+        "what": "Answered 'Yes' to packing an abdominal wound; the source says explicitly not to. Direct inversion."
+      },
+      {
+        "id": "hf-cpr-infant-01",
+        "what": "Said two or three fingers for an infant, then said to place the heel of one hand. A reader following the steps in order does the dangerous thing."
+      }
+    ],
+    "note": "This is the number to quote for A-KR2. Run it rarely and never fit to it; calibrate.ts refuses by default."
   }
 }

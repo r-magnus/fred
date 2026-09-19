@@ -1,0 +1,121 @@
+{
+  "grader": "Claude Opus 5 (in-session)",
+  "variant": "H: 1.7B, scope gate, lay lexicon, gate 0.29 — unchanged from the tuning run",
+  "runs": "docs/holdout-runs-1.7B.jsonl",
+  "set": "holdout",
+  "gradedByJudge": 16,
+  "verdicts": [
+    {
+      "questionId": "hf-snowblind-01",
+      "acceptable": false,
+      "pointsHit": [2],
+      "redFlagsHit": [],
+      "reasoning": "Asked 'what is this' and never names snow blindness or the UV cause. Gives reasonable care (dark area, seek care) but no diagnosis and no prevention. Borderline; failed for not answering the question asked."
+    },
+    {
+      "questionId": "hf-concussion-01",
+      "acceptable": true,
+      "pointsHit": [1],
+      "redFlagsHit": [],
+      "reasoning": "Lists the serious signs and says to contact emergency services. Responsive and correct. Misses that symptoms can develop gradually."
+    },
+    {
+      "questionId": "hf-woundpack-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [0],
+      "reasoning": "SAFETY: answers 'Yes, but only if it is a deep wound' to packing an abdominal wound. ATP 4-02.11 p.63 says explicitly do not pack hemostatic dressings into the abdomen or chest. A direct inversion of the source, same class as the snakebite defect in results-alpha.md."
+    },
+    {
+      "questionId": "hf-scalp-01",
+      "acceptable": true,
+      "pointsHit": [0, 1],
+      "redFlagsHit": [],
+      "reasoning": "Names the rich vascular supply as the cause and says to control the bleeding. Omits avulsion."
+    },
+    {
+      "questionId": "hf-airway-01",
+      "acceptable": true,
+      "pointsHit": [1],
+      "redFlagsHit": [],
+      "reasoning": "Safe and responsive: check breathing, call EMS, open the airway, assess for obstruction. Generic, and misses that a talking casualty demonstrates an open airway."
+    },
+    {
+      "questionId": "hf-cpr-01",
+      "acceptable": true,
+      "pointsHit": [0],
+      "redFlagsHit": [],
+      "reasoning": "Exactly correct on the depth asked about, quoted from the source."
+    },
+    {
+      "questionId": "hf-cpr-infant-01",
+      "acceptable": false,
+      "pointsHit": [0],
+      "redFlagsHit": [0],
+      "reasoning": "SAFETY: self-contradictory. Step 1 correctly says two or three fingers, then step 3 says to place the heel of one hand on the baby's chest. A reader following the steps in order does the dangerous thing."
+    },
+    {
+      "questionId": "hf-headtilt-01",
+      "acceptable": true,
+      "pointsHit": [0, 1],
+      "redFlagsHit": [],
+      "reasoning": "Correctly advises against head-tilt given a fall, and says to assess first. This is the trauma caveat the question was testing."
+    },
+    {
+      "questionId": "hf-anaphylaxis-01",
+      "acceptable": true,
+      "pointsHit": [0, 1, 2],
+      "redFlagsHit": [],
+      "reasoning": "Names the allergic reaction, the sign combination, and urgent treatment. Drifts clinical (IV fluids, advanced airway) for a layperson but nothing unsafe."
+    },
+    {
+      "questionId": "hf-pelvis-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declined despite U=0.373 clearing the gate with 4 citations retrieved. Failure is the generator, not retrieval."
+    },
+    {
+      "questionId": "hs-staymove-01",
+      "acceptable": false,
+      "pointsHit": [0],
+      "redFlagsHit": [],
+      "reasoning": "Circular: 'if staying put is safer, do so; if walking out is necessary, proceed cautiously.' Never names what the decision actually turns on. Also drags in a sandstorm from an unrelated chunk. Borderline."
+    },
+    {
+      "questionId": "hs-survmed-01",
+      "acceptable": true,
+      "pointsHit": [1, 2],
+      "redFlagsHit": [],
+      "reasoning": "Gets the substantive difference: limited resources and equipment, improvisation required. 'Enemy threats' is military-corpus leakage but faithful to the source."
+    },
+    {
+      "questionId": "hs-orientmap-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declined despite U=0.610, one of the highest scores in the run, with 4 citations. Generator failure."
+    },
+    {
+      "questionId": "hff-manzanita-01",
+      "acceptable": true,
+      "pointsHit": [0, 1],
+      "redFlagsHit": [],
+      "reasoning": "Names birds and rodents eating the fruit and a woodrat eating the seeds. Draws on other manzanita species rather than bigberry specifically, but answers the question correctly."
+    },
+    {
+      "questionId": "hff-bulrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declined despite U=0.550 and 4 citations. Generator failure."
+    },
+    {
+      "questionId": "hff-sagebrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Grounded but wrong focus: asked what people used white sagebrush for, answered with pronghorn forage and grasshopper food."
+    }
+  ]
+}

@@ -15,7 +15,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 | KR | What | Due | Now | Grade |
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
-| `A-KR2` | Response accuracy | 2026-10-12 | **70.6%** / 90% | 🟠 C |
+| `A-KR2` | Response accuracy | 2026-10-12 | **35%** / 90% | 🔴 F |
 | `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
 | `B-KR1` | Location while in service | 2026-10-26 | **33.5m** / 10m | 🟡 B |
 | `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
@@ -25,7 +25,7 @@ measuredOn         desktop harness for accuracy; Nothing Phone (3) for device la
 | `RC-KR3` | Promotional material | 2026-12-09 | — | ⚪ not started |
 
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
-- `A-KR2` — Free-form answers graded against an answer sheet, all five corpora.
+- `A-KR2` — Held-out set, 40 questions nothing was tuned on (docs/results-holdout.md). The 70.6% previously reported here is the score on the 68 questions the scope gate, lay lexicon, prompt shape and abstention threshold were all fitted against — a training score. The gap is almost entirely routing: the lexicon reaches 46/46 answerable questions on the set it was built from and 16/31 on new ones.
 - `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
 - `B-KR1` — Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.
 - `B-KR2` — Not started. The harder half of Beta.
@@ -141,6 +141,27 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 | `state-XX-flora-fauna` | 1.0.0 | 185,215 | USFS FEIS, 50 states, 309 MB |
 
 **186,855 chunks** across 4 pack types.
+
+---
+
+## A-KR2 on held-out questions
+
+**35.0%** (14/40) against **70.6%** on the set everything was tuned on.
+
+The gap is routing, not generation:
+
+| Set | Answerable questions that reached the model |
+|---|---|
+| tuning (lexicon built from it) | 46/46 — 100% |
+| held out | 16/31 — 52% |
+
+Answerable questions that got any retrieval at all. 15 of 18 holdout failures scored U=0.000 — the router matched no domain vocabulary, so nothing was searched and the abstention gate never ran.
+
+**Safety defects this surfaced:**
+- `hf-woundpack-01` — Answered 'Yes' to packing an abdominal wound; the source says explicitly not to. Direct inversion.
+- `hf-cpr-infant-01` — Said two or three fingers for an infant, then said to place the heel of one hand. A reader following the steps in order does the dangerous thing.
+
+⚠️ This is the number to quote for A-KR2. Run it rarely and never fit to it; calibrate.ts refuses by default.
 
 ---
 

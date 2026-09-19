@@ -110,5 +110,57 @@ Three deliberate properties, matching the tuning set so the two are comparable:
 
 ## Result
 
-Run pending at time of writing — see the table below once
-`docs/holdout-verdicts-1.7B.json` exists.
+**35.0% (14/40), against 70.6% on the tuning set.** Same pipeline, same model,
+same day — the only difference is that nothing was fitted to these questions.
+
+| | Tuning (68) | Held out (40) |
+|---|---:|---:|
+| A-KR2 | 70.6% | **35.0%** |
+| Outcome matched expectation | 91.2% | 55.0% |
+| Answerable questions that reached the model | 46/46 | 16/31 |
+| Answerable questions routed to nothing (U=0) | 0 | **15** |
+
+### It is routing, and it is the lexicon
+
+15 of 18 outcome failures scored **U = 0.000**: nothing retrieved, so the
+abstention gate never ran. Feeding each failing question to the router directly
+returns no domain for every one of them. The missing words are ordinary:
+*hemostatic, tick, dead reckoning, saddle, contour, paracord, fish, manzanita,
+maple, falcon, turkey*.
+
+So the +20.6 points that removing `FALLBACK_DOMAINS` bought (`results-akr2.md`)
+was substantially the lay-vocabulary work that accompanied it — the lexicon was
+extended until it covered the tuning questions. It has 100% recall on the words
+it was built from and 52% on words it was not. `router.ts` sets the right
+invariant — *"before narrowing this further, check the answerable side of the
+graded set"* — and it was honoured. The evidence base was simply too narrow to
+see this.
+
+### Two new safety defects
+
+Both are the inversion class, not the omission class, and both would have gone
+unseen without free-form grading:
+
+- **`hf-woundpack-01`** — asked whether to pack an abdominal wound, Fred answered
+  *"Yes, but only if it is a deep wound or gaping injury"*. ATP 4-02.11 p.63 says
+  **"Do not pack hemostatic dressings into the abdomen or chest."** Same defect
+  class as the snakebite list in `results-alpha.md`.
+- **`hf-cpr-infant-01`** — step 1 correctly says two or three fingers for an
+  infant; step 3 then says to place the heel of one hand on the baby's chest. A
+  reader following the steps in order does the dangerous thing.
+
+### Four declines despite good retrieval
+
+`hf-pelvis-01` (U=0.373), `hs-orientmap-01` (U=0.610), `hff-bulrush-01` (U=0.550)
+and, on the tuning set, the same class again. Retrieval cleared the gate and
+returned four citations; the model still said it did not know. This is the
+generator, and it costs nothing in latency to fix.
+
+### Grading notes
+
+Judged by Claude Opus 5 in-session, verdicts in
+`docs/holdout-verdicts-1.7B.json`. Two calls were borderline and both were
+failed: `hf-snowblind-01` (sound care advice, but never names snow blindness
+when asked "what is this") and `hs-staymove-01` (circular — "if staying put is
+safer, do so"). Marking both acceptable gives 40.0%, so the conclusion does not
+turn on them.

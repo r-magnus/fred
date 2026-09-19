@@ -31,6 +31,18 @@ interface Metrics {
     meanMs: number; peakPssMb: number; peakRssMb: number; idlePssMb: number;
     embedderParity: string; note: string;
   };
+  akr2Holdout?: {
+    overall: number; correct: number; total: number;
+    judgedAcceptable: number; judged: number; nonAnswerCorrect: number;
+    tuningComparison: number;
+    routingRecall: {
+      tuning: { reached: number; answerable: number };
+      holdout: { reached: number; answerable: number };
+      note: string;
+    };
+    newSafetyDefects: { id: string; what: string }[];
+    note: string;
+  };
   location?: {
     implemented: string; stateResolution: string; whyNotReverseGeocode: string;
     stateAccuracy: string; fixStrategy: string; lockMs: number; lockNote: string;
@@ -187,6 +199,33 @@ for (const c of m.corpora) p(`| \`${c.pack}\` | ${c.version} | ${c.chunks.toLoca
 p();
 const totalChunks = m.corpora.reduce((s, c) => s + c.chunks, 0);
 p(`**${totalChunks.toLocaleString()} chunks** across ${m.corpora.length} pack types.`);
+
+if (m.akr2Holdout !== undefined) {
+  const h = m.akr2Holdout;
+  p();
+  p('---');
+  p();
+  p('## A-KR2 on held-out questions');
+  p();
+  p(`**${h.overall.toFixed(1)}%** (${h.correct}/${h.total}) against **${h.tuningComparison}%** on the set everything was tuned on.`);
+  p();
+  p('The gap is routing, not generation:');
+  p();
+  p('| Set | Answerable questions that reached the model |');
+  p('|---|---|');
+  const rt = h.routingRecall.tuning, rh = h.routingRecall.holdout;
+  p(`| tuning (lexicon built from it) | ${rt.reached}/${rt.answerable} — ${((rt.reached / rt.answerable) * 100).toFixed(0)}% |`);
+  p(`| held out | ${rh.reached}/${rh.answerable} — ${((rh.reached / rh.answerable) * 100).toFixed(0)}% |`);
+  p();
+  p(h.routingRecall.note);
+  if (h.newSafetyDefects.length > 0) {
+    p();
+    p('**Safety defects this surfaced:**');
+    for (const d of h.newSafetyDefects) p(`- \`${d.id}\` — ${d.what}`);
+  }
+  p();
+  p(`⚠️ ${h.note}`);
+}
 
 if (m.location !== undefined) {
   const l = m.location;

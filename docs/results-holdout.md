@@ -123,10 +123,22 @@ same day — the only difference is that nothing was fitted to these questions.
 ### It is routing, and it is the lexicon
 
 15 of 18 outcome failures scored **U = 0.000**: nothing retrieved, so the
-abstention gate never ran. Feeding each failing question to the router directly
-returns no domain for every one of them. The missing words are ordinary:
-*hemostatic, tick, dead reckoning, saddle, contour, paracord, fish, manzanita,
-maple, falcon, turkey*.
+abstention gate never ran. Putting each failing question through
+`scoreDomains` shows two separate bugs, not one.
+
+**Bug 1 — unknown vocabulary, 11 questions.** No domain matches at all, so no
+pack is searched and the pipeline abstains. The missing words are ordinary:
+*hemostatic, dead reckoning, saddle, contour, paracord, manzanita, maple,
+falcon, turkey*.
+
+**Bug 2 — a state-only domain for content the core packs carry, 4 questions.**
+`tick` maps to `wildlife` and `fish` and `plant` to `plants`. No core pack
+declares either domain, so routing selects only state packs, the location is
+unknown, every one is skipped, and the pipeline asks for a location. But
+`core-survival` p.47 covers ticks, and p.111 covers spoiled fish, and neither
+depends on which state you are standing in. `needs-location` should fire when
+the answer is genuinely state-specific, not whenever a word happens to be tagged
+`plants` or `wildlife`.
 
 So the +20.6 points that removing `FALLBACK_DOMAINS` bought (`results-akr2.md`)
 was substantially the lay-vocabulary work that accompanied it — the lexicon was
@@ -148,6 +160,34 @@ unseen without free-form grading:
 - **`hf-cpr-infant-01`** — step 1 correctly says two or three fingers for an
   infant; step 3 then says to place the heel of one hand on the baby's chest. A
   reader following the steps in order does the dangerous thing.
+
+### What a routing fallback would recover
+
+Measured by re-running the set with `ROUTING_FALLBACK=1` and the threshold at
+zero, so every score is visible (`docs/holdout-runs-fallback.jsonl`). This is a
+diagnostic, not a fit — see the caveat below.
+
+Retrieval finds the right material easily once it is allowed to look:
+manzanita 0.877, bigleaf maple 0.799, prairie falcon 0.775, dead reckoning
+0.689, turkey 0.619, hemostatic 0.612, hill 0.610, saddle 0.521.
+
+| Fallback threshold | Genuine recovered | Out-of-scope wrongly admitted |
+|---:|---:|---:|
+| 0.30 | 12/15 | 3/7 |
+| 0.40 | 8/15 | 3/7 |
+| **0.50** | **8/15** | **0/7** |
+| 0.55 | 7/15 | 0/7 |
+
+There is a clean point at 0.50: eight questions recovered, nothing out of scope
+admitted. The out-of-scope queries cluster just under it — paediatric dosing
+0.489, IV cannulation 0.480, distance-to-road 0.472 — which is uncomfortably
+tight, and the three genuine questions at 0.347-0.389 are lost.
+
+**This number must not be taken from this table.** It is fitted to the held-out
+set by construction, and adopting it would convert the only honest measurement
+into a second training score. The fallback threshold needs its own tuning
+questions, drawn the same sampled way, with vocabulary the lexicon does not
+know. The table says only that separation exists and is worth building for.
 
 ### Four declines despite good retrieval
 

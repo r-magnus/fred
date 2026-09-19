@@ -155,7 +155,7 @@ The gap is routing, not generation:
 | tuning (lexicon built from it) | 46/46 — 100% |
 | held out | 16/31 — 52% |
 
-Answerable questions that got any retrieval at all. 15 of 18 holdout failures scored U=0.000 — the router matched no domain vocabulary, so nothing was searched and the abstention gate never ran.
+Answerable questions that got any retrieval at all. 15 of 18 holdout failures scored U=0.000, from two distinct bugs: 11 matched no domain vocabulary at all, and 4 matched only plants/wildlife, which no core pack declares, so routing selected state packs only and asked for a location instead of searching core-survival.
 
 **Safety defects this surfaced:**
 - `hf-woundpack-01` — Answered 'Yes' to packing an abdominal wound; the source says explicitly not to. Direct inversion.

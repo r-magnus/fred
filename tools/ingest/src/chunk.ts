@@ -17,6 +17,8 @@ export interface SourcePage {
 
 export interface DraftChunk {
   readonly text: string;
+  /** Contextual-retrieval preamble, added after chunking. See contextualize.ts. */
+  readonly context?: string;
   readonly section: string;
   /** Null for sources with no pages, such as FEIS web reviews. */
   readonly page: number | null;

@@ -89,6 +89,8 @@ export class NodePackStore implements PackStore {
           packId: r.pack_id as string,
           ordinal: r.ordinal as number,
           text: r.text as string,
+          // Empty for packs built before contextual retrieval shipped.
+          context: (r.context as string | null) ?? '',
           section: r.section as string,
           source: r.source as string,
           page: (r.page as number | null) ?? null,

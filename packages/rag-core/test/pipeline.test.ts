@@ -10,7 +10,7 @@ import { FakeBackend, FakePackStore, FAKE_SPEC } from './fakes.ts';
 
 type Seed = Omit<ChunkRecord, 'id' | 'packId' | 'ordinal'>;
 const seed = (text: string, over: Partial<Seed> = {}): Seed => ({
-  text, section: 'sec', source: 'WHO BEC 2018', page: 10,
+  text, context: '', section: 'sec', source: 'WHO BEC 2018', page: 10,
   domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', ...over,
 });
 

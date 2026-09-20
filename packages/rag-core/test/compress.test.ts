@@ -12,7 +12,7 @@ const opts = { ...DEFAULT_COMPRESSION, countTokens };
 
 function chunk(over: Partial<ChunkRecord> & { text: string }): ChunkRecord {
   return {
-    id: 'p:0', packId: 'p', ordinal: 0, section: 's', source: 'src', page: 1,
+    id: 'p:0', packId: 'p', ordinal: 0, context: '', section: 's', source: 'src', page: 1,
     domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose',
     ...over,
   };
@@ -153,7 +153,7 @@ test('a sentence from the top chunk outranks an equally relevant one further dow
   // a distractor survived intact. With 21 of 23 graded failures having the right
   // material already in context, that is the wrong direction to be trimming in.
   const mk = (id: string, text: string): ChunkRecord => ({
-    id, packId: 'p', ordinal: 0, text, section: 's', source: 'src', page: 1,
+    id, packId: 'p', ordinal: 0, text, context: '', section: 's', source: 'src', page: 1,
     domain: 'first-aid-physical', licenseId: 'l', blockKind: 'prose',
   });
   // Identical bodies, so only rank can separate them.

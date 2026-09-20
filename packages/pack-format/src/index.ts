@@ -140,6 +140,15 @@ export interface ChunkRecord {
   /** Row index into vectors.i8. Must equal the SQLite rowid ordering. */
   readonly ordinal: number;
   readonly text: string;
+  /**
+   * Contextual-retrieval preamble: one line saying what this passage is.
+   *
+   * Empty for packs built before this shipped — the column is additive so the
+   * fifty state packs stay readable without re-ingesting. Prepended before
+   * embedding, indexed in FTS5 beside the text, and shown to the generator,
+   * which is what stops a "Do not" list reading as instructions.
+   */
+  readonly context: string;
   /** Human-readable heading path, e.g. "Approach to shock > Recognition". */
   readonly section: string;
   /** Short source label shown in citations, e.g. "WHO BEC 2018". */

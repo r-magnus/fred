@@ -104,6 +104,8 @@ export class DevicePackStore implements PackStore {
           packId: String(r.pack_id),
           ordinal: Number(r.ordinal),
           text: String(r.text),
+          // Empty for packs built before contextual retrieval shipped.
+          context: r.context == null ? '' : String(r.context),
           section: String(r.section),
           source: String(r.source),
           page: r.page == null ? null : Number(r.page),

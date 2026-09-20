@@ -50,6 +50,10 @@ function writeChunkDb(dbPath: string, packId: string, chunks: readonly DraftChun
       id         TEXT NOT NULL UNIQUE,
       pack_id    TEXT NOT NULL,
       text       TEXT NOT NULL,
+      -- Contextual-retrieval preamble. Nullable and additive on purpose: packs
+      -- built before this shipped stay readable, so core corpora can adopt it
+      -- without re-ingesting fifty state packs. Readers probe for the column.
+      context    TEXT,
       section    TEXT NOT NULL,
       source     TEXT NOT NULL,
       page       INTEGER,
@@ -59,17 +63,20 @@ function writeChunkDb(dbPath: string, packId: string, chunks: readonly DraftChun
     );
     -- External-content FTS5: the index references chunks rather than copying
     -- the text, which keeps the pack roughly half the size on device.
+    -- context is indexed alongside text, which is what makes the preamble do
+    -- lexical work as well as semantic: "tick" and "manzanita" gain surface to
+    -- match on even where the body never repeats the word.
     CREATE VIRTUAL TABLE chunks_fts USING fts5(
-      text, content='chunks', content_rowid='ordinal', tokenize='porter unicode61'
+      context, text, content='chunks', content_rowid='ordinal', tokenize='porter unicode61'
     );
   `);
   const insert = db.prepare(`
-    INSERT INTO chunks (ordinal, id, pack_id, text, section, source, page, domain, license_id, block_kind)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO chunks (ordinal, id, pack_id, text, context, section, source, page, domain, license_id, block_kind)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   db.exec('BEGIN');
   chunks.forEach((c, i) => {
-    insert.run(i, `${packId}:${i}`, packId, c.text, c.section, input.source, c.page, c.domain, input.licenseId, c.blockKind);
+    insert.run(i, `${packId}:${i}`, packId, c.text, c.context ?? null, c.section, input.source, c.page, c.domain, input.licenseId, c.blockKind);
   });
   db.exec('COMMIT');
   db.exec("INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild')");

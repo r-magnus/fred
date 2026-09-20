@@ -16,6 +16,7 @@ import { chunkPages, DEFAULT_CHUNKING, type SourcePage } from './chunk.ts';
 import { classifyChunk } from './filter.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { writePack, type PackInput } from './pack.ts';
+import { contextualize } from './contextualize.ts';
 import type { DomainTag, LicenseEntry } from '@fred/pack-format';
 
 // ONNX rather than GGUF: the device must reproduce these vectors exactly, and
@@ -254,9 +255,38 @@ const byDomain = kept.reduce<Record<string, number>>((a, c) => {
 }, {});
 console.log(`      by domain ${JSON.stringify(byDomain)}`);
 
-console.log('[5/5] embedding + writing pack');
-const vectors = await embedder.embed(kept.map((c) => c.text));
-const { dir, manifest } = await writePack('packs', { ...def.input, embedding: embedder.spec }, kept, vectors);
+// CONTEXTUALIZE=1 adds a contextual-retrieval preamble to every chunk. Opt-in
+// because it needs a local generation model and turns a two-minute ingest into
+// a much longer one; see docs/results-improvement-research.md for why it earns
+// that. Packs built without it stay valid — the column is nullable.
+let contextualized = kept;
+if (process.env.CONTEXTUALIZE === '1') {
+  const genModel = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
+  console.log(`[5/6] contextualizing ${kept.length} chunks with ${genModel.split('/').pop()}`);
+  const started = Date.now();
+  const contexts = await contextualize(kept, {
+    modelPath: genModel,
+    documentTitle: def.input.source,
+    onProgress: (done, total) => {
+      if (done % 25 !== 0 && done !== total) return;
+      const rate = (Date.now() - started) / done;
+      const left = ((total - done) * rate) / 1000;
+      process.stdout.write(`\r      ${done}/${total}  ~${left.toFixed(0)}s remaining   `);
+    },
+  });
+  process.stdout.write('\n');
+  contextualized = kept.map((c, i) => ({ ...c, context: contexts[i] ?? '' }));
+  const labelled = contexts.filter((c) => c.includes('AVOID')).length;
+  console.log(`      ${labelled} chunks labelled as prohibitions`);
+}
+
+console.log(`[${process.env.CONTEXTUALIZE === '1' ? '6/6' : '5/5'}] embedding + writing pack`);
+// The preamble is embedded with the text, which is the whole point: it is what
+// gives an out-of-vocabulary passage surface to match on.
+const vectors = await embedder.embed(
+  contextualized.map((c) => (c.context === undefined || c.context === '' ? c.text : `${c.context}\n${c.text}`)),
+);
+const { dir, manifest } = await writePack('packs', { ...def.input, embedding: embedder.spec }, contextualized, vectors);
 await embedder.dispose();
 
 const totalBytes = manifest.files.reduce((s, f) => s + f.bytes, 0);

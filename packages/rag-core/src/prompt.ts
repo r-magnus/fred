@@ -90,7 +90,12 @@ export function renderContext(blocks: readonly ContextBlock[]): string {
   return blocks
     .map((b, i) => {
       const page = b.chunk.page === null ? '' : `, p. ${b.chunk.page}`;
-      return `SOURCE ${i + 1} (${b.chunk.source}${page})\n${b.text}`;
+      // The contextual-retrieval preamble goes in front of the passage, not
+      // just into the index. A 1.7B model will read a headerless "Do not" list
+      // as instructions (arXiv 2605.13829, and twice in our own eval), and a
+      // first line saying "Lists actions to AVOID" is what prevents that.
+      const context = b.chunk.context === '' ? '' : `${b.chunk.context}\n`;
+      return `SOURCE ${i + 1} (${b.chunk.source}${page})\n${context}${b.text}`;
     })
     .join('\n\n');
 }

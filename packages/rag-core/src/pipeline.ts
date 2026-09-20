@@ -44,11 +44,14 @@ export const DEFAULT_ABSTAIN_THRESHOLD = 0.29;
 /**
  * The bar when routing matched no vocabulary and searched everything anyway.
  *
- * Higher than the normal gate on purpose: on this path the only evidence that
- * the query is in scope is the retrieval score itself, so it has to carry the
- * weight the lexicon usually carries. Provisional — see docs/results-holdout.md.
+ * Deliberately equal to the normal gate rather than higher. A raised bar here
+ * would need a number, and the only data that could set one is the held-out
+ * set — where the separating value is 0.50 (docs/results-holdout.md). Fitting
+ * to that set would destroy the one honest measurement this project has, so
+ * this ships at the already-fitted threshold and the option exists for when
+ * there are unknown-vocabulary tuning questions to fit against.
  */
-export const DEFAULT_FALLBACK_THRESHOLD = 0.45;
+export const DEFAULT_FALLBACK_THRESHOLD = DEFAULT_ABSTAIN_THRESHOLD;
 
 /** PocketRAG §3.5 — generation budget under memory pressure. */
 export function maxTokensForPressure(pressure: number): number {
@@ -149,38 +152,29 @@ export async function ask(
     memoryPressure: pressure,
   };
 
-  // Location gate before retrieval: the answer likely exists but is state-scoped.
-  if (routed.packIds.length === 0 && routed.skippedStatePacks.length > 0) {
-    return {
-      kind: 'needs-location',
-      candidatePacks: routed.skippedStatePacks,
-      diagnostics: {
-        ...baseDiag,
-        candidates: [],
-        topScore: 0,
-        tokensBefore: 0,
-        tokensAfter: 0,
-        contextReduction: 0,
-      },
-    };
-  }
-
   const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
   const topScore = candidates[0]?.score ?? 0;
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
-    return {
-      kind: 'abstain',
-      nearest: candidates.slice(0, 2).map(toCitation),
-      diagnostics: {
-        ...baseDiag,
-        candidates,
-        topScore,
-        tokensBefore: 0,
-        tokensAfter: 0,
-        contextReduction: 0,
-      },
+    const weak = {
+      ...baseDiag,
+      candidates,
+      topScore,
+      tokensBefore: 0,
+      tokensAfter: 0,
+      contextReduction: 0,
     };
+    // Asking for a location is now a post-retrieval decision, made on evidence
+    // rather than on which domain a word happens to be tagged with. It fires
+    // only when the unscoped packs were searched and had nothing worth saying,
+    // while a state pack that was skipped might have. That ordering is the
+    // difference between "which state are you in?" and an answer for questions
+    // like spoiled fish or testing cordage, where a plants/wildlife word routed
+    // to state packs but core-survival held the answer all along.
+    if (routed.skippedStatePacks.length > 0) {
+      return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
+    }
+    return { kind: 'abstain', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
   }
 
   // Stage 3 — compress before prefill.

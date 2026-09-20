@@ -49,27 +49,31 @@ export interface RouteResult {
 }
 
 /**
- * There is no fallback. A query matching no domain vocabulary is not searched.
+ * Routing narrows the search. It may never empty it.
  *
- * This used to search first aid and survival anyway, on the reasoning that "the
- * cost of over-searching is latency; the cost of under-searching is a missed
- * answer when it matters most". The graded eval priced that trade properly: the
- * cost of over-searching was answering "how do I perform a cricothyrotomy", "how
- * deep can I dive before I need a decompression stop" and "is it going to rain
- * tomorrow" — 13 of 19 questions no pack covers (docs/results-akr2.md).
+ * This file has now been through the full arc. It began searching first aid for
+ * every unrecognised query; the graded eval priced that badly (13 of 19
+ * uncoverable questions answered, docs/results-akr2.md) and the fallback was
+ * removed; removing it bought +20.6 points and looked like the best change of
+ * the project. Then the held-out set showed what those points were: the lexicon
+ * had been extended until it covered the tuning questions' vocabulary. It
+ * reaches 46/46 answerable questions on the set it was built from and 16/31 on
+ * questions it has never seen (docs/results-holdout.md).
  *
- * The reasoning was sound about the risk, though, and removing the fallback
- * blindly would have refused eight genuine questions, including "my friend is
- * shivering uncontrollably and confused after falling in a cold creek" — a
- * hypothermia emergency described without a single clinical word. So the lexicon
- * was extended with lay vocabulary first: body parts, described symptoms,
- * terrain. Measured over the graded set after that, declining on no-match
- * refuses 0 of 46 answerable questions and correctly declines 12 of 22.
+ * The measurement that settles it: searching every pack on the device with no
+ * routing at all costs **1.88 ms**, against a 14,700 ms answer. The phone holds
+ * four packs and 7,413 chunks. The narrowing this function exists to provide is
+ * worth 0.013% of one answer, and it was costing 15 of 31 questions.
  *
- * The invariant to preserve: before narrowing this further, check the answerable
- * side of the graded set, not just the decline side.
+ * So routing survives as a hint, not a gate. When vocabulary matches, the search
+ * narrows and keeps its precision. When it does not, everything is searched and
+ * the abstention gate decides on evidence — which is also what the production
+ * study in docs/results-accuracy-research-2.md found, where a post-retrieval
+ * cascade with no training beat every pre-retrieval router 72.2% to 13-38%.
+ *
+ * The invariant is now structural rather than advisory: `packIds` is empty only
+ * when no pack is available at all.
  */
-
 /** A domain must reach this share of the top domain's score to be searched. */
 const RELATIVE_THRESHOLD = 0.4;
 
@@ -98,24 +102,12 @@ export function route(
 
   let fallback = false;
 
-  if (entries.length === 0 && ctx.allowFallback !== true) {
-    // Nothing recognisable: decline rather than guess. Returning no domains also
-    // leaves skippedStatePacks empty, so the pipeline abstains instead of asking
-    // for a location it has no use for.
-    return {
-      packIds: [],
-      domains: [],
-      scores,
-      skippedStatePacks: [],
-      fallback: false,
-      reason: 'no domain vocabulary matched; out of scope',
-    };
-  } else if (entries.length === 0) {
-    // Vocabulary told us nothing, so let retrieval decide on the evidence. The
-    // pipeline demands a higher score before answering on this path.
+  if (entries.length === 0) {
+    // Vocabulary told us nothing. That is a statement about the lexicon, not
+    // about the query, so it is not grounds for refusing to look.
     fallback = true;
     domains = [...DOMAIN_TAGS];
-    reason = 'no domain vocabulary matched; searching everything on a raised bar';
+    reason = 'no domain vocabulary matched; searching everything';
   } else {
     const top = Math.max(...entries.map(([, v]) => v));
     domains = entries
@@ -135,7 +127,11 @@ export function route(
       // A state pack is only meaningful for the state the user is actually in.
       // Searching Colorado wildlife in Ohio is worse than returning nothing.
       if (ctx.state === null || pack.scope.state !== ctx.state) {
-        skippedForState.push(pack.id);
+        // Only counts as "gated on location" when real vocabulary put us here.
+        // On the fallback path every domain is wanted, so every state pack
+        // would qualify and "what is the capital of France?" would come back
+        // as "which state are you in?" — speculation dressed up as evidence.
+        if (!fallback) skippedForState.push(pack.id);
         continue;
       }
     }
@@ -146,6 +142,23 @@ export function route(
     reason += ctx.state === null
       ? '; skipped state packs (location unresolved)'
       : `; skipped state packs outside ${ctx.state}`;
+  }
+
+  // The matched domains resolved to state packs only, and those were skipped.
+  // Widening rather than returning nothing is what stops "why do people make
+  // such a fuss about ticks?" becoming "which state are you in?" — tick maps to
+  // wildlife, no core pack declares wildlife, and core-survival p.47 answers it
+  // without caring where the reader is standing. skippedStatePacks stays
+  // populated, so the pipeline can still ask for a location if the widened
+  // search turns up nothing worth saying.
+  if (selected.length === 0) {
+    for (const pack of available) {
+      if (pack.scope.kind !== 'us-state') selected.push(pack.id);
+    }
+    if (selected.length > 0) {
+      fallback = true;
+      reason += '; widened to unscoped packs';
+    }
   }
 
   return { packIds: selected, domains, scores, skippedStatePacks: skippedForState, fallback, reason };

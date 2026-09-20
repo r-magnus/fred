@@ -101,7 +101,11 @@ test('a pack from another state is never searched', async () => {
   const res = await ask('What do I do if I see a bear?', deps(), { state: 'OH' });
   assert.equal(res.kind, 'needs-location');
   const r = route(extractKeywords('bear'), PACKS, { state: 'OH' });
-  assert.deepEqual(r.packIds, []);
+  // The invariant is that the wrong state's pack is not searched — not that
+  // nothing is. Routing now widens to the unscoped packs rather than returning
+  // empty, and the location prompt is decided after retrieval instead.
+  assert.ok(!r.packIds.includes('state-CO-wildlife'), r.packIds.join(', '));
+  assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
   assert.ok(r.reason.includes('outside OH'));
 });
 
@@ -175,17 +179,22 @@ test('chunk domain, not just pack domain, decides what a query can retrieve', as
     'a snare passage must not answer a first-aid question just because its pack routes for first aid');
 });
 
-test('a query with no domain vocabulary is declined, not searched', () => {
-  // The router used to search first aid and survival on no match, which is how
-  // "how do I perform a cricothyrotomy" got answered from adjacent chapters.
+test('a query with no domain vocabulary is searched, then declined on the evidence', async () => {
+  // These used to be refused by the router. That bought +20.6 points on the
+  // tuning set and cost 15 of 31 held-out questions, because refusing on "no
+  // vocabulary matched" measures the lexicon rather than the query
+  // (docs/results-holdout.md). They must still be declined — just by the gate,
+  // after looking, rather than by never looking.
   for (const q of [
     'What is the capital of France?',
     'How do I perform a cricothyrotomy?',
     'How deep can I dive before I need a decompression stop?',
   ]) {
     const r = route(extractKeywords(q), PACKS, { state: null });
-    assert.equal(r.packIds.length, 0, `${q} -> [${r.packIds.join(', ')}]`);
+    assert.ok(r.packIds.length > 0, `${q} should be searched`);
+    assert.ok(!r.packIds.some((id) => id.startsWith('state-')), 'no state pack on a speculative search');
     assert.equal(r.skippedStatePacks.length, 0, 'must abstain, not ask for a location');
+    assert.equal((await ask(q, deps(), { state: null })).kind, 'abstain', q);
   }
 });
 
@@ -231,7 +240,7 @@ test('"mountain" alone does not route to wildlife', () => {
   // the pipeline asked for the user's location. 'lion'/'cougar'/'puma' cover the
   // animal 'mountain' was listed for.
   const poem = route(extractKeywords('Can you write me a poem about the mountains?'), PACKS, { state: null });
-  assert.ok(!poem.domains.includes('wildlife'), poem.reason);
+  assert.ok(poem.fallback, 'no domain vocabulary, so this is a speculative search');
   assert.equal(poem.skippedStatePacks.length, 0, 'must not gate a non-geographic query on location');
 
   const lion = route(extractKeywords('Are there mountain lions around here?'), PACKS, { state: 'CO' });

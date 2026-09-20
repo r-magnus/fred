@@ -9,6 +9,7 @@ const SETS = [
   'tools/eval/data/graded-survival.json',
   'tools/eval/data/graded-flora-fauna.json',
   'tools/eval/data/graded-negative.json',
+  'tools/eval/data/graded-unknown-vocab.json',
 ];
 
 /** Load from an inline string, so validation is tested without touching disk. */

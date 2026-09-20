@@ -71,6 +71,13 @@ export const GRADED_SETS = [
   'tools/eval/data/graded-survival.json',
   'tools/eval/data/graded-flora-fauna.json',
   'tools/eval/data/graded-negative.json',
+  // Added 2026-09-19. The original 68 could not tune the fallback path, because
+  // every one of them routed successfully — the set had no case where the
+  // lexicon fails, which is exactly the case the held-out set showed dominates.
+  // 32 questions using vocabulary the lexicon does not carry, half answerable
+  // and half out of scope, so the threshold on that path has something to
+  // separate. Being narrow was the original sin; this widens it.
+  'tools/eval/data/graded-unknown-vocab.json',
 ] as const;
 
 /**

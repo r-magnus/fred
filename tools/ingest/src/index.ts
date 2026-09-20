@@ -74,13 +74,20 @@ interface CorpusDef {
   readonly dropChunks?: readonly RegExp[];
 }
 
+/**
+ * Contextual retrieval changes what is indexed and what the generator sees, so
+ * a contextualized pack is a different pack. Packs are replaced wholesale and
+ * never patched in place, and a device holding the old version has no way to
+ * discover the difference unless the version says so — hence the minor bump on
+ * all three core corpora when CONTEXTUALIZE landed.
+ */
 const CORPORA: Record<string, CorpusDef> = {
   'who-bec': {
     pdf: 'corpora/who/who-bec.pdf',
     domain: 'first-aid-physical',
     input: {
       id: 'core-firstaid',
-      version: '1.0.0',
+      version: '1.1.0',
       displayName: 'Physical First Aid',
       description: 'WHO/ICRC Basic Emergency Care — acute illness and injury.',
       domains: ['first-aid-physical'],
@@ -126,7 +133,7 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-survival',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.1.0',
+      version: '1.2.0',
       displayName: 'Wilderness Survival',
       description: 'US Army ATP 3-50.21 Survival — water, food, fire, shelter, navigation, knots.',
       domains: ['survival', 'first-aid-physical'],
@@ -190,7 +197,7 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-firstaid-army',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.1.0',
+      version: '1.2.0',
       displayName: 'Field First Aid',
       description: 'US Army ATP 4-02.11 — first aid for nonmedical responders: bleeding, airway, burns, fractures, bites, heat and cold.',
       domains: ['first-aid-physical'],

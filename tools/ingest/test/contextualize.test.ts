@@ -13,16 +13,48 @@ const chunk = (over: Partial<DraftChunk> & { text: string }): DraftChunk => ({
  * snakebite list (results-alpha.md) and the abdominal wound-packing answer
  * (results-holdout.md).
  */
-test('prohibition text is labelled from the body, however it is phrased', () => {
+test('a passage that is all prohibitions is labelled as such', () => {
   for (const text of [
     'Do not apply ice to the bite site.',
     "Don't cut the wound open.",
     'Never apply a tourniquet for a snakebite.',
     'Avoid giving the casualty alcohol.',
-    'Some prose first.\nDo not pack hemostatic dressings into the abdomen or chest.',
+    '- Do not cut the wound.\n- Never suck out the venom.\n- Avoid alcohol.',
   ]) {
     assert.match(structuralLabel(chunk({ text })), /AVOID/, text);
   }
+});
+
+/**
+ * The bug this file exists to prevent, found by running the real corpus: an
+ * earlier version matched "never" anywhere in the chunk, so a passage of burn
+ * treatment containing one "Never place a tourniquet around the neck" was
+ * labelled "Lists actions to AVOID". That is the inversion defect in reverse —
+ * it would tell the generator not to cool a burn.
+ */
+test('a mostly-instructional passage with one prohibition is NOT called avoid-only', () => {
+  const burns = chunk({
+    section: 'BURNS',
+    text: [
+      'If you suspect a second-degree burn:',
+      '- Take a pain reliever if available.',
+      '- Flush the burn with cool water for several minutes.',
+      '- Cover the burn with a sterile dressing.',
+      '- Never place a tourniquet around the neck.',
+    ].join('\n'),
+  });
+  const label = structuralLabel(burns);
+  assert.doesNotMatch(label, /Lists actions to AVOID/);
+  assert.match(label, /BOTH/, 'a mixed passage should say so');
+});
+
+test('a prohibition inside a sentence does not flip the whole passage', () => {
+  // "never" mid-sentence is commentary, not an instruction line.
+  const c = chunk({
+    section: 'DIRECT PRESSURE',
+    text: 'Bandages can be boiled and reused. Bleeding that never slows needs a tourniquet.',
+  });
+  assert.doesNotMatch(structuralLabel(c), /AVOID/);
 });
 
 test('prohibition is labelled from the heading even when the body lost it', () => {

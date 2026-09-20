@@ -29,23 +29,53 @@ import { getLlama, LlamaChatSession, type LlamaContext, type LlamaModel } from '
 import type { DraftChunk } from './chunk.ts';
 
 /**
- * Prohibition markers, checked against the chunk's own text.
+ * A line that tells the reader not to do something.
  *
- * Deliberately not a model call. The whole point is that this half holds even
- * when the generator is wrong, and a regex over "Do not" is not the part of
- * this pipeline that needs intelligence.
+ * Anchored to line starts. An early version matched anywhere in the chunk, and
+ * labelled whole passages of legitimate burn treatment as things to avoid
+ * because one line said "Never place a tourniquet around the neck" — the
+ * inversion defect in reverse, and worse than not labelling at all, since it
+ * would have told the generator not to cool a burn.
  */
-const PROHIBITION = /(^|\n)\s*(do not\b|don't\b|never\b|avoid\b|do NOT\b)/i;
-/** A heading that turns everything under it into a list of things to avoid. */
-const PROHIBITION_HEADING = /\b(do not|don't|never|avoid|contraindicat|precaution|warning|caution)\b/i;
+const PROHIBITION_LINE = /^\s*[-*\u2022]?\s*(do not\b|don't\b|never\b|avoid\b)/i;
+/** A heading that makes everything beneath it a list of things to avoid. */
+const PROHIBITION_HEADING = /\b(do not|don't|never|avoid|contraindicat)\b/i;
 
-/** The half that does not depend on a model being right. */
+/** Lines with enough substance to count; blank and stub lines skew the ratio. */
+function contentLines(text: string): string[] {
+  return text.split('\n').map((l) => l.trim()).filter((l) => l.length > 3);
+}
+
+/**
+ * The half that does not depend on a model being right.
+ *
+ * Three outcomes rather than two, because most real passages are mixed. Saying
+ * "this is all prohibitions" about a passage that is mostly instructions is its
+ * own safety bug, so a mixed passage gets told to preserve each line's polarity
+ * instead.
+ */
 export function structuralLabel(chunk: DraftChunk): string {
-  const heading = PROHIBITION_HEADING.test(chunk.section);
-  const body = PROHIBITION.test(chunk.text);
-  if (heading || body) return 'Lists actions to AVOID, not steps to follow.';
-  if (chunk.blockKind === 'procedure') return 'Ordered steps to follow.';
-  return '';
+  // The heading is authoritative: this is the orphaned "Do not -" case from
+  // results-alpha.md, where chunking split the list from its header and the
+  // body alone gives no clue that it is a prohibition list.
+  if (PROHIBITION_HEADING.test(chunk.section)) {
+    return 'Lists actions to AVOID, not steps to follow.';
+  }
+
+  const lines = contentLines(chunk.text);
+  const prohibitions = lines.filter((l) => PROHIBITION_LINE.test(l)).length;
+
+  if (prohibitions === 0) {
+    return chunk.blockKind === 'procedure' ? 'Ordered steps to follow.' : '';
+  }
+  // Predominantly prohibitions: safe to characterise the whole passage.
+  if (prohibitions * 2 >= lines.length) {
+    return 'Lists actions to AVOID, not steps to follow.';
+  }
+  // Mixed. Naming it is the accurate thing to do, and it is exactly the case a
+  // small model gets wrong (arXiv 2605.13829 — negation is dropped, so a
+  // "do not" line reads as an instruction).
+  return 'Contains BOTH steps to follow and actions to avoid — keep each line\'s wording.';
 }
 
 /** Model-written half: one sentence on what the passage covers. */

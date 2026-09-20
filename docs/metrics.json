@@ -396,32 +396,32 @@
     ],
     "note": "This is the number to quote for A-KR2. Never fit to it; calibrate.ts refuses by default.",
     "fallbackDiagnostic": {
-      "method": "ROUTING_FALLBACK=1 with the threshold at 0, so every score is visible",
+      "method": "fit on graded-unknown-vocab.json (tuning), 34 fallback-path questions: 11 answerable, 23 out of scope",
       "thresholds": [
         {
-          "t": 0.3,
-          "recovered": 12,
-          "admitted": 3
+          "t": 0.311,
+          "recovered": 10,
+          "admitted": 18
         },
         {
-          "t": 0.4,
-          "recovered": 8,
-          "admitted": 3
+          "t": 0.441,
+          "recovered": 5,
+          "admitted": 12
         },
         {
-          "t": 0.5,
-          "recovered": 8,
-          "admitted": 0
+          "t": 0.488,
+          "recovered": 4,
+          "admitted": 7
         },
         {
-          "t": 0.55,
-          "recovered": 7,
+          "t": 0.73,
+          "recovered": 1,
           "admitted": 0
         }
       ],
-      "ofGenuine": 15,
-      "ofOutOfScope": 7,
-      "note": "Separation exists at 0.50 but the margin is thin \u2014 out-of-scope queries sit at 0.472-0.489. Do NOT adopt 0.50: it is fitted to the held-out set. The fallback threshold needs its own tuning questions with unknown vocabulary."
+      "ofGenuine": 11,
+      "ofOutOfScope": 23,
+      "note": "NEGATIVE RESULT: no threshold separates them. The arithmetic best is 0.730, which blocks every out-of-scope question by abstaining on 10 of 11 genuine ones. The 0.50 that looked clean on the held-out set keeps only 4 of 11 here \u2014 that separation was an artifact of seven easy negative points. A scalar on the fused score cannot distinguish \"the corpus answers this\" from \"the corpus contains these words\". Needs a sufficient-context signal instead; see docs/results-holdout.md."
     },
     "previous": {
       "overall": 35.0,

@@ -204,3 +204,59 @@ failed: `hf-snowblind-01` (sound care advice, but never names snow blindness
 when asked "what is this") and `hs-staymove-01` (circular — "if staying put is
 safer, do so"). Marking both acceptable gives 40.0%, so the conclusion does not
 turn on them.
+
+
+---
+
+## The fallback threshold cannot be fitted. It is the wrong instrument.
+
+Added 2026-09-19, after building the unknown-vocabulary tuning set
+(`graded-unknown-vocab.json`) specifically to fit this honestly.
+
+**Result: no threshold separates in-scope from out-of-scope on the fallback
+path.** On 34 tuning questions that route to nothing (11 answerable, 23 out of
+scope), the sweep is a straight trade with no knee:
+
+| Threshold | Answerable kept | Out-of-scope blocked | Total right |
+|---:|---:|---:|---:|
+| 0.311 | 10/11 | 5/23 | 15/34 |
+| 0.441 | 5/11 | 11/23 | 16/34 |
+| 0.488 | 4/11 | 16/23 | 20/34 |
+| 0.628 | 2/11 | 21/23 | 23/34 |
+| **0.730** | **1/11** | **23/23** | 24/34 |
+
+The arithmetic "best" is 0.730, which blocks every out-of-scope question by
+abstaining on ten of the eleven genuine ones. That is not a threshold, it is a
+switch labelled *off*.
+
+### This vindicates refusing to fit on the held-out set
+
+The held-out data suggested 0.50 separated cleanly: 8 of 15 genuine recovered,
+0 of 7 out-of-scope admitted. On the tuning data, 0.50 keeps **4 of 11**
+answerable questions. The clean separation was an artifact of having only seven
+out-of-scope points, and seven easy ones at that.
+
+Had that number been adopted when it looked good, it would have shipped fitted
+to noise, and the held-out set — the one measurement that could have caught it —
+would already have been spent. This is the concrete payoff of the discipline,
+and it is worth putting in the report.
+
+### What it means
+
+A single scalar on the fused retrieval score cannot tell "the corpus answers
+this" from "the corpus contains these words". It was never going to: U measures
+*similarity to retrieved text*, and a question about paediatric ibuprofen doses
+is genuinely similar to text about pain relief. The signal does not contain the
+distinction we are asking it to draw.
+
+This is the same wall *Prompt-Based Abstention Fails Under Misleading Context*
+(arXiv 2608.22228) hit from the generation side: sufficiency and correctness are
+different properties, and no amount of tuning one gets you the other
+(`results-improvement-research.md`).
+
+So the fallback threshold ships **equal to the normal gate**, permanently, and
+the out-of-scope problem moves to a different signal. The candidate is the
+sufficient-context check — asking whether the retrieved passages actually
+contain what the question needs, rather than whether they look like it. That is
+a question the generator can answer in one constrained token, and the
+literature puts it at +2-10 points of selective accuracy at the same coverage.

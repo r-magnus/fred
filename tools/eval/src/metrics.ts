@@ -43,6 +43,11 @@ interface Metrics {
       note: string;
     };
     newSafetyDefects: { id: string; what: string }[];
+    previous?: { overall: number; correct: number; what: string };
+    precisionCost?: {
+      negativesCorrect: number; negatives: number; was: number;
+      admitted: { id: string; u: number; what: string }[]; note: string;
+    };
     note: string;
   };
   location?: {
@@ -214,7 +219,8 @@ if (m.akr2Holdout !== undefined) {
   p();
   p('## A-KR2 on held-out questions');
   p();
-  p(`**${h.overall.toFixed(1)}%** (${h.correct}/${h.total}) against **${h.tuningComparison}%** on the set everything was tuned on.`);
+  const prev = h.previous === undefined ? '' : ` Up from **${h.previous.overall.toFixed(1)}%** (${h.previous.what}).`;
+  p(`**${h.overall.toFixed(1)}%** (${h.correct}/${h.total}) against **${h.tuningComparison}%** on the set everything was tuned on.${prev}`);
   p();
   p('The gap is routing, not generation:');
   p();
@@ -225,6 +231,17 @@ if (m.akr2Holdout !== undefined) {
   p(`| held out | ${rh.reached}/${rh.answerable} — ${((rh.reached / rh.answerable) * 100).toFixed(0)}% |`);
   p();
   p(h.routingRecall.note);
+  if (h.precisionCost !== undefined) {
+    const pc = h.precisionCost;
+    p();
+    p(`**What it cost.** Out-of-scope questions correctly declined: **${pc.negativesCorrect}/${pc.negatives}**, down from ${pc.was}.`);
+    p();
+    p('| Now answered | U | |');
+    p('|---|---:|---|');
+    for (const x of pc.admitted) p(`| \`${x.id}\` | ${x.u} | ${x.what} |`);
+    p();
+    p(pc.note);
+  }
   if (h.newSafetyDefects.length > 0) {
     p();
     p('**Safety defects this surfaced:**');

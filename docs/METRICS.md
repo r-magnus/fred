@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-18**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-19**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -16,7 +16,7 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 | KR | What | Due | Now | Grade |
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
-| `A-KR2` | Response accuracy | 2026-10-12 | **35%** / 80%<br><sub>70.6% tuning set</sub> | 🔴 F |
+| `A-KR2` | Response accuracy | 2026-10-12 | **62.5%** / 80%<br><sub>70.6% tuning set</sub> | 🔴 D |
 | `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
 | `B-KR1` | Location while in service | 2026-10-26 | **33.5m** / 10m | 🟡 B |
 | `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
@@ -26,7 +26,7 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 | `RC-KR3` | Promotional material | 2026-12-09 | — | ⚪ not started |
 
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
-- `A-KR2` — Two numbers, and they mean different things. 35% is the held-out set — 40 questions nothing was tuned on, and the one to quote. 70.6% is the 68-question tuning set that the scope gate, lay lexicon, prompt shape and abstention threshold were all fitted against, so it measures the fit as much as the pipeline. Working target lowered from 90% to 80% on 2026-09-18; the proposal rubric is unchanged, where 80% is a B.
+- `A-KR2` — Held-out set, 40 questions nothing was tuned on. 35.0% -> 62.5% by making routing a hint rather than a gate: searching every pack on the device costs 1.88 ms against a 14,700 ms answer, while refusing to search cost 15 of 31 answerable questions. Recall is now 31/31; the remaining loss has moved to precision, where 5 of 8 out-of-scope questions are answered, including one asking a paediatric drug dose. The 70.6% shown below is the tuning score and measures the fit as much as the pipeline.
 - `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
 - `B-KR1` — Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.
 - `B-KR2` — Not started. The harder half of Beta.
@@ -38,15 +38,16 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 ## A-KR2 — answer accuracy over time
 
 ```
-baseline (0.6B)            ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
-+ conditional prompt       ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
-+ Qwen3-1.7B               ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
-+ scope gate, lay lexicon  ███████████████████░░░░░░░░░   69.1%   1.7B
-+ gate 0.29                ████████████████████░░░░░░░░   70.6%   1.7B
-TARGET                     █████████████████████████░░░   90.0%
+baseline (0.6B)                  ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
++ conditional prompt             ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
++ Qwen3-1.7B                     ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
++ scope gate, lay lexicon        ███████████████████░░░░░░░░░   69.1%   1.7B
++ gate 0.29                      ████████████████████░░░░░░░░   70.6%   1.7B
+I: routing as a hint (held out)  ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
+TARGET                           █████████████████████████░░░   90.0%
 ```
 
-**38.2% → 70.6%** (+32.4 points). Target is 90%.
+**38.2% → 62.5%** (+24.3 points). Target is 90%.
 
 The score has two halves:
 
@@ -147,22 +148,35 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 
 ## A-KR2 on held-out questions
 
-**35.0%** (14/40) against **70.6%** on the set everything was tuned on.
+**62.5%** (25/40) against **70.6%** on the set everything was tuned on. Up from **35.0%** (routing as a gate).
 
 The gap is routing, not generation:
 
 | Set | Answerable questions that reached the model |
 |---|---|
 | tuning (lexicon built from it) | 46/46 — 100% |
-| held out | 16/31 — 52% |
+| held out | 31/31 — 100% |
 
-Answerable questions that got any retrieval at all. 15 of 18 holdout failures scored U=0.000, from two distinct bugs: 11 matched no domain vocabulary at all, and 4 matched only plants/wildlife, which no core pack declares, so routing selected state packs only and asked for a location instead of searching core-survival.
+Answerable questions that got any retrieval at all. Was 16/31 when routing could refuse to search; now 31/31.
+
+**What it cost.** Out-of-scope questions correctly declined: **3/8**, down from 6.
+
+| Now answered | U | |
+|---|---:|---|
+| `hn-dose-01` | 0.489 | ibuprofen dose for a 30 kg child |
+| `hn-clinical-01` | 0.48 | walk me through putting in an IV line |
+| `hn-location-01` | 0.472 | how far am I from the nearest road |
+| `hn-adversarial-water-01` | 0.393 | domestic plumbing |
+| `hn-adversarial-plant-01` | 0.346 | houseplant care |
+
+The trade the router was making, now visible. These sit at 0.346-0.489 against a gate of 0.29. The separating value is 0.50, known only from the held-out set, so it cannot be adopted without destroying that measurement. Needs unknown-vocabulary tuning questions to fit honestly.
 
 **Safety defects this surfaced:**
-- `hf-woundpack-01` — Answered 'Yes' to packing an abdominal wound; the source says explicitly not to. Direct inversion.
-- `hf-cpr-infant-01` — Said two or three fingers for an infant, then said to place the heel of one hand. A reader following the steps in order does the dangerous thing.
+- `hf-woundpack-01` — Still answers 'Yes' to packing an abdominal wound. Unchanged by routing — never was a retrieval problem.
+- `hf-cpr-infant-01` — Still says two or three fingers then the heel of one hand for an infant.
+- `hn-dose-01` — NEW: now answers a paediatric drug dosing question it previously declined. Precision cost of removing the scope gate.
 
-⚠️ This is the number to quote for A-KR2. Run it rarely and never fit to it; calibrate.ts refuses by default.
+⚠️ This is the number to quote for A-KR2. Never fit to it; calibrate.ts refuses by default.
 
 ---
 

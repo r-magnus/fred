@@ -1,0 +1,297 @@
+{
+  "grader": "Claude Opus 5 (in-session)",
+  "variant": "I: 1.7B, routing as a hint, post-retrieval location decision, gate 0.29 unchanged",
+  "runs": "docs/holdout-runs-norouter.jsonl",
+  "set": "holdout",
+  "gradedByJudge": 31,
+  "verdicts": [
+    {
+      "questionId": "hf-snowblind-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Unchanged from the previous run. Sound care advice, but never names snow blindness or the UV cause when asked 'what is this'. Borderline, failed for consistency with the earlier grading."
+    },
+    {
+      "questionId": "hf-concussion-01",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Lists the serious signs and says to contact emergency services."
+    },
+    {
+      "questionId": "hf-hemostatic-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. 'Hold continuous direct pressure for a minimum of three minutes' \u2014 exactly the source."
+    },
+    {
+      "questionId": "hf-woundpack-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "SAFETY, unchanged: still answers 'Yes, but only if it is a deep wound' to packing an abdomen. ATP 4-02.11 p.63 says do not. Routing was never the cause of this one."
+    },
+    {
+      "questionId": "hf-scalp-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names the rich vascular supply and says to control the bleeding."
+    },
+    {
+      "questionId": "hf-airway-01",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Safe and responsive; misses that a talking casualty demonstrates an open airway."
+    },
+    {
+      "questionId": "hf-cpr-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Exact on the depth asked about."
+    },
+    {
+      "questionId": "hf-cpr-infant-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "SAFETY, unchanged: step 1 says two or three fingers, step 3 says the heel of one hand. Following the steps in order does the dangerous thing."
+    },
+    {
+      "questionId": "hf-tick-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable \u2014 this is the question that used to return 'which state are you in?'. Names disease transmission and prevention."
+    },
+    {
+      "questionId": "hf-headtilt-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correctly advises against head-tilt given a fall."
+    },
+    {
+      "questionId": "hf-anaphylaxis-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names the reaction, the sign combination and urgent treatment."
+    },
+    {
+      "questionId": "hf-pelvis-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still declines at U=0.373 with four citations. Generator, not retrieval."
+    },
+    {
+      "questionId": "hs-staymove-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Circular \u2014 'if staying put is safer, do so'. Never names what the decision turns on. Unchanged."
+    },
+    {
+      "questionId": "hs-movement-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Concrete and correct: falls, wildlife, hazards, hydration and nutrition, monitoring. Misses the stop-think-act framing."
+    },
+    {
+      "questionId": "hs-deadreckon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable and the best answer in the run: definition, azimuth tracking, error accumulation, and confirming position by terrain association."
+    },
+    {
+      "questionId": "hs-gps-battery-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Sensible conservation advice; misses 'use it alongside other navigation tools'."
+    },
+    {
+      "questionId": "hs-saddle-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Exactly right, plus the hourglass shape."
+    },
+    {
+      "questionId": "hs-hill-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Concentric circles and the smallest closed circle as hilltop."
+    },
+    {
+      "questionId": "hs-spoiledfish-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable \u2014 previously asked for a location because 'fish' maps to wildlife. Answers the actual question: if signs of spoilage are present, do not cook it."
+    },
+    {
+      "questionId": "hs-cordage-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Gets the twist test and holding together; misses the pull test."
+    },
+    {
+      "questionId": "hs-paracord-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable but inverted: attributes fishing line, thread and lashing to the OUTER cover, where the source gives those uses to the inner core strands. Gets the components right and their uses backwards."
+    },
+    {
+      "questionId": "hs-survmed-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Limited resources and improvisation. 'Enemy threats' is corpus leakage but faithful."
+    },
+    {
+      "questionId": "hs-insects-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Danger from venom and pathogens, with precautions."
+    },
+    {
+      "questionId": "hs-orientmap-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still declines at U=0.610, one of the highest scores in the run, with four citations. Generator."
+    },
+    {
+      "questionId": "hff-manzanita-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Birds and rodents on the fruit, woodrat on the seeds."
+    },
+    {
+      "questionId": "hff-manzanita-02",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Gives the maximum height correctly; does not give the range."
+    },
+    {
+      "questionId": "hff-bulrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Still declines at U=0.550 with four citations. Generator."
+    },
+    {
+      "questionId": "hff-bigleafmaple-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Yes to syrup, and correctly notes the lower yield than sugar maple."
+    },
+    {
+      "questionId": "hff-falcon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. All three points, including the ground-squirrel switch."
+    },
+    {
+      "questionId": "hff-turkey-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Newly reachable. Ponderosa pines on easterly slopes."
+    },
+    {
+      "questionId": "hff-sagebrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Grounded but wrong focus: asked what people used it for, answered with pronghorn forage. Unchanged."
+    }
+  ]
+}

@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, type ContextBlock } from './prompt.ts';
+import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -73,6 +73,11 @@ export interface AskOptions {
   readonly allowRoutingFallback?: boolean;
   /** Overrides DEFAULT_FALLBACK_THRESHOLD on the fallback path. */
   readonly fallbackThreshold?: number;
+  /**
+   * Ask the model whether the retrieved passages answer the question, and
+   * abstain if not. Costs a second prefill of the same context.
+   */
+  readonly checkSufficiency?: boolean;
   readonly retrieval?: RetrievalOptions;
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
@@ -98,6 +103,8 @@ export interface Diagnostics {
   readonly contextReduction: number;
   readonly maxTokens: number;
   readonly memoryPressure: number;
+  /** Model's verdict on whether the context answers the question; null if unchecked. */
+  readonly sufficient?: boolean | null;
 }
 
 export type AskResult =
@@ -189,6 +196,36 @@ export async function ask(
     text: c.text,
   }));
 
+  // The sufficiency check runs here, after compression, so it sees exactly the
+  // passages the answer would be built from. Asking before compression would
+  // judge material the generator never gets.
+  let sufficient: boolean | null = null;
+  if (opts.checkSufficiency === true) {
+    let verdict = '';
+    for await (const tok of backend.generate(buildSufficiencyParts(query, blocks), {
+      maxTokens: 4, temperature: 0,
+    })) {
+      verdict += tok;
+      if (verdict.trim().length >= 3) break;
+    }
+    sufficient = readSufficiency(verdict);
+    if (!sufficient) {
+      return {
+        kind: 'abstain',
+        nearest: candidates.slice(0, 2).map(toCitation),
+        diagnostics: {
+          ...baseDiag,
+          candidates,
+          topScore,
+          tokensBefore: compressed.tokensBefore,
+          tokensAfter: compressed.tokensAfter,
+          contextReduction: compressed.reduction,
+          sufficient,
+        },
+      };
+    }
+  }
+
   const prompt = buildPromptParts(query, blocks);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
@@ -203,6 +240,7 @@ export async function ask(
       ...baseDiag,
       candidates,
       topScore,
+      sufficient,
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,

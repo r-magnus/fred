@@ -150,3 +150,52 @@ export function buildPrompt(query: string, blocks: readonly ContextBlock[]): str
   const { system, user } = buildPromptParts(query, blocks);
   return `${system}\n\n${user}`;
 }
+
+
+/**
+ * Ask whether the retrieved passages actually answer the question.
+ *
+ * The scalar gate cannot do this. U measures similarity to retrieved text, and
+ * "how many milligrams of ibuprofen for a 30 kg child" is genuinely similar to
+ * text about pain relief — so no threshold on it separates "the corpus answers
+ * this" from "the corpus contains these words" (docs/results-holdout.md, where
+ * the best fitted value abstains on 10 of 11 genuine questions).
+ *
+ * This asks the different question directly. Phrased to resist the small-model
+ * habit of agreeing: NO is given concrete grounds, and the wording makes
+ * partial overlap an explicit NO rather than leaving it to judgement.
+ */
+export const SUFFICIENCY_SYSTEM =
+  'You check whether sources contain the information needed to answer a question. ' +
+  'Reply with exactly one word, YES or NO.\n' +
+  'Answer NO if the sources only discuss the general topic without containing the ' +
+  'specific information asked for, if they are about a related but different ' +
+  'subject, or if answering would need knowledge the sources do not state.\n' +
+  'Answer YES only if the specific information asked for is present in the sources.';
+
+export function buildSufficiencyParts(
+  query: string,
+  blocks: readonly ContextBlock[],
+): PromptParts {
+  return {
+    system: SUFFICIENCY_SYSTEM,
+    user: `${renderContext(blocks)}\n\nQUESTION: ${query}\n\n` +
+      'Do the sources above contain the specific information needed to answer that ' +
+      'question? Reply YES or NO.',
+  };
+}
+
+/**
+ * Read the verdict out of a short generation.
+ *
+ * Defaults to sufficient when the reply is unreadable. A parser failure is a
+ * bug in this file, and the honest failure mode for one is to leave behaviour
+ * as it was rather than to start refusing questions Fred can answer.
+ */
+export function readSufficiency(text: string): boolean {
+  const t = text.trim().toUpperCase();
+  if (t.startsWith('NO')) return false;
+  if (t.startsWith('YES')) return true;
+  if (/\bNO\b/.test(t) && !/\bYES\b/.test(t)) return false;
+  return true;
+}

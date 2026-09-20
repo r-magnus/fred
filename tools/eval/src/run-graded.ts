@@ -79,6 +79,9 @@ for (const [i, q] of questions.entries()) {
     ...(process.env.ROUTING_FALLBACK === '1' ? { allowRoutingFallback: true } : {}),
     ...(process.env.FALLBACK_THRESHOLD !== undefined
       ? { fallbackThreshold: Number(process.env.FALLBACK_THRESHOLD) } : {}),
+    // SUFFICIENCY=1 asks the model whether the retrieved passages answer the
+    // question before generating. Off by default until it has earned its cost.
+    ...(process.env.SUFFICIENCY === '1' ? { checkSufficiency: true } : {}),
   });
 
   let answer = '';

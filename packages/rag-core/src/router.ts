@@ -152,12 +152,21 @@ export function route(
   // populated, so the pipeline can still ask for a location if the widened
   // search turns up nothing worth saying.
   if (selected.length === 0) {
+    const widenedDomains = new Set<DomainTag>();
     for (const pack of available) {
-      if (pack.scope.kind !== 'us-state') selected.push(pack.id);
+      if (pack.scope.kind === 'us-state') continue;
+      selected.push(pack.id);
+      for (const d of pack.domains) widenedDomains.add(d);
     }
     if (selected.length > 0) {
       fallback = true;
-      reason += '; widened to unscoped packs';
+      // The domains have to widen with the packs. Stage 1 filters candidates by
+      // `domains` (retrieve.ts), so widening the pack list alone selects the
+      // core packs and then discards every chunk in them: "tick" wants wildlife,
+      // core-survival's chunks are tagged survival, and retrieval comes back
+      // empty with U=0. That shipped for one eval run and cost three questions.
+      domains = [...new Set([...domains, ...widenedDomains])];
+      reason += '; widened to unscoped packs and their domains';
     }
   }
 

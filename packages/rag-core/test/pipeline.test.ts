@@ -309,3 +309,22 @@ test('mixing packs built with a different encoder throws instead of scoring nons
     /was built with other\/encoder/,
   );
 });
+
+/**
+ * Widening has to carry the domains with it.
+ *
+ * Stage 1 filters candidates by the routed domains, so widening the pack list
+ * alone selects the core packs and then discards every chunk inside them. That
+ * shipped for one held-out run: "why do people make such a fuss about ticks?"
+ * matched wildlife, widened to core-survival, and retrieved nothing at all
+ * because core-survival's chunks are tagged survival.
+ */
+test('widening to unscoped packs widens the domains too', () => {
+  const r = route(extractKeywords('Why do people make such a fuss about ticks?'), PACKS, { state: null });
+  assert.ok(r.packIds.includes('core-survival'), `packs: ${r.packIds.join(', ')}`);
+  assert.ok(r.domains.includes('survival'), `domains: ${r.domains.join(', ')}`);
+  assert.ok(!r.packIds.includes('state-CO-wildlife'), 'still never another state');
+  // The state pack genuinely matched, so the location prompt stays available if
+  // the widened search comes back with nothing.
+  assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
+});

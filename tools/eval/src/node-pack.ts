@@ -133,7 +133,11 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
   let genCtx: LlamaContext | null = null;
   if (opts.genModelPath) {
     genModel = await llama.loadModel({ modelPath: opts.genModelPath });
-    genCtx = await genModel.createContext({ contextSize: 4096 });
+    // sequences: Qwen3.5-2B exhausted the default pool on the fourth question
+    // ("No sequences left") even though every sequence is disposed per call, so
+    // the pool is sized explicitly. Generation is greedy at temperature 0, so
+    // this changes capacity only, never output.
+    genCtx = await genModel.createContext({ contextSize: 4096, sequences: 4 });
   }
 
   const spec: EmbeddingSpec = {

@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock } from './prompt.ts';
+import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type SufficiencyVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -78,6 +78,11 @@ export interface AskOptions {
    * abstain if not. Costs a second prefill of the same context.
    */
   readonly checkSufficiency?: boolean;
+  /**
+   * Which sufficiency wording to use. 'numeric' adds an explicit rule that a
+   * question asking for a quantity needs that quantity present in the sources.
+   */
+  readonly sufficiencyVariant?: SufficiencyVariant;
   readonly retrieval?: RetrievalOptions;
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
@@ -202,7 +207,7 @@ export async function ask(
   let sufficient: boolean | null = null;
   if (opts.checkSufficiency === true) {
     let verdict = '';
-    for await (const tok of backend.generate(buildSufficiencyParts(query, blocks), {
+    for await (const tok of backend.generate(buildSufficiencyParts(query, blocks, opts.sufficiencyVariant), {
       maxTokens: 4, temperature: 0,
     })) {
       verdict += tok;

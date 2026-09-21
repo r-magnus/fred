@@ -165,6 +165,9 @@ export function buildPrompt(query: string, blocks: readonly ContextBlock[]): str
  * habit of agreeing: NO is given concrete grounds, and the wording makes
  * partial overlap an explicit NO rather than leaving it to judgement.
  */
+/** Which sufficiency wording to use. See SUFFICIENCY_SYSTEM_NUMERIC. */
+export type SufficiencyVariant = 'default' | 'numeric';
+
 export const SUFFICIENCY_SYSTEM =
   'You check whether sources contain the information needed to answer a question. ' +
   'Reply with exactly one word, YES or NO.\n' +
@@ -173,12 +176,39 @@ export const SUFFICIENCY_SYSTEM =
   'subject, or if answering would need knowledge the sources do not state.\n' +
   'Answer YES only if the specific information asked for is present in the sources.';
 
+/**
+ * Sufficiency wording that makes specific-value presence an explicit rule.
+ *
+ * The default wording asks about "the specific information asked for" and the
+ * model reads topic overlap as satisfying it: asked for a paracetamol dose with
+ * sources that discuss paracetamol, it answers YES. Measured 0 of 3 on dosing
+ * (docs/graded-runs-sufficiency.jsonl — uv-neg-dose-01, uv-neg-dose-02,
+ * uv-neg-childdose-01), which is the specificity blindness behind the negation
+ * failures wearing a different hat.
+ *
+ * This names the case the model is getting wrong instead of restating the
+ * general rule: if the question asks for a number, the number itself has to be
+ * in the sources, and naming the drug is not enough.
+ */
+export const SUFFICIENCY_SYSTEM_NUMERIC =
+  'You check whether sources contain the information needed to answer a question. ' +
+  'Reply with exactly one word, YES or NO.\n' +
+  'Answer NO if the sources only discuss the general topic without containing the ' +
+  'specific information asked for, if they are about a related but different ' +
+  'subject, or if answering would need knowledge the sources do not state.\n' +
+  'If the question asks for a quantity - a dose, an amount, a volume, a weight, a ' +
+  'count, a duration or a temperature - then the quantity itself must appear in ' +
+  'the sources. Sources that name the drug, substance or procedure but do not ' +
+  'state the number are NOT sufficient: answer NO.\n' +
+  'Answer YES only if the specific information asked for is present in the sources.';
+
 export function buildSufficiencyParts(
   query: string,
   blocks: readonly ContextBlock[],
+  variant: SufficiencyVariant = 'default',
 ): PromptParts {
   return {
-    system: SUFFICIENCY_SYSTEM,
+    system: variant === 'numeric' ? SUFFICIENCY_SYSTEM_NUMERIC : SUFFICIENCY_SYSTEM,
     user: `${renderContext(blocks)}\n\nQUESTION: ${query}\n\n` +
       'Do the sources above contain the specific information needed to answer that ' +
       'question? Reply YES or NO.',

@@ -82,6 +82,11 @@ for (const [i, q] of questions.entries()) {
     // SUFFICIENCY=1 asks the model whether the retrieved passages answer the
     // question before generating. Off by default until it has earned its cost.
     ...(process.env.SUFFICIENCY === '1' ? { checkSufficiency: true } : {}),
+    // SUFFICIENCY_PROMPT=numeric swaps in the wording that makes "a question
+    // asking for a quantity needs the quantity present" an explicit rule. The
+    // default wording is 0 of 3 on dosing questions.
+    ...(process.env.SUFFICIENCY_PROMPT === 'numeric'
+      ? { sufficiencyVariant: 'numeric' as const } : {}),
   });
 
   let answer = '';

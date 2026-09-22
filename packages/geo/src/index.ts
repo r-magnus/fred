@@ -125,3 +125,9 @@ export function stateForCoords(
 
 /** How far the fallback reached, in km, or 0 when the point was contained. */
 export const SNAP_DISTANCE_KM = SNAP_KM;
+
+// Drive-test recording and fix selection — see fix.ts.
+export {
+  isBetterFix, meetsTarget, summariseTrack, toTrackRow, TRACK_HEADER,
+  type Reading, type TrackSample, type TrackSummary,
+} from './fix.ts';

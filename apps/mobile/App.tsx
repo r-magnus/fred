@@ -190,7 +190,7 @@ function Screen() {
     );
   }
 
-  if (probe) return <MapProbe onClose={() => setProbe(false)} />;
+  if (probe) return <MapProbe onClose={() => setProbe(false)} fix={fix} />;
 
   return (
     <View style={styles.root}>

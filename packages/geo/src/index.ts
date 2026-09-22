@@ -137,3 +137,5 @@ export {
 // re-exporting it put h3-js into the phone's JS bundle, where it stopped the
 // app launching at all. Ingest-side dependencies must not ride along on a
 // module the app needs for stateForCoords.
+
+export { circleRing, distanceMeters } from './circle.ts';

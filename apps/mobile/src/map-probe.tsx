@@ -11,10 +11,12 @@
  * file-format decisions in that document are settled and the real map work can
  * start; if it does not, the fallback is MBTiles.
  */
-import { Map, Camera } from '@maplibre/maplibre-react-native';
+import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 import { Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
+import { circleRing } from '@fred/geo';
+import type { LocationFix } from './location.ts';
 
 /**
  * Staged by hand for the probe; the real thing ships per-state packs.
@@ -48,15 +50,45 @@ const style = (uri: string): StyleSpecification => ({
   ],
 });
 
-export function MapProbe({ onClose }: { onClose: () => void }): React.JSX.Element {
+export function MapProbe(
+  { onClose, fix }: { onClose: () => void; fix: LocationFix | null },
+): React.JSX.Element {
   const uri = `${Paths.document.uri}${ARCHIVE}`;
+  // B-KR2's "estimated location zone". The radius is the GPS's own 68%
+  // confidence figure, so the circle is a claim the hardware already makes
+  // rather than one invented for the display. Outdoors this is single-digit
+  // metres and the ring is tight; indoors it is tens of metres and visibly
+  // loose, which is the honest picture rather than a flattering one.
+  const ring = fix === null || fix.accuracyMeters === null
+    ? [] : circleRing(fix.latitude, fix.longitude, fix.accuracyMeters);
   return (
     <View style={styles.root}>
       <Map style={styles.map} mapStyle={style(uri)} attribution logo={false}>
-        {/* Yosemite: a public landmark already used in packages/geo's tests, so
-            the probe does not put anyone's real position in the repo. */}
-        <Camera initialViewState={{ center: [-119.5383, 37.8651], zoom: 9 }} />
+        {/* Centre on the user when known; otherwise Yosemite, a public landmark
+            packages/geo's tests already use, so no real position is hardcoded. */}
+        <Camera initialViewState={{
+          center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
+          zoom: fix === null ? 9 : 13,
+        }} />
+        {ring.length > 0 && (
+          <GeoJSONSource
+            id="zone"
+            data={{ type: 'Feature', properties: {},
+              geometry: { type: 'Polygon', coordinates: [ring] } }}
+          >
+            <Layer id="zone-fill" type="fill"
+              paint={{ 'fill-color': '#4fd1a5', 'fill-opacity': 0.18 }} />
+            <Layer id="zone-edge" type="line"
+              paint={{ 'line-color': '#4fd1a5', 'line-width': 2 }} />
+          </GeoJSONSource>
+        )}
       </Map>
+      {fix !== null && (
+        <Text style={styles.zoneNote}>
+          {`within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`}
+          {fix.state === null ? '' : ` · ${fix.state}`}
+        </Text>
+      )}
       <Pressable style={styles.close} onPress={onClose} hitSlop={12}>
         <Text style={styles.closeText}>close probe</Text>
       </Pressable>
@@ -74,4 +106,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 6,
   },
   closeText: { color: '#6ca', fontSize: 12, fontWeight: '600' },
+  zoneNote: {
+    position: 'absolute', bottom: 40, alignSelf: 'center',
+    color: '#4fd1a5', fontSize: 13, fontWeight: '600',
+    backgroundColor: '#0d1117cc', borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden',
+  },
 });

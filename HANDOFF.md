@@ -1,148 +1,136 @@
-# Handoff — 2026-09-20
+# Handoff — 2026-09-22
 
-Written for whoever picks this up next, on a different machine. Everything
-measured here is in `docs/`; this file is only the state of play and the next
-decision.
+Supersedes the 2026-09-20 note. Sixteen commits since. Everything measured is
+in `docs/`; this is the state of play and what to do next.
 
-## The one thing to understand first
+## The short version
 
-**A-KR2 was reported as 70.6% for weeks. It was 35%.**
+Alpha's accuracy work is **stalled on purpose** — the generator lever is closed
+and the remaining failures are all generation quality. Beta went from "not
+started" to **mostly built and verified on the device**: position, map and
+signal coverage all render offline. The one thing nobody can do from a desk is
+the drive test.
 
-The 70.6% was measured on the same 68 questions the scope gate, the lay
-lexicon, the prompt shape and the abstention threshold had all been fitted
-against. A held-out set of 40 questions — nothing tuned on them — scored 35%.
-That set now exists (`tools/eval/data/holdout-*.json`, `EVAL_SET=holdout`) and
-**it is the number to quote.**
+## A-KR2 — accuracy, due 2026-10-12
 
-The tuning set is still useful for iterating. It is not evidence.
+**62.5% held out, target 80%.** Unchanged since the last note, and not for lack
+of trying.
 
-**Do not fit anything to the held-out set.** `calibrate.ts` and
-`fit-fallback.ts` both refuse by default. The rules are in
-`docs/results-holdout.md` and they have already paid for themselves once — see
-"the trap that was avoided" below.
+- **The generator stays Qwen3-1.7B.** SmolLM2-1.7B was screened and lost 28 to
+  38 on graded tuning answers. It is *extractive* — it emits raw document
+  fragments with the manual's own numbering ("13-29. Locate the site of the
+  suspected fracture"), which is maximally faithful and useless. Qwen3.5-2B was
+  dropped as too large by the owner. `docs/graded-runs-smollm2.jsonl`.
+- **Dosing is not a prompting problem.** Two independent wordings both scored
+  0 of 3. Parked at the owner's request. The numeric wording is otherwise a
+  strict improvement (tuning outcome 71 → 79, zero regressions) and is
+  committed but still `SUFFICIENCY=1`, default off.
+- **Every remaining held-out failure is the generator, not retrieval.** All
+  nine have four citations and non-zero scores. Three decline with good sources
+  in hand, three invert the source, three answer the wrong question. The
+  `paracord` lexical gap the old research flagged is already fixed by the
+  routing change.
 
-## Where A-KR2 is
+**The lever with evidence behind it is a verification pass.** `results-nli-research.md`
+sized it at +3-6 points and shelved it on latency; the owner has since said
+accuracy beats latency, so that objection is gone. It targets the inversion
+class, which includes both safety defects.
 
-| | Held out (40) | Tuning (100) |
-|---|---:|---:|
-| Before routing change | 35.0% | — |
-| **Now** | **62.5%** | 71/100 outcome |
+A methodology trap, recorded because it cost a run: **`outcome matches
+expectation` cannot see a generator change.** It measures answer-vs-abstain,
+decided by retrieval and the gate upstream. A-KR2 is a graded read of the prose
+(README §04 QR-02) and nothing substitutes for it.
 
-Target is 80% (lowered from 90% by the project owner on 2026-09-18; on the
-proposal rubric 80% is a B). Due **2026-10-12**.
+## B-KR1 / B-KR2 / B-KR3 — the Beta trio
 
-The gain came from one change: **routing narrows the search, it may no longer
-empty it.** Measured justification — searching every pack on the device with no
-routing at all costs **1.88 ms** against a **14,700 ms** answer, while refusing
-to search cost 15 of 31 answerable questions. Recall went 16/31 → 31/31.
+**B-KR1 is an A outdoors.** First outdoor measurement the project has: median
+**9.5 m**, best 5.6 m, five attempts, **airplane mode on**, partial sky
+obstruction. Against 33.5 m indoors. The 15 s refine window is generous, not
+tight — three of five attempts hit the target on their first reading.
+`docs/results-bkr1-outdoor.md`.
 
-The bill: out-of-scope questions correctly declined dropped **6/8 → 3/8**. Fred
-now answers "how many milligrams of ibuprofen for a 30 kg child". That is the
-open problem.
+**That reprices B-KR2.** It asks for ±1 km with WiFi off; the measurement above
+*is* that case, about a hundred times inside target. Recorded as a falsifiable
+prediction: B-KR2's difficulty is the map, not positioning.
 
-## The decision waiting for you
+**All three now render on the device, offline:**
 
-The sufficiency check (`SUFFICIENCY=1`, default **off**, committed but not
-shipped) asks the model whether retrieved passages contain what the question
-needs. Measured: +4 outcome points, blocks seven out-of-scope questions the
-scalar gate could not — **and fails the criteria it was built against.**
+| | State |
+|---|---|
+| Position | Green ring sized by the GPS's own 68% confidence radius |
+| Map | MapLibre + Protomaps PMTiles, **z14, 598 MB for California** |
+| Coverage | Amber res-7 hexagons + "carriers report signal about N km north-east" |
 
-- It does **not** block drug dosing: paracetamol, epinephrine and paediatric
-  ORS are all still answered, 0 of 3. The model cannot separate "the sources
-  mention ibuprofen" from "the sources state a dose".
-- It costs **+4.8 s** (14.5 → 19.3 s desktop, ~25 s on device), which drops
-  A-KR3 from B to C.
+**None of this closes a KR.** The proposal verifies all three by driving to
+different physical locations, and that has not happened.
 
-Two independent rescues, neither attempted:
+## What is owed, in order
 
-1. **Cost — do this first.** Run the check on **Qwen3-0.6B**, already staged on
-   the device at `/data/data/dev.fred.app/files/`. A 0.6B prefill is far
-   cheaper and yes/no classification is within its range. If the check cannot
-   be made cheap, its accuracy barely matters.
-2. **Accuracy — one attempt only.** A prompt variant making "a request for a
-   number requires the number to be present" explicit. Kill it if it does not
-   block ≥2 of 3 dosing questions. Do not chain prompt tweaks; refinement D
-   (`docs/results-akr2.md`) took declines 1→16 that way.
+1. **The drive test.** Needs a car and nothing else — arm the recorder by
+   long-pressing the location chip, drive, long-press to stop. It records
+   continuously; the driver never touches the phone. One trip serves all three
+   KRs. A reminder routine exists.
+2. **Per-state packaging.** Map and coverage packs are staged by hand with
+   `adb push`. They should ship like the flora packs do, keyed off
+   `stateForCoords`. Coverage is 7.1 KB per state; maps are the real cost.
+3. **The verification pass for A-KR2**, per the research above.
+4. **Trim the app.** The APK carries four CPU architectures; 195 MB of 350 MB
+   is for hardware no modern phone uses. The device also holds ~440 MB of
+   models the app never loads (Qwen3-0.6B, the fp16 encoder). ~630 MB of
+   avoidable weight before RC-KR1.
 
-If both fail, the research points at **swapping the generator** —
-`docs/results-accuracy-research-2.md`. Qwen3-1.7B is a generation behind
-(Qwen3.5 shipped March 2026, Gemma 4 April), and SmolLM2-1.7B is reported as
-the most grounded model at that size. That is an afternoon and no architecture
-change, and it targets the failures routing did not touch.
+## Traps that already bit, so they do not bite again
 
-## What routing did NOT fix, and will not
+- **`adb push` silently reports success while writing nothing** for large files
+  over the USB/IP link. Small files run at 44-90 MB/s. Split into 40-50 MB
+  chunks, verify each by size, retry the failures — typically one or two per
+  pass. Restarting the adb server clears some stalls.
+- **Gradle reuses a cached JS bundle.** A JS-only fix can be correct and never
+  reach the APK. After any such change, grep the bundle *inside* the APK for a
+  symbol that should or should not be there. Deleting
+  `android/app/build/generated/assets/react/release/index.android.bundle`
+  forces a fresh one. This masked a correct fix for most of a morning.
+- **h3-js crashes Hermes** via an Emscripten `TextDecoder("utf-16le")` that is
+  never used. `scripts/patch-h3-hermes.mjs` neutralises it. Patching only the
+  package's `main` is not enough — it ships umd, esm and browser builds and
+  remaps entries — and matching a whole line is not enough either, because one
+  build is minified.
+- **A release build is not debuggable**, so `adb run-as` refuses and drive data
+  cannot be read back. `scripts/patch-android-fieldtest.mjs` sets
+  `debuggable true`. **That flag must come off before RC-KR1.**
+- **Expo SDK 57 deprecated `writeAsStringAsync`** — it throws at runtime. The
+  File/Paths API is the current one. `apps/mobile/AGENTS.md` says to read the
+  versioned docs first, and it is right.
 
-These are generator failures. They survived every retrieval change:
+## Commercial use is blocked, and it is not the FCC
 
-- **`hf-woundpack-01`** — asked whether to pack an abdominal wound, answers
-  *"Yes, but only if it is a deep wound"*. ATP 4-02.11 p.63 says **do not**.
-- **`hf-cpr-infant-01`** — step 1 says two or three fingers for a baby, step 3
-  says the heel of one hand. Following the steps in order does the dangerous
-  thing.
-- Three questions still decline with good retrieval in hand, including
-  `hs-orientmap-01` at U=0.610 with four citations.
+`docs/licensing.md` has the register. FCC coverage, the Army manuals, FEIS and
+Census are all public domain. **WHO Basic Emergency Care and WHO Psychological
+First Aid are CC BY-NC-SA** — NonCommercial, with share-alike propagating.
 
-`docs/results-improvement-research.md` has the literature: negation failure is
-a known, size-dependent weakness (arXiv 2605.13829) and prompting will not fix
-it. Over-refusal and inversion are two ends of one dial at this model size
-(arXiv 2608.22228) — **do not spend time on the abstention prompt.**
+The mitigation is already half-built: `core-firstaid-army` is 410 chunks of
+public-domain first aid sitting beside the WHO pack's 667. Nobody has measured
+what dropping WHO costs in accuracy, and that number should exist before it
+becomes a business decision.
 
-## The trap that was avoided, so it is not walked into again
+**Nothing enforces this.** The pack format carries `nonCommercial: true` and no
+code reads it.
 
-The held-out data suggested a fallback threshold of **0.50** separated cleanly:
-8 of 15 genuine recovered, 0 of 7 out-of-scope admitted. It was tempting.
+## Credentials and local files, none of them in git
 
-Fitted properly on tuning data (`graded-unknown-vocab.json`, built for exactly
-this), **0.50 keeps 4 of 11**, and no threshold separates at all — the
-arithmetic best, 0.730, blocks every out-of-scope question by abstaining on ten
-of eleven genuine ones. The clean separation was an artifact of seven easy
-negative points.
-
-Adopting it would have shipped a number fitted to noise and spent the one
-measurement able to catch it. **This is why the holdout rules exist.**
-
-## Things that are done
-
-- **B-KR1 location** — works, graded B. Offline state lookup from bundled
-  Census boundaries (`packages/geo`), never `reverseGeocodeAsync`, which needs
-  network and would fail in exactly Fred's situation. ±33.5 m median indoors.
-  **Owes an outdoor drive test** — the proposal verifies this KR by driving.
-  The owner wanted to run it over USB so ADB survives airplane mode; airplane
-  mode also tests whether GPS holds up with no signal, which could shrink
-  B-KR2 a lot.
-- **The app** — rebuilt, `expo-location` and `react-native-safe-area-context`
-  linked, real insets, chat screen, US-03 sources, US-07 stop.
-
-## Things that were tried and did not work
-
-- **Contextual retrieval** (`CONTEXTUALIZE=1`, `tools/ingest/src/contextualize.ts`).
-  Committed and working, but **measured no recall benefit** — our failure was
-  routing, and a preamble cannot help a query that never reaches the index.
-  Costs 4.5 s/chunk, so all 186,855 chunks would take ~10 days. Keep it only
-  for the prohibition labels. **Read the label code before re-enabling**: the
-  first version stamped "Lists actions to AVOID" on a passage of burn treatment
-  because one line said "never place a tourniquet around the neck". Fixed, with
-  tests, but it is the kind of bug that ships silently.
-
-## State of the repo
-
-- Branch **`bkr1-location`**, **17 commits ahead of `main`**, and at the time of
-  writing **not pushed**. Check `git log origin/main..HEAD` before assuming.
-- `CS-195 Project Proposal.pdf` is untracked on purpose; nobody has said whether
-  it belongs in the repo.
-- Packs on disk are the **baseline** ones. The contextualized survival pack was
-  built, inspected, found to have the mislabelling bug, and discarded.
-- `docs/METRICS.md` is generated — edit `docs/metrics.json` and run
-  `npm run metrics`, never the markdown.
+- `~/.config/fred/fcc.env` — FCC API username and token, mode 600.
+- `~/fred-tracks/` — drive-test CSVs. They hold real coordinates;
+  `.gitignore` refuses `bkr1-*.csv`.
+- `~/fred-known-good.apk` — a working build, if one is ever needed back.
+- `~/models/` — the GGUFs and the encoder. Not in git, needed by the eval.
 
 ## Commands
 
 ```
-npm test                                            # 113 tests
+npm test                                            # 152 tests
+npm run typecheck                                   # packages, tools AND the app
 EVAL_SET=holdout node tools/eval/src/run-graded.ts docs/holdout-runs.jsonl
-EVAL_SET=holdout node tools/eval/src/grading-packet.ts docs/holdout-runs.jsonl
-node tools/eval/src/fit-fallback.ts                 # tuning only; refuses holdout
-npm run metrics
+node tools/ingest/src/coverage-pack.ts out.bin <fcc.shp.zip>...
 ```
 
 Ingest and measurement must not share a machine — a build at 1504% CPU once

@@ -137,3 +137,5 @@ export {
   COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
   type CoverageIndex, type NearestCoverage,
 } from './coverage.ts';
+
+export { encodeCells, decodeCells } from './coverage-codec.ts';

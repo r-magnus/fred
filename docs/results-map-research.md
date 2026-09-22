@@ -73,8 +73,19 @@ without downloading the planet.
 | Region | Max zoom | Size |
 |---|---:|---:|
 | California | 12 | **95 MB** |
+| California | 13 | **250 MB** |
+| California | 14 | **598 MB** |
+| California | 15 | **1417 MB** |
 | Lower 48 | 10 | **365 MB** |
 | Lower 48 | 12 | **1832 MB** |
+
+**Zoom 12 was the wrong choice and the probe showed it.** It satisfies the ±1 km
+the rubric grades and is useless to look at: zooming in gives shapes with no
+detail. The rubric measures whether a position is right, not whether a map is
+worth opening, and optimising for the first produced a map that fails the
+second. **z14 is the shipping choice** — 598 MB for California, where trails and
+forest roads appear. z13 at 250 MB is the conservative fallback if per-state
+downloads must stay small.
 
 California took 3.7 s and transferred 104 MB for a 100 MB archive — an overfetch
 of 0.05, so the range-request path is efficient enough to run per state in a

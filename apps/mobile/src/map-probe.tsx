@@ -16,8 +16,16 @@ import { Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 
-/** Staged by hand for the probe; the real thing ships per-state packs. */
-const ARCHIVE = 'ca-z12.pmtiles';
+/**
+ * Staged by hand for the probe; the real thing ships per-state packs.
+ *
+ * z14, not the z12 the research settled on. z12 is enough for the +/-1 km the
+ * rubric grades, and useless to look at — zooming in shows shapes and no
+ * detail. Measured for California: z12 95 MB, z13 250 MB, z14 598 MB, z15
+ * 1417 MB. z14 is where trails and forest roads appear, which is the point of
+ * carrying a map at all in this product.
+ */
+const ARCHIVE = 'ca-z14.pmtiles';
 
 /**
  * Minimal style rather than @protomaps/basemaps.

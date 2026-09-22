@@ -12,7 +12,7 @@
  * start; if it does not, the fallback is MBTiles.
  */
 import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
-import { Paths } from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 import { useEffect, useState } from 'react';
@@ -21,15 +21,25 @@ import { loadCoverage, coverageNear, type CoverageView } from './coverage-layer.
 import type { LocationFix } from './location.ts';
 
 /**
- * Staged by hand for the probe; the real thing ships per-state packs.
+ * Per state, selected the same way the flora packs are.
  *
- * z14, not the z12 the research settled on. z12 is enough for the +/-1 km the
- * rubric grades, and useless to look at — zooming in shows shapes and no
+ * z14, not the z12 the research settled on. z12 satisfies the +/-1 km the
+ * rubric grades and is useless to look at — zooming in shows shapes and no
  * detail. Measured for California: z12 95 MB, z13 250 MB, z14 598 MB, z15
  * 1417 MB. z14 is where trails and forest roads appear, which is the point of
- * carrying a map at all in this product.
+ * carrying a map at all.
+ *
+ * At ~600 MB per state these cannot all ship at once, unlike coverage at
+ * ~7 KB. Whatever fetches them later, the naming and the lookup are the same
+ * as `stateForCoords` already drives for packs.
  */
-const ARCHIVE = 'ca-z14.pmtiles';
+/** Drawn when the state's map is not on the device: overlays still render. */
+const EMPTY_STYLE: StyleSpecification = {
+  version: 8, sources: {},
+  layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#0d1117' } }],
+};
+
+export const mapFile = (state: string): string => `map-${state}-z14.pmtiles`;
 
 /**
  * Minimal style rather than @protomaps/basemaps.
@@ -55,7 +65,12 @@ const style = (uri: string): StyleSpecification => ({
 export function MapProbe(
   { onClose, fix }: { onClose: () => void; fix: LocationFix | null },
 ): React.JSX.Element {
-  const uri = `${Paths.document.uri}${ARCHIVE}`;
+  // No state means no map to choose; an absent file means that state has not
+  // been downloaded. Both render the terrain-less background rather than
+  // failing, because a missing map must not take the location zone with it.
+  const archive = fix?.state == null ? null : mapFile(fix.state);
+  const haveMap = archive !== null && new File(Paths.document, archive).exists;
+  const uri = archive === null ? null : `${Paths.document.uri}${archive}`;
   // B-KR2's "estimated location zone". The radius is the GPS's own 68%
   // confidence figure, so the circle is a claim the hardware already makes
   // rather than one invented for the display. Outdoors this is single-digit
@@ -78,7 +93,8 @@ export function MapProbe(
   }, [fix]);
   return (
     <View style={styles.root}>
-      <Map style={styles.map} mapStyle={style(uri)} attribution logo={false}>
+      <Map style={styles.map} mapStyle={haveMap && uri !== null ? style(uri) : EMPTY_STYLE}
+        attribution logo={false}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
         <Camera initialViewState={{
@@ -113,6 +129,13 @@ export function MapProbe(
           </GeoJSONSource>
         )}
       </Map>
+      {!haveMap && (
+        <Text style={styles.missingNote}>
+          {fix?.state == null
+            ? 'Location unknown, so no map selected.'
+            : `No map downloaded for ${fix.state}.`}
+        </Text>
+      )}
       {fix !== null && (
         <Text style={styles.zoneNote}>
           {`within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`}
@@ -139,6 +162,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 6,
   },
   closeText: { color: '#6ca', fontSize: 12, fontWeight: '600' },
+  missingNote: {
+    position: 'absolute', top: 120, alignSelf: 'center',
+    color: '#8b9a96', fontSize: 13, textAlign: 'center',
+    backgroundColor: '#0d1117cc', borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden',
+  },
   covNote: {
     position: 'absolute', bottom: 80, alignSelf: 'center',
     color: '#e8b04f', fontSize: 13, fontWeight: '600', textAlign: 'center',

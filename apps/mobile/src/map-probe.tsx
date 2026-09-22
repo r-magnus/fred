@@ -15,7 +15,9 @@ import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-nati
 import { Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
+import { useEffect, useState } from 'react';
 import { circleRing } from '@fred/geo';
+import { loadCoverage, coverageNear, type CoverageView } from './coverage-layer.ts';
 import type { LocationFix } from './location.ts';
 
 /**
@@ -61,6 +63,19 @@ export function MapProbe(
   // loose, which is the honest picture rather than a flattering one.
   const ring = fix === null || fix.accuracyMeters === null
     ? [] : circleRing(fix.latitude, fix.longitude, fix.accuracyMeters);
+
+  // B-KR3. Loaded once per screen open rather than per render: the pack is a
+  // few kilobytes but the ring search walks outward until it finds something.
+  const [coverage, setCoverage] = useState<CoverageView | null>(null);
+  useEffect(() => {
+    if (fix === null || fix.state === null) return;
+    let live = true;
+    void loadCoverage(fix.state).then((index) => {
+      if (!live || index === null) return;
+      setCoverage(coverageNear(fix.latitude, fix.longitude, index));
+    });
+    return () => { live = false; };
+  }, [fix]);
   return (
     <View style={styles.root}>
       <Map style={styles.map} mapStyle={style(uri)} attribution logo={false}>
@@ -70,6 +85,21 @@ export function MapProbe(
           center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
           zoom: fix === null ? 9 : 13,
         }} />
+        {coverage !== null && coverage.polygons.length > 0 && (
+          <GeoJSONSource
+            id="coverage"
+            data={{ type: 'Feature', properties: {},
+              geometry: { type: 'MultiPolygon',
+                coordinates: coverage.polygons.map((p) => [p]) } }}
+          >
+            {/* Under the location ring in draw order, so the user's own zone
+                stays readable on top of the shading. */}
+            <Layer id="cov-fill" type="fill"
+              paint={{ 'fill-color': '#e8b04f', 'fill-opacity': 0.22 }} />
+            <Layer id="cov-edge" type="line"
+              paint={{ 'line-color': '#e8b04f', 'line-opacity': 0.5, 'line-width': 1 }} />
+          </GeoJSONSource>
+        )}
         {ring.length > 0 && (
           <GeoJSONSource
             id="zone"
@@ -89,6 +119,9 @@ export function MapProbe(
           {fix.state === null ? '' : ` · ${fix.state}`}
         </Text>
       )}
+      {coverage?.advice !== undefined && coverage.advice !== null && (
+        <Text style={styles.covNote}>{coverage.advice}</Text>
+      )}
       <Pressable style={styles.close} onPress={onClose} hitSlop={12}>
         <Text style={styles.closeText}>close probe</Text>
       </Pressable>
@@ -106,6 +139,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 6,
   },
   closeText: { color: '#6ca', fontSize: 12, fontWeight: '600' },
+  covNote: {
+    position: 'absolute', bottom: 80, alignSelf: 'center',
+    color: '#e8b04f', fontSize: 13, fontWeight: '600', textAlign: 'center',
+    backgroundColor: '#0d1117cc', borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden',
+    maxWidth: '86%',
+  },
   zoneNote: {
     position: 'absolute', bottom: 40, alignSelf: 'center',
     color: '#4fd1a5', fontSize: 13, fontWeight: '600',

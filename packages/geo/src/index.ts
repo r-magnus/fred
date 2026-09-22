@@ -132,10 +132,8 @@ export {
   type Reading, type TrackSample, type TrackSummary,
 } from './fix.ts';
 
-// B-KR3 coverage search — see coverage.ts.
-export {
-  COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
-  type CoverageIndex, type NearestCoverage,
-} from './coverage.ts';
-
-export { encodeCells, decodeCells } from './coverage-codec.ts';
+// B-KR3 coverage lives at '@fred/geo/coverage', deliberately NOT re-exported
+// here. This barrel is imported by apps/mobile, and coverage pulls in h3-js;
+// re-exporting it put h3-js into the phone's JS bundle, where it stopped the
+// app launching at all. Ingest-side dependencies must not ride along on a
+// module the app needs for stateForCoords.

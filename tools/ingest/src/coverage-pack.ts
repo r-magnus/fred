@@ -21,7 +21,7 @@ import { createReadStream, writeFileSync } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import { cellToParent } from 'h3-js';
-import { COVERAGE_RES, encodeCells } from '@fred/geo';
+import { COVERAGE_RES, encodeCells } from '@fred/geo/coverage';
 import { execFileSync } from 'node:child_process';
 
 interface DbfField { readonly name: string; readonly offset: number; readonly length: number }

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { gzipSync } from 'node:zlib';
 import { latLngToCell, gridDisk } from 'h3-js';
-import { encodeCells, decodeCells, COVERAGE_RES } from '../src/index.ts';
+import { encodeCells, decodeCells, COVERAGE_RES } from '../src/coverage-entry.ts';
 
 const area = (k: number): string[] =>
   gridDisk(latLngToCell(37.8651, -119.5383, COVERAGE_RES), k);

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { latLngToCell, gridDisk, cellToParent } from 'h3-js';
 import {
   COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
-} from '../src/index.ts';
+} from '../src/coverage-entry.ts';
 
 // Yosemite Valley, already used by states.test.ts, so no real position enters
 // the repo from a coverage test either.

@@ -26,7 +26,8 @@ import {
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
 import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
-import { currentFix, lastKnownFix, describeAccuracy, type LocationFix } from './src/location.ts';
+import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
+  isRecording, type LocationFix } from './src/location.ts';
 
 interface Turn {
   readonly id: number;
@@ -61,6 +62,9 @@ function Screen() {
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [fix, setFix] = useState<LocationFix | null>(null);
+  // Drive-test recording. Long-press the location chip to arm it; see
+  // src/location.ts for why it is opt-in and what it writes.
+  const [recording, setRecording] = useState(isRecording());
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -191,8 +195,30 @@ function Screen() {
             key result is verified by standing somewhere and reading it, and
             because a ±2 km fix and a ±8 m one should not look the same to a
             reader deciding whether to trust the local guide. */}
-        <Pressable onPress={() => void locate()} hitSlop={8} disabled={locating}>
-          <Text style={styles.stateChip}>
+        <Pressable
+          onPress={() => void locate()}
+          onLongPress={() => {
+            // Long-press rather than a visible control: this writes coordinates
+            // to disk and exists for verifying B-KR1/2/3, not for daily use.
+            if (recording) {
+              const s = stopRecording();
+              setRecording(false);
+              setLocNote(s === null ? 'Recording stopped.'
+                : `Track: ${s.samples} samples, best ${s.bestAccuracyMeters ?? '?'} m, `
+                  + `median ${s.medianAccuracyMeters ?? '?'} m`
+                  + `${s.timeToTargetMs === null ? ', target never met' : `, target in ${(s.timeToTargetMs / 1000).toFixed(1)} s`}`
+                  + `${s.states.length > 0 ? `, ${s.states.join('/')}` : ''}`
+                  + `${s.anyMocked ? ' — MOCKED' : ''}`);
+            } else {
+              const path = startRecording();
+              setRecording(true);
+              setLocNote(`Recording to ${path.split('/').pop() ?? path}`);
+            }
+          }}
+          hitSlop={8}
+          disabled={locating}
+        >
+          <Text style={[styles.stateChip, recording && styles.stateChipRecording]}>
             {locating ? (locProgress === null ? 'locating…' : `±${Math.round(locProgress)} m…`)
               : state === null ? 'use location'
               : fix !== null && fix.state === state ? `${state} ${describeAccuracy(fix)}`
@@ -362,6 +388,9 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#2a3a35', borderRadius: 12,
     paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden',
   },
+  // Armed recording has to be obvious at a glance: it writes coordinates, and
+  // nobody should drive home unaware it is still running.
+  stateChipRecording: { color: '#e88', borderColor: '#5a2a2a' },
 
   thread: { flex: 1 },
   threadInner: { padding: 18, paddingBottom: 8 },

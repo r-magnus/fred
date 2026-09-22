@@ -12,7 +12,11 @@
  * packages/geo.
  */
 import * as Location from 'expo-location';
-import { stateForCoords } from '@fred/geo';
+import { File, Paths } from 'expo-file-system';
+import {
+  stateForCoords, isBetterFix, meetsTarget, toTrackRow, TRACK_HEADER,
+  summariseTrack, type TrackSample, type TrackSummary,
+} from '@fred/geo';
 
 export interface LocationFix {
   readonly latitude: number;
@@ -57,6 +61,83 @@ export async function lastKnownFix(maxAgeMs = 120_000): Promise<LocationFix | nu
   if (!granted.granted) return null;
   const loc = await Location.getLastKnownPositionAsync({ maxAge: maxAgeMs });
   return loc === null ? null : toFix(loc, true, 0);
+}
+
+/**
+ * Drive-test recording — off unless deliberately switched on.
+ *
+ * B-KR1, B-KR2 and B-KR3 are all verified by driving to different physical
+ * locations, so one trip should produce data for all three rather than three
+ * trips producing notes. This writes every reading the watch sees, not just the
+ * best one, because how fast accuracy tightens is the interesting part outdoors
+ * and the indoor measurements never got to see it.
+ *
+ * It records coordinates, which the normal logging path deliberately does not.
+ * That is the whole reason this is opt-in and lands in a named file the tester
+ * can delete: checking a fix against ground truth needs to know where the phone
+ * really was, and nothing else Fred does needs that.
+ */
+class TrackRecorder {
+  private readonly file: File;
+  private readonly samples: TrackSample[] = [];
+
+  constructor(readonly name: string) {
+    this.file = new File(Paths.document, name);
+    if (!this.file.exists) {
+      this.file.create();
+      this.file.write(`${TRACK_HEADER}\n`);
+    }
+  }
+
+  add(loc: Location.LocationObject, elapsedMs: number, improved: boolean): void {
+    const s: TrackSample = {
+      elapsedMs,
+      timestamp: loc.timestamp,
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+      accuracyMeters: loc.coords.accuracy,
+      altitudeMeters: loc.coords.altitude,
+      speedMps: loc.coords.speed,
+      state: stateForCoords(loc.coords.latitude, loc.coords.longitude),
+      improved,
+      // Android-only, and absent on a platform that does not report it. A
+      // track made with a mock provider must not later read as a real drive.
+      mocked: loc.mocked === true,
+    };
+    this.samples.push(s);
+    // Appended per sample rather than buffered to the end: a drive that ends
+    // with a flat battery should still leave behind everything up to that point.
+    this.file.write(`${toTrackRow(s)}\n`, { append: true });
+  }
+
+  summary(targetMeters: number): TrackSummary {
+    return summariseTrack(this.samples, targetMeters);
+  }
+}
+
+let recorder: TrackRecorder | null = null;
+
+/**
+ * Begin recording to `<documents>/<name>`, returning the path to pull over USB.
+ *
+ * USB is the point: `adb pull` works with the radios off, so the airplane-mode
+ * run that tests whether GPS holds up without a signal can still be retrieved.
+ */
+export function startRecording(name = `bkr1-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`): string {
+  recorder = new TrackRecorder(name);
+  return `${Paths.document.uri}${name}`;
+}
+
+/** Stop recording and report what the track contained. Null if none was running. */
+export function stopRecording(targetMeters = TARGET_METERS): TrackSummary | null {
+  const s = recorder?.summary(targetMeters) ?? null;
+  recorder = null;
+  return s;
+}
+
+/** Whether a track is being written right now. */
+export function isRecording(): boolean {
+  return recorder !== null;
 }
 
 /** The B-KR1 target. Stop early once the fix is this good. */
@@ -128,15 +209,18 @@ export async function currentFix(
       void Location.watchPositionAsync(
         { accuracy: Location.Accuracy.Highest, timeInterval: 1000, distanceInterval: 0 },
         (loc) => {
-          // A reading with no accuracy figure cannot be compared, so it only
-          // wins when there is nothing to compare it against.
+          // The rule itself lives in @fred/geo, where node --test can reach it.
           const a = loc.coords.accuracy;
-          const bestA = best?.coords.accuracy ?? null;
-          if (best === null || bestA === null || (a !== null && a < bestA)) {
+          const improved = isBetterFix(
+            best === null ? null : { accuracyMeters: best.coords.accuracy },
+            { accuracyMeters: a },
+          );
+          if (improved) {
             best = loc;
             onProgress?.(a);
           }
-          if (a !== null && a <= targetMeters) finish();
+          if (recorder !== null) recorder.add(loc, Date.now() - started, improved);
+          if (meetsTarget({ accuracyMeters: a }, targetMeters)) finish();
         },
         (message) => { if (best !== null) finish(); else { settled = true; reject(new Error(message)); } },
       ).then((s) => {

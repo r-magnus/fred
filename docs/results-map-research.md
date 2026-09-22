@@ -165,3 +165,41 @@ rather than shipped. A minimal hand-written style was used instead of
 map should use the proper style.
 
 The next thing is the B-KR2 screen itself, and it starts from a settled base.
+
+## The crash that followed, and why the fix looked like it failed
+
+Recorded because both halves cost time and both will recur.
+
+**Cause.** h3-js is Emscripten-compiled, and Emscripten's runtime opens with
+`new TextDecoder("utf-16le")`. Hermes does not support that encoding, so the
+bundle threw `RangeError: Unknown encoding: utf-16le` while loading modules —
+before any application code ran. The app started, died in under a second, and
+logged nothing: no Java stack, no crash entry, `am start -W` reporting `Status:
+ok`. The evidence was in `/data/tombstones`, as a SIGABRT with the JS stack in
+the abort message.
+
+It reached the phone because `@fred/geo`'s barrel briefly re-exported the B-KR3
+coverage search, and `apps/mobile` imports that barrel for `stateForCoords`.
+Coverage now lives at `@fred/geo/coverage`, off the app's import path.
+
+**Why the fix appeared not to work.** Removing the export, rebuilding and
+reinstalling still crashed, which sent the investigation down three dead ends —
+native libraries (an empty `lib/arm64` is correct here, since the APK stores
+them uncompressed and loads them from the archive), transfer corruption
+(checksums matched end to end), and the 626 MB map file (moving it aside
+changed nothing).
+
+The build was reusing a cached JS bundle. `assembleRelease` did not re-run
+`createBundleReleaseJsAndAssets`, so the APK kept shipping the old bundle with
+h3-js still in it. Grepping the bundle inside the APK for `latLngToCell` proved
+it in seconds and should have been the first check, not the last.
+
+**Check the artefact, not the source.** After any JS-only change that must
+reach the device:
+
+```
+python3 -c "import zipfile;d=zipfile.ZipFile('app-release.apk').read('assets/index.android.bundle');print(b'<symbol>' in d)"
+```
+
+Removing `android/app/build/generated/assets/react/release/index.android.bundle`
+forces a fresh one. The clean bundle is 1.51 MB against 1.80 MB with h3-js.

@@ -131,3 +131,9 @@ export {
   isBetterFix, meetsTarget, summariseTrack, toTrackRow, TRACK_HEADER,
   type Reading, type TrackSample, type TrackSummary,
 } from './fix.ts';
+
+// B-KR3 coverage search — see coverage.ts.
+export {
+  COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
+  type CoverageIndex, type NearestCoverage,
+} from './coverage.ts';

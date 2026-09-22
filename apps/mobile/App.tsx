@@ -203,9 +203,12 @@ function Screen() {
             if (recording) {
               const s = stopRecording();
               setRecording(false);
+              // Rounded: the platform reports full float precision, and
+              // "27.40999984741211 m" is not a number anyone reads in a car.
+              const m = (v: number | null): string => (v === null ? '?' : v.toFixed(1));
               setLocNote(s === null ? 'Recording stopped.'
-                : `Track: ${s.samples} samples, best ${s.bestAccuracyMeters ?? '?'} m, `
-                  + `median ${s.medianAccuracyMeters ?? '?'} m`
+                : `Track: ${s.samples} samples, best ${m(s.bestAccuracyMeters)} m, `
+                  + `median ${m(s.medianAccuracyMeters)} m`
                   + `${s.timeToTargetMs === null ? ', target never met' : `, target in ${(s.timeToTargetMs / 1000).toFixed(1)} s`}`
                   + `${s.states.length > 0 ? `, ${s.states.join('/')}` : ''}`
                   + `${s.anyMocked ? ' — MOCKED' : ''}`);

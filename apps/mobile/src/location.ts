@@ -118,12 +118,22 @@ class TrackRecorder {
 let recorder: TrackRecorder | null = null;
 
 /**
+ * Local time, not UTC. A track is matched against "when I was at the trailhead",
+ * and toISOString would name an evening drive with tomorrow's date.
+ */
+function defaultTrackName(d = new Date()): string {
+  const p = (n: number): string => String(n).padStart(2, '0');
+  return `bkr1-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+    + `-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.csv`;
+}
+
+/**
  * Begin recording to `<documents>/<name>`, returning the path to pull over USB.
  *
  * USB is the point: `adb pull` works with the radios off, so the airplane-mode
  * run that tests whether GPS holds up without a signal can still be retrieved.
  */
-export function startRecording(name = `bkr1-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`): string {
+export function startRecording(name = defaultTrackName()): string {
   recorder = new TrackRecorder(name);
   return `${Paths.document.uri}${name}`;
 }

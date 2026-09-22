@@ -126,18 +126,31 @@ it independently.
    Fred already builds custom native modules for llama.rn, op-sqlite and
    onnxruntime, so the pipeline exists — but `apps/mobile/AGENTS.md` says to
    read the Expo v57 docs before writing app code, and that applies here.
-2. **The RN wrapper's PMTiles path is newer than the native engine's.** The
-   `addProtocol` request (maplibre-react-native#28) is closed and released, and
-   the bundled Android engine is 13.6.1, but this has not been run on Fred's
-   build. MBTiles is the fallback if it does not work.
+2. ~~**The RN wrapper's PMTiles path is newer than the native engine's.**~~
+   **Resolved 2026-09-21 on the device.** `@maplibre/maplibre-react-native`
+   11.4.0 built alongside llama.rn, op-sqlite and onnxruntime without
+   incident, and `pmtiles://file://` read the 95 MB California archive from
+   the app's documents directory and drew terrain, water and roads at
+   Yosemite **in airplane mode**. The MBTiles fallback is not needed.
+   `apps/mobile/src/map-probe.tsx` is the throwaway that proved it.
 3. **ODbL attribution.** OpenStreetMap must be credited on screen.
 
-## The test to run next
+## The test that was run
 
-Build the app with the map library, point it at the 95 MB California archive
-already extracted, and see whether it draws with the network off. About an hour.
-It settles risk 1 and risk 2 together, and it is the only thing standing between
-this research and a size-and-library decision that can be committed to.
+Built the app with the map library, pointed it at the 95 MB California archive,
+and opened it with the radios off. It drew. That settles risks 1 and 2 together:
+the library links into Fred's native setup, and PMTiles reads from local storage
+through the React Native wrapper.
 
-Do it before writing any map UI, because the answer determines the file format
-everything downstream is built around.
+**So the decisions in this document are now measured rather than proposed.**
+MapLibre React Native, PMTiles, per-region archives built with `pmtiles
+extract`. The remaining open choice is per-state packs against one national
+archive, which is a packaging question, not a technical one.
+
+What the probe deliberately did not do: no B-KR2 zone, no B-KR3 overlay, no
+styling beyond three layers, and the archive was staged by hand with `adb push`
+rather than shipped. A minimal hand-written style was used instead of
+`@protomaps/basemaps` to keep a second dependency out of a throwaway; the real
+map should use the proper style.
+
+The next thing is the B-KR2 screen itself, and it starts from a settled base.

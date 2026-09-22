@@ -6,6 +6,7 @@
     "@fred/geo": "*",
     "@fred/pack-format": "*",
     "@fred/rag-core": "*",
+    "@maplibre/maplibre-react-native": "^11.4.0",
     "@op-engineering/op-sqlite": "^18.1.4",
     "expo": "~57.0.20",
     "expo-file-system": "~57.0.6",

@@ -26,6 +26,7 @@ import {
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
 import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
+import { MapProbe } from './src/map-probe.tsx';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
 
@@ -65,6 +66,8 @@ function Screen() {
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
   const [recording, setRecording] = useState(isRecording());
+  // Throwaway: tap the wordmark to check the PMTiles basemap renders.
+  const [probe, setProbe] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -187,10 +190,14 @@ function Screen() {
     );
   }
 
+  if (probe) return <MapProbe onClose={() => setProbe(false)} />;
+
   return (
     <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Text style={styles.wordmarkSmall}>Fred</Text>
+        <Pressable onPress={() => setProbe(true)} hitSlop={8}>
+          <Text style={styles.wordmarkSmall}>Fred</Text>
+        </Pressable>
         {/* B-KR1. The accuracy is on screen rather than in a log because the
             key result is verified by standing somewhere and reading it, and
             because a ±2 km fix and a ±8 m one should not look the same to a

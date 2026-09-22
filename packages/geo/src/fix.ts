@@ -48,6 +48,21 @@ export function meetsTarget(r: Reading, targetMeters: number): boolean {
 export interface TrackSample {
   /** Milliseconds since the fix attempt started, not since the epoch. */
   readonly elapsedMs: number;
+  /**
+   * Milliseconds since recording began, monotonic across the whole track.
+   *
+   * `elapsedMs` restarts on every fix attempt, so grouping on it silently
+   * merges two attempts whose second sample lands later than the first's last
+   * — which happened on the 2026-09-21 outdoor run and nearly turned five
+   * attempts into four. This one only ever increases.
+   */
+  readonly sinceStartMs: number;
+  /**
+   * Where the reading came from. 'watch' is the continuous track that runs for
+   * the whole recording; 'fix' is a sample taken during a location request.
+   * Both are real readings, so both are kept, but only one is driver-free.
+   */
+  readonly source: 'watch' | 'fix';
   /** Epoch ms reported by the platform for the reading itself. */
   readonly timestamp: number;
   readonly latitude: number;
@@ -68,14 +83,15 @@ export interface TrackSample {
 }
 
 export const TRACK_HEADER =
-  'elapsedMs,timestamp,latitude,longitude,accuracyMeters,altitudeMeters,speedMps,state,improved,mocked';
+  'sinceStartMs,elapsedMs,source,timestamp,latitude,longitude,accuracyMeters,'
+  + 'altitudeMeters,speedMps,state,improved,mocked';
 
 const num = (v: number | null): string => (v === null ? '' : String(v));
 
 /** One CSV row. No quoting needed: every field is a number, a USPS code or a bool. */
 export function toTrackRow(s: TrackSample): string {
   return [
-    s.elapsedMs, s.timestamp, s.latitude, s.longitude,
+    s.sinceStartMs, s.elapsedMs, s.source, s.timestamp, s.latitude, s.longitude,
     num(s.accuracyMeters), num(s.altitudeMeters), num(s.speedMps),
     s.state ?? '', s.improved, s.mocked,
   ].join(',');
@@ -93,6 +109,10 @@ export interface TrackSummary {
   readonly states: readonly string[];
   /** True when any sample came from a mock provider. */
   readonly anyMocked: boolean;
+  /** How many came from the continuous watch rather than a tap. */
+  readonly watchSamples: number;
+  /** Wall time from first to last sample, ms. Zero for a track of one. */
+  readonly durationMs: number;
 }
 
 /**
@@ -118,6 +138,8 @@ export function summariseTrack(
   for (const s of samples) {
     if (s.state !== null && !states.includes(s.state)) states.push(s.state);
   }
+  const first = samples[0];
+  const last = samples[samples.length - 1];
   return {
     samples: samples.length,
     bestAccuracyMeters: acc.length === 0 ? null : acc[0]!,
@@ -125,5 +147,8 @@ export function summariseTrack(
     timeToTargetMs: hit === undefined ? null : hit.elapsedMs,
     states,
     anyMocked: samples.some((s) => s.mocked),
+    watchSamples: samples.filter((s) => s.source === 'watch').length,
+    durationMs: first === undefined || last === undefined
+      ? 0 : last.sinceStartMs - first.sinceStartMs,
   };
 }

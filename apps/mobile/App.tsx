@@ -210,12 +210,15 @@ function Screen() {
                 : `Track: ${s.samples} samples, best ${m(s.bestAccuracyMeters)} m, `
                   + `median ${m(s.medianAccuracyMeters)} m`
                   + `${s.timeToTargetMs === null ? ', target never met' : `, target in ${(s.timeToTargetMs / 1000).toFixed(1)} s`}`
+                  + `${s.watchSamples > 0 ? `, ${s.watchSamples} auto over ${(s.durationMs / 60000).toFixed(1)} min` : ''}`
                   + `${s.states.length > 0 ? `, ${s.states.join('/')}` : ''}`
                   + `${s.anyMocked ? ' — MOCKED' : ''}`);
             } else {
-              const path = startRecording();
               setRecording(true);
-              setLocNote(`Recording to ${path.split('/').pop() ?? path}`);
+              setLocNote('Recording…');
+              void startRecording().then((path) => {
+                setLocNote(`Recording to ${path.split('/').pop() ?? path} — no need to touch the phone`);
+              });
             }
           }}
           hitSlop={8}

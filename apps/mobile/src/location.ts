@@ -80,6 +80,9 @@ export async function lastKnownFix(maxAgeMs = 120_000): Promise<LocationFix | nu
 class TrackRecorder {
   private readonly file: File;
   private readonly samples: TrackSample[] = [];
+  private readonly startedAt = Date.now();
+  /** The always-on subscription. Null until the continuous watch attaches. */
+  private watch: Location.LocationSubscription | null = null;
 
   constructor(readonly name: string) {
     this.file = new File(Paths.document, name);
@@ -89,9 +92,44 @@ class TrackRecorder {
     }
   }
 
-  add(loc: Location.LocationObject, elapsedMs: number, improved: boolean): void {
+  /**
+   * Record continuously until stopped, so a drive needs no interaction.
+   *
+   * The first recorder only captured during a fix attempt, which meant tapping
+   * at every stop — fine standing in a field, wrong in a moving car. Highest
+   * accuracy is deliberate: this runs during a measurement, not during normal
+   * use, and the reading being graded is the one the GPS can actually achieve.
+   */
+  startWatch(): void {
+    void Location.watchPositionAsync(
+      { accuracy: Location.Accuracy.Highest, timeInterval: 2000, distanceInterval: 0 },
+      (loc) => { this.add(loc, 0, false, 'watch'); },
+      () => { /* a dropped reading must not end the recording */ },
+    ).then((sub) => {
+      // stopWatch() may already have run, in which case nothing removes this.
+      if (this.watch === null && !this.stopped) this.watch = sub;
+      else sub.remove();
+    }, () => { /* permission or provider failure; the tap path still records */ });
+  }
+
+  private stopped = false;
+
+  stopWatch(): void {
+    this.stopped = true;
+    this.watch?.remove();
+    this.watch = null;
+  }
+
+  add(
+    loc: Location.LocationObject,
+    elapsedMs: number,
+    improved: boolean,
+    source: 'watch' | 'fix' = 'fix',
+  ): void {
     const s: TrackSample = {
       elapsedMs,
+      sinceStartMs: Date.now() - this.startedAt,
+      source,
       timestamp: loc.timestamp,
       latitude: loc.coords.latitude,
       longitude: loc.coords.longitude,
@@ -133,13 +171,18 @@ function defaultTrackName(d = new Date()): string {
  * USB is the point: `adb pull` works with the radios off, so the airplane-mode
  * run that tests whether GPS holds up without a signal can still be retrieved.
  */
-export function startRecording(name = defaultTrackName()): string {
+export async function startRecording(name = defaultTrackName()): Promise<string> {
+  // The continuous watch needs the same permission the tap path asks for, and
+  // asking here means a drive cannot silently record nothing.
+  const perm = await Location.requestForegroundPermissionsAsync();
   recorder = new TrackRecorder(name);
+  if (perm.granted) recorder.startWatch();
   return `${Paths.document.uri}${name}`;
 }
 
 /** Stop recording and report what the track contained. Null if none was running. */
 export function stopRecording(targetMeters = TARGET_METERS): TrackSummary | null {
+  recorder?.stopWatch();
   const s = recorder?.summary(targetMeters) ?? null;
   recorder = null;
   return s;

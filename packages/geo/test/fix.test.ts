@@ -42,7 +42,7 @@ test('the early exit needs a real number, not a missing one', () => {
 });
 
 const sample = (o: Partial<TrackSample> = {}): TrackSample => ({
-  elapsedMs: 0, timestamp: 1_700_000_000_000,
+  elapsedMs: 0, sinceStartMs: 0, source: 'watch', timestamp: 1_700_000_000_000,
   latitude: 37.8651, longitude: -119.5383,
   accuracyMeters: 20, altitudeMeters: null, speedMps: null,
   state: 'CA', improved: false, mocked: false, ...o,
@@ -58,7 +58,7 @@ test('a CSV row has one field per header column', () => {
 test('missing numbers are written as empty fields, not as the string null', () => {
   const row = toTrackRow(sample({ accuracyMeters: null, altitudeMeters: null, speedMps: null }));
   assert.equal(row.includes('null'), false);
-  assert.equal(row, '0,1700000000000,37.8651,-119.5383,,,,CA,false,false');
+  assert.equal(row, '0,0,watch,1700000000000,37.8651,-119.5383,,,,CA,false,false');
 });
 
 test('summary reports the median accuracy, which is how B-KR1 is stated', () => {
@@ -123,4 +123,32 @@ test('a mocked reading anywhere marks the whole track', () => {
   // B-KR1 is graded from this file, so a faked run must not read as a real one.
   assert.equal(summariseTrack([sample(), sample({ mocked: true })], 10).anyMocked, true);
   assert.equal(summariseTrack([sample(), sample()], 10).anyMocked, false);
+});
+
+
+test('a continuous track is separable from tap-driven samples', () => {
+  // The whole point of the always-on mode: a drive should not need the driver.
+  const s = summariseTrack([
+    sample({ source: 'watch' }), sample({ source: 'watch' }),
+    sample({ source: 'fix' }),
+  ], 10);
+  assert.equal(s.watchSamples, 2);
+  assert.equal(s.samples, 3);
+});
+
+test('duration spans the track, and does not restart with each attempt', () => {
+  // elapsedMs restarts per attempt; sinceStartMs must not. Grouping on the
+  // former merged two attempts on the 2026-09-21 outdoor run.
+  const s = summariseTrack([
+    sample({ sinceStartMs: 0, elapsedMs: 0 }),
+    sample({ sinceStartMs: 60_000, elapsedMs: 4000 }),
+    sample({ sinceStartMs: 125_000, elapsedMs: 2000 }),
+  ], 10);
+  assert.equal(s.durationMs, 125_000);
+});
+
+test('a single-sample track has no duration rather than a crash', () => {
+  assert.equal(summariseTrack([sample()], 10).durationMs, 0);
+  assert.equal(summariseTrack([], 10).durationMs, 0);
+  assert.equal(summariseTrack([], 10).watchSamples, 0);
 });

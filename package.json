@@ -13,7 +13,7 @@
     "test": "node --test packages/*/test/*.test.ts tools/ingest/test/*.test.ts tools/eval/test/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p apps/mobile/tsconfig.json",
     "ingest": "node tools/ingest/src/index.ts",
-    "postinstall": "node scripts/patch-onnx-gradle.mjs && node scripts/patch-onnx-autolink.mjs && node scripts/patch-android-fieldtest.mjs && node scripts/patch-h3-hermes.mjs",
+    "postinstall": "node scripts/patch-onnx-gradle.mjs && node scripts/patch-onnx-autolink.mjs && node scripts/patch-android-fieldtest.mjs && node scripts/patch-h3-hermes.mjs && node scripts/patch-android-abi.mjs",
     "metrics": "node tools/eval/src/metrics.ts"
   },
   "devDependencies": {

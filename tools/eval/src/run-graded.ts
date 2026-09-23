@@ -87,6 +87,8 @@ for (const [i, q] of questions.entries()) {
     // default wording is 0 of 3 on dosing questions.
     ...(process.env.SUFFICIENCY_PROMPT === 'numeric'
       ? { sufficiencyVariant: 'numeric' as const } : {}),
+    // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
+    ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
   });
 
   let answer = '';

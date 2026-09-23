@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type SufficiencyVariant } from './prompt.ts';
+import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -83,6 +83,12 @@ export interface AskOptions {
    * question asking for a quantity needs that quantity present in the sources.
    */
   readonly sufficiencyVariant?: SufficiencyVariant;
+  /**
+   * Answer-shape wording. 'lead' adds an instruction to deliver the thing the
+   * question asks for first — a name, a difference, a use — because three
+   * held-out failures answer about the topic instead.
+   */
+  readonly answerVariant?: AnswerVariant;
   readonly retrieval?: RetrievalOptions;
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
@@ -231,7 +237,7 @@ export async function ask(
     }
   }
 
-  const prompt = buildPromptParts(query, blocks);
+  const prompt = buildPromptParts(query, blocks, opts.answerVariant);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };

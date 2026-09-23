@@ -34,6 +34,45 @@ export function isRefusal(text: string): boolean {
   return t === NO_ANSWER_REPLY.toLowerCase().replace(/[.!]+$/, '');
 }
 
+/**
+ * Variant prefix that names what the question is asking *for*.
+ *
+ * The base prefix already says "Answer the question itself", and the remaining
+ * held-out failures show that is not enough. Three of the nine answer *about*
+ * the topic without delivering the thing asked: asked "what is this", Fred
+ * gives sound care advice and never names snow blindness; asked how heat stroke
+ * differs from heat exhaustion, it defines heat stroke; asked what people used
+ * sagebrush for, it answers with pronghorn forage.
+ *
+ * Each is grounded and each is a miss, so this is not a retrieval or a
+ * truthfulness problem — it is answer shape. The instruction below names the
+ * three question types rather than exhorting harder, because "answer the
+ * question" is already there and is already being obeyed as the model
+ * understands it.
+ *
+ * MEASURED AND REJECTED — see docs/results-answer-shape.md. Default off.
+ *
+ * It fixed one of five target failures and moved in-prose refusals 18 -> 22,
+ * including turning `fa-snake-02` — a correct "do not use a tourniquet" answer
+ * to a snakebite question — into "I don't have reliable information on that."
+ *
+ * This comment previously claimed the change was "deliberately NOT the
+ * abstention dial" because it touches neither over-refusal nor inversion. That
+ * was wrong. Telling a small model to lead with a specific kind of answer makes
+ * it likelier to conclude it does not have one, which is the same two-sided
+ * knob `docs/results-holdout.md` and arXiv 2608.22228 describe, reached from a
+ * direction that did not look like it. **Count refusals before and after any
+ * prompt change, whatever the change appears to be about.**
+ */
+export const SYSTEM_PREFIX_LEAD = `You are a field first-aid and wilderness survival assistant. Answer using only the SOURCES below.
+
+- Answer the question itself. Never describe how you would answer it, never write out steps for finding the answer, and never repeat these instructions back.
+- Give the thing the question asks for, first. If it asks what something is, name it. If it asks how two things differ, state the difference. If it asks what something is used for, give the use. Advice about the topic is not an answer to the question.
+- Use only facts written in the SOURCES. Do not add a number, time, dose, distance or threshold that is not written there.
+- If a source says to avoid something or not to do something, keep that meaning.
+- Keep procedure steps in their original order. Never omit or reorder a step.
+- If the SOURCES do not contain the answer, reply with exactly: I don't have reliable information on that.`;
+
 export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival assistant. Answer using only the SOURCES below.
 
 - Answer the question itself. Never describe how you would answer it, never write out steps for finding the answer, and never repeat these instructions back.
@@ -141,8 +180,18 @@ export interface PromptParts {
   readonly user: string;
 }
 
-export function buildPromptParts(query: string, blocks: readonly ContextBlock[]): PromptParts {
-  return { system: SYSTEM_PREFIX, user: buildQuerySuffix(query, blocks).trimStart() };
+/** Which answer-shape wording to use. See SYSTEM_PREFIX_LEAD. */
+export type AnswerVariant = 'default' | 'lead';
+
+export function buildPromptParts(
+  query: string,
+  blocks: readonly ContextBlock[],
+  variant: AnswerVariant = 'default',
+): PromptParts {
+  return {
+    system: variant === 'lead' ? SYSTEM_PREFIX_LEAD : SYSTEM_PREFIX,
+    user: buildQuerySuffix(query, blocks).trimStart(),
+  };
 }
 
 /** Flattened form, for backends with no chat template. */

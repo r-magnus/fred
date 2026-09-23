@@ -98,6 +98,13 @@ different physical locations, and that has not happened.
 - **A release build is not debuggable**, so `adb run-as` refuses and drive data
   cannot be read back. `scripts/patch-android-fieldtest.mjs` sets
   `debuggable true`. **That flag must come off before RC-KR1.**
+- **Expo was upgraded 57.0.20 → 57.0.24 on 2026-09-22 for iOS**, before the
+  drive test, by the owner's decision. Xcode 27 will not launch an app without
+  the UIKit scene life cycle, and only 57.0.23+ supports it. The lockfile was
+  regenerated, which also moved **op-sqlite 18.1.4 → 18.2.5**. **Android has
+  not been rebuilt since.** The APK already on the phone is the old one. Any
+  new APK needs a quick pass before it is driven. Details, and how to roll back:
+  `docs/results-ios-build.md`.
 - **Expo SDK 57 deprecated `writeAsStringAsync`** — it throws at runtime. The
   File/Paths API is the current one. `apps/mobile/AGENTS.md` says to read the
   versioned docs first, and it is right.

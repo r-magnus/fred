@@ -53,8 +53,17 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     onPhase({ phase: 'packs' });
     const store = new DevicePackStore();
     const manifests: PackManifest[] = [];
-    for (const entry of new Directory(BASE, 'packs').list()) {
-      if (entry instanceof Directory) manifests.push(await store.load(entry, 'chunks.sqlite'));
+    // `.list()` throws when the directory is absent, and a clean install has no
+    // packs directory at all — on Android it only ever existed because `adb
+    // push` created it as a side effect. Without this check the first thing a
+    // user sees is a raw ExpoModulesCore exception about a file called "packs",
+    // instead of the sentence below. Found on iOS (docs/results-ios-build.md),
+    // but a fresh Android install behaves identically.
+    const packsDir = new Directory(BASE, 'packs');
+    if (packsDir.exists) {
+      for (const entry of packsDir.list()) {
+        if (entry instanceof Directory) manifests.push(await store.load(entry, 'chunks.sqlite'));
+      }
     }
     if (manifests.length === 0) {
       throw new Error('No knowledge packs installed. Stage them with tools/eval/measure-app.sh.');

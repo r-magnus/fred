@@ -14,6 +14,8 @@
  *
  * Sizes are real, measured for California: z12 95 MB, z13 250 MB, z14 598 MB,
  * z15 1417 MB. z14 is the shipping choice — see docs/results-map-research.md.
+ * Those predate PAD below. This script's California z14 is 641 MB: its header
+ * bounds are the Census bbox plus exactly PAD, about 6% more area.
  */
 import { execFileSync } from 'node:child_process';
 import { STATE_BOUNDARIES } from '../packages/geo/src/us-states.ts';

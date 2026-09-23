@@ -80,3 +80,29 @@ caveat is accuracy rather than licensing — see `docs/beta-service-coverage.md`
 OpenStreetMap-derived tiles require attribution and carry share-alike obligations on
 the derived database. Display the attribution in the map view, not buried in an
 About screen.
+
+## How this register relates to LICENSE.md
+
+`LICENSE.md` (added 2026-09-22) places the project's **original** work under a
+proprietary licence, and §1 carves out "third-party components expressly
+identified as being subject to separate licenses".
+
+**This file is that identification.** The carve-out only means anything if the
+list exists and is current, which is why the header above says to keep it so.
+
+Two consequences worth stating plainly, because a proprietary licence at the
+root can read as covering everything in the tree:
+
+- **The obligations in the table above are unaffected by it.** WHO BEC and WHO
+  PFA remain CC BY-NC-SA, and OpenStreetMap-derived map archives remain ODbL
+  with attribution and share-alike. A proprietary licence over Fred's own code
+  does not and cannot relicense someone else's corpus.
+- **The NonCommercial constraint therefore still stands**, and still comes from
+  the WHO material rather than from anything added since. `HANDOFF.md` has the
+  detail and the mitigation, which is that `core-firstaid-army` is 410 chunks of
+  public-domain first aid sitting beside the WHO pack's 667.
+
+`apps/mobile/LICENSE` is **Expo's** MIT notice, shipped by the project template
+(`Copyright (c) 2015-present 650 Industries, Inc.`). It covers the scaffolding
+under `apps/mobile`, not Fred, and is retained because MIT asks that the notice
+travel with the code.

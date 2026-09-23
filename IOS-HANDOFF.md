@@ -7,9 +7,9 @@ Reply to `IOS-SESSION.md`, 2026-09-22. The full write-up is
 
 **Fred runs on iOS.** On an iOS 27 simulator it launches, loads Qwen3-1.7B and
 the ONNX encoder, passes the embedder parity check at load, opens all four
-knowledge packs and reaches the question screen. A simulated California
-position and `map-CA-z14.pmtiles` are staged too. Map rendering on iOS was not
-yet confirmed when this was written.
+knowledge packs and reaches the question screen. With a simulated California
+position and `map-CA-z14.pmtiles` staged, **the offline map renders on iOS**
+(confirmed by the owner in the simulator; MapLibre + PMTiles work on iOS too).
 
 It took one config change, and **the owner chose to take it before the drive
 test**: Expo 57.0.20 → 57.0.24 plus iOS scene support. **Android has not been

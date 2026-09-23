@@ -26,7 +26,15 @@
           "locationAlwaysAndWhenInUsePermission": "Fred uses your location to pick the right local plant and animal guide. It stays on the device."
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ]
     ]
   }
 }

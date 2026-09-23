@@ -31,7 +31,7 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 - `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.
 - `B-KR2` — Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its ±1 km target. Unverified: needs the drive.
 - `B-KR3` — Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.
-- `RC-KR1` — Android harness only. iOS never built.
+- `RC-KR1` — iOS launches on the simulator (Xcode 27). Needed expo 57.0.24 + scene support; Android not rebuilt since. See results-ios-build.md.
 - `RC-KR2` — Not started.
 - `RC-KR3` — Not started.
 

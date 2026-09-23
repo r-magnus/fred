@@ -122,12 +122,22 @@ export interface NodeBackendOptions {
   readonly cosineFloor: number;
   readonly probe: EmbeddingSpec['probe'];
   readonly genModelPath?: string;
+  /**
+   * Embed queries with this instead of loading `embedModelPath` as a GGUF. The
+   * ONNX embedder is what ingest and the device use; the GGUF is what this
+   * harness always used. Parity is still checked by the caller either way.
+   */
+  readonly embedder?: {
+    embed(texts: readonly string[]): Promise<Float32Array[]>;
+    dispose(): Promise<void>;
+  };
 }
 
 export async function createNodeBackend(opts: NodeBackendOptions): Promise<InferenceBackend & { dispose(): Promise<void> }> {
   const llama = await getLlama();
-  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath });
-  const embedCtx = await embedModel.createEmbeddingContext();
+  const embedModel: LlamaModel | null = opts.embedder
+    ? null : await llama.loadModel({ modelPath: opts.embedModelPath });
+  const embedCtx = embedModel ? await embedModel.createEmbeddingContext() : null;
 
   let genModel: LlamaModel | null = null;
   let genCtx: LlamaContext | null = null;
@@ -142,7 +152,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
 
   const spec: EmbeddingSpec = {
     modelId: opts.embedModelId,
-    dim: embedModel.embeddingVectorSize ?? 384,
+    dim: embedModel?.embeddingVectorSize ?? 384,
     quantization: 'int8-per-row',
     normalized: true,
     cosineFloor: opts.cosineFloor,
@@ -154,11 +164,13 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
   return {
     embeddingSpec: () => spec,
     async embed(text: string) {
-      const e = await embedCtx.getEmbeddingFor(text);
+      if (opts.embedder) return (await opts.embedder.embed([text]))[0] as Float32Array;
+      const e = await embedCtx!.getEmbeddingFor(text);
       return Float32Array.from(e.vector);
     },
     async countTokens(texts: readonly string[]): Promise<number[]> {
       const m = genModel ?? embedModel;
+      if (!m) throw new Error('countTokens needs a generation model when embedding with ONNX');
       return texts.map((t) => m.tokenize(t).length);
     },
     async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
@@ -193,8 +205,9 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
       }
     },
     async dispose() {
-      await embedCtx.dispose();
-      await embedModel.dispose();
+      await embedCtx?.dispose();
+      await embedModel?.dispose();
+      await opts.embedder?.dispose();
       if (genCtx) await genCtx.dispose();
       if (genModel) await genModel.dispose();
     },

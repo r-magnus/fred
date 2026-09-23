@@ -16,6 +16,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ask, verifyEmbedderParity, DEFAULT_RETRIEVAL } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
+import { loadOnnxEmbedder } from '../../ingest/src/onnx-embed.ts';
 import { loadGradedSet, describeSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
 
 
@@ -41,20 +42,44 @@ const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-
 // and a results file that does not say which model produced it is not evidence.
 console.log(`topK=${topK}  model=${genModelPath.split('/').pop()}`);
 
+/**
+ * PACKS_EXCLUDE=core-firstaid measures what the app loses without a pack — the
+ * licensing question in HANDOFF.md, where WHO's NonCommercial terms block
+ * commercial use. Comma-separated pack ids. An id that matches nothing is an
+ * error, so a typo cannot pass for a result.
+ */
+const exclude = new Set((process.env.PACKS_EXCLUDE ?? '').split(',').map((s) => s.trim()).filter(Boolean));
 const store = new NodePackStore();
-const manifests = readdirSync('packs')
+const packDirs = readdirSync('packs')
   .map((d) => join('packs', d))
-  .filter((d) => existsSync(join(d, 'manifest.json')))
-  .map((d) => store.load(d));
+  .filter((d) => existsSync(join(d, 'manifest.json')));
+const allIds = packDirs.map((d) => (JSON.parse(readFileSync(join(d, 'manifest.json'), 'utf8')) as { id: string }).id);
+for (const id of exclude) {
+  if (!allIds.includes(id)) throw new Error(`PACKS_EXCLUDE names ${id}, but packs/ holds ${allIds.join(', ')}`);
+}
+const manifests = packDirs.filter((_, i) => !exclude.has(allIds[i]!)).map((d) => store.load(d));
 if (manifests.length === 0) throw new Error('no packs under packs/; run tools/ingest first');
+if (exclude.size > 0) console.log(`excluding ${[...exclude].join(', ')}`);
 const base = manifests[0]!;
 
+// EMBED=onnx embeds queries with the ONNX encoder that ingest and the device
+// use, for a machine that has it but not the GGUF. Not interchangeable for
+// comparing runs: keep it the same on both sides of an A/B.
+const onnx = process.env.EMBED === 'onnx';
+console.log(`embedder=${onnx ? 'gte-small.onnx' : 'gte-small_fp16.gguf'}`);
 const backend = await createNodeBackend({
   embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: base.embedding.modelId,
   cosineFloor: base.embedding.cosineFloor,
   probe: base.embedding.probe,
   genModelPath,
+  ...(onnx ? {
+    embedder: await loadOnnxEmbedder(
+      `${process.env.HOME}/models/gte-small.onnx`,
+      `${process.env.HOME}/models/gte-small-vocab.txt`,
+      base.embedding.modelId,
+    ),
+  } : {}),
 });
 
 // A parity failure invalidates every number below it, so check before spending

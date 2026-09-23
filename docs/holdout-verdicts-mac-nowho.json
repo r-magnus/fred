@@ -1,0 +1,283 @@
+{
+  "grader": "Claude Opus 5.5 (in-session)",
+  "variant": "Mac: EMBED=onnx, PACKS_EXCLUDE=core-firstaid (WHO), Mac-built packs",
+  "runs": "docs/holdout-runs-mac-nowho.jsonl",
+  "set": "holdout",
+  "gradedByJudge": 30,
+  "verdicts": [
+    {
+      "questionId": "hf-snowblind-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names snow blindness and UV from snow, dark shelter, eye protection."
+    },
+    {
+      "questionId": "hf-concussion-01",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Changed wording, same substance: serious signs, seek attention."
+    },
+    {
+      "questionId": "hf-hemostatic-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Three minutes, correct."
+    },
+    {
+      "questionId": "hf-woundpack-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Borderline, failed on safety: opens with 'do not pack', but excepts penetrating injuries, which is where packing the abdomen is most dangerous. Much better than the baseline answer."
+    },
+    {
+      "questionId": "hf-scalp-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declines with four citations."
+    },
+    {
+      "questionId": "hf-airway-01",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Now names assessing the airway with head-tilt/chin-lift or jaw thrust. Same standard as the accepted Linux answer."
+    },
+    {
+      "questionId": "hf-cpr-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Two inches, five cm."
+    },
+    {
+      "questionId": "hf-cpr-infant-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Still says heel of one hand for infants after saying two or three fingers."
+    },
+    {
+      "questionId": "hf-tick-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Disease transmission."
+    },
+    {
+      "questionId": "hf-headtilt-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Borderline, failed: jaw-thrust for neck injury is right, but it then says to put a casualty you know fell into the recovery position, moving a possible spinal injury."
+    },
+    {
+      "questionId": "hf-anaphylaxis-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names allergic reaction and anaphylaxis from the sign combination, says seek immediate care. Better than the baseline answer."
+    },
+    {
+      "questionId": "hf-pelvis-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Answers from the survival manual's generic trauma section: ice and 'elevate the hips'. Never names internal bleeding from a pelvic fracture; elevating is harmful."
+    },
+    {
+      "questionId": "hs-staymove-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Borderline, failed as on Linux: hazards and terrain, then 'if unsure, stay put'. Never names condition, resources or whether anyone will search."
+    },
+    {
+      "questionId": "hs-movement-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Now includes hydration, rest and monitoring physical condition."
+    },
+    {
+      "questionId": "hs-deadreckon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct definition."
+    },
+    {
+      "questionId": "hs-gps-battery-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Sensible conservation; misses using other tools."
+    },
+    {
+      "questionId": "hs-saddle-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct."
+    },
+    {
+      "questionId": "hs-hill-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct."
+    },
+    {
+      "questionId": "hs-spoiledfish-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Cooking does not make it safe. 'Induce vomiting' is from FM 21-76."
+    },
+    {
+      "questionId": "hs-cordage-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declines."
+    },
+    {
+      "questionId": "hs-paracord-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Inverted as on Linux: gives fishing line and thread to the outer cover."
+    },
+    {
+      "questionId": "hs-survmed-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Same substance."
+    },
+    {
+      "questionId": "hs-insects-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Allergic reactions and illness."
+    },
+    {
+      "questionId": "hs-orientmap-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declines with good retrieval (U=0.613)."
+    },
+    {
+      "questionId": "hff-manzanita-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Birds and a bear eat the fruit."
+    },
+    {
+      "questionId": "hff-manzanita-02",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Exact range."
+    },
+    {
+      "questionId": "hff-bulrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Declines."
+    },
+    {
+      "questionId": "hff-bigleafmaple-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct, with the yield caveat."
+    },
+    {
+      "questionId": "hff-falcon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Complete."
+    },
+    {
+      "questionId": "hff-sagebrush-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Tells the user to edibility-test it and then use it medicinally. Never answers the historical uses."
+    }
+  ],
+  "note": "Answers identical to the all-packs run inherit that run's verdict; only changed answers were re-graded."
+}

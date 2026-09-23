@@ -116,9 +116,11 @@ Census are all public domain. **WHO Basic Emergency Care and WHO Psychological
 First Aid are CC BY-NC-SA** — NonCommercial, with share-alike propagating.
 
 The mitigation is already half-built: `core-firstaid-army` is 410 chunks of
-public-domain first aid sitting beside the WHO pack's 667. Nobody has measured
-what dropping WHO costs in accuracy, and that number should exist before it
-becomes a business decision.
+public-domain first aid sitting beside the WHO pack's 667. **Dropping WHO costs
+nothing measurable** (2026-09-23, Mac, paired held-out runs): 22/40 with it,
+23/40 without, and the paediatric-dose answer went away with it.
+`docs/results-without-who.md`. Only 40 questions, so it rules out a large loss,
+not a small one.
 
 **Nothing enforces this.** The pack format carries `nonCommercial: true` and no
 code reads it.

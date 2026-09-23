@@ -79,6 +79,18 @@ different physical locations, and that has not happened.
    models the app never loads (Qwen3-0.6B, the fp16 encoder). ~630 MB of
    avoidable weight before RC-KR1.
 
+## The Expo 57.0.24 upgrade is verified on Android
+
+The iOS build needed `expo@57.0.23+` for Xcode 27's scene life cycle, and that
+upgrade moves `expo-modules-core`, `expo-modules-jsi` and `op-sqlite` — shared
+with Android. `docs/results-ios-build.md` flagged it as untested there.
+
+**Tested 2026-09-22 on the Nothing Phone (3): it is fine.** Builds clean at
+152 MB, launches, loads the packs, and answers "How do I treat a burn" from
+three sources with citations and the medical disclaimer — which exercises
+op-sqlite, the ONNX encoder and llama.rn together. The pre-upgrade APK is backed
+up at `~/fred-preupgrade.apk` if it is ever needed.
+
 ## Traps that already bit, so they do not bite again
 
 - **`adb push` silently reports success while writing nothing** for large files

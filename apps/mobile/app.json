@@ -9,6 +9,10 @@
       "package": "dev.fred.app",
       "largeHeap": false
     },
+    "ios": {
+      "bundleIdentifier": "dev.fred.app",
+      "supportsTablet": false
+    },
     "plugins": [
       [
         "llama.rn",

@@ -53,7 +53,10 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     onPhase({ phase: 'packs' });
     const store = new DevicePackStore();
     const manifests: PackManifest[] = [];
-    for (const entry of new Directory(BASE, 'packs').list()) {
+    // A fresh install has no packs/ at all, and list() throws on a missing
+    // directory — which would bury the message below under an UnexpectedException.
+    const packsDir = new Directory(BASE, 'packs');
+    for (const entry of packsDir.exists ? packsDir.list() : []) {
       if (entry instanceof Directory) manifests.push(await store.load(entry, 'chunks.sqlite'));
     }
     if (manifests.length === 0) {

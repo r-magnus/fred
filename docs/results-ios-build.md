@@ -190,7 +190,8 @@ predicted. `loadEngine` in `apps/mobile/src/engine.ts` calls
 exist. So the friendlier `No knowledge packs installed` check below it never
 runs. Android always had the directory because `adb push` created it. This is
 not iOS-specific: a fresh Android install would show the same thing. Left
-unfixed, since it is app code and out of scope for this session.
+unfixed, since it is app code and out of scope for this session. *Fixed
+2026-09-23: `loadEngine` checks `exists` first. Verified on the simulator.*
 
 No other errors in the log. UIKit notes that `statusBarStyle` and
 `statusBarFrame` are no-ops on iOS 27, which is harmless and comes from React

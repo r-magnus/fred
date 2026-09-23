@@ -197,6 +197,28 @@ No other errors in the log. UIKit notes that `statusBarStyle` and
 `statusBarFrame` are no-ops on iOS 27, which is harmless and comes from React
 Native, not Fred.
 
+## Problem 3: FTS5 was off on iOS (found 2026-09-23)
+
+The question screen was reached, but the first question asked failed:
+`no such module: fts5`. Lexical retrieval queries the packs' `chunks_fts`
+tables, so no question on iOS could be answered.
+
+op-sqlite reads its build options (`fts5`, `performanceMode`) from the app's
+`package.json`, and the two platforms find that file differently:
+
+- **The podspec** walks up from `node_modules/@op-engineering/op-sqlite/`. In
+  this workspace, the first `package.json` it reaches is the **repo root's**,
+  which had no `op-sqlite` block. So FTS5 was silently off, with no warning
+  at `pod install`.
+- **Android's Gradle** starts from `apps/mobile/android/`, whose path has no
+  `node_modules`, so it reads `apps/mobile/package.json`. That's why Android
+  always had FTS5.
+
+Fix: the same `op-sqlite` block now sits in the root `package.json`. Android
+never reads that file, so Android is unaffected. **Keep the two blocks
+identical.** Check after `pod install`:
+`grep SQLITE_ENABLE_FTS5 "apps/mobile/ios/Pods/Target Support Files/op-sqlite/"*.xcconfig`.
+
 ## Other notes
 
 - **ONNX Runtime floats on both platforms.** `onnxruntime-react-native`

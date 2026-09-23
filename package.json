@@ -19,5 +19,9 @@
   "devDependencies": {
     "typescript": "^5.7.2",
     "@types/node": "^22.10.2"
+  },
+  "op-sqlite": {
+    "fts5": true,
+    "performanceMode": true
   }
 }

@@ -31,7 +31,9 @@ of trying.
   `paracord` lexical gap the old research flagged is already fixed by the
   routing change.
 
-**The lever with evidence behind it is a verification pass.** `results-nli-research.md`
+**Superseded: see `docs/results-generator-research.md` for what is left to try.** The verification pass below was measured and rejected (`docs/results-verifier-test.md`), as was answer-shape prompting (`docs/results-answer-shape.md`). The two untried levers are Qwen3's thinking mode with a raised token cap, and a larger generator — both desktop-only, both free to test.
+
+~~The lever with evidence behind it is a verification pass.~~ `results-nli-research.md`
 sized it at +3-6 points and shelved it on latency; the owner has since said
 accuracy beats latency, so that objection is gone. It targets the inversion
 class, which includes both safety defects.

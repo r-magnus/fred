@@ -589,3 +589,12 @@ Build packs with `node tools/ingest/src/index.ts <who-bec|atp-3-50-21|atp-4-02-1
 packs come from USFS FEIS: `node tools/ingest/src/feis-fetch.ts` once, then
 `node tools/ingest/src/feis-pack.ts CA OR`. Check corpus coverage with
 `node tools/eval/src/coverage.ts`.
+
+
+### Licensing
+
+Copyright © 2026 Ryan Magnuson. All Rights Reserved.
+
+This repository contains proprietary software. No permission is granted
+to copy, modify, distribute, sublicense, or commercially exploit this
+software without prior written permission from Ryan Magnuson.

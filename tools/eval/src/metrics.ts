@@ -67,8 +67,16 @@ function bar(pct: number, width = 28): string {
   return '█'.repeat(filled) + '░'.repeat(width - filled);
 }
 
+/**
+ * `built` exists because "not started" and "graded" are not the only states.
+ *
+ * B-KR2 and B-KR3 render on the device and are verified by driving, which has
+ * not happened — calling that "not started" understates the work and calling it
+ * a grade would claim a verification nobody has run.
+ */
 const GRADE_MARK: Record<string, string> = {
-  A: '🟢 A', B: '🟡 B', C: '🟠 C', D: '🔴 D', F: '🔴 F', '—': '⚪ not started',
+  A: '🟢 A', B: '🟡 B', C: '🟠 C', D: '🔴 D', F: '🔴 F',
+  built: '🔵 built, unverified', '—': '⚪ not started',
 };
 
 const out: string[] = [];

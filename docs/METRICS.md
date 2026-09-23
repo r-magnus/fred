@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-19**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-22**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -18,9 +18,9 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
 | `A-KR2` | Response accuracy | 2026-10-12 | **62.5%** / 80%<br><sub>70.6% tuning set</sub> | 🔴 D |
 | `A-KR3` | Response time | 2026-10-19 | **14.7s** / 10s | 🟡 B |
-| `B-KR1` | Location while in service | 2026-10-26 | **33.5m** / 10m | 🟡 B |
-| `B-KR2` | Offline location estimate | 2026-11-10 | — | ⚪ not started |
-| `B-KR3` | Predicted service zone | 2026-11-16 | — | ⚪ not started |
+| `B-KR1` | Location while in service | 2026-10-26 | **9.5m** / 10m | 🟢 A |
+| `B-KR2` | Offline location estimate | 2026-11-10 | **on device** | 🔵 built, unverified |
+| `B-KR3` | Predicted service zone | 2026-11-16 | **on device** | 🔵 built, unverified |
 | `RC-KR1` | iOS and Android app | 2026-11-25 | — | ⚪ not started |
 | `RC-KR2` | Product page | 2026-12-02 | — | ⚪ not started |
 | `RC-KR3` | Promotional material | 2026-12-09 | — | ⚪ not started |
@@ -28,9 +28,9 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 - `A-KR1` — First aid, survival, flora/fauna. 53 packs, 186,855 chunks.
 - `A-KR2` — Held-out set, 40 questions nothing was tuned on. 35.0% -> 62.5% by making routing a hint rather than a gate: searching every pack on the device costs 1.88 ms against a 14,700 ms answer, while refusing to search cost 15 of 31 answerable questions. Recall is now 31/31; the remaining loss has moved to precision, where 5 of 8 out-of-scope questions are answered, including one asking a paediatric drug dose. The 70.6% shown below is the tuning score and measures the fit as much as the pipeline.
 - `A-KR3` — Device mean, Nothing Phone (3). Desktop was 11.4s, so the phone runs ~1.3x slower at this model size. Still inside the 10-20s band.
-- `B-KR1` — Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.
-- `B-KR2` — Not started. The harder half of Beta.
-- `B-KR3` — Data source identified (FCC BDC, ~310MB at H3 res 7). No code.
+- `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.
+- `B-KR2` — Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its ±1 km target. Unverified: needs the drive.
+- `B-KR3` — Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.
 - `RC-KR1` — Android harness only. iOS never built.
 - `RC-KR2` — Not started.
 - `RC-KR3` — Not started.
@@ -60,10 +60,9 @@ The score has two halves:
 
 | Lost | Why | What would fix it |
 |---:|---|---|
-| 6 | answered a question no corpus covers | sufficient-context classifier (~4 hrs); these carry domain words so routing cannot see them |
-| 6 | grounded in the right chunk but the wrong focus, or incomplete | retrieval and prompt work; no latency cost. The largest single group |
-| 4 | declined despite retrieval succeeding | prompt or model; two had the answer in the top chunk. No latency cost |
-| 4 | fabricated or inverted a fact | NLI grounding verifier — the only technique that catches these, but ~2s per answer (docs/results-nli-research.md) |
+| 3 | declined despite retrieval succeeding | no cheap lever. hs-orientmap-01 declines at U=0.610 with four citations. Loosening abstention is two-sided: on tuning, the same conservatism correctly blocks 12 out-of-scope questions and wrongly blocks 6 |
+| 3 | inverted or contradicted the source | none found. Prompting does not reach it (arXiv 2605.13829) and a grounding verifier was measured and rejected (docs/results-verifier-test.md) |
+| 3 | grounded but answered a different question than the one asked | answer-shape prompting, untried. Distinct from the abstention dial, so it does not carry that trade-off |
 
 ## A-KR3 — response time
 
@@ -188,6 +187,7 @@ Implemented 2026-09-18.
 |---|---|---|---:|
 | 2026-09-18T21:05 | indoors, wifi on | CA | ±73 m |
 | 2026-09-18T21:15 | indoors, wifi on | CA | ±33.5 m |
+| 2026-09-21T20:53 | outdoors, airplane mode, partial sky obstruction | CA | ±9.5 m |
 
 **Getting the fix** — watchPositionAsync at Accuracy.Highest, keeping the best reading for up to 15 s and returning early at ≤10 m. A single getCurrentPositionAsync returns as soon as the platform meets its own bar, which is not ±10 m.
 

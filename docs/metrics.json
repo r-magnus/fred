@@ -1,6 +1,6 @@
 {
   "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md \u2014 it is generated.",
-  "updated": "2026-09-19",
+  "updated": "2026-09-22",
   "config": {
     "model": "Qwen3-1.7B-Q4_K_M",
     "embedder": "gte-small (ONNX)",
@@ -69,9 +69,9 @@
       "id": "B-KR1",
       "name": "Location while in service",
       "due": "2026-10-26",
-      "value": 33.5,
-      "grade": "B",
-      "note": "Working on device: expo-location fix plus offline state resolution (packages/geo), no network geocoding. 33.5 m is the median of 8 consecutive indoor samples, where GPS cannot lock and the platform falls back to WiFi positioning. Indoors is the worst case, so this is a floor. The KR is verified by driving outdoors, which has not been done yet.",
+      "value": 9.5,
+      "grade": "A",
+      "note": "9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS \u2014 indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.",
       "unit": "m",
       "target": 10,
       "lowerIsBetter": true,
@@ -87,17 +87,17 @@
       "id": "B-KR2",
       "name": "Offline location estimate",
       "due": "2026-11-10",
-      "value": null,
-      "grade": "\u2014",
-      "note": "Not started. The harder half of Beta."
+      "value": "on device",
+      "grade": "built",
+      "note": "Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its \u00b11 km target. Unverified: needs the drive."
     },
     {
       "id": "B-KR3",
       "name": "Predicted service zone",
       "due": "2026-11-16",
-      "value": null,
-      "grade": "\u2014",
-      "note": "Data source identified (FCC BDC, ~310MB at H3 res 7). No code."
+      "value": "on device",
+      "grade": "built",
+      "note": "Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive."
     },
     {
       "id": "RC-KR1",
@@ -170,24 +170,19 @@
   },
   "remainingLosses": [
     {
-      "n": 6,
-      "what": "answered a question no corpus covers",
-      "fix": "sufficient-context classifier (~4 hrs); these carry domain words so routing cannot see them"
-    },
-    {
-      "n": 6,
-      "what": "grounded in the right chunk but the wrong focus, or incomplete",
-      "fix": "retrieval and prompt work; no latency cost. The largest single group"
-    },
-    {
-      "n": 4,
+      "n": 3,
       "what": "declined despite retrieval succeeding",
-      "fix": "prompt or model; two had the answer in the top chunk. No latency cost"
+      "fix": "no cheap lever. hs-orientmap-01 declines at U=0.610 with four citations. Loosening abstention is two-sided: on tuning, the same conservatism correctly blocks 12 out-of-scope questions and wrongly blocks 6"
     },
     {
-      "n": 4,
-      "what": "fabricated or inverted a fact",
-      "fix": "NLI grounding verifier \u2014 the only technique that catches these, but ~2s per answer (docs/results-nli-research.md)"
+      "n": 3,
+      "what": "inverted or contradicted the source",
+      "fix": "none found. Prompting does not reach it (arXiv 2605.13829) and a grounding verifier was measured and rejected (docs/results-verifier-test.md)"
+    },
+    {
+      "n": 3,
+      "what": "grounded but answered a different question than the one asked",
+      "fix": "answer-shape prompting, untried. Distinct from the abstention dial, so it does not carry that trade-off"
     }
   ],
   "latency": {
@@ -327,6 +322,13 @@
         "state": "CA",
         "accuracyMeters": 33.5,
         "note": "median of 8 refining-watch samples; range 20.0-76.6 m"
+      },
+      {
+        "when": "2026-09-21T20:53",
+        "where": "outdoors, airplane mode, partial sky obstruction",
+        "state": "CA",
+        "accuracyMeters": 9.5,
+        "note": "median of 8 samples over 5 attempts; best 5.6 m. Every attempt met the 10 m target, three on their first reading. No WiFi and no cell signal, so this is GPS alone. One location, not the drive the KR is verified by"
       }
     ],
     "note": "Outdoor and driving samples are still owed \u2014 the proposal verifies this KR by driving to different physical locations. Every reading so far is indoors, which is the worst case for GPS.",

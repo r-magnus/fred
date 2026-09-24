@@ -21,6 +21,7 @@ import { looksLikeProcedure } from '@fred/rag-core';
 import type { DraftChunk } from './chunk.ts';
 import type { FeisReview } from './feis-fetch.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
+import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
 import { writePack } from './pack.ts';
 
 const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
@@ -140,7 +141,10 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   const reviews = JSON.parse(readFileSync('corpora/feis/reviews.json', 'utf8')) as FeisReview[];
-  const embedder = await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID);
+  // EMBEDDER=embeddinggemma builds for EmbeddingGemma-300M; see index.ts.
+  const embedder = process.env.EMBEDDER === 'embeddinggemma'
+    ? await loadGgufEmbedder(EMBEDDING_GEMMA)
+    : await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID);
   const count = (t: string): number => embedder.tokenCount(t);
 
   for (const state of states) {
@@ -151,8 +155,9 @@ async function main(): Promise<void> {
     console.log(`${state}: ${species.length} species (${plants} plants, ${species.length - plants} animals), ${chunks.length} chunks`);
     if (empty.length > 0) console.log(`  ${empty.length} species contributed no chunks: ${empty.slice(0, 10).join(', ')}${empty.length > 10 ? ', …' : ''}`);
 
-    const vectors = await embedder.embed(chunks.map((c) => c.text));
-    const { dir, manifest } = await writePack('packs', {
+    const vectors = await embedder.embed(chunks.map((c) =>
+      embedder.spec.documentTemplate === undefined ? c.text : documentText(EMBEDDING_GEMMA, c.section, c.text)));
+    const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
       id: `state-${state}-flora-fauna`,
       version: '1.0.0',
       displayName: `${state} Plants and Wildlife`,

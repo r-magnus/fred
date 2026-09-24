@@ -89,6 +89,20 @@ export interface EmbeddingSpec {
    * Calibrate per encoder at ingest time; do not guess it.
    */
   readonly cosineFloor: number;
+  /**
+   * How a query is wrapped before embedding, with `{text}` standing for the
+   * question. Absent means the query is embedded as-is (gte-small).
+   *
+   * Instruction-tuned encoders embed questions and passages differently.
+   * EmbeddingGemma expects "task: search result | query: ..." on the question
+   * side and "title: ... | text: ..." on the passage side, and searching with
+   * the wrong wrapper silently costs recall. It lives in the pack because the
+   * pack is what the phone has: a runtime that guessed would be wrong without
+   * anything failing.
+   */
+  readonly queryTemplate?: string;
+  /** The passage-side wrapper used at ingest, recorded for provenance. */
+  readonly documentTemplate?: string;
 }
 
 export interface PackFileEntry {
@@ -181,7 +195,8 @@ export function embeddingsCompatible(a: EmbeddingSpec, b: EmbeddingSpec): boolea
     a.modelId === b.modelId &&
     a.dim === b.dim &&
     a.quantization === b.quantization &&
-    a.normalized === b.normalized
+    a.normalized === b.normalized &&
+    (a.queryTemplate ?? '') === (b.queryTemplate ?? '')
   );
   // cosineFloor is deliberately excluded: it is a calibration constant of the
   // encoder, not part of vector identity. Retrieval takes it from the running

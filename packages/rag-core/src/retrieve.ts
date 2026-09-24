@@ -22,6 +22,19 @@ export interface RetrievalOptions {
    * embedding rather than setting alpha=0 keeps the latency comparison honest.
    */
   readonly mode: 'hybrid' | 'lexical-only';
+  /**
+   * What the query vector is built from. 'keywords' embeds the extracted
+   * keyword list, which throws away everything that is not a keyword — "face
+   * down and not responding, can I turn them over" becomes a bag of nouns.
+   * 'question' embeds the question as asked, which is what the encoder was
+   * trained on. Measured on the tuning set: docs/results-strategy-research.md §1e.
+   */
+  readonly queryInput: 'question' | 'keywords';
+  /**
+   * Per-pack count of nearest-by-meaning chunks added to the keyword candidates.
+   * 0 disables it, leaving Stage 2 to re-score keyword hits only.
+   */
+  readonly densePool: number;
 }
 
 export const DEFAULT_RETRIEVAL: RetrievalOptions = {
@@ -29,6 +42,8 @@ export const DEFAULT_RETRIEVAL: RetrievalOptions = {
   topK: 4,
   alpha: DEFAULT_ALPHA,
   mode: 'hybrid',
+  queryInput: 'keywords',
+  densePool: 0,
 };
 
 export interface ScoredChunk {
@@ -101,6 +116,11 @@ export async function verifyEmbedderParity(
   return { ok: cosine >= minCosine, cosine };
 }
 
+/** Wrap a query the way its encoder expects. See EmbeddingSpec.queryTemplate. */
+export function applyQueryTemplate(template: string | undefined, text: string): string {
+  return template === undefined ? text : template.replace('{text}', text);
+}
+
 export async function retrieve(
   keywords: readonly Keyword[],
   packIds: readonly string[],
@@ -115,6 +135,8 @@ export async function retrieve(
    * answered from a snare that "will cut off the bird's feet".
    */
   domains?: readonly DomainTag[],
+  /** The question as asked. Used when opts.queryInput is 'question'. */
+  query?: string,
 ): Promise<ScoredChunk[]> {
   if (packIds.length === 0) return [];
   // Only the hybrid path compares vectors, so only it requires a matching encoder.
@@ -130,11 +152,32 @@ export async function retrieve(
   // The routed domains go into the query itself, so the quota is spent only on
   // chunks that survive the filter. See PackStore.searchLexical.
   const terms = keywords.map((k) => k.term);
-  const hits = (
+  const lexicalOnly = opts.mode === 'lexical-only';
+  const queryVec = lexicalOnly
+    ? null
+    : await backend.embed(applyQueryTemplate(
+      backend.embeddingSpec().queryTemplate,
+      opts.queryInput === 'question' && query !== undefined && query.trim() !== ''
+        ? query
+        : terms.join(' '),
+    ));
+
+  const lexicalHits = (
     await Promise.all(
       packIds.map((id) => store.searchLexical([id], terms, opts.candidateLimit, domains)),
     )
   ).flat();
+  // Stage 1b — nearest by meaning, so a passage the keywords miss can still
+  // compete. Merged with the keyword hits, then everything is scored on one scale.
+  const denseHits = queryVec !== null && opts.densePool > 0 && store.searchDense !== undefined
+    ? await store.searchDense(packIds, queryVec, opts.densePool, domains)
+    : [];
+  const seen = new Set<string>();
+  const hits = [...lexicalHits, ...denseHits].filter((h) => {
+    if (seen.has(h.chunkId)) return false;
+    seen.add(h.chunkId);
+    return true;
+  });
   if (hits.length === 0) return [];
   const wanted = domains === undefined ? null : new Set<DomainTag>(domains);
 
@@ -148,12 +191,7 @@ export async function retrieve(
 
   const byId = new Map(chunks.map((c) => [c.id, c]));
 
-  // Stage 2 — semantic re-rank over the survivors only.
-  const lexicalOnly = opts.mode === 'lexical-only';
-  const queryVec = lexicalOnly
-    ? null
-    : await backend.embed(keywords.map((k) => k.term).join(' '));
-
+  // Stage 2 — score every candidate on the fused scale.
   // The floor is a property of the running encoder, not of any one pack.
   const floor = backend.embeddingSpec().cosineFloor;
 

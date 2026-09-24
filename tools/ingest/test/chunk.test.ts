@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chunkPages, isListHeader, isListItem } from '../src/chunk.ts';
+import { chunkByStructure, chunkPages, isListHeader, isListItem } from '../src/chunk.ts';
 
 /** One token per whitespace-separated word: enough to drive window boundaries. */
 const tokenize = (t: string): number => t.split(/\s+/).filter(Boolean).length;
@@ -66,4 +66,46 @@ test('a chunk not opening inside a list is unchanged', () => {
   });
   assert.equal(chunks.length, 1);
   assert.equal(chunks[0]?.text, 'Plain prose line one.\nPlain prose line two.');
+});
+
+const OPTS = { targetTokens: 60, overlapTokens: 0, domain: 'first-aid-physical' as const, tokenize };
+
+test('structure chunks start at numbered paragraphs, not mid-sentence', () => {
+  const page = {
+    pageNumber: 139,
+    text: [
+      'FRACTURES',
+      '13-29. Locate the site of the suspected fracture by asking the casualty where',
+      'it hurts and looking for swelling, deformity or an open wound over the bone.',
+      '13-30. Remove jewelry from the injured limb, because if swelling occurs later',
+      'the rings cannot be removed and the circulation may be cut off below them.',
+      '13-31. Gather splinting materials. If none are available improvise them from',
+      'sticks, boards or rolled newspaper, and pad them where they touch the body.',
+    ].join('\n'),
+  };
+  const chunks = chunkByStructure([page], OPTS);
+  assert.ok(chunks.length >= 2, 'three 30-word paragraphs do not fit one 60-token chunk');
+  for (const c of chunks) {
+    assert.match(c.text, /^(FRACTURES\n)?13-\d\d\. /, `chunk opens mid-paragraph:\n${c.text}`);
+  }
+});
+
+test('a negated list stays with its header, even when split', () => {
+  const items = Array.from({ length: 12 }, (_, i) => `\u0083 Forbidden action number ${i} at the bite site.`);
+  const page = { pageNumber: 48, text: ['SNAKEBITES', 'Do not -', ...items].join('\n') };
+  const chunks = chunkByStructure([page], { ...OPTS, targetTokens: 30 });
+  const withItems = chunks.filter((c) => c.text.includes('Forbidden action'));
+  assert.ok(withItems.length > 1, 'the list is long enough to need splitting');
+  for (const c of withItems) assert.ok(c.text.includes('Do not -'), `lost its header:\n${c.text}`);
+});
+
+test('figure captions are dropped and chunks never span a heading', () => {
+  const page = {
+    pageNumber: 5,
+    text: ['BURNS', 'Cool the burn with clean water.', 'Figure 13-15. Board splint applied to the forearm', 'BLEEDING', 'Press on the wound.'].join('\n'),
+  };
+  const chunks = chunkByStructure([page], { ...OPTS, targetTokens: 500 });
+  assert.equal(chunks.length, 2);
+  assert.ok(chunks.every((c) => !c.text.includes('Figure 13-15')));
+  assert.deepEqual(chunks.map((c) => c.section), ['BURNS', 'BLEEDING']);
 });

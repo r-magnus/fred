@@ -87,7 +87,29 @@ test('empty input does not divide by zero', async () => {
 
 test('sentence splitting handles abbreviations and newlines', () => {
   assert.deepEqual(splitSentences('Use e.g. a cloth. Then press.'), ['Use e.g. a cloth.', 'Then press.']);
-  assert.equal(splitSentences('One\nTwo\nThree').length, 3);
+});
+
+test('a hard-wrapped line break is not a sentence boundary', () => {
+  // The sv-cold-01 defect: "Do not" ended one pdf line and its verb began the next.
+  assert.deepEqual(
+    splitSentences('gradually warm the area by exposing it to warm air. Do not\nmassage or moisten the skin. Make sure to protect\nthe feet.'),
+    ['gradually warm the area by exposing it to warm air.', 'Do not massage or moisten the skin.', 'Make sure to protect the feet.'],
+  );
+});
+
+test('list items, numbered paragraphs and headings still start new sentences', () => {
+  assert.deepEqual(splitSentences('The steps are\n- Stay calm\n- Keep still'), ['The steps are', '- Stay calm', '- Keep still']);
+  assert.deepEqual(splitSentences('warm air\n13-29. Locate the site'), ['warm air', '13-29. Locate the site']);
+  assert.deepEqual(splitSentences('BLEEDING\nExternal bleeding is'), ['BLEEDING', 'External bleeding is']);
+  assert.deepEqual(splitSentences('One\n\nTwo'), ['One', 'Two']);
+});
+
+test('a sentence carrying a prohibition is never dropped', async () => {
+  const filler = 'Terrain and weather vary across the region and season.';
+  const text = [filler, filler, 'Do not massage or moisten the skin.', filler, filler, filler].join(' ');
+  const res = await compressContext([chunk({ text })], [], { ...DEFAULT_COMPRESSION, countTokens: estimateTokens });
+  assert.ok(res.chunks[0]!.text.includes('Do not massage or moisten the skin.'));
+  assert.ok(res.reduction > 0, 'the filler around it is still compressed');
 });
 
 test('looksLikeProcedure distinguishes steps from description', () => {

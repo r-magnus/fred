@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 
@@ -90,6 +90,11 @@ export interface AskOptions {
    */
   readonly answerVariant?: AnswerVariant;
   readonly retrieval?: RetrievalOptions;
+  /**
+   * Compression bounds. `{ minReduction: 0, maxReduction: 0 }` hands the
+   * retrieved passages to the model whole.
+   */
+  readonly compression?: { readonly minReduction: number; readonly maxReduction: number };
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
 }
@@ -125,6 +130,12 @@ export type AskResult =
       readonly stream: AsyncIterable<string>;
       readonly citations: readonly Citation[];
       readonly medical: boolean;
+      /**
+       * Exactly what the model is given. Exposed so the eval can check whether
+       * the answer's source passage survived retrieval and compression, which
+       * the citation labels alone cannot show.
+       */
+      readonly prompt: PromptParts;
       readonly diagnostics: Diagnostics;
     }
   /** The query needs a state pack but the location is unknown. */
@@ -170,7 +181,7 @@ export async function ask(
     memoryPressure: pressure,
   };
 
-  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
+  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
   const topScore = candidates[0]?.score ?? 0;
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
@@ -199,7 +210,7 @@ export async function ask(
   const compressed = await compressContext(
     candidates.map((c) => c.chunk),
     keywords,
-    { ...DEFAULT_COMPRESSION, countTokens: (texts) => backend.countTokens(texts) },
+    { ...(opts.compression ?? DEFAULT_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
   );
 
   const blocks: ContextBlock[] = compressed.chunks.map((c) => ({
@@ -246,6 +257,7 @@ export async function ask(
     kind: 'answer',
     stream: backend.generate(prompt, generateOpts),
     citations: candidates.map(toCitation),
+    prompt,
     medical: candidates.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
       ...baseDiag,

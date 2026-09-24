@@ -1,0 +1,562 @@
+{
+  "grader": "Claude Opus 5 (in-session)",
+  "variant": "K: Qwen3.5-2B with Qwen's published sampling (temp 1.0, top_p 1.0, top_k 20, presence_penalty 2.0, seed 1729)",
+  "runs": "docs/graded-runs-qwen35-2b-sampled.jsonl",
+  "gradedByJudge": 61,
+  "verdicts": [
+    {
+      "questionId": "fa-bleed-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Still the 30-minute waiting period."
+    },
+    {
+      "questionId": "fa-bleed-02",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Removes the initial padding to repack, and then ends mid-answer with 'I don't have reliable information on that.'"
+    },
+    {
+      "questionId": "fa-snake-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Treats a rattlesnake bite as a bee sting: scrape the stinger off with a credit card. No ice this time, so no red flag, but no key point either."
+    },
+    {
+      "questionId": "fa-snake-02",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Says do not use a tourniquet and keep the limb horizontal, then at step 5 says to elevate it above heart level. Self-contradictory, and the wrong half is the dangerous half."
+    },
+    {
+      "questionId": "fa-shock-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Capillary refill and altered mental status, control bleeding, monitor. Thinner than either earlier run and invents 'feverish breath'."
+    },
+    {
+      "questionId": "fa-burn-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Cool compresses, jewellery, cover. Drifts into chemical exposure and salt replacement."
+    },
+    {
+      "questionId": "fa-burn-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "All four thresholds."
+    },
+    {
+      "questionId": "fa-choke-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Abdominal thrusts described correctly."
+    },
+    {
+      "questionId": "fa-seizure-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "'Do not place anything in the mouth unless they are choking on an object' still carves the exception the red flag names, and still recommends benzodiazepines."
+    },
+    {
+      "questionId": "fa-hypo-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Wet clothing, insulation, gentle handling, professional rewarming."
+    },
+    {
+      "questionId": "fa-heat-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Asked for the signs and the treatment, gives only the treatment. Both earlier runs gave both halves."
+    },
+    {
+      "questionId": "fa-heat-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Distinguishes the two and escalates. Loses the rapid-cooling step."
+    },
+    {
+      "questionId": "fa-fracture-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Joints above and below, padding, distal pulse. Still confused about footgear on an arm."
+    },
+    {
+      "questionId": "fa-ankle-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "No longer repeats itself, but still answers with fracture splinting."
+    },
+    {
+      "questionId": "fa-cut-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Tells you to keep the wound open and apply heat to drain infection. Never says to apply direct pressure."
+    },
+    {
+      "questionId": "fa-infection-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Signs and escalation. One snakebite line leaks in, far less than the greedy run."
+    },
+    {
+      "questionId": "fa-unconscious-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Reaches the right answer after a paragraph of visible deliberation: 'No wait, looking more closely at the sources'. Unusable as delivered."
+    },
+    {
+      "questionId": "fa-head-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Lists the warning signs and then ends with 'I don't have reliable information on that.'"
+    },
+    {
+      "questionId": "fa-eye-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "All four."
+    },
+    {
+      "questionId": "fa-blister-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Moleskin, dry feet, two pairs of socks, check healing."
+    },
+    {
+      "questionId": "sv-water-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Boiling, filtration, chemicals."
+    },
+    {
+      "questionId": "sv-water-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. The greedy run answered this one."
+    },
+    {
+      "questionId": "sv-fire-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Garbled: dry the grass between layers of clothing, strike matches at 90 degrees for sparks, save the match tips for later."
+    },
+    {
+      "questionId": "sv-shelter-01",
+      "acceptable": true,
+      "pointsHit": [
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Site factors and insulation depth. Loses natural shelter first."
+    },
+    {
+      "questionId": "sv-shelter-02",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Grommets and staking, then warns about injury from hot asphalt."
+    },
+    {
+      "questionId": "sv-nav-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Map orienting again, which needs the compass the question says you do not have."
+    },
+    {
+      "questionId": "sv-knot-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "'You cannot secure a tarp to a tree with the knots described in the sources.' The baseline named two hitches."
+    },
+    {
+      "questionId": "sv-signal-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Emits its entire deliberation instead of an answer, including 'Wait, re-evaluating QUESTION vs SOURCES' and a debate about whether to refuse."
+    },
+    {
+      "questionId": "sv-plant-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [
+        1
+      ],
+      "reasoning": "Still opens with 'test the plant raw to ensure it is edible'."
+    },
+    {
+      "questionId": "sv-plant-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. The baseline answered it correctly."
+    },
+    {
+      "questionId": "sv-river-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Hazardous areas and swimming with the current."
+    },
+    {
+      "questionId": "sv-cold-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Never names immersion foot."
+    },
+    {
+      "questionId": "sv-food-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Says yes, then undercuts it: animals may not bother because 'their diet is heavily insect-based'. No storage advice."
+    },
+    {
+      "questionId": "sv-lost-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. Both earlier runs answered it."
+    },
+    {
+      "questionId": "sv-hypo-prevent-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Two usable sentences, then 'I don't have reliable information on that.' in the same answer."
+    },
+    {
+      "questionId": "ff-oak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Many-stemmed deciduous shrub or woody vine, then wanders into Oregon white oak at 70 feet."
+    },
+    {
+      "questionId": "ff-oak-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Benton County, Oregon, and Sonoran scrub oak in Utah and Arizona, for a question about California."
+    },
+    {
+      "questionId": "ff-lion-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "'Mountain lions are known to kill mountain lion kittens and occasionally eat them.' Never answers whether they are here."
+    },
+    {
+      "questionId": "ff-bear-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Florida, Georgia and Alabama, then 'I don't have reliable information on that.'"
+    },
+    {
+      "questionId": "ff-bear-02",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Predators and cannibalism, behind an 'ANSWER:' preamble that should not be in the prose."
+    },
+    {
+      "questionId": "ff-huckleberry-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Dry slopes, canyons, barren ridges, moisture range."
+    },
+    {
+      "questionId": "ff-blackoak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Yes, native, southern Oregon foothills."
+    },
+    {
+      "questionId": "ff-or-bear-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Dumps its full reasoning, including a literal </think> tag, 'Wait, checking Source 3 again' and 'Final Answer formulation (2-3 short sentences)'. The answer is in there; so is everything else."
+    },
+    {
+      "questionId": "ff-or-coyote-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Opportunistic, animal and plant matter."
+    },
+    {
+      "questionId": "ff-list-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "'You are not located in any specific region provided in the sources' \u2014 the location was supplied and is Oregon."
+    },
+    {
+      "questionId": "ff-berry-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "'Blackberries are generally considered safe to eat', qualified only by thorns and pesticides. Same red flag as the greedy run."
+    },
+    {
+      "questionId": "uv-sucking-chest-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Seals the wound and escalates. Still tells the user to needle-decompress."
+    },
+    {
+      "questionId": "uv-prone-roll-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Says not to turn them over at all and offers a tongue-jaw lift instead. Neither key point."
+    },
+    {
+      "questionId": "uv-tongue-airway-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. The greedy run fixed this one."
+    },
+    {
+      "questionId": "uv-ingestion-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Clean no, without the cooking loophole the greedy run added. An improvement."
+    },
+    {
+      "questionId": "uv-tannic-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Tannic acid from oak bark, plus jewelweed."
+    },
+    {
+      "questionId": "uv-lice-01",
+      "acceptable": false,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Seven good points, then 'Answer should be summarized into numbered steps based *only* what is provided' and a page of working, cut off mid-sentence."
+    },
+    {
+      "questionId": "uv-snare-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Gill net, baited fishhooks, loop snares."
+    },
+    {
+      "questionId": "uv-flotation-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. The greedy run answered it."
+    },
+    {
+      "questionId": "uv-animalfat-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Soft woods and pitch wood, and explicitly tells you not to use grease. Never reaches animal fat."
+    },
+    {
+      "questionId": "uv-rust-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses."
+    },
+    {
+      "questionId": "uv-moon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct on the rises-before-sunset case only. The greedy run gave both."
+    },
+    {
+      "questionId": "uv-effort-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Ten points of calorie planning. Neither least-effort nor water."
+    },
+    {
+      "questionId": "uv-hape-01",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names pulmonary edema and escalates, but never says to descend. That is the whole answer and it is missing."
+    },
+    {
+      "questionId": "uv-smoke-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses."
+    },
+    {
+      "questionId": "uv-shoulder-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Bandaging and reassessment."
+    }
+  ]
+}

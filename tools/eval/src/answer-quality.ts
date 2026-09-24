@@ -11,10 +11,10 @@ import { ask, SYSTEM_PREFIX } from '@fred/rag-core';
 const store = new NodePackStore();
 const manifest = store.load('packs/core-firstaid-v1.0.0');
 const backend = await createNodeBackend({
-  embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: manifest.embedding.modelId,
   cosineFloor: manifest.embedding.cosineFloor,
   probe: manifest.embedding.probe,
+  queryTemplate: manifest.embedding.queryTemplate,
   genModelPath: process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`,
 });
 const packs = [{ id: manifest.id, domains: manifest.domains, scope: manifest.scope }];

@@ -70,27 +70,76 @@ const ABBREVIATIONS = new Set([
 ]);
 
 /**
- * Sentence splitter. Regex-based and deliberately simple: the corpora are edited
- * manuals with regular punctuation. Newlines terminate a sentence too, which keeps
- * list items separate. Known limits: no handling of quoted sentences or decimals
- * inside abbreviations.
+ * Sentence splitter.
+ *
+ * The manuals arrive hard-wrapped: pdf extraction keeps the page's line breaks,
+ * about every 110 characters, whether or not a sentence ends there. This used to
+ * treat every newline as a sentence boundary, so compression dropped *lines of
+ * the page* rather than sentences. Measured on the tuning set, 40 of 93 answered
+ * questions lost a line holding "not", "never" or "avoid", and in four the line
+ * ended in the negation while the next line survived — `sv-cold-01` was handed
+ * "massage or moisten the skin" where the manual says "Do not massage or moisten
+ * the skin" (docs/results-strategy-research.md §1c).
+ *
+ * So a newline now ends a sentence only when the text says it does: the line
+ * before ends in terminal punctuation or a colon, the next line opens a list item,
+ * a numbered paragraph or a heading, or there is a blank line between them.
+ * Otherwise the lines are one sentence that happens to wrap.
  */
 export function splitSentences(text: string): string[] {
-  const out: string[] = [];
+  return unwrapLines(text).flatMap(splitProse);
+}
+
+/** A line that opens a new unit whatever the line before it ended with. */
+const UNIT_START = /^(?:[-*\u2022\u25aa\u2013\u0083\u2020\u2021]\s|[zZ]\s+\S|\d+[.)]\s|\d+-\d+\.\s|[a-z][.)]\s|step\s+\d+)/i;
+
+function isHeadingLine(line: string): boolean {
+  if (line.length > 60) return false;
+  const letters = line.replace(/[^A-Za-z]/g, '');
+  if (letters.length < 3) return false;
+  return line.replace(/[^A-Z]/g, '').length / letters.length > 0.7;
+}
+
+/** Join hard-wrapped lines back into the paragraphs and list items they came from. */
+export function unwrapLines(text: string): string[] {
+  const units: string[] = [];
   let buf = '';
-  const parts = text.split(/(\n+|(?<=[.!?])\s+)/);
-  for (const part of parts) {
-    if (part === undefined) continue;
-    if (/^\n+$/.test(part)) {
-      if (buf.trim()) out.push(buf.trim());
+  let prevBlank = true;
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (line === '') {
+      if (buf) units.push(buf);
       buf = '';
+      prevBlank = true;
       continue;
     }
+    const boundary = prevBlank || buf === '' || /[.!?:]["')\]]?$/.test(buf) ||
+      UNIT_START.test(line) || isHeadingLine(line) || isHeadingLine(buf);
+    if (boundary) {
+      if (buf) units.push(buf);
+      buf = line;
+    } else {
+      buf += ` ${line}`;
+    }
+    prevBlank = false;
+  }
+  if (buf) units.push(buf);
+  return units;
+}
+
+/** Split one unwrapped unit on terminal punctuation, respecting abbreviations. */
+function splitProse(unit: string): string[] {
+  const out: string[] = [];
+  let buf = '';
+  for (const part of unit.split(/((?<=[.!?])\s+)/)) {
+    if (part === undefined) continue;
     if (/^\s+$/.test(part)) {
       const trimmed = buf.trimEnd();
       const lastWord = trimmed.split(/[\s(]/).pop() ?? '';
       const bare = lastWord.replace(/\.$/, '').toLowerCase();
-      if (ABBREVIATIONS.has(bare) || /^[A-Z]$/.test(bare)) {
+      // "13-29." and "4." open a paragraph or a list item; they end nothing.
+      const marker = /^(?:\d+(?:-\d+)?|[a-z])\.$/.test(trimmed);
+      if (ABBREVIATIONS.has(bare) || /^[A-Z]$/.test(bare) || marker) {
         buf += part;
         continue;
       }
@@ -103,6 +152,16 @@ export function splitSentences(text: string): string[] {
   if (buf.trim()) out.push(buf.trim());
   return out;
 }
+
+/**
+ * A sentence that carries a prohibition or a warning is never dropped.
+ *
+ * Dropping it does not shorten the advice, it reverses it: the remaining
+ * sentences read as permission. This is the one class of content where
+ * compression's worst case is an instruction to do harm, so it is exempt the
+ * same way ordered procedures are. The cost is a little less compression.
+ */
+export const PROHIBITION = /\b(?:do not|don't|never|avoid|must not|should not|cannot|not|caution|warning)\b/i;
 
 /**
  * Runtime safety net for procedure detection.
@@ -205,7 +264,7 @@ export async function compressContext(
       const density = domainTermDensity(text);
       // The opening sentence usually carries the topic; keep it pinned so a
       // surviving fragment never loses its subject.
-      const droppable = !atomic && sentenceIndex > 0 && sentences.length > 1;
+      const droppable = !atomic && sentenceIndex > 0 && sentences.length > 1 && !PROHIBITION.test(text);
       scored.push({
         chunkIndex,
         sentenceIndex,

@@ -152,3 +152,31 @@ export function fuse(cosine: number, sLex: number, alpha: number = DEFAULT_ALPHA
   const l = Math.max(0, Math.min(1, sLex));
   return alpha * c + (1 - alpha) * l;
 }
+
+/**
+ * Brute-force nearest neighbours over a pack's whole INT8 matrix.
+ *
+ * Stage 2 used to score only the chunks Stage 1's keyword search had already
+ * found, so a question worded differently from the manual never reached the
+ * semantic scorer at all: "my friend twisted their ankle" shares no term with
+ * "sprains and strains". A full scan is affordable on the phone — the largest
+ * pack on the device is 5,773 rows of 384 bytes — and it is the only way
+ * meaning can find a passage that words cannot.
+ */
+export function denseTopK(
+  buffer: Uint8Array,
+  dim: number,
+  query: Float32Array,
+  limit: number,
+  /** Rows to consider. Filtering before ranking keeps `limit` a quota of usable rows. */
+  allow?: (ordinal: number) => boolean,
+): { ordinal: number; cosine: number }[] {
+  const rows = Math.floor(buffer.byteLength / dim);
+  const scored: { ordinal: number; cosine: number }[] = [];
+  for (let i = 0; i < rows; i++) {
+    if (allow !== undefined && !allow(i)) continue;
+    scored.push({ ordinal: i, cosine: cosineInt8(query, vectorRow(buffer, i, dim)) });
+  }
+  scored.sort((a, b) => b.cosine - a.cosine);
+  return scored.slice(0, limit);
+}

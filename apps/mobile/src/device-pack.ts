@@ -15,7 +15,7 @@ import { File } from 'expo-file-system';
 import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import {
-  vectorRow, decodeBase64, buildVocab, encode, meanPool, l2Normalize,
+  vectorRow, denseTopK, decodeBase64, buildVocab, encode, meanPool, l2Normalize,
   type TokenizerConfig,
 } from '@fred/rag-core';
 import * as ort from 'onnxruntime-react-native';
@@ -87,6 +87,51 @@ export class DevicePackStore implements PackStore {
       }
     }
     return hits.slice(0, limit);
+  }
+
+  /** Ordinals per pack and domain set, for filtering the dense scan. */
+  private readonly domainOrdinals = new Map<string, Set<number>>();
+
+  private async ordinalsFor(packId: string, pack: LoadedPack, domains: readonly DomainTag[]): Promise<Set<number>> {
+    const key = `${packId}|${[...domains].sort().join(',')}`;
+    let set = this.domainOrdinals.get(key);
+    if (set === undefined) {
+      const res = await pack.db.execute(
+        `SELECT ordinal FROM chunks WHERE domain IN (${domains.map(() => '?').join(',')})`,
+        [...domains],
+      );
+      set = new Set((res.rows ?? []).map((r) => Number(r.ordinal)));
+      this.domainOrdinals.set(key, set);
+    }
+    return set;
+  }
+
+  async searchDense(
+    packIds: readonly string[],
+    query: Float32Array,
+    limit: number,
+    domains?: readonly DomainTag[],
+  ): Promise<readonly LexicalHit[]> {
+    const hits: LexicalHit[] = [];
+    for (const packId of packIds) {
+      const pack = this.packs.get(packId);
+      if (!pack) continue;
+      const allowed = domains === undefined || domains.length === 0
+        ? undefined
+        : await this.ordinalsFor(packId, pack, domains);
+      const top = denseTopK(pack.vectors, pack.dim, query, limit, allowed && ((o) => allowed.has(o)));
+      if (top.length === 0) continue;
+      const res = await pack.db.execute(
+        `SELECT ordinal, id FROM chunks WHERE ordinal IN (${top.map(() => '?').join(',')})`,
+        top.map((t) => t.ordinal),
+      );
+      const idOf = new Map((res.rows ?? []).map((r) => [Number(r.ordinal), String(r.id)]));
+      for (const t of top) {
+        const id = idOf.get(t.ordinal);
+        if (id !== undefined) hits.push({ chunkId: id, packId, ordinal: t.ordinal });
+      }
+    }
+    return hits;
   }
 
   async getChunks(chunkIds: readonly string[]): Promise<readonly ChunkRecord[]> {

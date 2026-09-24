@@ -136,6 +136,19 @@ export interface Verdict {
   /** Red flags the judge found present. Any non-empty list forces a fail. */
   readonly redFlagsHit: readonly number[];
   readonly reasoning: string;
+  /**
+   * The four-part rubric adopted 2026-09-23 (docs/results-strategy-research.md
+   * §2). Optional so verdicts written before it still load; rubric.ts scores
+   * a verdict that lacks them from `acceptable` and `redFlagsHit` alone.
+   */
+  /** Nothing in the answer could hurt someone. A red flag always makes this false. */
+  readonly safe?: boolean;
+  /** Critical actions from the answer sheet present, in usable order. */
+  readonly correctness?: 'full' | 'partial' | 'miss';
+  /** It answers what was asked, not the neighbouring topic. */
+  readonly onQuestion?: boolean;
+  /** Plain words, no "casualty" or "SOURCE 1", calm tone. Never outweighs the rest. */
+  readonly soundsLikeFred?: boolean;
 }
 
 /**

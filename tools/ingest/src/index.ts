@@ -12,11 +12,12 @@
  */
 import { extractPdf } from './pdf.ts';
 import { cleanPage, findBoilerplate, type CleanRules } from './clean.ts';
-import { chunkPages, DEFAULT_CHUNKING, type SourcePage } from './chunk.ts';
+import { chunkByStructure, chunkPages, DEFAULT_CHUNKING, type SourcePage } from './chunk.ts';
 import { classifyChunk } from './filter.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { writePack, type PackInput } from './pack.ts';
 import { contextualize } from './contextualize.ts';
+import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
 import type { DomainTag, LicenseEntry } from '@fred/pack-format';
 
 // ONNX rather than GGUF: the device must reproduce these vectors exactly, and
@@ -27,32 +28,7 @@ const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
 const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
 const EMBED_MODEL_ID = 'Supabase/gte-small';
 
-const WHO_BEC_LICENSE: LicenseEntry = {
-  id: 'who-bec',
-  license: 'CC-BY-NC-SA-3.0-IGO',
-  sourceTitle: 'WHO/ICRC Basic Emergency Care: approach to the acutely ill and injured',
-  sourceUrl: 'https://www.who.int/publications-detail-redirect/basic-emergency-care-approach-to-the-acutely-ill-and-injured',
-  attribution: 'WHO/ICRC Basic Emergency Care (2018), CC BY-NC-SA 3.0 IGO',
-  nonCommercial: true,
-};
-
-const ATP_SURVIVAL_LICENSE: LicenseEntry = {
-  id: 'atp-3-50-21',
-  license: 'Public domain (US Government work)',
-  sourceTitle: 'ATP 3-50.21, Survival (Headquarters, Department of the Army, September 2018)',
-  sourceUrl: 'https://archive.org/details/survival-atp-3-50-21',
-  attribution: 'US Army ATP 3-50.21, Survival (2018). Approved for public release; distribution is unlimited.',
-  nonCommercial: false,
-};
-
-const ATP_FIRST_AID_LICENSE: LicenseEntry = {
-  id: 'atp-4-02-11',
-  license: 'Public domain (US Government work)',
-  sourceTitle: 'ATP 4-02.11, Casualty Response, Tactical Combat Casualty Care, and First Aid (Headquarters, Department of the Army, March 2026)',
-  sourceUrl: 'https://archive.org/details/army-techniques-publication-for-casualty-response-tactical-combat-casualty-care-',
-  attribution: 'US Army ATP 4-02.11, Casualty Response, Tactical Combat Casualty Care, and First Aid (2026). Approved for public release; distribution is unlimited.',
-  nonCommercial: false,
-};
+import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 
 interface CorpusDef {
   readonly pdf: string;
@@ -236,12 +212,28 @@ const cleaned: SourcePage[] = pages.map((p) => ({
 }));
 console.log(`      removed ${boilerplate.size} boilerplate lines`);
 
-console.log(`[3/5] loading embedder ${EMBED_MODEL_ID}`);
-const embedder = await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID);
+// EMBEDDER=embeddinggemma builds the pack for EmbeddingGemma-300M instead of
+// gte-small. The pack records which, and every runtime reads it from there.
+const embedderName = process.env.EMBEDDER ?? 'gte-small';
+if (embedderName !== 'gte-small' && embedderName !== 'embeddinggemma') {
+  throw new Error(`EMBEDDER must be gte-small or embeddinggemma, got ${embedderName}`);
+}
+console.log(`[3/5] loading embedder ${embedderName === 'gte-small' ? EMBED_MODEL_ID : EMBEDDING_GEMMA.modelId}`);
+const embedder = embedderName === 'gte-small'
+  ? await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID)
+  : await loadGgufEmbedder(EMBEDDING_GEMMA);
 console.log(`      dim ${embedder.spec.dim}, calibrated cosineFloor ${embedder.spec.cosineFloor.toFixed(4)}`);
 
-console.log('[4/5] chunking');
-const chunks = chunkPages(cleaned, {
+// CHUNKING=structure cuts at the manual's own paragraphs (chunkByStructure).
+// Measured 2026-09-24 and NOT the default: it cut mid-sentence starts from
+// 35-68% to 1-7%, but put the answer's source passage in the top 4 for 23 of 49
+// cited tuning questions against the windows' 27, even at an equal token
+// budget (EmbeddingGemma, pure semantic ranking). Readable passages are the
+// field cards' job instead (docs/results-phase1.md).
+const chunking = process.env.CHUNKING ?? 'window';
+if (chunking !== 'structure' && chunking !== 'window') throw new Error(`CHUNKING must be structure or window, got ${chunking}`);
+console.log(`[4/5] chunking (${chunking})`);
+const chunks = (chunking === 'structure' ? chunkByStructure : chunkPages)(cleaned, {
   ...DEFAULT_CHUNKING,
   domain: def.domain,
   tokenize: (t) => embedder.tokenCount(t),
@@ -290,10 +282,24 @@ if (process.env.CONTEXTUALIZE === '1') {
 console.log(`[${process.env.CONTEXTUALIZE === '1' ? '6/6' : '5/5'}] embedding + writing pack`);
 // The preamble is embedded with the text, which is the whole point: it is what
 // gives an out-of-vocabulary passage surface to match on.
-const vectors = await embedder.embed(
-  contextualized.map((c) => (c.context === undefined || c.context === '' ? c.text : `${c.context}\n${c.text}`)),
-);
-const { dir, manifest } = await writePack('packs', { ...def.input, embedding: embedder.spec }, contextualized, vectors);
+// Structure chunks are shorter and most no longer open on their heading, so the
+// section title is prepended for embedding only (the stored text is unchanged).
+// A passage that says "tie the tails at the side" is then indexed as being about
+// SHOULDER BANDAGE. HEADINGS=0 turns it off for comparison.
+const withHeading = (c: { section: string; text: string }): string =>
+  chunking === 'structure' && process.env.HEADINGS !== '0' && !c.text.startsWith(c.section)
+    ? `${c.section}\n${c.text}`
+    : c.text;
+// An encoder with a passage template takes the section as its title field, so
+// the heading prefix above would say the same thing twice.
+const passage = (c: { section: string; text: string; context?: string }): string => {
+  const body = c.context === undefined || c.context === '' ? c.text : `${c.context}\n${c.text}`;
+  return embedder.spec.documentTemplate === undefined
+    ? (c.context === undefined || c.context === '' ? withHeading(c) : `${c.context}\n${withHeading(c)}`)
+    : documentText(EMBEDDING_GEMMA, c.section, body);
+};
+const vectors = await embedder.embed(contextualized.map(passage));
+const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', { ...def.input, embedding: embedder.spec }, contextualized, vectors);
 await embedder.dispose();
 
 const totalBytes = manifest.files.reduce((s, f) => s + f.bytes, 0);

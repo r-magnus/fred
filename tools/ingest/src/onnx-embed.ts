@@ -27,7 +27,7 @@ export interface OnnxEmbedder {
 }
 
 /** Unrelated pairs, for measuring where this encoder's cosine bottoms out. */
-const CALIBRATION_TEXTS: readonly string[] = [
+export const CALIBRATION_TEXTS: readonly string[] = [
   'how do I control severe arterial bleeding from a limb',
   'the migration patterns of arctic terns across ocean basins',
   'compiling a static library for an embedded microcontroller',
@@ -38,7 +38,7 @@ const CALIBRATION_TEXTS: readonly string[] = [
   'replacing the timing belt on a four cylinder engine',
 ];
 
-const PROBE_TEXT = 'control severe external bleeding';
+export const PROBE_TEXT = 'control severe external bleeding';
 
 function cosine(a: Float32Array, b: Float32Array): number {
   let d = 0, na = 0, nb = 0;

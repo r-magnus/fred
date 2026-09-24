@@ -75,7 +75,7 @@ if (process.env.CARDS === 'approved') {
 }
 if (cards.length === 0) throw new Error('no cards to build');
 
-const embedderName = process.env.EMBEDDER ?? 'gte-small';
+const embedderName = process.env.EMBEDDER ?? 'embeddinggemma';
 const embedder = embedderName === 'embeddinggemma'
   ? await loadGgufEmbedder(EMBEDDING_GEMMA)
   : await loadOnnxEmbedder(`${process.env.HOME}/models/gte-small.onnx`, `${process.env.HOME}/models/gte-small-vocab.txt`, 'Supabase/gte-small');

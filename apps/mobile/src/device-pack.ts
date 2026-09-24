@@ -175,11 +175,29 @@ export class DevicePackStore implements PackStore {
 
 export interface DeviceBackendOptions {
   readonly modelPath: string;
-  /** ONNX graph, the same file ingest used. */
-  readonly embedModelPath: string;
-  /** WordPiece vocabulary, the same file ingest used. */
-  readonly embedVocabPath: string;
+  /**
+   * How to embed queries, chosen from the packs' own EmbeddingSpec so the app
+   * can never search a pack with the wrong encoder.
+   *
+   * 'onnx' is gte-small through the shared TypeScript tokenizer and pooling.
+   * 'gguf' is a llama.cpp encoder (EmbeddingGemma-300M) through llama.rn. That
+   * path once disagreed with node-llama-cpp on the same model
+   * (docs/results-m3.md), which is exactly what verifyEmbedderParity catches at
+   * load, so a mismatch here fails loudly instead of searching badly.
+   */
+  readonly embedder:
+    | { readonly kind: 'onnx'; readonly modelPath: string; readonly vocabPath: string }
+    | { readonly kind: 'gguf'; readonly modelPath: string };
   readonly spec: EmbeddingSpec;
+}
+
+/** The encoder file each supported pack encoder needs on the device. */
+export function embedderFilesFor(modelId: string):
+  | { readonly kind: 'onnx'; readonly model: string; readonly vocab: string }
+  | { readonly kind: 'gguf'; readonly model: string } {
+  if (modelId === 'Supabase/gte-small') return { kind: 'onnx', model: 'gte-small.onnx', vocab: 'gte-small-vocab.txt' };
+  if (modelId === 'google/embeddinggemma-300m') return { kind: 'gguf', model: 'embeddinggemma-300M-Q8_0.gguf' };
+  throw new Error(`No on-device encoder for packs built with ${modelId}. Rebuild the packs or update the app.`);
 }
 
 /**
@@ -284,13 +302,50 @@ export async function createDeviceBackend(
     // context and needs retesting on CPU before it means anything.
   });
 
-  const embedSession = await ort.InferenceSession.create(opts.embedModelPath);
-  // expo-file-system's File wants a URI. Given the bare path that ONNX Runtime
-  // and op-sqlite need, textSync is "rejected" rather than failing to find the
-  // file. Never reached until the ONNX module actually registered.
-  const vocabUri = opts.embedVocabPath.startsWith('file://') ? opts.embedVocabPath : `file://${opts.embedVocabPath}`;
-  const vocabText = new File(vocabUri).textSync();
-  const tokenizer = buildVocab(vocabText);
+  let embed: (text: string) => Promise<Float32Array>;
+  let releaseEmbedder: () => Promise<void>;
+  if (opts.embedder.kind === 'onnx') {
+    const embedSession = await ort.InferenceSession.create(opts.embedder.modelPath);
+    // expo-file-system's File wants a URI. Given the bare path that ONNX Runtime
+    // and op-sqlite need, textSync is "rejected" rather than failing to find the
+    // file. Never reached until the ONNX module actually registered.
+    const vocabPath = opts.embedder.vocabPath;
+    const vocabUri = vocabPath.startsWith('file://') ? vocabPath : `file://${vocabPath}`;
+    const tokenizer = buildVocab(new File(vocabUri).textSync());
+    embed = (text) => embedWithOnnx(embedSession, tokenizer, text);
+    releaseEmbedder = () => embedSession.release();
+  } else {
+    // A llama.rn context in embedding mode, created fresh for every text and
+    // released straight after. Pooling comes from the GGUF's own metadata
+    // (EmbeddingGemma: mean, then its dense projections), which is what
+    // node-llama-cpp used at ingest. CPU only, like the generator.
+    //
+    // Fresh per call because a reused context is wrong after its first
+    // embedding, measured on the phone (llama.rn 0.12.9): the pack's probe text
+    // scored cos 0.9996 on a new context and 0.3880 on every later call to the
+    // same one, and after embedding another text it scored 0.8989. clearCache(),
+    // swa_full and disabling the state cache all left it at 0.3880. A fresh
+    // context is always right, and creating one costs well under a second
+    // against a ~15 s answer. This is very likely the "llama.rn embeddings
+    // disagree" of docs/results-m3.md; verifyEmbedderParity is what caught it.
+    const modelPath = opts.embedder.modelPath;
+    embed = async (text) => {
+      const ctx: LlamaContext = await initLlama({
+        model: modelPath,
+        embedding: true,
+        n_ctx: 2048,
+        n_batch: 512,
+        n_threads: N_THREADS,
+        n_gpu_layers: 0,
+      });
+      try {
+        return l2Normalize(Float32Array.from((await ctx.embedding(text)).embedding));
+      } finally {
+        await ctx.release();
+      }
+    };
+    releaseEmbedder = async () => {};
+  }
 
   const info = gen as unknown as Record<string, unknown>;
   // "gpu: true" here means a GPU device exists, not that layers are on it; the
@@ -298,7 +353,7 @@ export async function createDeviceBackend(
   const backend: DeviceBackend = {
     genInfo: { gpu: info.gpu, devices: info.devices, reasonNoGPU: info.reasonNoGPU, androidLib: info.androidLib },
     embeddingSpec: () => opts.spec,
-    embed: (text: string) => embedWithOnnx(embedSession, tokenizer, text),
+    embed,
     async countTokens(texts: readonly string[]): Promise<number[]> {
       // Exact, via llama.rn's tokenizer. Batched by the interface so this costs
       // one bridge crossing per string rather than one per compression pass.
@@ -360,7 +415,7 @@ export async function createDeviceBackend(
     },
     async release() {
       await gen.release();
-      await embedSession.release();
+      await releaseEmbedder();
     },
   };
   return backend;

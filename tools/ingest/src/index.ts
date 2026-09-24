@@ -63,7 +63,7 @@ const CORPORA: Record<string, CorpusDef> = {
     domain: 'first-aid-physical',
     input: {
       id: 'core-firstaid',
-      version: '1.1.0',
+      version: '1.2.0',
       displayName: 'Physical First Aid',
       description: 'WHO/ICRC Basic Emergency Care — acute illness and injury.',
       domains: ['first-aid-physical'],
@@ -109,7 +109,7 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-survival',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.2.0',
+      version: '1.3.0',
       displayName: 'Wilderness Survival',
       description: 'US Army ATP 3-50.21 Survival — water, food, fire, shelter, navigation, knots.',
       domains: ['survival', 'first-aid-physical'],
@@ -173,7 +173,7 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-firstaid-army',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.2.0',
+      version: '1.3.0',
       displayName: 'Field First Aid',
       description: 'US Army ATP 4-02.11 — first aid for nonmedical responders: bleeding, airway, burns, fractures, bites, heat and cold.',
       domains: ['first-aid-physical'],
@@ -212,9 +212,10 @@ const cleaned: SourcePage[] = pages.map((p) => ({
 }));
 console.log(`      removed ${boilerplate.size} boilerplate lines`);
 
-// EMBEDDER=embeddinggemma builds the pack for EmbeddingGemma-300M instead of
-// gte-small. The pack records which, and every runtime reads it from there.
-const embedderName = process.env.EMBEDDER ?? 'gte-small';
+// Packs are built for EmbeddingGemma-300M by default (docs/results-phase1.md
+// §3); EMBEDDER=gte-small builds the older encoder. The pack records which, and
+// every runtime reads it from there.
+const embedderName = process.env.EMBEDDER ?? 'embeddinggemma';
 if (embedderName !== 'gte-small' && embedderName !== 'embeddinggemma') {
   throw new Error(`EMBEDDER must be gte-small or embeddinggemma, got ${embedderName}`);
 }

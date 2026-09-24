@@ -7,7 +7,7 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
+import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
@@ -52,6 +52,14 @@ export const DEFAULT_ABSTAIN_THRESHOLD = 0.29;
  * there are unknown-vocabulary tuning questions to fit against.
  */
 export const DEFAULT_FALLBACK_THRESHOLD = DEFAULT_ABSTAIN_THRESHOLD;
+
+/**
+ * Passages go to the model whole. Trimming saved ~170 prompt tokens (about a
+ * second on the phone) but still cut the answer's source passage on 5 of 49
+ * cited tuning questions, because it picks sentences by word overlap with the
+ * question (docs/results-phase1.md §2). Pass `compression` to turn it back on.
+ */
+export const NO_COMPRESSION = { minReduction: 0, maxReduction: 0 } as const;
 
 /** PocketRAG §3.5 — generation budget under memory pressure. */
 export function maxTokensForPressure(pressure: number): number {
@@ -210,7 +218,7 @@ export async function ask(
   const compressed = await compressContext(
     candidates.map((c) => c.chunk),
     keywords,
-    { ...(opts.compression ?? DEFAULT_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
+    { ...(opts.compression ?? NO_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
   );
 
   const blocks: ContextBlock[] = compressed.chunks.map((c) => ({

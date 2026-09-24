@@ -36,7 +36,7 @@ console.log(describeSet(questions));
 const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
 // Printed because these two settings are what an A/B between runs is varying,
 // and a results file that does not say which model produced it is not evidence.
-console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'on' : 'off'}  model=${genModelPath.split('/').pop()}  packs=${PACKS}`);
+console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'off' : 'on'}  model=${genModelPath.split('/').pop()}  packs=${PACKS}`);
 
 const store = new NodePackStore();
 const manifests = readdirSync(PACKS)

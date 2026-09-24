@@ -37,13 +37,21 @@ export interface RetrievalOptions {
   readonly densePool: number;
 }
 
+/**
+ * The measured configuration (docs/results-phase1.md): the question embedded as
+ * asked, 20 nearest-by-meaning chunks per pack added to the keyword candidates,
+ * and meaning alone deciding the final order (alpha 1). With EmbeddingGemma this
+ * put the answer's source passage among the four the model reads for 27 of 49
+ * cited tuning questions, against 22 for the best gte-small setting. Keyword
+ * search still widens the candidate pool; it no longer votes on the order.
+ */
 export const DEFAULT_RETRIEVAL: RetrievalOptions = {
   candidateLimit: 50,
   topK: 4,
-  alpha: DEFAULT_ALPHA,
+  alpha: 1.0,
   mode: 'hybrid',
-  queryInput: 'keywords',
-  densePool: 0,
+  queryInput: 'question',
+  densePool: 20,
 };
 
 export interface ScoredChunk {

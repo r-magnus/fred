@@ -25,7 +25,8 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
-import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
+import { File, Paths } from 'expo-file-system';
+import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapProbe } from './src/map-probe.tsx';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
@@ -178,6 +179,38 @@ function Screen() {
       setBusy(false);
     }
   }, [draft, state, busy, update]);
+
+  /**
+   * Development hook: ask questions from the desktop while the phone is locked.
+   *
+   * Only active when a file named `devhooks` exists in the app's private
+   * storage, which only the debug staging flow creates (tools/eval/ask-phone.sh
+   * writes it via `adb run-as`, which works only on debuggable builds). The app
+   * then checks `devhooks-ask.txt` every two seconds and asks its first line
+   * ("question<TAB>state") through the normal screen flow, so timing and
+   * retrieval are logged exactly as for a typed question.
+   */
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
+  useEffect(() => {
+    if (!new File(Paths.document, 'devhooks').exists) return;
+    setVerboseLogging(true);
+    const inbox = new File(Paths.document, 'devhooks-ask.txt');
+    const timer = setInterval(() => {
+      if (!inbox.exists || engine.current === null || busyRef.current) return;
+      const lines = inbox.textSync().split('\n').filter((l) => l.trim() !== '');
+      inbox.delete();
+      const [first, ...rest] = lines;
+      if (rest.length > 0) inbox.write(rest.join('\n'));
+      if (first === undefined) return;
+      const [question, st] = first.split('\t');
+      console.log(`[fred] devhook ask: ${question}`);
+      void sendRef.current(question, st === undefined || st === '' ? null : st);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (load.phase !== 'ready') {
     const failed = load.phase === 'failed';

@@ -10,7 +10,7 @@
  * Every run prints the settings it used, because a results file that does not
  * say how it was produced is not evidence.
  */
-import { DEFAULT_RETRIEVAL, type RetrievalOptions } from '@fred/rag-core';
+import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type RetrievalOptions } from '@fred/rag-core';
 
 function int(name: string, fallback: number, min: number): number {
   const raw = process.env[name];
@@ -44,10 +44,13 @@ export function describeRetrieval(r: RetrievalOptions): string {
   return `query=${r.queryInput} densePool=${r.densePool} topK=${r.topK} alpha=${r.alpha}`;
 }
 
-/** COMPRESS=0 hands passages to the model whole. Unset keeps the shipping bounds. */
+/**
+ * COMPRESS=1 turns trimming back on at the paper's 20-40% bounds. Unset (or 0)
+ * keeps the shipping default, which hands passages to the model whole.
+ */
 export function compressionFromEnv(): { minReduction: number; maxReduction: number } | undefined {
   const raw = process.env.COMPRESS;
-  if (raw === undefined || raw === '1') return undefined;
-  if (raw === '0') return { minReduction: 0, maxReduction: 0 };
+  if (raw === undefined || raw === '0') return undefined;
+  if (raw === '1') return { ...DEFAULT_COMPRESSION };
   throw new Error(`COMPRESS must be 0 or 1, got ${raw}`);
 }

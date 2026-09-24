@@ -33,7 +33,7 @@ const outPath = process.argv[2];
 const DEEP_K = 50;
 const retrieval = retrievalFromEnv();
 const compression = compressionFromEnv();
-console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'on' : 'off'}`);
+console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'off' : 'on'}`);
 
 const questions = setsFor(process.env.EVAL_SET)
   .flatMap((s) => loadGradedSet(s, (p) => readFileSync(p, 'utf8')))

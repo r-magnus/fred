@@ -141,8 +141,8 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   const reviews = JSON.parse(readFileSync('corpora/feis/reviews.json', 'utf8')) as FeisReview[];
-  // EMBEDDER=embeddinggemma builds for EmbeddingGemma-300M; see index.ts.
-  const embedder = process.env.EMBEDDER === 'embeddinggemma'
+  // EmbeddingGemma-300M by default; EMBEDDER=gte-small for the older encoder.
+  const embedder = process.env.EMBEDDER !== 'gte-small'
     ? await loadGgufEmbedder(EMBEDDING_GEMMA)
     : await loadOnnxEmbedder(EMBED_MODEL, EMBED_VOCAB, EMBED_MODEL_ID);
   const count = (t: string): number => embedder.tokenCount(t);
@@ -159,7 +159,7 @@ async function main(): Promise<void> {
       embedder.spec.documentTemplate === undefined ? c.text : documentText(EMBEDDING_GEMMA, c.section, c.text)));
     const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
       id: `state-${state}-flora-fauna`,
-      version: '1.0.0',
+      version: '1.1.0',
       displayName: `${state} Plants and Wildlife`,
       description: `USFS FEIS species reviews for ${species.length} species recorded in ${state}: identification, habitat, diet and safety notes.`,
       domains: ['plants', 'wildlife'],

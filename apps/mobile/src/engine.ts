@@ -13,15 +13,13 @@
 import { Directory, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
 import { ask, verifyEmbedderParity, type AskResult, type RoutablePack } from '@fred/rag-core';
-import { DevicePackStore, createDeviceBackend } from './device-pack.ts';
+import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
 
 const BASE = Paths.document;
 const BASE_PATH = BASE.uri.replace(/^file:\/\//, '').replace(/\/$/, '');
 
 /** Filenames staged into internal storage. See tools/eval/measure-app.sh. */
 const MODEL_FILE = 'Qwen3-1.7B-Q4_K_M.gguf';
-const EMBED_MODEL_FILE = 'gte-small.onnx';
-const EMBED_VOCAB_FILE = 'gte-small-vocab.txt';
 
 export type LoadPhase =
   | { readonly phase: 'idle' }
@@ -48,7 +46,14 @@ export interface Engine {
  * (docs/results-m3.md), so a mismatch fails the load loudly instead of letting
  * the app run subtly wrong.
  */
-export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engine> {
+export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Engine> {
+  // Every phase is logged as well as shown, so a failed load can be read with
+  // `adb logcat -s ReactNativeJS` even when the screen is locked.
+  const onPhase = (p: LoadPhase): void => {
+    console.log(`[fred] load ${p.phase}${p.phase === 'failed' ? `: ${p.message}` : p.phase === 'ready' ? `: ${p.packs} packs, ${p.chunks} passages` : ''}`);
+    onPhaseUi(p);
+  };
+  const t0 = Date.now();
   try {
     onPhase({ phase: 'packs' });
     const store = new DevicePackStore();
@@ -70,16 +75,31 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     }
 
     onPhase({ phase: 'models' });
+    // The packs say which encoder they were built with; the app follows.
+    const files = embedderFilesFor(manifests[0]!.embedding.modelId);
     const backend = await createDeviceBackend({
       modelPath: `${BASE_PATH}/${MODEL_FILE}`,
-      embedModelPath: `${BASE_PATH}/${EMBED_MODEL_FILE}`,
-      embedVocabPath: `${BASE_PATH}/${EMBED_VOCAB_FILE}`,
+      embedder: files.kind === 'onnx'
+        ? { kind: 'onnx', modelPath: `${BASE_PATH}/${files.model}`, vocabPath: `${BASE_PATH}/${files.vocab}` }
+        : { kind: 'gguf', modelPath: `${BASE_PATH}/${files.model}` },
       spec: manifests[0]!.embedding,
     });
 
     onPhase({ phase: 'verifying' });
+    // Every pack carries the same probe sentence, so embed it once, not once
+    // per pack: each embedding costs a fresh llama.rn context (device-pack.ts).
+    const probes = new Map<string, Promise<Float32Array>>();
+    const probeBackend = {
+      ...backend,
+      embed: (text: string): Promise<Float32Array> => {
+        let v = probes.get(text);
+        if (v === undefined) { v = backend.embed(text); probes.set(text, v); }
+        return v;
+      },
+    };
     for (const m of manifests) {
-      const parity = await verifyEmbedderParity(m.embedding, backend);
+      const parity = await verifyEmbedderParity(m.embedding, probeBackend);
+      console.log(`[fred] parity ${m.id} cos=${parity.cosine.toFixed(4)} ${parity.ok ? 'ok' : 'FAIL'}`);
       if (!parity.ok) {
         await backend.release();
         throw new Error(
@@ -95,6 +115,7 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
       .map((m) => (m.scope as { state: string }).state)
       .sort();
 
+    console.log(`[fred] engine ready in ${Date.now() - t0}ms, encoder ${manifests[0]!.embedding.modelId}`);
     onPhase({
       phase: 'ready',
       packs: manifests.length,
@@ -102,8 +123,11 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     });
 
     return {
-      ask: (question, state, signal) =>
-        ask(question, { backend, store, packs }, signal ? { state, signal } : { state }),
+      ask: async (question, state, signal) => {
+        const t0 = Date.now();
+        const res = await ask(question, { backend, store, packs }, signal ? { state, signal } : { state });
+        return timed(res, t0);
+      },
       availableStates: () => states,
       release: () => backend.release(),
     };
@@ -112,6 +136,45 @@ export async function loadEngine(onPhase: (p: LoadPhase) => void): Promise<Engin
     onPhase({ phase: 'failed', message });
     throw e;
   }
+}
+
+/**
+ * One log line per question, read with `adb logcat -s ReactNativeJS`: time to
+ * the retrieval decision, to the first token, and to the last, plus the top
+ * sources. This is how on-device latency and retrieval are measured without
+ * driving the UI from a harness.
+ */
+let verbose = false;
+/**
+ * Also log which passages were used and the answer text. Off by default: a
+ * user's questions and answers do not belong in the system log. The app turns
+ * it on only in its development mode (the `devhooks` file, App.tsx).
+ */
+export function setVerboseLogging(on: boolean): void { verbose = on; }
+
+function timed(res: AskResult, t0: number): AskResult {
+  const retrievalMs = Date.now() - t0;
+  const top = verbose ? res.diagnostics.candidates.slice(0, 4).map((c) => c.chunk.section).join(' | ') : '-';
+  if (res.kind !== 'answer') {
+    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)} top=${top}`);
+    return res;
+  }
+  const inner = res.stream;
+  async function* stream(): AsyncGenerator<string> {
+    let first = 0;
+    let chars = 0;
+    let text = '';
+    for await (const tok of inner) {
+      if (first === 0) first = Date.now();
+      chars += tok.length;
+      if (verbose) text += tok;
+      yield tok;
+    }
+    const end = Date.now();
+    if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)} tokens=${res.diagnostics.tokensAfter} top=${top}`);
+  }
+  return { ...res, stream: stream() };
 }
 
 /** Human-readable label for the loading screen. */

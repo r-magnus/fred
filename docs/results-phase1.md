@@ -268,3 +268,57 @@ Not changed:
 
 Verdicts recorded before these edits were graded against the old sheets; the
 next graded run uses the new ones.
+
+## 9. On the phone (2026-09-24)
+
+The measured pipeline now runs on the Nothing Phone (3). New defaults in
+rag-core (whole-question search, 20 nearest-by-meaning passages per pack,
+meaning-only ranking, no trimming); EmbeddingGemma through llama.rn; packs
+`core-firstaid` 1.2.0, `core-firstaid-army` 1.3.0, `core-survival` 1.3.0,
+`core-fieldcards` 0.1.0 (27 approved cards) and `state-CA-flora-fauna` 1.1.0,
+all built for EmbeddingGemma.
+
+**A llama.rn bug, caught by the parity check.** A reused llama.rn embedding
+context is right only on its first call. On the phone, the pack probe scored
+cos 0.9996 on a fresh context, 0.3880 on every later call, and 0.8989 after
+embedding another text. `clearCache()`, `swa_full` and disabling the state cache
+did not change it. Every real query shares EmbeddingGemma's
+`task: search result | query:` prefix, so without the check, every search after
+the first would have been quietly wrong. The fix is a fresh context per
+embedding, which costs about 0.7 s. This is very likely what made
+docs/results-m3.md abandon llama.rn embeddings.
+
+**Measured on the phone**, 5 spot-check questions, same packs as the desktop:
+
+| | Phone |
+|---|---:|
+| Engine ready (packs, models, parity) | 2.7 s |
+| Retrieval, including the query embedding | 0.85-0.95 s |
+| Time to first word | 7.5-14.2 s |
+| Answer total, mean | 15.4 s (range 9.9-24.1 s) |
+| Peak memory while answering | 2.9 GB PSS (was 3.02 GB) |
+
+- **Retrieval matched the desktop exactly**: same top-4 passages, same scores to
+  three decimals.
+- **Answers matched in substance**, with small wording differences. The choking
+  answer is the fixed 2026 sequence.
+- **Two known problems showed up on the phone too:**
+  - Bleeding: the card was not among the top 4, so the answer mentions raising
+    the limb and treats a tourniquet as a last resort (#47).
+  - Water without boiling: declined, with the water card ranked first (#48).
+
+**Tooling added:**
+
+- `tools/eval/stage-phone.sh` stages packs and models in verified chunks,
+  replacing old packs wholesale.
+- `tools/eval/install-apk.sh` does the same for the APK, because `adb install`
+  stalled for eleven minutes and installed nothing.
+- `tools/eval/ask-phone.sh` asks the app questions from the desktop while the
+  phone is locked. It uses a development inbox in App.tsx that is active only
+  when a `devhooks` file exists in app storage, which only the debug staging
+  creates.
+- Load stages, parity and per-question timing are always logged. Answer text
+  and passage names are logged only in that development mode.
+
+Still to do for #46: EmbeddingGemma packs for the other 49 states (an
+overnight job), and Q4_0 plus no memory-mapping for speed (#49).

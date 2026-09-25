@@ -190,7 +190,9 @@ export async function ask(
   };
 
   const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
-  const topScore = candidates[0]?.score ?? 0;
+  // The best score, not the first chunk's: a reserved field card goes first
+  // and may score below the top manual passage (retrieve.ts).
+  const topScore = candidates.reduce((m, c) => Math.max(m, c.score), 0);
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
     const weak = {

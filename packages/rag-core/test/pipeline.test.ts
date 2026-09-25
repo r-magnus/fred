@@ -328,3 +328,16 @@ test('widening to unscoped packs widens the domains too', () => {
   // the widened search comes back with nothing.
   assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
 });
+
+test('a qualifying field card is placed first, even from outside the top K', async () => {
+  const { withReservedCard } = await import('../src/retrieve.ts');
+  const mk = (packId: string, id: string, score: number) =>
+    ({ chunk: { id, packId } as never, cosineRaw: score, cosine: score, sLex: 0, score });
+  const scored = [mk('m', 'a', 0.5), mk('m', 'b', 0.45), mk('m', 'c', 0.44), mk('m', 'd', 0.43), mk('cards', 'card', 0.38)];
+  const opts = { candidateLimit: 50, topK: 4, alpha: 1, mode: 'hybrid' as const, queryInput: 'question' as const, densePool: 20 };
+  const reserved = withReservedCard(scored, { ...opts, reserve: { packId: 'cards', minScore: 0.35 } });
+  assert.deepEqual(reserved.map((c) => c.chunk.id), ['card', 'a', 'b', 'c']);
+  const tooWeak = withReservedCard(scored, { ...opts, reserve: { packId: 'cards', minScore: 0.4 } });
+  assert.deepEqual(tooWeak.map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(withReservedCard(scored, opts).map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
+});

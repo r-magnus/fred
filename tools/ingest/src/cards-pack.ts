@@ -69,8 +69,15 @@ if (process.env.CARDS === 'approved') {
   const reviewsPath = process.argv[2];
   if (reviewsPath === undefined) throw new Error('CARDS=approved needs the exported reviews JSON as an argument');
   const reviews = JSON.parse(readFileSync(reviewsPath, 'utf8')) as Record<string, { decision: string; rev: string }>;
+  // Changes Claude made and self-reviewed after Ryan's review, per his
+  // 2026-09-24 instruction to escalate only serious conflicts. Each entry names
+  // the card revision it covers, so a later edit needs a new entry.
+  const selfPath = 'corpora/cards/self-reviews.json';
+  const self = (existsSync(selfPath) ? JSON.parse(readFileSync(selfPath, 'utf8')) : []) as { id: string; rev: string }[];
   const before = cards.length;
-  cards = cards.filter((c) => reviews[c.id]?.decision === 'approved' && reviews[c.id]?.rev === revOf(c));
+  cards = cards.filter((c) =>
+    (reviews[c.id]?.decision === 'approved' && reviews[c.id]?.rev === revOf(c)) ||
+    self.some((r) => r.id === c.id && r.rev === revOf(c)));
   console.log(`approved at current revision: ${cards.length} of ${before}`);
 }
 if (cards.length === 0) throw new Error('no cards to build');

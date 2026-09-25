@@ -29,6 +29,7 @@ const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
 const EMBED_MODEL_ID = 'Supabase/gte-small';
 
 import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
+import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
 
 interface CorpusDef {
   readonly pdf: string;
@@ -97,8 +98,9 @@ const CORPORA: Record<string, CorpusDef> = {
         /^Appendix A$/,
         /^(?:Overview|Survival Medicine|Water|Food|Fire|Shelter and Clothing|Movement and Navigation|Survival Equipment|Survival Knots and Rope)$/,
       ],
-      // Bullets are a Wingdings glyph that extracts as a literal "z".
-      rewrites: [[/^z (?=\S)/gm, '- ']],
+      // Bullets are a Wingdings glyph that extracts as a literal "z". The
+      // redactions run after, so they match the "- " form (redactions.ts).
+      rewrites: [[/^z (?=\S)/gm, '- '], ...asRewrites(SURVIVAL_REDACTIONS)],
     },
     // Chapter 2, Survival Medicine, tagged medical so answers drawn from it carry
     // the disclaimer. The pack routes for first aid as well, because this chapter
@@ -109,7 +111,8 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-survival',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.3.0',
+      // 1.4.0: berry-colour rules and the step-by-step taste test removed (redactions.ts).
+      version: '1.4.0',
       displayName: 'Wilderness Survival',
       description: 'US Army ATP 3-50.21 Survival — water, food, fire, shelter, navigation, knots.',
       domains: ['survival', 'first-aid-physical'],
@@ -239,6 +242,10 @@ const chunks = (chunking === 'structure' ? chunkByStructure : chunkPages)(cleane
   domain: def.domain,
   tokenize: (t) => embedder.tokenCount(t),
 }).map((c) => ({ ...c, domain: (c.page === null ? undefined : def.domainForPage?.(c.page)) ?? c.domain }));
+if (name === 'atp-3-50-21') {
+  const survived = survivingRedactions(SURVIVAL_REDACTIONS, chunks.map((c) => c.text));
+  if (survived.length > 0) throw new Error(`redacted passages survived ingest: ${survived.join(' | ')}`);
+}
 const scaffolding = chunks.filter((c) => classifyChunk(c.text).drop);
 const excluded = chunks.filter((c) => !classifyChunk(c.text).drop && def.dropChunks?.some((re) => re.test(c.text)));
 const kept = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));

@@ -35,6 +35,13 @@ export interface RetrievalOptions {
    * 0 disables it, leaving Stage 2 to re-score keyword hits only.
    */
   readonly densePool: number;
+  /**
+   * Field cards (plain-language, reviewed answers) get a reserved slot: when
+   * the best chunk from this pack scores at least `minScore`, it is placed
+   * first among the chunks handed to the model, even if manual passages
+   * outranked it. Undefined disables the reservation.
+   */
+  readonly reserve?: { readonly packId: string; readonly minScore: number };
 }
 
 /**
@@ -52,6 +59,11 @@ export const DEFAULT_RETRIEVAL: RetrievalOptions = {
   mode: 'hybrid',
   queryInput: 'question',
   densePool: 20,
+  // 0.35 separates right cards from wrong ones on the tuning set: every best
+  // card at or above it was the card for the question (bleeding at rank 6,
+  // fracture 8, shelter 19, berries 8), and the highest wrong match was the
+  // choking card for a chest wound at 0.308 (docs/results-phase1.md §10).
+  reserve: { packId: 'core-fieldcards', minScore: 0.35 },
 };
 
 export interface ScoredChunk {
@@ -225,5 +237,17 @@ export async function retrieve(
   }
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, opts.topK);
+  return withReservedCard(scored, opts);
+}
+
+/**
+ * Put the best qualifying field card first, then fill the rest by score.
+ * Exported for tests.
+ */
+export function withReservedCard(scored: readonly ScoredChunk[], opts: RetrievalOptions): ScoredChunk[] {
+  const reserve = opts.reserve;
+  if (reserve === undefined) return scored.slice(0, opts.topK);
+  const card = scored.find((c) => c.chunk.packId === reserve.packId);
+  if (card === undefined || card.score < reserve.minScore) return scored.slice(0, opts.topK);
+  return [card, ...scored.filter((c) => c !== card)].slice(0, opts.topK);
 }

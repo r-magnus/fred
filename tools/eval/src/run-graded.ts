@@ -14,7 +14,7 @@
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ask, verifyEmbedderParity } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, type CardAnswerMode } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
 import { loadGradedSet, describeSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
 import { compressionFromEnv, describeRetrieval, retrievalFromEnv } from './retrieval-env.ts';
@@ -90,6 +90,8 @@ for (const [i, q] of questions.entries()) {
       ? { sufficiencyVariant: 'numeric' as const } : {}),
     // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
     ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    // CARD_ANSWER=verbatim|card-only|pick answers from a clearly matching field card.
+    ...(process.env.CARD_ANSWER !== undefined ? { cardAnswer: process.env.CARD_ANSWER as CardAnswerMode } : {}),
   });
 
   let answer = '';
@@ -114,6 +116,7 @@ for (const [i, q] of questions.entries()) {
     latencyMs,
     promptTokens: d.tokensAfter,
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
+    ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);

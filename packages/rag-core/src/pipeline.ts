@@ -12,6 +12,7 @@ import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
+import { buildPickParts, parseCard, readPick, renderCard } from './card-answer.ts';
 
 /**
  * Abstention threshold on the fused score U_i.
@@ -99,6 +100,15 @@ export interface AskOptions {
   readonly answerVariant?: AnswerVariant;
   readonly retrieval?: RetrievalOptions;
   /**
+   * How to answer when a field card clearly matches (score at or above the
+   * reserved-card bar). 'off' treats the card as one passage among four;
+   * 'verbatim' shows the card as written; 'card-only' has the model answer
+   * from the card alone; 'pick' has the model choose the card's relevant steps
+   * and shows those verbatim with the summary, don'ts and get-help line
+   * (card-answer.ts, docs/plan-phase3.md step 2).
+   */
+  readonly cardAnswer?: CardAnswerMode;
+  /**
    * Compression bounds. `{ minReduction: 0, maxReduction: 0 }` hands the
    * retrieved passages to the model whole.
    */
@@ -106,6 +116,8 @@ export interface AskOptions {
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
 }
+
+export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
 
 export interface Citation {
   readonly index: number;
@@ -129,6 +141,8 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** Set when the answer was built from a field card rather than the passages. */
+  readonly cardAnswer?: CardAnswerMode;
 }
 
 export type AskResult =
@@ -245,6 +259,38 @@ export async function ask(
   }
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
+  const cardMode = opts.cardAnswer ?? 'off';
+  if (cardMode !== 'off' && cardMatched) {
+    const card = usable
+      .filter((c) => c.chunk.packId === reservedPack)
+      .reduce((b, c) => (c.score > b.score ? c : b));
+    const parsed = parseCard(card.chunk.text);
+    const cardBlocks: ContextBlock[] = [{ chunk: card.chunk, text: card.chunk.text }];
+    const prompt = buildPromptParts(query, cardBlocks, opts.answerVariant);
+    const diagnostics = {
+      ...baseDiag, candidates, topScore, sufficient: null,
+      tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode,
+    };
+    const common = { kind: 'answer' as const, citations: [toCitation(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
+    if (cardMode === 'card-only') {
+      return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
+    }
+    if (cardMode === 'verbatim') {
+      return { ...common, stream: once(renderCard(parsed)) };
+    }
+    const signal = opts.signal;
+    return {
+      ...common,
+      stream: (async function* () {
+        let pick = '';
+        for await (const tok of backend.generate(buildPickParts(query, parsed), signal ? { maxTokens: 24, temperature: 0, signal } : { maxTokens: 24, temperature: 0 })) {
+          pick += tok;
+        }
+        yield renderCard(parsed, readPick(pick, parsed.steps.length));
+      })(),
+    };
+  }
+
   // Stage 3 — compress before prefill.
   const compressed = await compressContext(
     usable.map((c) => c.chunk),
@@ -309,6 +355,10 @@ export async function ask(
       contextReduction: compressed.reduction,
     },
   };
+}
+
+async function* once(text: string): AsyncIterable<string> {
+  yield text;
 }
 
 function toCitation(c: ScoredChunk, i: number): Citation {

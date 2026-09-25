@@ -127,6 +127,8 @@ export interface GradedRun {
   readonly promptTokens: number;
   /** Why Fred declined, when it did: 'low-score', 'insufficient' or 'provider-only'. */
   readonly abstainReason?: string;
+  /** Set when the answer came from a field card (CARD_ANSWER). */
+  readonly cardAnswer?: string;
   /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
   readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }

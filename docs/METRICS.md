@@ -29,7 +29,7 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 
 - `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs. The state packs are being rebuilt for the EmbeddingGemma search model: 17 of 50 done; CA and OR are on the phone.
 - `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md.
-- `A-KR3` — Phone mean, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation entirely (32 of 100 tuning answers); that is not yet measured on the phone. Still inside the 10-20 s band.
+- `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Still inside the 10-20 s band.
 - `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.
 - `B-KR2` — Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its ±1 km target. Unverified: needs the drive.
 - `B-KR3` — Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.
@@ -92,25 +92,25 @@ p95      17.7 s   ████████████████████�
 
 | | |
 |---|---|
-| Measured | 2026-09-24, phase-2 build, seven check questions (answers are phase-2; card answers not yet on the phone) |
-| Engine ready (packs, models, parity check) | 4.9 s |
-| Retrieval | 848-1285 ms |
-| Answer, mean | **17.3 s** |
+| Measured | 2026-09-24, phase-3 build (not debuggable by default since #30; field-test build for this run), eight check questions |
+| Engine ready (packs, models, parity check) | 4.8 s |
+| Retrieval | 766-942 ms |
+| Answer, mean | **6.4 s** |
 | Peak memory | **2.90 GB PSS** |
-| Embedder parity | cos 0.9996 on all six packs (fresh llama.rn embedding context per text, working around a reuse bug) |
+| Embedder parity | cos 0.9996 on all seven packs (fresh llama.rn embedding context per text, working around a reuse bug) |
 
 ```
-control severe external bleeding  ███████████████████████████░   24.0 s   (TTFT 15.2s)
-nibble an unknown plant           ██████████████████████░░░░░░   20.0 s   (TTFT 13.6s)
-both hands for CPR on a baby      ██████████████████░░░░░░░░░░   16.2 s   (TTFT 12.5s)
-boiling water burn on arm         ██████████████████████░░░░░░   19.7 s   (TTFT 13.3s)
-no stove, no filter: water        █████████████░░░░░░░░░░░░░░░   11.6 s   (TTFT 11.0s)
-is a wild plant safe to eat       █████████████████████░░░░░░░   19.0 s   (TTFT 12.4s)
-black bears in Oregon             ████████████░░░░░░░░░░░░░░░░   10.5 s   (TTFT 8.3s)
-10s target                        ███████████░░░░░░░░░░░░░░░░░
+burn (card answer)                   █░░░░░░░░░░░░░░░░░░░░░░░░░░░    0.9 s   (TTFT 0.9s)
+both hands for CPR on a baby (card)  █░░░░░░░░░░░░░░░░░░░░░░░░░░░    0.8 s   (TTFT 0.8s)
+no stove, no filter: water (card)    █░░░░░░░░░░░░░░░░░░░░░░░░░░░    0.9 s   (TTFT 0.9s)
+twisted ankle (card)                 █░░░░░░░░░░░░░░░░░░░░░░░░░░░    0.8 s   (TTFT 0.8s)
+black bears in this state            █████████░░░░░░░░░░░░░░░░░░░    8.3 s   (TTFT 7.6s)
+signal for rescue                    ████████████████░░░░░░░░░░░░   14.4 s   (TTFT 11.0s)
+nibble an unknown plant              █████████████████████░░░░░░░   19.0 s   (TTFT 12.1s)
+10s target                           ███████████░░░░░░░░░░░░░░░░░
 ```
 
-> The seven check questions are the hard first-aid ones, so their mean (17.3 s) sits above the 15.4 s phone mean. Peak memory is from the phase-1 phone run (2.9 GB PSS), inside the 3-4 GB budget.
+> The eighth question ("walk me through putting in an IV line") was referred on in 0.87 s. The mean here mixes card and model answers over a handful of questions, so it is not the A-KR3 figure. Peak memory is from the phase-1 phone run (2.9 GB PSS), inside the 3-4 GB budget.
 
 ## Readability of the answers Fred gives
 

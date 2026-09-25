@@ -12,6 +12,11 @@ ADB="${ADB:-$HOME/toolchain/platform-tools/adb}"
 PKG=dev.fred.app
 Q="${1:?usage: ask-phone.sh questions.tsv}"
 n=$(grep -c . "$Q")
+
+# run-as works only on a debuggable build. A shippable build (the default since
+# #30) is not, so say which build to install instead of failing obscurely.
+flags=$("$ADB" shell dumpsys package $PKG)
+grep -q 'DEBUGGABLE' <<<"$flags" || { echo "installed $PKG is not debuggable; install a field-test build: tools/eval/build-apk.sh --field-test && tools/eval/install-apk.sh" >&2; exit 1; }
 "$ADB" push "$Q" /data/local/tmp/fred-ask.txt >/dev/null
 "$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
 "$ADB" logcat -c

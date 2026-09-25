@@ -65,7 +65,7 @@
         ">3m"
       ],
       "grade": "B",
-      "note": "Phone mean, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation entirely (32 of 100 tuning answers); that is not yet measured on the phone. Still inside the 10-20 s band."
+      "note": "Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Still inside the 10-20 s band."
     },
     {
       "id": "B-KR1",
@@ -307,53 +307,53 @@
   "device": {
     "hardware": "Nothing Phone (3), Snapdragon 8s Gen 4, Android 15, 11.5 GB RAM",
     "model": "Qwen3-1.7B-Q4_K_M, CPU only (n_gpu_layers 0); EmbeddingGemma-300M Q8 via llama.rn",
-    "measured": "2026-09-24, phase-2 build, seven check questions (answers are phase-2; card answers not yet on the phone)",
-    "engineReadyMs": 4920,
+    "measured": "2026-09-24, phase-3 build (not debuggable by default since #30; field-test build for this run), eight check questions",
+    "engineReadyMs": 4781,
     "retrieveMs": [
-      848,
-      1285
+      766,
+      942
     ],
     "answers": [
       {
-        "q": "control severe external bleeding",
-        "totalMs": 23980,
-        "ttftMs": 15156
+        "q": "burn (card answer)",
+        "totalMs": 882,
+        "ttftMs": 882
+      },
+      {
+        "q": "both hands for CPR on a baby (card)",
+        "totalMs": 766,
+        "ttftMs": 766
+      },
+      {
+        "q": "no stove, no filter: water (card)",
+        "totalMs": 859,
+        "ttftMs": 859
+      },
+      {
+        "q": "twisted ankle (card)",
+        "totalMs": 827,
+        "ttftMs": 827
+      },
+      {
+        "q": "black bears in this state",
+        "totalMs": 8292,
+        "ttftMs": 7648
+      },
+      {
+        "q": "signal for rescue",
+        "totalMs": 14401,
+        "ttftMs": 11037
       },
       {
         "q": "nibble an unknown plant",
-        "totalMs": 20049,
-        "ttftMs": 13562
-      },
-      {
-        "q": "both hands for CPR on a baby",
-        "totalMs": 16235,
-        "ttftMs": 12485
-      },
-      {
-        "q": "boiling water burn on arm",
-        "totalMs": 19746,
-        "ttftMs": 13257
-      },
-      {
-        "q": "no stove, no filter: water",
-        "totalMs": 11643,
-        "ttftMs": 11047
-      },
-      {
-        "q": "is a wild plant safe to eat",
-        "totalMs": 18963,
-        "ttftMs": 12402
-      },
-      {
-        "q": "black bears in Oregon",
-        "totalMs": 10531,
-        "ttftMs": 8320
+        "totalMs": 19038,
+        "ttftMs": 12146
       }
     ],
-    "meanMs": 17307,
+    "meanMs": 6438,
     "peakPssMb": 2970,
-    "embedderParity": "cos 0.9996 on all six packs (fresh llama.rn embedding context per text, working around a reuse bug)",
-    "note": "The seven check questions are the hard first-aid ones, so their mean (17.3 s) sits above the 15.4 s phone mean. Peak memory is from the phase-1 phone run (2.9 GB PSS), inside the 3-4 GB budget."
+    "embedderParity": "cos 0.9996 on all seven packs (fresh llama.rn embedding context per text, working around a reuse bug)",
+    "note": "The eighth question (\"walk me through putting in an IV line\") was referred on in 0.87 s. The mean here mixes card and model answers over a handful of questions, so it is not the A-KR3 figure. Peak memory is from the phase-1 phone run (2.9 GB PSS), inside the 3-4 GB budget."
   },
   "location": {
     "implemented": "2026-09-18",

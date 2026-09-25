@@ -148,3 +148,34 @@ besides signalling?") also crosses the gate now and is partly right.
 As in every phase: one grader, who wrote the changes and knew which run was
 which. The verdicts are in `graded-verdicts-phase3.json` and
 `holdout-verdicts-phase3.json` with a reason for each.
+
+## On the phone (2026-09-24)
+
+Phase-3 APK and packs (7 packs, all passing the encoder check at 0.9996).
+Engine ready in 4.8 s.
+
+| Question | Answered by | Time |
+|---|---|---:|
+| Boiling-water burn | burns card | 0.88 s |
+| Both hands for CPR on a baby? | CPR card | 0.77 s |
+| No stove, no filter: water | water card | 0.86 s |
+| Twisted ankle | sprain card | 0.83 s |
+| Walk me through an IV line | referral | 0.87 s |
+| Black bears in this state? (CA) | model: "Yes, American black bears are present in California." | 8.3 s |
+| How do I signal for rescue? | model, from FM 21-76 | 14.4 s |
+| Nibble an unknown plant? | model: no, identify first | 19.0 s |
+
+Scores matched the desktop to the third decimal except the burns card (0.337
+on the phone, 0.338 on the desktop), still on top of the search and above
+0.32, so answered from the card.
+
+## Release builds are no longer debuggable (#30)
+
+`scripts/patch-android-fieldtest.mjs` used to put `debuggable true` on every
+release build. The release type now reads a Gradle property, off by default:
+`tools/eval/build-apk.sh` builds a shippable APK and checks the built manifest
+has no `android:debuggable`; `--field-test` builds the debuggable one that
+`run-as` staging, the devhooks inbox and drive-test data need, and checks that
+too. `stage-phone.sh` and `ask-phone.sh` refuse a non-debuggable install with
+the command to fix it. The devhooks inbox cannot be reached on a shippable
+build, because only `run-as` can create its trigger file.

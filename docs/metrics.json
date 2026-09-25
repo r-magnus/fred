@@ -26,7 +26,7 @@
         "Non-functional"
       ],
       "grade": "A",
-      "note": "First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs. The state packs are being rebuilt for the EmbeddingGemma search model: 17 of 50 done; CA and OR are on the phone."
+      "note": "First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. CA and OR are on the phone; the other 48 wait for it to be connected."
     },
     {
       "id": "A-KR2",
@@ -299,9 +299,9 @@
     },
     {
       "pack": "state-XX-flora-fauna",
-      "version": "1.0.0 / 1.1.0",
-      "chunks": 185215,
-      "source": "USFS FEIS, 50 states (gte-small 1.0.0; EmbeddingGemma 1.1.0 rebuild 17/50)"
+      "version": "1.1.0",
+      "chunks": 177963,
+      "source": "USFS FEIS, 50 states, EmbeddingGemma, 403 MB"
     }
   ],
   "device": {

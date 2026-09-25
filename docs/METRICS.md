@@ -27,7 +27,7 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 | `RC-KR2` | Product page | 2026-12-02 | — | ⚪ not started |
 | `RC-KR3` | Promotional material | 2026-12-09 | — | ⚪ not started |
 
-- `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs. The state packs are being rebuilt for the EmbeddingGemma search model: 17 of 50 done; CA and OR are on the phone.
+- `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
 - `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md.
 - `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Still inside the 10-20 s band.
 - `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.
@@ -152,9 +152,9 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 | `core-survival` | 1.4.0 | 510 | US Army ATP 3-50.21 (2018), berry rules and taste test removed |
 | `core-signaling` | 1.0.0 | 18 | US Army FM 21-76 (1992), ch.19 Signaling Techniques |
 | `core-fieldcards` | 0.1.0 | 27 | Fred field cards, every quote checked against the manuals, reviewed |
-| `state-XX-flora-fauna` | 1.0.0 / 1.1.0 | 185,215 | USFS FEIS, 50 states (gte-small 1.0.0; EmbeddingGemma 1.1.0 rebuild 17/50) |
+| `state-XX-flora-fauna` | 1.1.0 | 177,963 | USFS FEIS, 50 states, EmbeddingGemma, 403 MB |
 
-**186,736 chunks** across 6 pack types.
+**179,484 chunks** across 6 pack types.
 
 ---
 

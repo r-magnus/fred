@@ -90,6 +90,10 @@ for (const [i, q] of questions.entries()) {
       ? { sufficiencyVariant: 'numeric' as const } : {}),
     // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
     ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
+    ...(process.env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
+    // LOCATION=1 names the hiker's state in the prompt for state-pack answers.
+    ...(process.env.LOCATION === '1' ? { locationInPrompt: true } : {}),
     // CARD_ANSWER=verbatim|card-only|pick answers from a clearly matching field card.
     ...(process.env.CARD_ANSWER !== undefined ? { cardAnswer: process.env.CARD_ANSWER as CardAnswerMode } : {}),
   });
@@ -117,6 +121,7 @@ for (const [i, q] of questions.entries()) {
     promptTokens: d.tokensAfter,
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
     ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
+    ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);

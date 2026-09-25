@@ -9,10 +9,11 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, readPick, renderCard } from './card-answer.ts';
+import { STATE_NAMES } from './states.ts';
 
 /**
  * Abstention threshold on the fused score U_i.
@@ -109,6 +110,14 @@ export interface AskOptions {
    */
   readonly cardAnswer?: CardAnswerMode;
   /**
+   * When the first search scores under the gate, restate the question in
+   * field-manual wording and search again (plan step 4). Costs one short
+   * generation, only on questions that would otherwise be declined.
+   */
+  readonly secondSearch?: boolean;
+  /** Name the hiker's state in the prompt when answering from a state pack. Off until measured (plan step 3). */
+  readonly locationInPrompt?: boolean;
+  /**
    * Compression bounds. `{ minReduction: 0, maxReduction: 0 }` hands the
    * retrieved passages to the model whole.
    */
@@ -141,6 +150,8 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** The manual-wording restatement, when a second search ran, and what it scored. */
+  readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** Set when the answer was built from a field card rather than the passages. */
   readonly cardAnswer?: CardAnswerMode;
 }
@@ -193,8 +204,8 @@ export async function ask(
   const pressure = memory?.pressure() ?? 0;
   const maxTokens = maxTokensForPressure(pressure);
 
-  const keywords = extractKeywords(query);
-  const routed = route(keywords, packs, {
+  let keywords = extractKeywords(query);
+  let routed = route(keywords, packs, {
     state: opts.state,
     ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
   });
@@ -202,17 +213,40 @@ export async function ask(
     ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD)
     : threshold;
 
+
+  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
+  // The best score, not the first chunk's: a reserved field card goes first
+  // and may score below the top manual passage (retrieve.ts).
+  const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
+  let topScore = best(candidates);
+
+  let secondSearch: { rewrite: string; topScore: number } | undefined;
+  if (opts.secondSearch === true && topScore < effectiveThreshold) {
+    let rewrite = '';
+    for await (const tok of backend.generate(buildRewriteParts(query), { maxTokens: 80, temperature: 0 })) rewrite += tok;
+    rewrite = rewrite.trim();
+    const keywords2 = extractKeywords(`${query} ${rewrite}`);
+    const routed2 = route(keywords2, packs, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
+    const candidates2 = await retrieve(keywords2, routed2.packIds, store, backend, retrievalOpts, routed2.domains, rewrite);
+    secondSearch = { rewrite, topScore: best(candidates2) };
+    // Only adopted if it clears the same gate. The rewrite is searched with,
+    // never answered from: the prompt below still carries the hiker's question
+    // and the manual's passages.
+    if (secondSearch.topScore >= effectiveThreshold) {
+      keywords = keywords2;
+      routed = routed2;
+      candidates = candidates2;
+      topScore = secondSearch.topScore;
+    }
+  }
+
   const baseDiag = {
     keywords,
     route: routed,
     maxTokens,
     memoryPressure: pressure,
+    ...(secondSearch === undefined ? {} : { secondSearch }),
   };
-
-  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
-  // The best score, not the first chunk's: a reserved field card goes first
-  // and may score below the top manual passage (retrieve.ts).
-  const topScore = candidates.reduce((m, c) => Math.max(m, c.score), 0);
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
     const weak = {
@@ -334,7 +368,12 @@ export async function ask(
     }
   }
 
-  const prompt = buildPromptParts(query, blocks, opts.answerVariant);
+  // Say where the hiker is only when a state pack is being answered from, the
+  // one case where "this state" or "around here" needs resolving.
+  const statePacks = new Set(packs.filter((p) => p.scope.kind === 'us-state').map((p) => p.id));
+  const place = opts.state !== null && opts.locationInPrompt === true && blocks.some((b) => statePacks.has(b.chunk.packId))
+    ? STATE_NAMES[opts.state] : undefined;
+  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };

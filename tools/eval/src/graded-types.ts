@@ -129,6 +129,8 @@ export interface GradedRun {
   readonly abstainReason?: string;
   /** Set when the answer came from a field card (CARD_ANSWER). */
   readonly cardAnswer?: string;
+  /** The manual-wording restatement and its score, when a second search ran (SECOND_SEARCH). */
+  readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
   readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }

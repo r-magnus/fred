@@ -28,7 +28,7 @@ const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
 const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
 const EMBED_MODEL_ID = 'Supabase/gte-small';
 
-import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
+import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
 import { ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, WHO_BEC_PROVIDER_ONLY, type ProviderRule } from './provider-only.ts';
 
@@ -77,6 +77,29 @@ const CORPORA: Record<string, CorpusDef> = {
       source: 'WHO BEC 2018',
       licenseId: 'who-bec',
       licenses: [WHO_BEC_LICENSE],
+    },
+  },
+  // Signalling for rescue only: the one survival topic the 2018 manual left out
+  // (docs/plan-phase3.md, class D). See FM_21_76_LICENSE for why this edition.
+  'fm-21-76': {
+    pdf: 'corpora/survival/fm-21-76.pdf',
+    domain: 'survival',
+    pages: [[298, 311]], // Chapter 19, Signaling Techniques; 308-309 are figures only.
+    clean: {
+      dropLines: [/^19-\d+$/, /^FM 21-76$/],
+      // Chapter titles are letter-spaced ("S I G N A L I N G").
+      rewrites: [[/^S I G N A L I N G$/m, 'SIGNALING'], [/^T E C H N I Q U E S$/m, 'TECHNIQUES']],
+    },
+    input: {
+      id: 'core-signaling',
+      version: '1.0.0',
+      displayName: 'Signaling for Rescue',
+      description: 'US Army FM 21-76 Survival (1992), Chapter 19 — signal fires, smoke, mirrors, whistles, ground-to-air codes.',
+      domains: ['survival'],
+      scope: { kind: 'global' },
+      source: 'FM 21-76 Survival 1992',
+      licenseId: 'fm-21-76',
+      licenses: [FM_21_76_LICENSE],
     },
   },
   // Current Army survival doctrine. It supersedes FM 3-05.70 (2002), which

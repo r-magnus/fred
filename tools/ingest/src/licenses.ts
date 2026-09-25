@@ -31,3 +31,18 @@ export const ATP_FIRST_AID_LICENSE: LicenseEntry = {
   nonCommercial: false,
 };
 
+
+/**
+ * Only the signalling chapter is used. ATP 3-50.21 (2018) dropped signalling
+ * (it moved to recovery doctrine), and FM 3-05.70 (2002), which kept it, is
+ * distribution-restricted to US Government agencies and contractors, so it
+ * cannot ship. FM 21-76 (1992) is approved for public release.
+ */
+export const FM_21_76_LICENSE: LicenseEntry = {
+  id: 'fm-21-76',
+  license: 'Public domain (US Government work)',
+  sourceTitle: 'FM 21-76, Survival (Headquarters, Department of the Army, June 1992), Chapter 19 Signaling Techniques',
+  sourceUrl: 'https://www.bits.de/NRANEU/others/amd-us-archive/FM21-76(92).pdf',
+  attribution: 'US Army FM 21-76, Survival (1992). Approved for public release; distribution is unlimited.',
+  nonCommercial: false,
+};

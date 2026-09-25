@@ -410,3 +410,11 @@ done what they can there. The next fix belongs in how the answer is written.
 When one card clearly matches, Fred should answer from the card's own steps and
 "don'ts" rather than letting the model rewrite them freely (a new ticket
 alongside #48). Fine-tuning stays the last resort.
+
+**On the phone** (rebuilt APK, phase-2 packs staged, 7 check questions): all
+six packs pass the encoder check (cos 0.9996). Retrieval picks the same passages
+with the same scores as the desktop, and the answers match in substance. The
+bleeding answer on the phone doesn't mention raising the limb at all. The burn
+and baby-CPR answers repeat the same wrong steps as on the desktop, and the
+no-stove water question is refused the same way. Engine ready 4.9 s (six packs);
+retrieval 0.85-1.3 s; first word 8.3-15.2 s; full answer 10.5-24.0 s.

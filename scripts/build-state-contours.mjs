@@ -9,31 +9,30 @@
  *    archive with `pmtiles extract`, the same range-request workflow
  *    build-state-map.mjs uses. Cached in the work directory, so a re-run does
  *    not download again.
- * 2. Trace contours per tile (tools/ingest/src/contours.ts): 200 m lines at
+ * 2. Trace contours per tile (tools/ingest/src/contours.ts), across worker
+ *    threads (contour-worker.mjs): 200 m lines at
  *    z10, 100 m at z11, 40 m at z12, with 1000/500/200 m index lines flagged
  *    idx=1. Above z12 MapLibre overzooms the z12 tiles.
  * 3. Write gzipped MVT tiles to an MBTiles file and convert it with
  *    `pmtiles convert`.
  *
- * The bbox is build-state-map.mjs's (Census boundaries plus 0.15 degrees), so
+ * The bbox comes from state-bbox.mjs, shared with build-state-map.mjs, so
  * contours cover exactly the area the basemap does.
  *
  * Needs the `pmtiles` CLI (github.com/protomaps/go-pmtiles) on PATH, or set
  * PMTILES_BIN. Elevation: Mapterhorn, attribution required on screen.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, readSync, fstatSync, renameSync, rmSync } from 'node:fs';
-import { gzipSync } from 'node:zlib';
+import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
+import { availableParallelism } from 'node:os';
+import { Worker } from 'node:worker_threads';
 import { DatabaseSync } from 'node:sqlite';
-import sharp from 'sharp';
-import { PMTiles } from 'pmtiles';
-import { STATE_BOUNDARIES } from '../packages/geo/src/us-states.ts';
-import { CONTOUR_LEVELS, encodeContourTile, terrariumToMetres, tileContours } from '../tools/ingest/src/contours.ts';
+import { stateBbox } from './state-bbox.mjs';
+import { CONTOUR_LEVELS } from '../tools/ingest/src/contours.ts';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.find((a) => a.startsWith(`--${name}=`))?.split('=')[1];
 const positional = args.filter((a) => !a.startsWith('--'));
-const PAD = 0.15; // must match build-state-map.mjs
 
 let name, bbox;
 if (flag('bbox') !== undefined) {
@@ -42,14 +41,13 @@ if (flag('bbox') !== undefined) {
   positional.unshift(undefined);
 } else {
   const state = positional[0]?.toUpperCase();
-  const b = state === undefined ? undefined : STATE_BOUNDARIES[state];
-  if (b === undefined) {
+  const box = state === undefined ? undefined : stateBbox(state);
+  if (box === undefined) {
     console.error('usage: build-state-contours.mjs <USPS> [out-dir]  |  --bbox=W,S,E,N --name=XX [out-dir]');
     process.exit(1);
   }
   name = state;
-  const [w, s, e, n] = b.bbox;
-  bbox = [w - PAD, s - PAD, e + PAD, n + PAD];
+  bbox = box; // shared with build-state-map.mjs (state-bbox.mjs)
 }
 const outDir = positional[1] ?? '.';
 const workDir = process.env.CONTOUR_WORK ?? `${outDir}/.contours-work`;
@@ -80,73 +78,17 @@ if (!existsSync(demPath)) {
   }
 }
 
-/** pmtiles' Source over a local file. */
-class NodeFileSource {
-  constructor(path) { this.path = path; this.fd = openSync(path, 'r'); this.size = fstatSync(this.fd).size; }
-  getKey() { return this.path; }
-  async getBytes(offset, length) {
-    const n = Math.min(length, this.size - offset);
-    const buf = Buffer.alloc(n);
-    readSync(this.fd, buf, 0, n, offset);
-    return { data: buf.buffer.slice(buf.byteOffset, buf.byteOffset + n) };
-  }
-}
-const dem = new PMTiles(new NodeFileSource(demPath));
-
 const lonToX = (lon, z) => Math.floor(((lon + 180) / 360) * 2 ** z);
 const latToY = (lat, z) => {
   const r = (lat * Math.PI) / 180;
   return Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * 2 ** z);
 };
 
-// Decoded elevation tiles, keyed z/x/y. Rows are processed top to bottom, so
-// only three rows need to stay decoded at a time.
-const cache = new Map();
-let size = 0;
-async function elevation(z, x, y) {
-  const key = `${z}/${x}/${y}`;
-  if (cache.has(key)) return cache.get(key);
-  const t = await dem.getZxy(z, x, y);
-  let grid = null;
-  if (t !== undefined) {
-    const { data, info } = await sharp(Buffer.from(t.data)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-    size = info.width;
-    grid = terrariumToMetres(data, info.channels);
-  }
-  cache.set(key, grid);
-  return grid;
-}
-
-// Pixels borrowed from each neighbour. Contours within this strip are traced
-// from the same pixels by both tiles, so lines meet exactly at the edge.
-const BORDER = 4;
-
-async function gridWithBorder(z, x, y) {
-  const centre = await elevation(z, x, y);
-  if (centre === null) return null;
-  const w = size + 2 * BORDER;
-  const out = new Float32Array(w * w);
-  const tiles = new Map();
-  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-    tiles.set(`${dx},${dy}`, await elevation(z, x + dx, y + dy));
-  }
-  for (let j = 0; j < w; j++) {
-    for (let i = 0; i < w; i++) {
-      let px = i - BORDER, py = j - BORDER, dx = 0, dy = 0;
-      if (px < 0) { dx = -1; px += size; } else if (px >= size) { dx = 1; px -= size; }
-      if (py < 0) { dy = -1; py += size; } else if (py >= size) { dy = 1; py -= size; }
-      let t = tiles.get(`${dx},${dy}`);
-      if (t === null) {
-        // No neighbour (edge of the extract): repeat the centre tile's edge.
-        t = centre;
-        px = Math.min(Math.max(i - BORDER, 0), size - 1);
-        py = Math.min(Math.max(j - BORDER, 0), size - 1);
-      }
-      out[j * w + i] = t[py * size + px];
-    }
-  }
-  return out;
-}
+// 2. Trace, in parallel: contour-worker.mjs does the decoding and tracing for
+// blocks of rows; this process only writes. CONTOUR_THREADS overrides.
+const THREADS = Number(process.env.CONTOUR_THREADS ?? Math.max(1, availableParallelism() - 1));
+const workers = Array.from({ length: THREADS }, () => new Worker(new URL('./contour-worker.mjs', import.meta.url)));
+const ROWS_PER_BLOCK = 4;
 
 // 3. Output.
 const mbtilesPath = `${workDir}/contours-${name}.mbtiles`;
@@ -166,27 +108,36 @@ for (const zs of Object.keys(CONTOUR_LEVELS)) {
   const [x0, x1] = [lonToX(bbox[0], z), lonToX(bbox[2], z)];
   const [y0, y1] = [latToY(bbox[3], z), latToY(bbox[1], z)];
   const rows = y1 - y0 + 1;
-  cache.clear();
+  const blocks = [];
+  for (let y = y0; y <= y1; y += ROWS_PER_BLOCK) blocks.push([y, Math.min(y + ROWS_PER_BLOCK - 1, y1)]);
+  let rowsDone = 0;
   db.exec('BEGIN');
-  for (let y = y0; y <= y1; y++) {
-    for (const k of cache.keys()) { const ky = Number(k.split('/')[2]); if (ky < y - 1) cache.delete(k); }
-    for (let x = x0; x <= x1; x++) {
-      const grid = await gridWithBorder(z, x, y);
-      if (grid === null) continue;
-      const features = tileContours(grid, size, BORDER, interval, index);
-      if (features.length === 0) continue;
-      const data = gzipSync(encodeContourTile('contours', features));
-      insert.run(z, x, 2 ** z - 1 - y, data);
-      tilesWritten++; bytes += data.length;
-    }
-    if ((y - y0) % 10 === 0 || y === y1) {
-      const s = (Date.now() - started) / 1000;
-      process.stdout.write(`\r  z${z} row ${y - y0 + 1}/${rows}  ${tilesWritten} tiles  ${(bytes / 1e6).toFixed(1)} MB  ${s.toFixed(0)} s   `);
-    }
-  }
+  await Promise.all(workers.map((w) => new Promise((resolve, reject) => {
+    const next = () => {
+      const b = blocks.shift();
+      if (b === undefined) { w.removeAllListeners('message'); w.removeAllListeners('error'); resolve(); return; }
+      w.postMessage({ demPath, z, interval, index, x0, x1, yStart: b[0], yEnd: b[1] });
+    };
+    w.on('message', (m) => {
+      if (m.done) { next(); return; }
+      if (m.row) {
+        rowsDone++;
+        if (rowsDone % 10 === 0 || rowsDone === rows) {
+          const s = (Date.now() - started) / 1000;
+          process.stdout.write(`\r  z${z} row ${rowsDone}/${rows}  ${tilesWritten} tiles  ${(bytes / 1e6).toFixed(1)} MB  ${s.toFixed(0)} s   `);
+        }
+        return;
+      }
+      insert.run(m.z, m.x, 2 ** m.z - 1 - m.y, new Uint8Array(m.data));
+      tilesWritten++; bytes += m.data.byteLength;
+    });
+    w.on('error', reject);
+    next();
+  })));
   db.exec('COMMIT');
   process.stdout.write('\n');
 }
+await Promise.all(workers.map((w) => w.terminate()));
 
 const meta = {
   name: `contours-${name}`,

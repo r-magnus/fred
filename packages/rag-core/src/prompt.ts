@@ -28,6 +28,14 @@ export interface ContextBlock {
  */
 export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
 
+/**
+ * What Fred says when the question is a clinical procedure (provider-only
+ * material; pipeline.ts). Fixed text, not generated: the point is that the
+ * model never sees the procedure.
+ */
+export const REFER_REPLY =
+  "That's a procedure for trained medical providers, so I won't walk you through it. Call emergency services or get the person to medical care as fast as you can.";
+
 /** True when a generated answer is really the model declining. */
 export function isRefusal(text: string): boolean {
   const t = text.trim().toLowerCase().replace(/[.!]+$/, '');
@@ -155,14 +163,18 @@ export function renderContext(blocks: readonly ContextBlock[]): string {
  * verbatim. Moving them above the question fixed the echo and cost far more
  * elsewhere (see shapeInstruction), so the echo is the cheaper defect.
  */
-export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[]): string {
+export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[], place?: string): string {
   const rules = [shapeInstruction(blocks)];
   // Fired unconditionally before, so it turned up on "what plants and animals are
   // near me?" and on a question about what mountain lions eat.
   if (isMedical(blocks)) {
     rules.push('If life is at risk, say to contact emergency services first.');
   }
-  return `\n\nSOURCES:\n${renderContext(blocks)}\n\nQUESTION: ${query}\n\n${rules.join('\n')}\n\nANSWER:`;
+  // "Are there black bears in this state?" cannot be answered from a passage
+  // about California unless the model knows "this state" is California: the
+  // model refused exactly that with the right passage in hand (ff-bear-01).
+  const where = place === undefined ? '' : `\n(The hiker is in ${place}.)`;
+  return `\n\nSOURCES:\n${renderContext(blocks)}\n\nQUESTION: ${query}${where}\n\n${rules.join('\n')}\n\nANSWER:`;
 }
 
 /**
@@ -187,10 +199,11 @@ export function buildPromptParts(
   query: string,
   blocks: readonly ContextBlock[],
   variant: AnswerVariant = 'default',
+  place?: string,
 ): PromptParts {
   return {
     system: variant === 'lead' ? SYSTEM_PREFIX_LEAD : SYSTEM_PREFIX,
-    user: buildQuerySuffix(query, blocks).trimStart(),
+    user: buildQuerySuffix(query, blocks, place).trimStart(),
   };
 }
 
@@ -277,4 +290,18 @@ export function readSufficiency(text: string): boolean {
   if (t.startsWith('YES')) return true;
   if (/\bNO\b/.test(t) && !/\bYES\b/.test(t)) return false;
   return true;
+}
+
+/**
+ * Restate a question in field-manual wording, for a second search when the
+ * first finds nothing (docs/plan-phase3.md step 4). The output is only ever
+ * searched with, never shown or given to the answering prompt: "my gear is
+ * squeaking" misses the manual's "animal fat can be used to grease
+ * equipment", and this is the bridge.
+ */
+export function buildRewriteParts(query: string): PromptParts {
+  return {
+    system: 'You translate a hiker\'s question into the terms a US Army survival or first-aid field manual would use.',
+    user: `QUESTION: ${query}\n\nWrite one or two sentences, in a field manual's own words, that a manual passage about this topic would contain. Name the topic the way the manual would. Write only the sentences.\n\nPASSAGE:`,
+  };
 }

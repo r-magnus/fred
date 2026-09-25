@@ -1,0 +1,2574 @@
+[
+  {
+    "id": "bleeding-severe",
+    "title": "Heavy bleeding from a wound",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "someone is bleeding a lot",
+      "how do I stop bad bleeding",
+      "blood is spurting from a cut on their leg",
+      "when do I use a tourniquet"
+    ],
+    "summary": "Heavy bleeding can kill in a few minutes, so act on it before anything else.",
+    "steps": [
+      "Uncover the wound so you can see where the blood is coming from.",
+      "Press hard and directly on the spot that is bleeding most, with gauze or the cleanest cloth you have.",
+      "If it is an arm or leg and pressure is not stopping it, put a tourniquet on 2 to 3 inches above the wound, on bare skin, and tighten it until the bleeding stops. Expect it to hurt; that means it is tight enough.",
+      "No tourniquet? Make one from a strip of cloth at least 1.5 inches wide and a stick: tie it around the limb, tie the stick into the knot, and twist until the bleeding stops.",
+      "For a deep wound where a tourniquet cannot go (neck, armpit, groin), pack the wound tightly with gauze or clean cloth and hold firm pressure for at least 3 minutes.",
+      "Once it stops, wrap a bandage firmly over the dressing to hold the pressure."
+    ],
+    "dont": [
+      "Don't loosen or take off a tourniquet once it is on. Leave that to medical staff.",
+      "Don't put a tourniquet around the neck.",
+      "Don't wrap a bandage so tight that there's no pulse below it. The skin below should stay pink and warm with a pulse; if it doesn't, loosen and re-tie the bandage."
+    ],
+    "getHelp": "This is an emergency. Get the person to medical care as fast as you can. A tourniquet is safest for under two hours.",
+    "reviewerNote": "Sources disagree on two points. WHO BEC (2018) says to raise a bleeding limb above the heart, and ATP 3-50.21 (2018) says to hold direct pressure for 30 minutes before a pressure dressing. The newer ATP 4-02.11 (2026) says neither, and our answer sheet flags both as unsafe, so this card leaves both out. Please confirm. The pressure-bandage line now follows ATP 4-02.11 p.65 and p.67 word for word.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 61,
+        "quote": "Severe injuries have the potential to cause death in as little as three minutes due to blood loss."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 61,
+        "quote": "it is essential to cut or tear their clothing and carefully expose the entire area of the wound"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 71,
+        "quote": "If a TQ is not available, pack the wound and hold direct pressure over the source of the heaviest bleed, FIRST. If this fails to control the bleeding in an arm or leg, only then consider an alternate improvised TQ."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 62,
+        "quote": "all TQs should be deliberate, placed two to three inches above the wound directly on the skin, not over clothing"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 62,
+        "quote": "Expecting pain during application is crucial as it signifies proper TQ application."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 22,
+        "quote": "If a CAT is unavailable, apply an improvised tourniquet made from a rod (made from a jack handle, stick, scabbard, cleaning rod, pipe, dowel), a band of material at least 1-1/2 inches wide"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 22,
+        "quote": "The rod is then twisted, applying pressure circumferentially around the limb tight enough to stop the arterial bleeding. Do not tighten the tourniquet more than necessary to stop the bleeding."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 62,
+        "quote": "especially in areas where a TQ cannot be used, such as the groin, armpit, or neck"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 67,
+        "quote": "Fill and pack the whole wound cavity tightly while keeping firm pressure on the wound."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 67,
+        "quote": "Hold continuous direct pressure for a minimum of three minutes."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 67,
+        "quote": "Once bleeding has been controlled, apply a pressure bandage over the wound packing material to secure it in place."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 62,
+        "quote": "TQs should never be removed except by medical personnel at a higher role of care."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 26,
+        "quote": "Never place a tourniquet around the neck."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 67,
+        "quote": "If there is no pulse below the pressure bandage, it has been applied too tightly and will need to be loosened and retied."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 62,
+        "quote": "the optimal safe duration being less than two hours"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 65,
+        "quote": "ensuring the skin below remains pink and warm, with a present pulse"
+      }
+    ]
+  },
+  {
+    "id": "bleeding-soaked",
+    "title": "A bandage soaking through with blood",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "the bandage is soaked with blood",
+      "blood is coming through the dressing",
+      "should I change a bloody bandage"
+    ],
+    "summary": "Leave the soaked dressing on. Add more on top and press harder.",
+    "steps": [
+      "Keep the first dressing where it is. Pulling it off tears away the clot that is starting to form.",
+      "Put another pad or more gauze straight on top of it.",
+      "Press firmly on the source of the bleeding again.",
+      "A bandage that keeps soaking through means the bleeding is serious. If it is an arm or leg and it will not stop, use a tourniquet (see heavy bleeding).",
+      "When it stops, wrap a bandage firmly over everything to hold it in place."
+    ],
+    "dont": [
+      "Don't take off the soaked dressing."
+    ],
+    "getHelp": "Bleeding that soaks through a bandage counts as life-threatening. Get medical help as soon as you can.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 169,
+        "quote": "If the first dressing becomes soaked with blood, do not remove as this will dislodge any clots that have formed. Instead add another pad and apply firm pressure."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 25,
+        "quote": "Once you apply the dressing, do not remove it, even when the dressing becomes blood soaked."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 22,
+        "quote": "Bandages or makeshift bandages used to cover the wound are ineffective and steadily becoming soaked with blood."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 169,
+        "quote": "If bleeding does not stop, consider deep wound packing or tourniquet"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 169,
+        "quote": "When bleeding stops, apply a bandage to keep the gauze/pad in place."
+      }
+    ]
+  },
+  {
+    "id": "sprain",
+    "title": "Twisted or sprained ankle, or a strained muscle",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "I twisted my ankle on the trail",
+      "my knee is swollen after I rolled it",
+      "how do I treat a sprain",
+      "I pulled a muscle"
+    ],
+    "summary": "Treat it with RICE: rest, ice, compression, elevation.",
+    "steps": [
+      "Rest: stop using the injured joint.",
+      "Ice: use cold compresses or an improvised ice pack on and off, for up to 48 hours.",
+      "Compression: wrap or splint it to keep it stable. On an ankle, leave the boot on unless the foot's circulation looks cut off.",
+      "Elevation: raise the injured part.",
+      "A torn muscle or bad sprain can look like a break. Signs to watch for are a pop at the time of injury, swelling, bruising and not being able to move it."
+    ],
+    "dont": [
+      "Don't wrap it so tight the foot or hand below goes numb, pale or bluish. Loosen it if that happens."
+    ],
+    "getHelp": "If they cannot move it, or it might be broken, splint it and get it checked.",
+    "reviewerNote": "Our tuning answer sheet (fa-ankle-01) says to remove footwear. The Army survival manual says to leave the boot on a sprained ankle unless circulation is compromised, and this card follows the manual. The answer sheet may need fixing. Quotes no longer carry the 'R-Rest' letter prefixes; the corpus cleaner now strips them at the next rebuild.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Rest injured area."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Use improvised ice packs and cold compresses intermittently for up to\nforty-eight hours following the injury."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Compression-wrap or splint to help stabilize. If possible, leave the boot on a sprained ankle\nunless circulation is compromised."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Elevate the affected area."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Signs and symptoms associated with sprains\ninclude pain, swelling, bruising, and loss of functional movement. There may be a pop or a tear associated\nwith the injury when it occurs."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "Treatment follows\nthe RICE algorithm used to treat sprains."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 137,
+        "quote": "If there is numbness, tingling or increased pain, or\nif the fingers or toes turn pale or bluish, loosen the bandage."
+      }
+    ]
+  },
+  {
+    "id": "snakebite",
+    "title": "Snakebite",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "snake bite first aid",
+      "my friend got bitten by a snake",
+      "what do I do for a snake bite",
+      "should I suck the venom out"
+    ],
+    "summary": "Keep them still and calm, and get to medical care. Antivenom is the real treatment.",
+    "steps": [
+      "Keep the person as still and calm as you can. Moving around and panicking speed up how fast the venom spreads.",
+      "Take off rings, watches and anything tight near the bite before it swells.",
+      "Keep the bitten arm or leg slightly below the level of the heart if you can.",
+      "Wash the bite gently with mild soap and water.",
+      "Cover it with a clean bandage that is snug but not tight, and splint the limb so it stays still.",
+      "Note the time of the bite. Watch their breathing and be ready to do CPR."
+    ],
+    "dont": [
+      "Don't cut the bite open or try to suck out the venom.",
+      "Don't put a tourniquet on the limb.",
+      "Don't put ice on it.",
+      "Don't try to catch or kill the snake. You risk a second bite. A photo from a safe distance is fine."
+    ],
+    "getHelp": "Get medical help right away. Most snakebites are not deadly, but hospitals have the antivenom and you don't.",
+    "reviewerNote": "WHO BEC describes a firm pressure bandage up the whole limb, but only for snakes whose venom affects the nerves (like coral snakes), and says it is NOT recommended for snakes whose venom damages tissue near the bite (like rattlesnakes). A hiker can't tell which, so this card uses the snug bandage and splint from ATP 4-02.11 instead.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Keep the bitten Service member as still and calm as possible. Restrict movement and avoid\nunnecessary exertion, as it can accelerate the spread of venom in the bloodstream."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Remove any constricting items, such as jewelry or tight clothing, from the affected area, as swelling\nmay occur."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Position the affected limb slightly below the level of the heart, if possible."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Cleanse the wound gently with mild soap and water to reduce the risk of infection. Do not apply ice\nor use a TQ, as they are not effective and can cause additional harm."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Apply a sterile bandage or dress over the bite, ensuring it is snug but not too tight."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 200,
+        "quote": "Bind a splint to the limb to immobilize as much of the limb as possible."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 200,
+        "quote": "Note the time the bandage was placed."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "Monitor\ntheir vital signs, such as breathing and heart rate, and be prepared to administer CPR if necessary."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "DO NOT attempt to cut open the bite or suck out the venom."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 200,
+        "quote": "DO NOT put a tourniquet around the snake bite or limb."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "do not attempt to capture or kill the snake as it may increase the risk\nof further bites"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 199,
+        "quote": "When possible, take a picture of the snake and send with the patient."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 179,
+        "quote": "It is crucial to seek medical attention immediately after a snakebite, as they can provide appropriate antivenom treatment"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 48,
+        "quote": "Deaths from snakebites are rare."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 199,
+        "quote": "This is NOT recommended if the snakes in your area produce toxins that primarily cause tissue\ndamage near the wound and do not cause body-wide symptoms."
+      }
+    ]
+  },
+  {
+    "id": "choking",
+    "title": "Someone is choking",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "someone is choking",
+      "my friend can't breathe, something is stuck in their throat",
+      "how do I do the Heimlich",
+      "choking and can't talk"
+    ],
+    "summary": "If they can cough or talk, let them cough. If they can't breathe, cough or speak, act now: five back blows, then abdominal thrusts until it comes out.",
+    "steps": [
+      "Ask if they are choking. If they can speak or cough strongly, encourage them to keep coughing and don't interfere.",
+      "If they can't breathe, speak or cough, or their breathing makes a high-pitched sound, call for help and act now.",
+      "Give five back blows first: lean them forward and strike firmly between the shoulder blades with the heel of your hand.",
+      "Then give abdominal thrusts: stand behind them and wrap your arms around their waist. Make a fist and put the thumb side against the middle of the belly, just above the belly button and well below the breastbone. Grab the fist with your other hand and thrust quickly inward and upward.",
+      "Make each thrust a separate, distinct push, and keep going until the object comes out or they pass out.",
+      "If they're pregnant, very large, or have a belly wound, use chest thrusts instead: arms under their armpits, fist in the middle of the breastbone, and thrust inward.",
+      "If they pass out, call for help, lay them on their back and start CPR. Each time you open the airway to give breaths, look in the mouth and take the object out only if you can see it."
+    ],
+    "dont": [
+      "Don't give back blows or thrusts while they can still cough or speak.",
+      "Don't sweep your fingers blindly through their mouth. It can push the object deeper."
+    ],
+    "getHelp": "For an infant, lay them face down along your arm or thigh with the head low and give five back blows, then turn them over and give five chest pushes with two fingers.",
+    "reviewerNote": "Now follows ATP 4-02.11 (2026): five back blows, then abdominal thrusts continued until the object is out or they pass out. WHO BEC (2018) alternates five and five; both use back blows and abdominal thrusts, and the newer order is used. The infant steps are from WHO, since the Army manual has none.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 80,
+        "quote": "If the casualty can\nspeak or cough effectively, encourage them to continue coughing. This indicates that they still have good air\nexchange, and you should not interfere with their efforts to expel the obstruction."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "if you notice high-pitched sounds when the casualty breathes or coughs, indicating poor air\nexchange, or if the casualty is unable to breathe, immediate action is required. Call for help"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Prior to applying abdominal thrust, first responders should administer five back blows."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 155,
+        "quote": "have the person bend at the waist and give five back blows (with the\nheel of your hand, strike the back between the shoulder blades"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Stand behind the casualty and wrap your arms around their waist."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "The thumb side of your fist should be against\nthe casualty's abdomen, in the midline and slightly above the casualty's navel, but well below the\ntip of the breastbone"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Press the fists into the abdomen with a quick backward and upward thrust"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Each thrust should be a separate and distinct movement."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Continue performing abdominal thrusts until the obstruction is expelled or the casualty becomes\nunresponsive."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "This technique is useful when the\ncasualty has an abdominal wound, is pregnant, or when the casualty is so large that you cannot wrap your\narms around the abdomen."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 82,
+        "quote": "Stand behind the casualty and wrap your arms around their chest with your arms under their armpits."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 82,
+        "quote": "place the thumb side of the fist in the middle of the breastbone"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "If the casualty becomes unresponsive, call for help as you proceed with the steps to open the airway."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 83,
+        "quote": "Position the casualty on their back to manage and secure the airway effectively."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "After each\nsubsequent set of chest compressions and before attempting breaths, look for an object and,\nif seen, remove it."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 82,
+        "quote": "Perform a finger sweep only if there is visible obstruction in the mouth to avoid pushing the\nobstruction deeper."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 159,
+        "quote": "Lay the infant over your arm or thigh in the face down position\nwith the head lower than the abdomen."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 159,
+        "quote": "Give five chest thrusts with two fingers placed just below the\nnipple line in the middle of the chest."
+      }
+    ]
+  },
+  {
+    "id": "hypothermia",
+    "title": "Hypothermia: shivering, confused, too cold",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "my friend is shivering and confused",
+      "fell in a cold creek and can't stop shivering",
+      "how do I warm someone up",
+      "signs of hypothermia"
+    ],
+    "summary": "Get them out of the cold, get them dry, wrap them up, and handle them gently. Severe hypothermia needs a hospital.",
+    "steps": [
+      "Watch for the signs: uncontrollable shivering, cold pale skin, slurred speech, clumsiness, sleepiness and confusion. If the shivering stops while they are still cold, it is getting worse, not better.",
+      "Get them out of the wind and cold.",
+      "Replace wet clothes with dry ones.",
+      "Put insulation under them as well as over them. The cold ground pulls heat out fast.",
+      "Wrap them from head to toe, leaving the face uncovered.",
+      "If they are awake and can swallow, give them warm, sweet drinks slowly.",
+      "Move them as little as possible and handle them gently. For severe cases, skin-to-skin contact inside a sleeping bag can help."
+    ],
+    "dont": [
+      "Don't give alcohol, caffeine or tobacco."
+    ],
+    "getHelp": "Hypothermia is a medical emergency. Evacuate as soon as you can, with the person lying down. Rewarming someone who is severely hypothermic should be done by medical professionals.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Symptoms of hypothermia are\ncoldness, wetness, and uncontrollable shivering."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Shivering may decrease or cease as the core temperature continues to fall."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Slurred speech."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Impaired coordination and fine motor skills."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Remove the casualty from the cold environment."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Replace wet clothing with dry clothing."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 105,
+        "quote": "it's critical to avoid placing the casualty directly onto cold, wet, or damp surfaces; instead, a blanket or poncho should be positioned underneath them to provide insulation"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 105,
+        "quote": "it is crucial to wrap the casualty completely, including their head, but ensure the face remains uncovered to prevent breathing obstructions"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "If the casualty is conscious, slowly give high caloric sweet warm fluids."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Avoid unnecessary movement from the casualty."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Environmental hypothermic casualties should be monitored and gently handled"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "For severe hypothermia, quickly stabilize\nthe victim's body temperature-this can include bare skin-on-skin contact inside a sleeping bag-and then\nprevent further heat loss."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "Do not allow the casualty to use tobacco, consume alcohol, or\ncaffeinated drinks."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 103,
+        "quote": "If\nuntreated, hypothermia is a true medical emergency and requires evacuation. Evacuate as soon as possible\nwith the casualty lying down."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 104,
+        "quote": "Attempting to\nrewarm a severely hypothermic person should be done by medical professionals"
+      }
+    ]
+  },
+  {
+    "id": "cold-night",
+    "title": "Staying warm on a cold night",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "staying warm overnight below freezing",
+      "how do I stay warm overnight",
+      "how do I avoid hypothermia while camping",
+      "my clothes are wet and it's getting cold"
+    ],
+    "summary": "Get off the cold ground, stay dry, block the wind, and wear loose layers.",
+    "steps": [
+      "Put insulation between you and the ground. A sleeping pad works, or use spare clothes, dry grass, ferns or pine boughs piled at least 12 inches thick. Fluff it up between uses.",
+      "Stay dry. Wet clothing pulls heat away up to 25 times faster than dry clothing. Dry damp clothes near your body or at a safe distance from a fire.",
+      "Get out of the wind. Moving air strips away the warm layer next to your skin. Face a shelter's opening sideways to the wind, at 90 degrees to it.",
+      "Wear several loose layers instead of one thick one, and cover your head, neck, hands and feet.",
+      "Don't overheat while setting up. Sweat soaks your clothes and chills you later, so open a layer if you start sweating.",
+      "Drink warm fluids and keep hydrated."
+    ],
+    "dont": [
+      "Don't wear tight clothing or boots. They cut off circulation and invite cold injuries.",
+      "Don't use candles or stoves in a closed-up shelter without a vent. They make carbon monoxide."
+    ],
+    "getHelp": "If anyone starts shivering uncontrollably, gets clumsy or confused, treat it as hypothermia.",
+    "reviewerNote": "Your note: wind angle now stated as 'sideways to the wind, at 90 degrees to it'.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 150,
+        "quote": "Heat loss through conduction can be somewhat controlled by placing a layer of insulation between\nisolated persons and the cold ground."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 150,
+        "quote": "If these materials are limited, use natural materials\nfrom the environment such as ferns and grass. In a coniferous forest, boughs from a tree will work."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 150,
+        "quote": "When using natural material, make the insulation a minimum of 12 inches thick."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 150,
+        "quote": "The insulation\nshould be fluffed in between uses"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "wet clothing can conduct heat away from the body\nup to 25 times faster than dry clothing"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "They can also put damp clothing near\ntheir body's core and body heat will began to dry the clothing."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "By removing or\ndisturbing this warm air layer, wind can reduce body temperature."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 148,
+        "quote": "the opening of the shelter should be placed 90 degrees to the\nprevailing wind"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 135,
+        "quote": "Several layers of lightweight clothing are better than a single,\nequally thick layer of clothing"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "Radiation can contribute to heat loss of as 45 percent\nof body heat through exposed hands, feet, head, and neck"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 135,
+        "quote": "dampness decreases the\ninsulation quality of clothing and as sweat evaporates, the body cools. Adjust your clothing so that\nyou do not sweat."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "Proper layering of clothing along with staying dry and hydrated with warm\nfluids can reduce the risk of cold injuries."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 135,
+        "quote": "Tight clothing and footgear restrict blood\ncirculation and invite cold injuries."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 148,
+        "quote": "Candles, fuel gel, or small oil\nlamps produce carbon monoxide."
+      }
+    ]
+  },
+  {
+    "id": "immersion-foot",
+    "title": "Immersion foot (trench foot): cold, wet, numb feet",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "feet numb from being wet a long time",
+      "what is trench foot",
+      "my feet are pale and cold and tingling after hiking in wet boots"
+    ],
+    "summary": "Feet that stay wet and cold for a long time can get immersion foot, also called trench foot. Warm and dry them gently.",
+    "steps": [
+      "At first the feet feel cold and numb, and they may burn or shoot with pain as they warm up. Later, the skin turns bluish and pale, the pulse in the foot weakens, and blisters and swelling appear.",
+      "Get out of the wet and cold.",
+      "Take off wet boots and socks and let the feet dry.",
+      "Warm them gradually with warm air.",
+      "Raise the feet a little to help with swelling.",
+      "Put on clean, dry, loose socks, and protect the feet from knocks. Avoid walking on them."
+    ],
+    "dont": [
+      "Don't rub or massage the feet.",
+      "Don't warm them with a fire or other direct heat. Numb feet burn without you noticing."
+    ],
+    "getHelp": "Advanced immersion foot can turn to gangrene, so get it seen by a doctor. Prevent it by changing into dry socks during the day and drying your feet every day.",
+    "reviewerNote": "Your note: early and later signs now separated instead of calling the first signs 'advanced'.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "The affected areas will be cold\nand numb. As the feet warm up, they may begin to feel hot with burning, shooting pains."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "In an advanced\nstage of immersion foot, the affected skin will be bluish and pale in color. The distal pulse will weaken, and\nblistering and swelling may occur."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Trench foot, also known as immersion foot"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Get the person out of wet and cold conditions as soon as possible"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Take off wet footwear and socks to allow the feet to dry."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "To treat immersion foot, gradually warm the affected area by exposing it to warm air."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Raise the feet slightly to help reduce swelling"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Avoid using tight or constrictive socks."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Make sure to protect the affected area from trauma, dry the feet, and avoid\nwalking."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Do not\nmassage or moisten the skin."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "Do not use direct heat sources like fires, heaters, or heating pads to warm the feet. The affected feet may be numb, and exposure to high heat can cause burns."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Casualties may also experience heat hemorrhaging and potential gangrene."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Personnel can prevent immersion foot by changing out of wet socks throughout the day. Washing\nand drying the feet daily also helps."
+      }
+    ]
+  },
+  {
+    "id": "frostbite",
+    "title": "Frostbite and frostnip",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "my fingers are white and numb from the cold",
+      "I think I have frostbite",
+      "how do I warm frostbitten toes"
+    ],
+    "summary": "Frozen skin looks pale, waxy or hard and goes numb. Rewarm it gently in warm water, never over a fire.",
+    "steps": [
+      "Watch for it on fingers, toes, ears, nose and cheeks. The skin suddenly goes white, then tingles. When the area stops hurting, frostbite has set in. Frozen skin feels hard, waxy or wooden.",
+      "Chilblains (red, swollen, tender, itchy skin after repeated cold exposure) usually get better if you warm the area with body heat. Don't rub it.",
+      "For frostbite, thaw the area in warm water between 99 and 109°F (37 to 43°C).",
+      "Loosen anything tight, keep the area warm, and protect it from more cold or knocks.",
+      "Once it has thawed, cover it with a clean dressing and raise it to reduce swelling."
+    ],
+    "dont": [
+      "Don't rub or massage it.",
+      "Don't hold it near a fire to thaw it. Numb skin burns badly without you feeling it."
+    ],
+    "getHelp": "All frostbite needs to be seen by a doctor, even if it looks mild.",
+    "reviewerNote": "ATP 3-50.21 p.50 describes 'chilblains or frost nip' together as red, swollen, hot, tender, itching skin. As you pointed out, that describes chilblains, not frostnip, so the card now names chilblains only. The frostbite signs (sudden whitening, tingling, then no pain; hard, waxy skin) are unchanged.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 191,
+        "quote": "It typically affects extremities, such as the fingers, toes, ears, and nose"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 192,
+        "quote": "The onset is signaled by a sudden blanching of the skin of the nose, ears, cheeks, fingers, or\ntoes followed by a momentary tingling sensation. Frostbite is indicated when the face, hands, or\nfeet stop hurting."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "The spot will appear wooden, waxy, or solid to the touch"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "You can identify Chilblains or frost nip by red, swollen, hot, tender, itching skin."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 50,
+        "quote": "The affected area usually responds well to locally applied\nwarming (body heat). Do not rub or massage the area."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "thaw the affected area using water that is between 99 and 109° Fahrenheit (F) [(37 and 43° Celsius (C)]"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "Keep\nthe tissue warm; decrease constricted clothing but increase exercise and insulation. Protect the affected area\nfrom further injury."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 191,
+        "quote": "Once the frostbitten area has thawed, cover it with a sterile\ndressing or clean cloth. Keep the area elevated to reduce swelling, if possible."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 51,
+        "quote": "To treat frostbite personnel should not attempt to thaw the affected areas by placing them too close\nto an open flame."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 191,
+        "quote": "Even if the frostbite\nappears mild, professional medical care is essential"
+      }
+    ]
+  },
+  {
+    "id": "burns",
+    "title": "Burns",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "I burned my hand on the stove",
+      "how do I treat a burn",
+      "my friend got burned by the campfire",
+      "burn with blisters"
+    ],
+    "summary": "Stop the burning, then work out how deep the burn is. Surface and blistering burns get cool water; deep burns get only a brief cool compress and a moist cover.",
+    "steps": [
+      "If clothing is on fire: stop, drop and roll. Don't run.",
+      "Work out the kind of burn. Red and painful with no blisters: a surface (first-degree) burn. Blisters and swelling: a partial-thickness (second-degree) burn. Leathery, dry skin that looks white, brown or black, and may not hurt at all: a full-thickness (third-degree) burn.",
+      "Surface burn: soak it in cool water to ease the pain.",
+      "Blistering burn: take off rings and tight clothing before it swells, cool it with cool running water or moist cloths until the pain eases, then cover it with a clean, dry, non-stick dressing.",
+      "Deep burn: cool it only briefly with cool, wet compresses, leave any charred clothing that's stuck to it, and cover it with cool, moist, clean dressings.",
+      "For any serious burn, keep them warm, watch for shock, and have them drink water to replace lost fluid."
+    ],
+    "dont": [
+      "Don't use ice or ice water. It damages the skin more.",
+      "Don't soak a deep burn in cold water.",
+      "Don't put butter, grease, ointments or home remedies on a burn.",
+      "Don't pull off clothing that is stuck to the burn."
+    ],
+    "getHelp": "Deep burns need medical care right away. So do burns to the face or neck, or soot in the mouth or nose, which can mean the airway is burned.",
+    "reviewerNote": "Split by burn depth, as you asked. You suggested a dry dressing for third-degree burns; ATP 3-50.21 p.28 says 'cool, moist, sterile bandages' for them, so the card follows the manual. Having Fred ask which kind of burn it is needs a prompt change (clarifying questions), which is on the next-steps list.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "get away from the flame and smother the fire - do\nnot run - Stop, Drop, and Roll."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "First-degree burns\ndo not blister; they become very red and are quite painful."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Soaking in cool water helps with the pain."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "These types of burns affect the\nupper layers of the dermis and have a tendency to swell and blister."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Remove jewelry or tight clothing from the burned area before the skin begins to swell."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Flush the skin with cool running water or apply moist cloths until\npain lessens."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Cover the burn with a clean, dry, non-adhering no-fluff bandage such as a gauze pad."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "extremely painful or painless if nerve damage has occurred"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Skin will\nbe leathery and dry and can appear black, white, or brown in color. Do not remove any embedded charred\nclothing or material."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Apply cool, wet compresses to the burned area for a very brief to help reduce the body temperature.\nDo not use ice or immerse the affected area in cold water."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Cover the burned area with cool, moist, sterile bandages."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 132,
+        "quote": "Preventing hypothermia is critical in burn care due to the high risk posed by skin damage."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Be prepared to treat injured personnel for shock."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Staying hydrated will help control the loss of\nbody fluids."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Do not use ice or ice water; this can cause more damage to the skin."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Do not put ointments, grease, petroleum jelly, butter, or home remedies on a burn."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 129,
+        "quote": "These burns require immediate medical attention"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 28,
+        "quote": "Suspect possible airway complications with burns to the face\nand/or neck; soot in the mouth and or nose; singed facial hair; or a dry cough."
+      }
+    ]
+  },
+  {
+    "id": "heat-illness",
+    "title": "Heat exhaustion and heat stroke",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "my friend is dizzy and sweating a lot in the heat",
+      "signs of heat stroke",
+      "what's the difference between heat exhaustion and heat stroke",
+      "someone overheated on the hike"
+    ],
+    "summary": "Heat exhaustion means heavy sweating, weakness and dizziness: cool them and give water. Heat stroke means hot, dry skin and confusion: it is an emergency, so cool them fast.",
+    "steps": [
+      "Heat exhaustion looks like heavy sweating, cool clammy skin, weakness, dizziness, headache, nausea and cramps.",
+      "For heat exhaustion: move them into shade, have them lie down with their legs raised a little, loosen tight clothing, put cool wet cloths on the neck, face and armpits, and fan them.",
+      "Have them sip cool water slowly. If they don't improve within 30 minutes, get help.",
+      "Heat stroke looks like confusion, hot dry skin with little or no sweating, a fast strong pulse, and sometimes seizures or collapse. Heat exhaustion can turn into it.",
+      "For heat stroke: cool them as fast as you can. Put them in cool water if possible. Otherwise soak their clothes and focus on the groin, armpits, back and neck, and fan them.",
+      "Watch their breathing and pulse, and start CPR if they stop."
+    ],
+    "dont": [
+      "Don't give alcohol or caffeine."
+    ],
+    "getHelp": "Heat stroke is a medical emergency. Call for help right away and keep cooling them while you wait.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 49,
+        "quote": "With heat exhaustion, personnel may\nexperience cool, moist, and clammy skin; a loss of appetite; a headache; excessive sweating; and weakness.\nThey may also experience faintness, dizziness, nausea, and muscle cramps."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Have the Service member lie down and elevate their legs slightly."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Loosen or remove any tight or unnecessary clothing. Apply a cool,\nwet cloth or towels to their skin, especially on the neck, face, and armpits. Use a fan or create air\nmovement to aid in evaporation."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 49,
+        "quote": "They should also slowly sip at least one\nquart of water per hour to replace lost fluids."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "If they do not\nimprove within 30 minutes or their condition worsens, seek medical assistance immediately."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Hot, dry skin (lack of sweating)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Altered mental state or confusion."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Rapid and strong heartbeat."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 49,
+        "quote": "They may\nhave seizures and mental confusion, and may collapse and lose consciousness."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Heat exhaustion can progress to heat stroke, a life-threatening condition."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 49,
+        "quote": "The treatment for heatstroke\ninvolves rapidly cooling victims by immersing them in cool water. If a water bath is unavailable, then douse\nvictims clothing with water making sure to cool the groin, the armpit, and the back and neck areas."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Fan the person while misting them with cool water to enhance cooling."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "If they stop breathing and you can no longer find a pulse, begin CPR"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Avoid alcohol\nor caffeine."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 189,
+        "quote": "Heat stroke is a medical\nemergency that requires immediate intervention."
+      }
+    ]
+  },
+  {
+    "id": "water-purify",
+    "title": "Making water safe to drink",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "treating creek or lake water",
+      "how do I purify water",
+      "purifying water without boiling",
+      "how long do I boil water"
+    ],
+    "summary": "Treat any water from a lake, stream, pond or spring before drinking it. Clear muddy water first, then boil it or treat it with tablets, iodine or bleach.",
+    "steps": [
+      "Muddy or cloudy water: filter it through cloth, or let it seep into a hole dug beside the source, first. That makes it clearer, but you still have to purify it.",
+      "Boil it: bring it to a rolling boil for 1 minute, or 3 minutes at high altitude.",
+      "Can't boil? Use purification tablets and follow the instructions on the packet. Check they haven't expired.",
+      "Tincture of iodine (2%): 5 drops per quart, or 10 if the water is cloudy or cold. Wait 30 minutes, or 60 if it's cold and cloudy.",
+      "Household bleach: the manual's amount is 2 drops per quart for 5.25% bleach, then wait 30 minutes (60 if the water is cold and cloudy). Bleach strength varies, so check the label.",
+      "After chemicals, open the cap and rinse the threads with treated water before drinking from the bottle."
+    ],
+    "dont": [
+      "Don't add drink mix until the treatment time is over.",
+      "Don't rely on a filter alone. Most filters don't remove viruses."
+    ],
+    "getHelp": "",
+    "reviewerNote": "Changes from your review that the manuals support: settle or filter first, bleach strength varies (the manual itself says to check it), the shellfish-iodine line removed, the 'rainwater is usually safe' line removed. The CDC points (6,500 ft, iodine cautions, chemical contamination) aren't in the manuals, so they are marked as such. Adding CDC's public-domain guidance as a proper source is on the next-steps list; then these lines can be quoted instead of flagged. Solar disinfection is still left out: the manual names it but gives no method.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "water from lakes, streams, ponds, swamps, and springs-especially any water near human\nsettlements or in the tropics-will need to be purified"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 66,
+        "quote": "Water that is high in sediment or debris content can be filtered"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "A sediment hole or seepage basin can be built by digging a hole alongside a water source allowing the ground to filter the water through the soil."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "After water has been filtered to improve palatability, it still requires purification prior to consumption."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "Boiling is the safest method for purifying water. Bringing water to a rolling boil for one minute at sea\nlevel will kill all waterborne pathogens. If above 8,000 feet, the boiling time should be extended to 3 minutes."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "When using water purification tablets always follow the manufacturer's\ninstructions for the recommended use of the product. Always verify that the tablets are within their\nspecified stale date"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "Use 5 drops of 2 percent tincture of iodine per full quart of water. If the water\nis cloudy or cold use 10 drops to ensure proper purification. After the iodine is mixed in, allow the\nwater to stand for 30 minutes before drinking. If the water is cold and cloudy, wait 60 minutes."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "Place 2 drops of chlorine bleach (5.25 percent sodium hypochlorite) for 1 quart\nof water and let it rest for 30 minutes. If cold and cloudy, wait 60 minutes."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "Remember that not all bleach is the same around the world; check the available level of sodium hypochlorite."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 68,
+        "quote": "open the cap and let the purified\nwater rinse any unpurified water from the threads of the container before touching it to their mouth"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "always ensure that the water has completed the purification process\nbefore adding the mixture to the water"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "most filters do not remove\nviruses"
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "Current CDC guidance says to boil for 3 minutes anywhere above 6,500 feet (the 2018 manual says above 8,000 feet).",
+        "why": "Reviewer request. CDC guidance; newer than the manual."
+      },
+      {
+        "text": "Iodine isn't suitable for everyone, for example during pregnancy or with thyroid problems. Use boiling or another method if unsure.",
+        "why": "Reviewer request. CDC guidance; replaces the manual's shellfish-allergy line, which the reviewer flagged as inaccurate."
+      },
+      {
+        "text": "If the water might contain fuel, pesticides or other chemicals, don't drink it. Boiling and disinfecting don't remove chemicals. Find another source.",
+        "why": "Reviewer request. CDC guidance; not in the manuals."
+      }
+    ]
+  },
+  {
+    "id": "fracture",
+    "title": "Suspected broken bone",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "I think my friend broke their arm",
+      "improvised splint",
+      "signs of a broken bone",
+      "make a splint"
+    ],
+    "summary": "Splint it the way you find it, so the joints above and below the break can't move, and check the blood flow before and after.",
+    "steps": [
+      "Signs of a break include a lot of pain and swelling, a snap heard or felt, a limb that looks the wrong shape or length, and a crackling feeling under the skin.",
+      "Take off rings and watches before swelling starts.",
+      "If bone is poking through the skin, cover the wound with a clean dressing before splinting.",
+      "Check the blood flow below the injury: feel for a pulse, check they can feel your touch, compare its warmth with the other side, and look for pale, white or bluish-gray skin.",
+      "Use sticks, branches or rolled-up material as splints. Put one on each side, long enough to hold the joint above and the joint below the break still.",
+      "Pad the splints wherever they touch bony spots like the wrist, elbow, knee or ankle.",
+      "Tie them in place with strips of cloth, above and below the break but not on top of it.",
+      "Check the pulse, feeling, warmth and color again after splinting."
+    ],
+    "dont": [
+      "Don't tie the splint so tight that the fingers or toes go numb, tingle, or turn pale or bluish. Loosen it if they do.",
+      "Don't move the broken bone more than you have to."
+    ],
+    "getHelp": "Get medical help, and keep checking the blood flow below the break while you wait.",
+    "reviewerNote": "Your decision: splint as found, never realign. Circulation checks now include warmth and color (ATP 4-02.11 p.139).",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 136,
+        "quote": "Significant pain along with marked swelling."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 136,
+        "quote": "An audible or perceived \"snap.\""
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 136,
+        "quote": "Different length or shape of limb."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 136,
+        "quote": "Crepitus (a crackling or popping sound under the skin)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 139,
+        "quote": "if the jewelry is not removed and swelling occurs later, they may not be able\nremove it"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "In open fractures, the soft tissue injury must be treated and properly dressed\nbefore splinting."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 138,
+        "quote": "Check pulses lower to the affected extremity before and after the application of the splint."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 46,
+        "quote": "A splint can be made from sticks, branches, parts of wreckage,\ndriftwood, rolls of paper, and other rigid items."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 137,
+        "quote": "Place rigid objects so that one is on each side of the injured arm or forearm."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 46,
+        "quote": "it is crucial to splint the joints above and below\nthe fracture site to prevent the bone ends from moving"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 139,
+        "quote": "Pad the splints where they touch any bony part of the body, such as the elbow, wrist,\nknee, ankle, crotch, or armpit areas."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 46,
+        "quote": "Use large straight strips of cloth material, vines, or braided plant material to secure the splints."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 141,
+        "quote": "The swathe should not be placed directly on top of the injury but\npositioned either above or below the fracture site."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 137,
+        "quote": "If there is numbness, tingling or increased pain, or\nif the fingers or toes turn pale or bluish, loosen the bandage."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 45,
+        "quote": "For this reason minimum manipulation should be done, and only very\ncautiously."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 141,
+        "quote": "Seek medical assistance. Notify medical personnel, watch closely for development of life-threatening\nconditions and, or impaired circulation to the injured extremity."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 139,
+        "quote": "Note any pale, white, or bluish-gray color of the skin, which may indicate impaired circulation."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 139,
+        "quote": "Check the temperature of the injured extremity."
+      }
+    ]
+  },
+  {
+    "id": "unresponsive",
+    "title": "Someone is unconscious or not responding",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "I found someone passed out",
+      "my friend fainted and won't wake up",
+      "moving an unconscious person",
+      "what is the recovery position"
+    ],
+    "summary": "Check they're breathing and keep their airway open. If they're breathing, put them in the recovery position. If not, start CPR.",
+    "steps": [
+      "Call for help.",
+      "If they are face down, roll them onto their back carefully as one unit, keeping the head, neck and back in line so the body doesn't twist.",
+      "Open the airway: one hand on the forehead to tilt the head back, and the fingertips of the other hand under the bony part of the jaw to lift the chin.",
+      "If a neck or head injury is possible, open the airway by lifting the jaw forward at its angles instead, without tilting the head.",
+      "Take out anything you can see in the mouth, but don't sweep blindly with your fingers.",
+      "Check whether they are breathing. If they are not, start CPR.",
+      "If they are breathing and there's no sign of injury, roll them onto their side with the top leg bent forward and their head resting on their arm, mouth pointing down. This lets vomit drain out instead of choking them."
+    ],
+    "dont": [
+      "Don't twist their body when you move them. It can make a back, neck or spine injury worse.",
+      "Don't push your fingers into the mouth to look for something you can't see. It can push it deeper."
+    ],
+    "getHelp": "Anyone who won't wake up needs medical help. Keep checking their breathing until help arrives.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 83,
+        "quote": "Call for immediate assistance."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 74,
+        "quote": "If the casualty is lying on their chest (prone position), cautiously\nroll the casualty as a unit so that their body does not twist. The\ntwisting may further complicate a back, neck, or spinal injury."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 74,
+        "quote": "The casualty's head and neck should\nstay in line with their back."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "Place one hand on the casualty's forehead and apply firm, backward pressure with the palm to tilt the\nhead back. Place the fingertips of the other hand under the bony part of the lower jaw and lift, bringing the\nchin forward."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "In a casualty with a suspected neck injury or severe head trauma, the\nsafest approach to opening the airway is the jaw-thrust technique\nbecause in most cases, it can be accomplished without extending the\nneck."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "Remove any visible objects, but do not perform a blind finger\nsweep."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 83,
+        "quote": "Confirm if the casualty is not breathing and, if so, proceed to attempt rescue breathing"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 189,
+        "quote": "If the patient is unconscious or semiconscious and if there is NO TRAUMA, place the patient on"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 189,
+        "quote": "Stabilize the patient by bending the top leg forward. The left arm should be\nstraight with the patient's head resting on the arm to elevate the head and position the mouth\ndownward. This position will allow for vomit and other secretions to drain from the mouth with\nless risk of airway obstruction."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "Do not put your fingers\nin the mouth to try to find or remove any unseen objects that might be causing an obstruction as this may\npush the object further into the airway."
+      }
+    ]
+  },
+  {
+    "id": "cpr",
+    "title": "CPR: not breathing, no pulse",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "how do I do CPR",
+      "they're not breathing",
+      "how fast do chest compressions go",
+      "no pulse what do I do"
+    ],
+    "summary": "Push hard and fast in the middle of the chest, 30 pushes then 2 breaths, and keep going. Babies and small children get fingers, not your whole hand.",
+    "steps": [
+      "Lay them on their back on a firm, flat surface and kneel beside their chest.",
+      "Adult: put the heel of one hand in the center of the chest, between the nipples, with your other hand on top, and push down at least 2 inches.",
+      "Baby or small child: use two or three fingers instead of your hand, and push down about a third to half the depth of the chest.",
+      "Push 100 to 120 times a minute (about two a second). Let the chest come all the way back up between pushes.",
+      "After 30 pushes, give 2 rescue breaths: tilt the head back, lift the chin, pinch the nose, seal your mouth over theirs and blow for about a second so the chest rises.",
+      "If the chest doesn't rise, tilt the head again before the second breath. If it still doesn't rise, they may be choking. Look in the mouth before each set of breaths and take out anything you see.",
+      "Keep going until they breathe, cough or move, until help takes over, or until you are too exhausted to continue. Swap with someone else if you can."
+    ],
+    "dont": [
+      "Don't use the heel of your hand or both hands on a baby or small child."
+    ],
+    "getHelp": "Call for help before you start if anyone else is there.",
+    "reviewerNote": "Self-reviewed change (2026-09-24): adult and child hand positions are now separate steps with an explicit don't. In the held-out run, the old card's single step (heel of hand) plus a child note at the end let the model tell someone to use the heel of the hand on a baby (hf-cpr-infant-01).",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "Ensure the person is lying on a firm, flat surface, such as the ground or a CPR board. Kneel\nbeside the person's chest."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "Place the heel of one hand on the center of the person's chest, between the nipples."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "For adults, compress the chest at least two\ninches (five centimeters) deep."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "Perform compressions at a rate of 100 to 120 compressions per minute. This\nequates to about two compressions per second."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "Allow the chest to fully recoil between each compression"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "If you are performing CPR alone, do cycles of 30 chest\ncompressions to two rescue breaths"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "Give 2 rescue breaths by tilting the head back and lift the chin up, then pinch the nose shut then\nmake a complete seal over the person's mouth."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "Blow in for about 1 second to make the chest clearly rise."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "If chest does not rise with the initial rescue breath, retilt the head before giving the second breath."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "If the second breath does not make the chest rise, the person may be choking. After each\nsubsequent set of chest compressions and before attempting breaths, look for an object and,\nif seen, remove it."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 95,
+        "quote": "If the person shows obvious signs of life, such as breathing normally, coughing, or\nmoving, CPR can be stopped."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 95,
+        "quote": "If the person performing CPR becomes too exhausted to continue effectively, they\ncan switch with another trained individual"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "For infants or children, use two or three fingers instead of the entire hand."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "For infants or children, compress the chest about one-third to onehalf of its depth."
+      }
+    ]
+  },
+  {
+    "id": "shock",
+    "title": "Shock after an injury",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "treating shock",
+      "my friend is pale and sweaty after the fall",
+      "how do I treat someone for shock"
+    ],
+    "summary": "Shock is the body failing after blood loss or serious injury. Stop any bleeding, lay them down with feet raised, keep them warm, and get help.",
+    "steps": [
+      "Watch for confusion, a weak pulse at the wrist, fast breathing, nausea, thirst, and pale, sweaty, cool or clammy skin, especially after heavy bleeding.",
+      "Control any bleeding first.",
+      "Get them into shade or shelter.",
+      "If they are awake, lay them on their back with their feet raised a little above the level of their heart, on a pack or a log. If sitting up helps them breathe, that's fine.",
+      "Loosen anything tight at the neck and waist.",
+      "Keep them from getting chilled or overheated. Wrap them in a blanket or clothing with something between them and the ground.",
+      "Stay calm, reassure them, and keep watching them."
+    ],
+    "dont": [
+      "If a leg might be broken, splint it before you raise their legs."
+    ],
+    "getHelp": "Shock can kill. Get medical help as fast as you can.",
+    "reviewerNote": "You flagged the broken-leg line as a possible invention. It is in the shock section of ATP 4-02.11, p.99, word for word: 'If the casualty has a fractured lower extremity, do not place the casualty in the shock position until the fracture has been splinted.' Raising the legs is part of the shock position, so it applies. Reworded so the link is clear.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Mental confusion."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Weak or absent radial pulse."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Sweaty, cool, or clammy skin."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Excessive thirst."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Shock is usually caused by severe bleeding"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "Move the casualty under a permanent or improvised shelter to shade them from direct sunlight."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "which is on their\nback with their feet elevated slightly above the level of their heart"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "If a sitting\nposition makes it easier for the casualty to breathe, that is fine."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "Loosen clothing at the neck, waist, or anywhere is binding."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "Prevent the casualty from getting chilled or overheated."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "Ensure no part of the casualty is touching the ground, as this increases loss of body heat."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 99,
+        "quote": "If the casualty has a fractured lower extremity, do not place the\ncasualty in the shock position until the fracture has been splinted."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 97,
+        "quote": "Shock will lead to the casualty's death if not quickly"
+      }
+    ]
+  },
+  {
+    "id": "find-north",
+    "title": "Finding north without a compass",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "finding direction with no compass",
+      "which way is north",
+      "how do I navigate by the sun",
+      "how do I find the North Star"
+    ],
+    "summary": "Use the sun and a stick in the day, or the North Star at night. Check with more than one method if you can.",
+    "steps": [
+      "The sun rises roughly in the east and sets roughly in the west, though rarely exactly. In the Northern Hemisphere, shadows point north at noon.",
+      "Shadow-stick method: push a stick into the ground and mark the tip of its shadow with a stone. That first mark is west.",
+      "Wait 10 to 15 minutes and mark the shadow tip again. That second mark is east.",
+      "Draw a line through the two marks. Stand with the first mark on your left: you're facing north.",
+      "At night in the Northern Hemisphere, find the Big Dipper. The two stars on the outer edge of its bowl point to the North Star. Follow that line about five times the gap between them.",
+      "The North Star stays put while the other stars turn around it, so it marks north all night.",
+      "If the moon is bright enough to cast a shadow, the shadow-stick method works with the moon too."
+    ],
+    "dont": [
+      "Don't rely on the shadow-stick method in the far north or south (beyond about 66 degrees latitude). It doesn't work there."
+    ],
+    "getHelp": "",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 161,
+        "quote": "The sun always rises in the east and sets in the west, but not exactly due east or due west."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 161,
+        "quote": "In the Northern Hemisphere,\nthey will move from west to east, and will point north at noon."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 162,
+        "quote": "Place a stick or branch into the ground at a level spot where a distinct shadow will be cast.\nMark the shadow tip with a stone, twig, or other means. This first shadow mark is always the\nWest direction."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 162,
+        "quote": "Wait 10 to 15 minutes until the shadow tip moves a few inches. Mark the new position of\nthe shadow tip in the same way as the first."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 162,
+        "quote": "Draw a straight line through the two marks to obtain an approximate east-west line."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 162,
+        "quote": "Standing with the first mark (west) to your left, the other directions are simple; north is to\nthe front"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 165,
+        "quote": "Forming the outer lip of this dipper are the \"pointer stars\" because they point to the North Star."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 165,
+        "quote": "Extend this line about\nfive times the distance between the pointer stars. The North Star will be located along this line."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 164,
+        "quote": "Polaris is considered to remain stationary"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 165,
+        "quote": "The Big Dipper and Cassiopeia are generally opposite each other and rotate counterclockwise around Polaris,\nwith Polaris in the center."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 180,
+        "quote": "The four cardinal directions can also be\nobtained at night using the same technique described for the shadow-tip method - just use the moon instead\nof the sun. In this case, the moon must be bright enough to cast a shadow."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 161,
+        "quote": "The shadow-tip method is ineffective for use beyond 66'/2° latitude in either hemisphere"
+      }
+    ]
+  },
+  {
+    "id": "lost-stay-or-move",
+    "title": "Lost: should I stay or keep moving?",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "I'm lost, what should I do",
+      "should I stay put or try to walk out",
+      "I don't know where I am",
+      "we're lost and it's getting dark"
+    ],
+    "summary": "Stop and take stock before deciding anything. Staying near where you are is often the better first choice; move only when you're sure moving gets you to water, shelter and help.",
+    "steps": [
+      "Don't make a big decision straight away. Give yourself a little time to get over the shock, then look at your situation.",
+      "Check yourself and anyone with you for injuries, especially a head injury that could affect judgment.",
+      "Check whether where you are has water, shelter from the weather, and a way to signal or call for help.",
+      "If it doesn't, and you're sure you can reach somewhere that does, moving may be the better choice.",
+      "If you move, make sure you have the gear and the strength for the trip. Know your way back as well as your way forward, and keep checking the weather and how you're holding up.",
+      "If you'll be out overnight, stop and make camp early so you have time to build a shelter."
+    ],
+    "dont": [
+      "Don't leave a safe shelter to travel in bad weather.",
+      "Don't set off without what you need to survive the trip."
+    ],
+    "getHelp": "",
+    "reviewerNote": "Rewritten from your review: no 'usually stay', no 'wait several days' (a military-evasion threshold). The two lines not from the manuals are marked as such.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "Avoid making any decision immediately after the\nisolating event. If possible, wait a period to allow for recovery from the mental (if not the\nphysical) shock resulting from the event. When shock has subsided, evaluate the situation,\nanalyze the factors involved, and make valid decisions."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "Does the isolated person have a head injury or condition that effects\ntheir ability to make a clear decision?"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "may favor staying near the\nisolation site (ex. aircraft crash) initially. Movement is considered only when certain that water,\nshelter, food, and help can be reached"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "The current location does not provide adequate food, water, shelter, or the ability to\nreport/communicate or support the recovery effort."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "Are the necessary tools, equipment and materials available to support movement?"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 154,
+        "quote": "Know your route backward equally as well as your route\nforward."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 154,
+        "quote": "Is the weather changing?"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "Continually assess your physical capabilities"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 154,
+        "quote": "Making camp early so that you have plenty of time to build a shelter."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "To leave a safe shelter to travel in\nadverse weather conditions is foolhardy"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 153,
+        "quote": "Movement\nis risky unless the necessities of survival are available."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "Don't wander without a plan. Every move you make without one makes you harder to find.",
+        "why": "Reviewer request. General search-and-rescue practice; not in the manuals."
+      },
+      {
+        "text": "If you have any phone signal, call emergency services before your battery runs down. Tell them where you are or were last seen, your route, and any injuries.",
+        "why": "Reviewer request. General safety guidance; not in the manuals."
+      }
+    ]
+  },
+  {
+    "id": "fire",
+    "title": "Starting a campfire",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "how do I start a fire",
+      "lighting a fire with matches",
+      "my fire keeps going out",
+      "what is tinder and kindling"
+    ],
+    "summary": "Get all three sizes of fuel ready first: tinder, kindling, then bigger wood. Light the tinder from the bottom and feed the fire slowly so it gets air.",
+    "steps": [
+      "Pick a spot out of the wind, near your shelter and a supply of wood, and not under snow-laden trees. Clear the ground down to bare soil about 3 feet across.",
+      "Gather everything before you light anything. Tinder: dry grass, fine shavings, birch bark or seed fluff, enough to fill a cupped hand. Kindling: dead, dry twigs from pencil-lead to thumb thickness, a big handful of each size. Fuel: wood at least as thick as your forearm.",
+      "Lay the tinder on something dry, like a flat piece of wood, to keep it off wet ground. Lean it against a stick about the size of your forearm.",
+      "Light the tinder from its bottom edge, on the side the wind is coming from, and shield the match from the wind. Flame climbs upward.",
+      "Once the tinder is burning strongly, lay kindling across it a handful at a time, crossing each layer and leaving gaps for air.",
+      "Add bigger wood as the kindling catches."
+    ],
+    "dont": [
+      "Don't smother the tinder with kindling laid on like a blanket. The fire needs air.",
+      "Don't use wet, porous rocks around the fire. They can explode when heated.",
+      "Don't leave until the ground under the fire is cool to the touch."
+    ],
+    "getHelp": "",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 118,
+        "quote": "Protected from the wind."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 118,
+        "quote": "Away from snow laden trees."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 118,
+        "quote": "Clear the ground of fallen leaves, vegetation, and duff; expose 3 feet (1 meter) in diameter of soil\nat a minimum"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 119,
+        "quote": "If one phase is skipped even in ideal circumstances, it is likely that the fire\nwill fail"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 120,
+        "quote": "Dead dry grass, ferns, moss, lichen, and fungi."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 120,
+        "quote": "When using fibrous tinder to start a single fire, isolated persons\ncollect enough to fill their hand with fingers cupped."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 122,
+        "quote": "Preparing kindling in several different sizes that range from pencil lead, to pencil, and then to thumb\nsize will make fire-building easy"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 122,
+        "quote": "Wood used as fuel should be the diameter of the forearm at a minimum."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 119,
+        "quote": "The base is used to keep moisture susceptible tinder and kindling off the wet\nground"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 119,
+        "quote": "It is about the size of a person's forearm."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 121,
+        "quote": "The tinder is lighted from its bottom edge\naway from the brace. The initial flame is small and is most easily able to spread in an upward sloping direction"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 125,
+        "quote": "Fires are started from the upwind side to protect the fragile fire-starting heat source."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 125,
+        "quote": "Isolated persons take intentional precautionary measures to protect lit matches from wind."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 121,
+        "quote": "Kindling is added once the tinder is burning strong and\nmostly engulfed by flame. It is laid by the handful"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 121,
+        "quote": "If the kindling is laid over the tinder like a blanket, the fire will likely not receive enough\noxygen to continue burning"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 121,
+        "quote": "The second handful of\nkindling is laid perpendicular or diagonal to the first laid kindling"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 118,
+        "quote": "Porous rock is removed from the fire site, which is at risk of exploding from the heat of the fire."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 125,
+        "quote": "When leaving an area after having a fire, ensure that the ground under\nwhere the fire was built is cool to the touch."
+      }
+    ]
+  },
+  {
+    "id": "shelter",
+    "title": "Setting up a shelter for the night",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "emergency shelter",
+      "tarp lean-to",
+      "where should I set up camp"
+    ],
+    "summary": "Pick a safe, level spot early, use what's already there, put the back of the shelter into the wind, and insulate the ground.",
+    "steps": [
+      "Start looking before dark. Build early so you have time.",
+      "Choose a spot that's level and big enough to lie down, protected from sun, wind, rain and snow, and not under dead trees that could fall.",
+      "Stay away from flash-flood areas and high-water marks, from slopes where rock, mud or snow could slide, and from low hollows where cold air collects.",
+      "Use natural cover first: an overhang, a fallen tree with thick branches, a clump of bushes, or the sheltered side of a big rock.",
+      "With a tarp or poncho: tie a line between two trees about 7 to 10 feet apart, at waist height. Put the back of the tarp into the wind and stake the low edge to the ground.",
+      "Tie a short stick onto each line just outside the tarp so rain drips off instead of running inside.",
+      "Pile brush or your pack along the open sides to block wind.",
+      "Put leaves, pine needles or boughs under you. At rest you can lose up to 80% of your body heat into the ground."
+    ],
+    "dont": [
+      "Don't camp in a spot that could flood or where rock, mud or snow could slide."
+    ],
+    "getHelp": "",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 154,
+        "quote": "Making camp early so that you have plenty of time to build a shelter."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "be large enough and level enough for the isolated person to lie down and protect their equipment"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "Provides elemental sun, wind, rain, and snow protection."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "Is free of dead trees that may fall."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "Is located in an area free from threat of avalanches, rockslides, mudslides, Flash-flood areas and\nhigh-water marks."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 136,
+        "quote": "Low-lying areas that may be a cold sump."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 138,
+        "quote": "Large rocks on leeward sides of hills."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 138,
+        "quote": "Fallen trees with thick branches."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "two trees or two poles 7 to 10 feet apart"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "Ensure that the back of the lean-to will be into the wind"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "Tie the ropes about waist high on the trees."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "Spread the poncho and anchor it to the ground, putting sharpened sticks through the\ngrommets and into the ground."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "These drip sticks will keep rainwater from running down the ropes into the lean-to."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "For additional protection from wind and rain, place some brush, a rucksack, or other\nequipment at the sides of the lean-to."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "To reduce heat loss to the ground, place some type of insulating material, such as leaves\nor pine needles, inside the lean-to."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 139,
+        "quote": "When at rest, isolated persons lose as much as 80 percent of their body heat to the ground."
+      }
+    ]
+  },
+  {
+    "id": "stings-bites",
+    "title": "Bee, wasp and insect stings, spider bites",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "I got stung by a bee",
+      "a spider bit me",
+      "how do I get a stinger out",
+      "wasp sting swelling"
+    ],
+    "summary": "Most stings and bites just need cleaning and a cold compress. Watch closely for a severe allergic reaction.",
+    "steps": [
+      "For a bee or wasp sting, get the stinger out quickly by scraping it off sideways with a fingernail or the edge of a card.",
+      "Wash the area gently with mild soap and water.",
+      "Hold a cold compress, or ice wrapped in cloth, on it for 10 to 15 minutes at a time.",
+      "Try not to scratch it.",
+      "For a spider bite, wash it and watch it. A black widow bite can cause intense pain, cramps and nausea, and a brown recluse bite can turn into a spreading sore. Both should be seen by a doctor.",
+      "If you're stung by fire ants, move away first, then take off any clothing or jewelry the ants are caught in."
+    ],
+    "dont": [
+      "Don't squeeze the stinger. It can push more venom in."
+    ],
+    "getHelp": "Trouble breathing, dizziness, a swollen face or throat, or a rash spreading over the body means a severe allergic reaction. Get help immediately (see severe allergic reaction).",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 181,
+        "quote": "Gently scrape it off\nthe skin using a blunt edge like a credit card or your fingernail. Avoid squeezing the venom sac, as\nit may release more venom."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 181,
+        "quote": "Clean the bite site with mild soap and water to reduce the risk of infection."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 181,
+        "quote": "apply a cold\ncompress or an ice pack wrapped in a cloth to the bite area. Do this for 10-15 minutes at a time"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 181,
+        "quote": "refrain from scratching the insect bite"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 182,
+        "quote": "Their venom contains neurotoxins that can cause intense\npain, muscle cramps, nausea"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 182,
+        "quote": "Their bites can cause tissue necrosis (cell\ndeath), leading to an ulcerous wound that may require medical attention."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 184,
+        "quote": "Move away from the area where the ants are present to avoid further stings."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 184,
+        "quote": "Remove any clothing or jewelry that may have ants trapped in them, as they can continue to sting."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 181,
+        "quote": "If you experience symptoms such as difficulty breathing, dizziness, swelling of the\nface or throat, or a widespread rash, seek immediate medical attention."
+      }
+    ]
+  },
+  {
+    "id": "ticks",
+    "title": "Removing a tick",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "there's a tick stuck in my skin",
+      "how do I remove a tick",
+      "tick bite what should I watch for"
+    ],
+    "summary": "Pull it straight out with steady pressure, clean the bite, and watch for a rash or flu-like illness over the next weeks.",
+    "steps": [
+      "Grip the tick with fine tweezers as close to the skin as you can.",
+      "Pull straight up with slow, even pressure until it lets go, so the whole tick comes out, mouthparts included.",
+      "Put the tick in a sealed bag or container.",
+      "Wash the bite with soap and water, wash your hands, and clean the bite every day until it heals.",
+      "If the mouthparts break off and stay in the skin, clean the spot with soap and water and watch it for ongoing irritation or signs of infection.",
+      "Over the following days and weeks, watch for a rash (sometimes shaped like a target), fever, tiredness, headache or aching joints. Tick-borne illnesses like Lyme disease and Rocky Mountain spotted fever can show up late.",
+      "To avoid ticks: wear long clothing in grass and brush, use a DEET repellent, and check your body regularly."
+    ],
+    "dont": [
+      "Don't twist or jerk the tick.",
+      "Don't squeeze or crush its body."
+    ],
+    "getHelp": "See a doctor if a rash, fever or flu-like symptoms appear after a tick bite.",
+    "reviewerNote": "Added what to do if the head breaks off, from ATP 4-02.11 p.185. The manual says remnants can cause irritation and infection; it does not say to dig them out, so the card doesn't either.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 184,
+        "quote": "Use fine-tipped tweezers to grasp the tick as close to the skin's surface as\npossible."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "Gently and steadily pull the tick upward with even pressure. Do not twist or jerk\nit. The goal is to remove the entire tick, including its mouthparts."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "Dispose of the tick by placing it\nin a sealed bag or container"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 47,
+        "quote": "Wash hands after touching the\ntick. Clean the tick wound daily until healed."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "This can\nexpand over time and may resemble a target-like pattern."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "These may include fever, fatigue, headache, muscle aches,\njoint pain, and swollen lymph nodes. However, these symptoms usually develop days or weeks after\nthe tick bite."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "wear protective clothing\nwhen in tick-prone areas, use insect repellents containing DEET, perform regular tick checks"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 184,
+        "quote": "Avoid squeezing or crushing the tick's body."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "if you develop symptoms such as\nfever, rash, joint pain, or flu-like symptoms after a tick bite, it is crucial to consult a health care professional"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "parts of the tick's body, such as its\nmouthparts, may remain embedded in the skin. This can lead to ongoing irritation and a risk of\ninfection."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 185,
+        "quote": "Thoroughly clean the bite area with soap and water or an antiseptic solution"
+      }
+    ]
+  },
+  {
+    "id": "anaphylaxis",
+    "title": "Severe allergic reaction (anaphylaxis)",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "my friend's face is swelling after a bee sting",
+      "allergic reaction trouble breathing",
+      "how do I use an EpiPen",
+      "signs of anaphylaxis"
+    ],
+    "summary": "Trouble breathing, a swelling face, lips or tongue, or hives spreading over the body after a sting, a food or anything else they're allergic to can be life-threatening. Get help fast.",
+    "steps": [
+      "Watch for sudden trouble breathing or wheezing, swelling of the face, lips or tongue, hives or widespread redness, a fast or weak pulse, and dizziness or confusion. It can start within seconds or minutes.",
+      "Call for help straight away, or send someone. This is an emergency.",
+      "If they carry an epinephrine auto-injector (like an EpiPen), help them use it right away, following the instructions printed on it.",
+      "No auto-injector? The treatment they need is epinephrine, so the priority is getting them to medical help as fast as you can.",
+      "Have them lie on their back if they can. If sitting up makes breathing easier, let them sit.",
+      "Ask what they're allergic to and what they just ate, touched or were stung by, but don't let that delay the steps above.",
+      "Keep watching their breathing and whether they respond. If they stop breathing, start CPR."
+    ],
+    "dont": [],
+    "getHelp": "Anaphylaxis can kill quickly. Get medical help even if the auto-injector seems to work.",
+    "reviewerNote": "Rewritten from your review. No doses: the card tells them to follow the injector's own instructions, and says what to do when there is no injector (get to help, because epinephrine is the treatment). Positioning simplified to lying down, or sitting if that helps breathing; the leg raise is dropped. The antihistamine line is not from the manuals and is marked as such.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Observe for sudden and severe symptoms like difficulty breathing, wheezing, or shortness of\nbreath."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Look for swelling of the face, lips, or tongue."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Note any hives or widespread skin redness."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Check for a rapid or weak pulse."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Anaphylactic reactions can\nmanifest within seconds or minutes after exposure to an allergen"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 101,
+        "quote": "Immediate actions include calling for\nmedical help and, if available, using the casualty's epinephrine auto-injector."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "Dosage guidelines are\ntypically provided with the injector"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "The primary treatment\ninvolves administering epinephrine (adrenaline)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "Position the casualty supine with legs elevated if injuries permit."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 26,
+        "quote": "Allow the patient to stay in a\nposition of comfort"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "Inquire about any known allergies or recent exposures to potential allergens."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "Perform rescue breathing and external chest compressions if required."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 102,
+        "quote": "Anaphylaxis is life-threatening, and immediate action is crucial."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "Antihistamines (like Benadryl) are not a substitute for epinephrine in a severe reaction.",
+        "why": "Reviewer request. Standard allergy guidance (AAAAI); the manuals do not say it."
+      }
+    ]
+  },
+  {
+    "id": "plant-rash",
+    "title": "Rash from poison ivy, oak or sumac",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "poison oak rash",
+      "I have an itchy rash from a plant",
+      "natural remedy for a plant rash",
+      "poison ivy what do I do"
+    ],
+    "summary": "The rash comes from an oil on the plant. Wash it off fast with soap and cold water, and don't spread it around.",
+    "steps": [
+      "Poison ivy, poison oak and poison sumac are the usual causes. Symptoms can take a few hours to several days to appear: burning, redness, itching, swelling and blisters.",
+      "As soon as you touch the plant or notice symptoms, wash the skin with soap and cold water.",
+      "No water at all? The manual's fallback is to wipe the skin repeatedly with dirt or sand, then wash properly with soap and water as soon as you can. Skip it if there are blisters.",
+      "Dry the area afterward.",
+      "Natural remedies from the manual: crushed jewelweed rubbed on the rash, or a wash made from tannic acid, which you can get by soaking or boiling oak bark.",
+      "The oil gets onto gear and clothing too, so clean anything that touched the plant."
+    ],
+    "dont": [
+      "Don't burn these plants. The smoke can be as harmful as touching them.",
+      "Don't rub dirt on blisters. It can break them open and cause infection.",
+      "Don't scratch. It spreads the rash."
+    ],
+    "getHelp": "Get it checked if the rash is near the eyes or spreads over a lot of the body.",
+    "reviewerNote": "You asked to drop the dirt/sand step unless the manual really supports it. It does, word for word: 'If water is not available, they should wipe their skin repeatedly with dirt or sand' (ATP 3-50.21 p.42), with the blister exception. Kept, framed as a no-water fallback only. The oak-bark detail combines p.42 and p.39.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "Poison ivy."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "Symptoms may take from a few hours to several days to appear. Symptoms can include burning, reddening,\nitching, swelling, and blisters."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "they should try to remove the oil by washing with soap and cold water. If water is not available, they should\nwipe their skin repeatedly with dirt or sand."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "After the removal of the oil, the area should be dried."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "The area can be washed with a tannic acid solution and jewelweed can be crushed and rubbed on the affected\narea to treat plant-caused rashes. Tannic acid can make from oak bark."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 39,
+        "quote": "Leach out the tannin by soaking or boiling."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "The oil can also get on equipment and then infect whoever touches the equipment."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "Never burn a contact poisonous\nplant, because the smoke may be as harmful as the plant."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "They should not use dirt if they have blisters. The dirt may break\nopen the blisters and leave the body open to infection."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "The effects\nmay be persistent, spread by scratching, and be particularly dangerous if there is contact in or around the\neyes."
+      }
+    ]
+  },
+  {
+    "id": "head-injury",
+    "title": "Head injury or concussion",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "hit my head and feel dizzy",
+      "signs of a concussion",
+      "I fell and hit my head and feel dizzy",
+      "knocked out for a few seconds"
+    ],
+    "summary": "Anyone who hits their head hard should be watched closely, kept still if the neck might be hurt, and checked by a doctor.",
+    "steps": [
+      "After a hard knock to the head, treat it as a possible neck or spine injury too. Don't move them unless they're in immediate danger.",
+      "Watch for signs of a concussion or worse: headache, nausea or vomiting, dizziness, confusion or memory loss, slurred speech, drowsiness, blurred vision or unequal pupils, and passing out, even briefly.",
+      "Ask simple questions: who they are, where they are, what day it is.",
+      "Most concussions happen without the person being knocked out, and symptoms can show up later, so keep watching them.",
+      "If they have a seizure, protect them from hitting things around them.",
+      "For a scalp wound, control bleeding with a dressing. Don't pull out anything stuck in the wound; pad around it instead.",
+      "A concussion needs rest, both physical and mental."
+    ],
+    "dont": [
+      "Don't hold down their arms and legs during a seizure.",
+      "Don't put anything between their teeth."
+    ],
+    "getHelp": "Clear fluid or blood from the nose or ears, a dent in the skull, worsening confusion or passing out are emergencies. Any suspected concussion should be checked by a doctor.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Casualties with blunt trauma should be treated as though they also have a spinal injury. The casualty should not be moved until the head and neck are stabilized\nunless they are in immediate danger"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Nausea and vomiting."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Slurred speech."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Blurred vision, unequal pupils, or bruising (black eyes)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Recent unconsciousness."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "(Do they know who they are? Do they know where they are?\nDo they know what day it is?)"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 122,
+        "quote": "In fact, most concussions occur without a person losing\nconsciousness."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 122,
+        "quote": "The above symptoms can\noccur immediately after the injury or may develop gradually over time."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 125,
+        "quote": "Protect them from further injury (such as hitting close-by objects)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 125,
+        "quote": "If there is an object extending from the wound, DO NOT remove the object. Improvise\nbulky dressings from the cleanest material available and place this material around the protruding\nobject for support"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 122,
+        "quote": "Physical and cognitive\nrest are recommended to allow the brain to heal properly."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 125,
+        "quote": "DO NOT forcefully hold their arms and legs if they are jerking because this can lead to\nbroken bones. DO NOT force anything between the casualties' teeth"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 121,
+        "quote": "Leakage of clear fluid (cerebrospinal fluid) or blood from the nose,\nears, or wound can indicate a more severe injury and should be treated as an emergency."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Deformity of the head (depression or swelling)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 122,
+        "quote": "It's important to seek medical attention if a concussion is suspected"
+      }
+    ]
+  },
+  {
+    "id": "wild-plants",
+    "title": "Eating wild plants and berries",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "can I eat these wild berries",
+      "tasting an unknown plant",
+      "identifying edible plants",
+      "what wild plants are edible"
+    ],
+    "summary": "Only eat a wild plant or berry you can positively identify. Don't go by its color, shape, taste or smell, and don't gamble on one because you're hungry.",
+    "steps": [
+      "Positive identification is the safest way to know a plant is edible.",
+      "Don't assume a plant is safe because animals eat it.",
+      "Don't eat any wild mushroom. Some kill quickly, and there's no field test for them.",
+      "Don't eat fruit that is spoiling or moldy.",
+      "The survival manual's taste test takes more than 24 hours for each part of a plant and is only a last resort for long-term survival. It is not a quick safety check.",
+      "People can live for weeks without food, so on a short trip hunger isn't a reason to gamble on an unidentified plant.",
+      "Even with a plant you know is safe, eat only a little at first."
+    ],
+    "dont": [],
+    "getHelp": "",
+    "reviewerNote": "Rewritten from your review. Removed: the berry color rules, 'aggregate berries are always edible', and the avoid-list, since none of them makes an unidentified plant safe. The manual's poisoning advice (make yourself vomit, activated charcoal) is not used; the Poison Control line is marked as not from the manuals. Note that the removed heuristics are still in the survival pack itself and can still reach Fred through search. Keeping them out of answers is on the next-steps list.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 77,
+        "quote": "The best and safest method for edibility of a plant is positive identification of the plant."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "Isolated persons should not eat any plant unless they have positively identified it first."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 77,
+        "quote": "It is risky to rely on plants being edible for human consumption simply because animals have also been\neating the plants."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 78,
+        "quote": "Avoid mushrooms and fungi"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 42,
+        "quote": "Some mushrooms cause death very\nquickly, and some mushrooms have no known antidote."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 78,
+        "quote": "There is no field test for determining if an unknown mushroom or\nfungi is edible except by eating them."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 77,
+        "quote": "do not eat any fruit starting to spoil or showing signs of mildew or fungus"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 83,
+        "quote": "Each part of a plant (roots, leaves, flowers, and so on) requires more than 24 hours to test."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 81,
+        "quote": "isolated\npersons should only select unknown plants as a last resort"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 69,
+        "quote": "We can live for weeks without food"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 83,
+        "quote": "Even after\ntesting plant food and finding it safe, eat it in moderation."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "If someone eats an unknown plant, berry or mushroom, get medical help or call a poison center right away, even before symptoms appear (in the US, Poison Control is 1-800-222-1222). Keep a sample or a photo of the plant if you safely can.",
+        "why": "Reviewer request. Poison Control guidance; the manual's own advice (induce vomiting, activated charcoal) is not suitable for a hiker."
+      }
+    ]
+  },
+  {
+    "id": "cut-minor",
+    "title": "A cut or scrape",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "small cut on my hand",
+      "cleaning a scrape",
+      "how do I treat a cut outdoors",
+      "signs a wound is infected"
+    ],
+    "summary": "Stop the bleeding with pressure, rinse the wound well with clean water, cover it, and check it every day for infection.",
+    "steps": [
+      "Press on it with a clean cloth until it stops bleeding. Small cuts and scrapes ooze and are easy to control.",
+      "Clean the skin around the wound.",
+      "Rinse the wound with plenty of clean water, squirted under pressure if you can, for example from a bag with a small hole poked in it. Use drinkable water at least.",
+      "Wash even small scratches with soap and water, and use antiseptic if you have it.",
+      "Cover it with a clean dressing and hold it on with a bandage.",
+      "Change the dressing every day and look for infection: more pain, swelling or redness, the area getting warm, or pus.",
+      "If it gets infected, hold a warm, moist compress (lukewarm salt water) on it for 30 minutes at a time, three or four times a day, and drink plenty of water."
+    ],
+    "dont": [
+      "Don't scrub inside the wound. Rinse it.",
+      "Don't rinse so hard that it starts bleeding again."
+    ],
+    "getHelp": "Get it seen if it keeps bleeding, is deep or gaping, or shows signs of infection that don't improve.",
+    "reviewerNote": "",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 22,
+        "quote": "Capillary bleeding most commonly occurs in minor cuts and scrapes and generally oozes in small\namounts as opposed to squirting (arterial) or flowing (venous). This type of bleeding is not difficult\nto control."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 35,
+        "quote": "Thoroughly clean the skin around the wound."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 35,
+        "quote": "Rinse (DO NOT SCRUB) the wound with large amounts of water under pressure. Water can be\npressurized using a syringe, irrigator, or plastic baggie with a small hole poked in it."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 35,
+        "quote": "Water used to cleanse a wound should be potable at a\nminimum"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 35,
+        "quote": "Clean even superficial scratches with soap and water and treated with antiseptics,\nif available."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Cover the wound\n(including nerves, bone, and blood vessels) with a clean dressing. Place a bandage on the dressing to hold it\nin place. Change the dressing daily to check for infection."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Pain, swelling, and redness\naround the wound, increased temperature, and pus in the wound or on the dressing indicate infection is\npresent."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Place a warm, moist compress with lukewarm saltwater directly on the infected wound"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Apply the warm compress three or four times daily."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Drink a lot of water."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 35,
+        "quote": "Care must be taken not to rinse/irrigate the wound so vigorously that clots are washed away and\nbleeding resumes."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 36,
+        "quote": "Keep a warm compress on the wound for a\ntotal of 30 minutes."
+      }
+    ]
+  }
+]

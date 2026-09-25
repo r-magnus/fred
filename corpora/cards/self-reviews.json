@@ -1,0 +1,10 @@
+[
+  {
+    "id": "cpr",
+    "rev": "15566dd908ed",
+    "date": "2026-09-24",
+    "by": "Claude (self-review)",
+    "change": "Split adult and baby/child hand positions into separate steps; added an explicit do-not for infants.",
+    "why": "Held-out hf-cpr-infant-01: the model told someone to use the heel of the hand on a baby, mixing the old card's adult step and trailing child note. Content unchanged otherwise; all quotes re-verified."
+  }
+]

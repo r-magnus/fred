@@ -11,7 +11,7 @@ import { FakeBackend, FakePackStore, FAKE_SPEC } from './fakes.ts';
 type Seed = Omit<ChunkRecord, 'id' | 'packId' | 'ordinal'>;
 const seed = (text: string, over: Partial<Seed> = {}): Seed => ({
   text, context: '', section: 'sec', source: 'WHO BEC 2018', page: 10,
-  domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', ...over,
+  domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', audience: 'everyone', ...over,
 });
 
 const PACKS = [
@@ -327,4 +327,96 @@ test('widening to unscoped packs widens the domains too', () => {
   // The state pack genuinely matched, so the location prompt stays available if
   // the widened search comes back with nothing.
   assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
+});
+
+test('a qualifying field card is placed first, even from outside the top K', async () => {
+  const { withReservedCard } = await import('../src/retrieve.ts');
+  const mk = (packId: string, id: string, score: number) =>
+    ({ chunk: { id, packId } as never, cosineRaw: score, cosine: score, sLex: 0, score });
+  const scored = [mk('m', 'a', 0.5), mk('m', 'b', 0.45), mk('m', 'c', 0.44), mk('m', 'd', 0.43), mk('cards', 'card', 0.38)];
+  const opts = { candidateLimit: 50, topK: 4, alpha: 1, mode: 'hybrid' as const, queryInput: 'question' as const, densePool: 20 };
+  const reserved = withReservedCard(scored, { ...opts, reserve: { packId: 'cards', minScore: 0.35 } });
+  assert.deepEqual(reserved.map((c) => c.chunk.id), ['card', 'a', 'b', 'c']);
+  const tooWeak = withReservedCard(scored, { ...opts, reserve: { packId: 'cards', minScore: 0.4 } });
+  assert.deepEqual(tooWeak.map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(withReservedCard(scored, opts).map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
+});
+
+// Provider-only material (docs/plan-phase3.md, class B).
+function clinicalStore(withCard: boolean): FakePackStore {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [
+    seed('Insert the IV cannula into the vein and secure the cannula with tape.', { audience: 'provider' }),
+    seed('Control severe bleeding with firm direct pressure on the wound.'),
+  ]);
+  store.addPack('core-fieldcards', withCard
+    ? [seed('Insert IV cannula vein: you cannot do this out here; keep them warm and get help.', { source: 'Fred field card' })]
+    : []);
+  return store;
+}
+const clinicalPacks = [
+  { id: 'core-firstaid', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-fieldcards', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+];
+
+test('a clinical procedure is referred on, not answered', async () => {
+  const backend = new FakeBackend();
+  const res = await ask('How do I insert an IV cannula into a vein?', { backend, store: clinicalStore(false), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+  });
+  assert.equal(res.kind, 'abstain');
+  if (res.kind !== 'abstain') return;
+  assert.equal(res.reason, 'provider-only');
+  assert.equal(backend.lastPrompt, null, 'the model must never see the procedure');
+});
+
+test('a matching field card takes precedence over provider-only material', async () => {
+  const res = await ask('How do I insert an IV cannula into a vein?', { backend: new FakeBackend(), store: clinicalStore(true), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
+  });
+  assert.equal(res.kind, 'answer');
+});
+
+test('provider-only passages never reach the model, even beside an answer', async () => {
+  const backend = new FakeBackend();
+  const res = await ask('How do I control severe bleeding from a wound?', { backend, store: clinicalStore(false), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+  });
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  for await (const _ of res.stream) { /* drain */ }
+  assert.ok(!(backend.lastPrompt ?? '').includes('cannula'));
+  assert.ok(res.citations.every((c) => !c.section.includes('cannula')));
+});
+
+test('the hiker\'s state is named only when a state pack is answered from', async () => {
+  const d = deps();
+  const bears = await ask('Black bear encounters around here: what do I do?', d, { state: 'CO', abstainThreshold: 0, locationInPrompt: true });
+  assert.equal(bears.kind, 'answer');
+  if (bears.kind === 'answer') assert.match(bears.prompt.user, /\(The hiker is in Colorado\.\)/);
+  const bleed = await ask('How do I control severe bleeding from a wound?', deps(), { state: 'CO', locationInPrompt: true });
+  assert.equal(bleed.kind, 'answer');
+  if (bleed.kind === 'answer') assert.doesNotMatch(bleed.prompt.user, /hiker is in/);
+});
+
+test('a clearly matching card is answered verbatim, without the model', async () => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Burns need cool water.')]);
+  store.addPack('core-fieldcards', [seed(
+    "Burns\nCool it and cover it.\n1. Cool the burn with cool water.\n2. Cover it with a clean dressing.\nDon't pull off clothing that is stuck to the burn.",
+    { source: 'Fred field card' },
+  )]);
+  const backend = new FakeBackend();
+  const res = await ask('burns cool cover clothing stuck', { backend, store, packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0, cardAnswer: 'verbatim',
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
+  });
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  let out = '';
+  for await (const t of res.stream) out += t;
+  assert.equal(out, "Cool it and cover it.\n1. Cool the burn with cool water.\n2. Cover it with a clean dressing.\nDon't pull off clothing that is stuck to the burn.");
+  assert.equal(backend.lastPrompt, null);
+  assert.equal(res.citations.length, 1);
 });

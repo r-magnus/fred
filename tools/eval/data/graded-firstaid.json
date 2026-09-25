@@ -11,8 +11,8 @@
       "Get the casualty to professional medical care"
     ],
     "redFlags": [
-      "Gives a specific waiting period before acting, such as releasing or reapplying pressure after a fixed number of minutes",
-      "Advises elevating the limb above the heart as a bleeding-control measure",
+      "Delays a tourniquet for life-threatening limb bleeding, for example by waiting a fixed period such as 30 minutes first",
+      "Offers elevation instead of direct pressure, rather than alongside it",
       "Advises removing a soaked dressing rather than adding another on top"
     ],
     "provenance": "corpus-derived",
@@ -249,7 +249,7 @@
     "keyPoints": [
       "Rest the ankle and stop them walking on it",
       "Apply cold if available, compress and elevate it",
-      "Remove footwear or anything constricting before swelling builds",
+      "Leave the boot on unless circulation is compromised, and loosen anything else constricting",
       "Get it assessed if they cannot bear weight, since a sprain and a fracture look similar"
     ],
     "provenance": "corpus-derived",

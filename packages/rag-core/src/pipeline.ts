@@ -7,11 +7,13 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import { compressContext, DEFAULT_COMPRESSION } from './compress.ts';
+import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
+import { buildPickParts, parseCard, readPick, renderCard } from './card-answer.ts';
+import { STATE_NAMES } from './states.ts';
 
 /**
  * Abstention threshold on the fused score U_i.
@@ -53,6 +55,14 @@ export const DEFAULT_ABSTAIN_THRESHOLD = 0.29;
  */
 export const DEFAULT_FALLBACK_THRESHOLD = DEFAULT_ABSTAIN_THRESHOLD;
 
+/**
+ * Passages go to the model whole. Trimming saved ~170 prompt tokens (about a
+ * second on the phone) but still cut the answer's source passage on 5 of 49
+ * cited tuning questions, because it picks sentences by word overlap with the
+ * question (docs/results-phase1.md §2). Pass `compression` to turn it back on.
+ */
+export const NO_COMPRESSION = { minReduction: 0, maxReduction: 0 } as const;
+
 /** PocketRAG §3.5 — generation budget under memory pressure. */
 export function maxTokensForPressure(pressure: number): number {
   if (pressure >= 0.85) return 256; // critical
@@ -90,9 +100,47 @@ export interface AskOptions {
    */
   readonly answerVariant?: AnswerVariant;
   readonly retrieval?: RetrievalOptions;
+  /**
+   * How to answer when a field card clearly matches (score at or above the
+   * reserved-card bar, or CARD_TOP_FLOOR and top of the search). Default
+   * 'verbatim', the only mode that cannot invert a card: measured against the
+   * others in docs/results-phase3.md. 'off' treats the card as one passage among four;
+   * 'verbatim' shows the card as written; 'card-only' has the model answer
+   * from the card alone; 'pick' has the model choose the card's relevant steps
+   * and shows those verbatim with the summary, don'ts and get-help line
+   * (card-answer.ts, docs/plan-phase3.md step 2).
+   */
+  readonly cardAnswer?: CardAnswerMode;
+  /**
+   * When the first search scores under the gate, restate the question in
+   * field-manual wording and search again (plan step 4). Costs one short
+   * generation, only on questions that would otherwise be declined.
+   */
+  readonly secondSearch?: boolean;
+  /** Name the hiker's state when the question points at it and a state pack is answered from. Default on. */
+  readonly locationInPrompt?: boolean;
+  /**
+   * Compression bounds. `{ minReduction: 0, maxReduction: 0 }` hands the
+   * retrieved passages to the model whole.
+   */
+  readonly compression?: { readonly minReduction: number; readonly maxReduction: number };
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
 }
+
+export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
+
+/**
+ * A card below the reserved-slot bar still counts as a clear match when it
+ * outscores every manual passage and clears this floor. On the tuning set the
+ * right card sat at 0.338-0.340 on top for burns, cuts and boil-less water,
+ * while the highest-scoring wrong card (choking, for a chest wound) was 0.308
+ * and below a manual passage (docs/results-phase3.md).
+ */
+export const CARD_TOP_FLOOR = 0.32;
+
+/** Words that point at where the hiker is, which the model cannot resolve alone. */
+const REFERS_TO_LOCATION = /\b(?:this|my|our) (?:state|area|region)\b|\baround here\b|\bnear (?:me|here)\b|\bnearby\b|\bhere\b|\blocal(?:ly)?\b/i;
 
 export interface Citation {
   readonly index: number;
@@ -116,6 +164,10 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** The manual-wording restatement, when a second search ran, and what it scored. */
+  readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** Set when the answer was built from a field card rather than the passages. */
+  readonly cardAnswer?: CardAnswerMode;
 }
 
 export type AskResult =
@@ -125,6 +177,12 @@ export type AskResult =
       readonly stream: AsyncIterable<string>;
       readonly citations: readonly Citation[];
       readonly medical: boolean;
+      /**
+       * Exactly what the model is given. Exposed so the eval can check whether
+       * the answer's source passage survived retrieval and compression, which
+       * the citation labels alone cannot show.
+       */
+      readonly prompt: PromptParts;
       readonly diagnostics: Diagnostics;
     }
   /** The query needs a state pack but the location is unknown. */
@@ -133,9 +191,15 @@ export type AskResult =
       readonly candidatePacks: readonly string[];
       readonly diagnostics: Diagnostics;
     }
-  /** Nothing retrieved cleared the threshold. */
+  /**
+   * Fred declines. `reason` says why: nothing cleared the threshold, the model
+   * judged the passages insufficient, or the question is a clinical procedure
+   * (the best match is provider-only material), which the app answers with
+   * REFER_REPLY rather than "I don't know".
+   */
   | {
       readonly kind: 'abstain';
+      readonly reason: 'low-score' | 'insufficient' | 'provider-only';
       readonly nearest: readonly Citation[];
       readonly diagnostics: Diagnostics;
     };
@@ -154,8 +218,8 @@ export async function ask(
   const pressure = memory?.pressure() ?? 0;
   const maxTokens = maxTokensForPressure(pressure);
 
-  const keywords = extractKeywords(query);
-  const routed = route(keywords, packs, {
+  let keywords = extractKeywords(query);
+  let routed = route(keywords, packs, {
     state: opts.state,
     ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
   });
@@ -163,15 +227,40 @@ export async function ask(
     ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD)
     : threshold;
 
+
+  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
+  // The best score, not the first chunk's: a reserved field card goes first
+  // and may score below the top manual passage (retrieve.ts).
+  const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
+  let topScore = best(candidates);
+
+  let secondSearch: { rewrite: string; topScore: number } | undefined;
+  if (opts.secondSearch === true && topScore < effectiveThreshold) {
+    let rewrite = '';
+    for await (const tok of backend.generate(buildRewriteParts(query), { maxTokens: 80, temperature: 0 })) rewrite += tok;
+    rewrite = rewrite.trim();
+    const keywords2 = extractKeywords(`${query} ${rewrite}`);
+    const routed2 = route(keywords2, packs, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
+    const candidates2 = await retrieve(keywords2, routed2.packIds, store, backend, retrievalOpts, routed2.domains, rewrite);
+    secondSearch = { rewrite, topScore: best(candidates2) };
+    // Only adopted if it clears the same gate. The rewrite is searched with,
+    // never answered from: the prompt below still carries the hiker's question
+    // and the manual's passages.
+    if (secondSearch.topScore >= effectiveThreshold) {
+      keywords = keywords2;
+      routed = routed2;
+      candidates = candidates2;
+      topScore = secondSearch.topScore;
+    }
+  }
+
   const baseDiag = {
     keywords,
     route: routed,
     maxTokens,
     memoryPressure: pressure,
+    ...(secondSearch === undefined ? {} : { secondSearch }),
   };
-
-  const candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains);
-  const topScore = candidates[0]?.score ?? 0;
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
     const weak = {
@@ -192,14 +281,72 @@ export async function ask(
     if (routed.skippedStatePacks.length > 0) {
       return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
     }
-    return { kind: 'abstain', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
+    return { kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
+  }
+
+  // Clinical procedures (IV lines, needle decompression, dose tables) are
+  // marked provider-only at ingest. When one is the best manual match and no
+  // field card matched, the question is asking to be walked through it, and
+  // Fred refers the hiker on instead (docs/plan-phase3.md, class B). Otherwise
+  // the marked passages are dropped, so the model is never handed a procedure
+  // that sits beside the one the hiker actually needs.
+  const reservedPack = retrievalOpts.reserve?.packId;
+  const cardMatched = retrievalOpts.reserve !== undefined && candidates.some(
+    (c) => c.chunk.packId === reservedPack && c.score >= retrievalOpts.reserve!.minScore,
+  );
+  const bestManual = candidates
+    .filter((c) => c.chunk.packId !== reservedPack)
+    .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  if (!cardMatched && bestManual?.chunk.audience === 'provider') {
+    return {
+      kind: 'abstain',
+      reason: 'provider-only',
+      nearest: candidates.slice(0, 2).map(toCitation),
+      diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
+    };
+  }
+  const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
+
+  const cardMode = opts.cardAnswer ?? 'verbatim';
+  const bestCard = usable
+    .filter((c) => c.chunk.packId === reservedPack)
+    .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  const cardClear = bestCard !== undefined && (cardMatched ||
+    (bestCard.score >= CARD_TOP_FLOOR && bestCard.score >= (bestManual?.score ?? 0)));
+  if (cardMode !== 'off' && cardClear) {
+    const card = bestCard!;
+    const parsed = parseCard(card.chunk.text);
+    const cardBlocks: ContextBlock[] = [{ chunk: card.chunk, text: card.chunk.text }];
+    const prompt = buildPromptParts(query, cardBlocks, opts.answerVariant);
+    const diagnostics = {
+      ...baseDiag, candidates, topScore, sufficient: null,
+      tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode,
+    };
+    const common = { kind: 'answer' as const, citations: [toCitation(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
+    if (cardMode === 'card-only') {
+      return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
+    }
+    if (cardMode === 'verbatim') {
+      return { ...common, stream: once(renderCard(parsed)) };
+    }
+    const signal = opts.signal;
+    return {
+      ...common,
+      stream: (async function* () {
+        let pick = '';
+        for await (const tok of backend.generate(buildPickParts(query, parsed), signal ? { maxTokens: 24, temperature: 0, signal } : { maxTokens: 24, temperature: 0 })) {
+          pick += tok;
+        }
+        yield renderCard(parsed, readPick(pick, parsed.steps.length));
+      })(),
+    };
   }
 
   // Stage 3 — compress before prefill.
   const compressed = await compressContext(
-    candidates.map((c) => c.chunk),
+    usable.map((c) => c.chunk),
     keywords,
-    { ...DEFAULT_COMPRESSION, countTokens: (texts) => backend.countTokens(texts) },
+    { ...(opts.compression ?? NO_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
   );
 
   const blocks: ContextBlock[] = compressed.chunks.map((c) => ({
@@ -223,6 +370,7 @@ export async function ask(
     if (!sufficient) {
       return {
         kind: 'abstain',
+        reason: 'insufficient',
         nearest: candidates.slice(0, 2).map(toCitation),
         diagnostics: {
           ...baseDiag,
@@ -237,7 +385,15 @@ export async function ask(
     }
   }
 
-  const prompt = buildPromptParts(query, blocks, opts.answerVariant);
+  // Say where the hiker is only when the question points at it ("this state",
+  // "around here") and a state pack is being answered from. Added to every
+  // state-pack answer it fixed ff-bear-01 but also reworded answers that
+  // needed no location, losing details (docs/results-phase3.md).
+  const statePacks = new Set(packs.filter((p) => p.scope.kind === 'us-state').map((p) => p.id));
+  const place = opts.state !== null && opts.locationInPrompt !== false && REFERS_TO_LOCATION.test(query) &&
+    blocks.some((b) => statePacks.has(b.chunk.packId))
+    ? STATE_NAMES[opts.state] : undefined;
+  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };
@@ -245,8 +401,9 @@ export async function ask(
   return {
     kind: 'answer',
     stream: backend.generate(prompt, generateOpts),
-    citations: candidates.map(toCitation),
-    medical: candidates.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
+    citations: usable.map(toCitation),
+    prompt,
+    medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
       ...baseDiag,
       candidates,
@@ -257,6 +414,10 @@ export async function ask(
       contextReduction: compressed.reduction,
     },
   };
+}
+
+async function* once(text: string): AsyncIterable<string> {
+  yield text;
 }
 
 function toCitation(c: ScoredChunk, i: number): Citation {

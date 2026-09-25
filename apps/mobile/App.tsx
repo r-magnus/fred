@@ -24,8 +24,9 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
-import { loadEngine, describePhase, type Engine, type LoadPhase } from './src/engine.ts';
+import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, type Citation } from '@fred/rag-core';
+import { File, Paths } from 'expo-file-system';
+import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapProbe } from './src/map-probe.tsx';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
@@ -156,7 +157,9 @@ function Screen() {
         return;
       }
       if (res.kind === 'abstain') {
-        update(id, { kind: 'abstain', done: true });
+        // A clinical procedure gets a referral, not "I don't know": Fred does
+        // know what it is, and knows it is not for a hiker to attempt.
+        update(id, { kind: 'abstain', text: res.reason === 'provider-only' ? REFER_REPLY : '', done: true });
         return;
       }
       update(id, { citations: res.citations, medical: res.medical });
@@ -178,6 +181,38 @@ function Screen() {
       setBusy(false);
     }
   }, [draft, state, busy, update]);
+
+  /**
+   * Development hook: ask questions from the desktop while the phone is locked.
+   *
+   * Only active when a file named `devhooks` exists in the app's private
+   * storage, which only the debug staging flow creates (tools/eval/ask-phone.sh
+   * writes it via `adb run-as`, which works only on debuggable builds). The app
+   * then checks `devhooks-ask.txt` every two seconds and asks its first line
+   * ("question<TAB>state") through the normal screen flow, so timing and
+   * retrieval are logged exactly as for a typed question.
+   */
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
+  useEffect(() => {
+    if (!new File(Paths.document, 'devhooks').exists) return;
+    setVerboseLogging(true);
+    const inbox = new File(Paths.document, 'devhooks-ask.txt');
+    const timer = setInterval(() => {
+      if (!inbox.exists || engine.current === null || busyRef.current) return;
+      const lines = inbox.textSync().split('\n').filter((l) => l.trim() !== '');
+      inbox.delete();
+      const [first, ...rest] = lines;
+      if (rest.length > 0) inbox.write(rest.join('\n'));
+      if (first === undefined) return;
+      const [question, st] = first.split('\t');
+      console.log(`[fred] devhook ask: ${question}`);
+      void sendRef.current(question, st === undefined || st === '' ? null : st);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (load.phase !== 'ready') {
     const failed = load.phase === 'failed';
@@ -293,7 +328,13 @@ function Screen() {
               </View>
             )}
 
-            {t.kind === 'abstain' && (
+            {t.kind === 'abstain' && t.text === REFER_REPLY && (
+              <View style={styles.card}>
+                <Text style={styles.body}>{REFER_REPLY}</Text>
+              </View>
+            )}
+
+            {t.kind === 'abstain' && t.text !== REFER_REPLY && (
               <View style={styles.card}>
                 <Text style={styles.body}>I don&apos;t have reliable information on that.</Text>
                 <Text style={styles.hint}>

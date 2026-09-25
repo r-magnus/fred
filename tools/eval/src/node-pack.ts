@@ -12,7 +12,7 @@ import type {
   ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest,
 } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
-import { vectorRow } from '@fred/rag-core';
+import { denseTopK, vectorRow } from '@fred/rag-core';
 import { getLlama, LlamaChatSession, type LlamaContext, type LlamaModel } from 'node-llama-cpp';
 
 interface LoadedPack {
@@ -75,6 +75,47 @@ export class NodePackStore implements PackStore {
     return hits.slice(0, limit);
   }
 
+  /** Ordinals per pack and domain set, for filtering the dense scan. */
+  private readonly domainOrdinals = new Map<string, Set<number>>();
+
+  private ordinalsFor(packId: string, pack: LoadedPack, domains: readonly DomainTag[]): Set<number> {
+    const key = `${packId}|${[...domains].sort().join(',')}`;
+    let set = this.domainOrdinals.get(key);
+    if (set === undefined) {
+      const rows = pack.db
+        .prepare(`SELECT ordinal FROM chunks WHERE domain IN (${domains.map(() => '?').join(',')})`)
+        .all(...domains) as { ordinal: number }[];
+      set = new Set(rows.map((r) => r.ordinal));
+      this.domainOrdinals.set(key, set);
+    }
+    return set;
+  }
+
+  async searchDense(
+    packIds: readonly string[],
+    query: Float32Array,
+    limit: number,
+    domains?: readonly DomainTag[],
+  ): Promise<readonly LexicalHit[]> {
+    const hits: LexicalHit[] = [];
+    for (const packId of packIds) {
+      const pack = this.packs.get(packId);
+      if (!pack) continue;
+      const allowed = domains === undefined || domains.length === 0 ? undefined : this.ordinalsFor(packId, pack, domains);
+      const top = denseTopK(pack.vectors, pack.dim, query, limit, allowed && ((o) => allowed.has(o)));
+      if (top.length === 0) continue;
+      const rows = pack.db
+        .prepare(`SELECT ordinal, id FROM chunks WHERE ordinal IN (${top.map(() => '?').join(',')})`)
+        .all(...top.map((t) => t.ordinal)) as { ordinal: number; id: string }[];
+      const idOf = new Map(rows.map((r) => [r.ordinal, r.id]));
+      for (const t of top) {
+        const id = idOf.get(t.ordinal);
+        if (id !== undefined) hits.push({ chunkId: id, packId, ordinal: t.ordinal });
+      }
+    }
+    return hits;
+  }
+
   async getChunks(chunkIds: readonly string[]): Promise<readonly ChunkRecord[]> {
     const out: ChunkRecord[] = [];
     for (const [packId, pack] of this.packs) {
@@ -97,6 +138,7 @@ export class NodePackStore implements PackStore {
           domain: r.domain as DomainTag,
           licenseId: r.license_id as string,
           blockKind: r.block_kind as BlockKind,
+          audience: r.audience === 'provider' ? 'provider' : 'everyone',
         });
       }
     }
@@ -116,17 +158,89 @@ export class NodePackStore implements PackStore {
   }
 }
 
+/**
+ * The local GGUF for a pack's encoder. Derived from the manifest so every tool
+ * embeds queries with the encoder the pack was built with; a hardcoded path
+ * would keep searching an EmbeddingGemma pack with gte-small, and the parity
+ * check is the only thing that would notice.
+ */
+export function embedModelPathFor(modelId: string): string {
+  const files: Record<string, string> = {
+    'Supabase/gte-small': 'gte-small_fp16.gguf',
+    'google/embeddinggemma-300m': 'embeddinggemma-300M-Q8_0.gguf',
+  };
+  const file = files[modelId];
+  if (file === undefined) throw new Error(`no local GGUF known for encoder ${modelId}`);
+  return `${process.env.HOME}/models/${file}`;
+}
+
 export interface NodeBackendOptions {
-  readonly embedModelPath: string;
+  /** Defaults to embedModelPathFor(embedModelId). */
+  readonly embedModelPath?: string;
   readonly embedModelId: string;
   readonly cosineFloor: number;
   readonly probe: EmbeddingSpec['probe'];
+  readonly queryTemplate?: string | undefined;
   readonly genModelPath?: string;
+}
+
+/**
+ * GEN_SAMPLING=qwen replaces greedy decoding with the parameters Qwen publishes
+ * for this model family. Off by default, so a plain run still measures what
+ * device-pack.ts does.
+ *
+ * Greedy is not a neutral default here. Qwen's own guidance is
+ * "DO NOT use greedy decoding, as it can lead to performance degradation and
+ * endless repetitions", and Qwen3.5-2B's card adds that this model is
+ * "more prone to entering thinking loops compared to other Qwen3.5 models,
+ * which may prevent it from terminating generation properly". Both describe
+ * docs/results-qwen35-2b.md exactly: five answers ran to the token cap, two of
+ * them repeating a single sentence.
+ *
+ * The card's non-thinking text recommendation is temperature 1.0, top_p 1.0,
+ * top_k 20, min_p 0, presence_penalty 2.0, repetition_penalty 1.0.
+ *
+ * Two things this has to get right to be that recommendation rather than a
+ * lookalike:
+ *
+ * - `presencePenalty` here penalises tokens inside a window that defaults to
+ *   the last 64 tokens. vLLM's presence_penalty, which is what Qwen's number
+ *   refers to, applies across the whole completion. The window is therefore
+ *   widened to the answer budget. A 64-token window could not even see the
+ *   repetition that motivated this: the sentence fa-ankle-01 repeated eleven
+ *   times is longer than the window.
+ * - Sampling makes a run a sample rather than a measurement, so the seed is
+ *   fixed. Without one, re-running the same configuration produces different
+ *   prose and nothing can be compared to anything.
+ */
+const QWEN_SAMPLING = process.env.GEN_SAMPLING === 'qwen';
+const GEN_SEED = Number(process.env.GEN_SEED ?? 1729);
+if (!Number.isInteger(GEN_SEED)) throw new Error(`GEN_SEED must be an integer, got ${process.env.GEN_SEED}`);
+
+function samplingFor(genOpts: GenerateOptions) {
+  if (!QWEN_SAMPLING) {
+    return {
+      temperature: genOpts.temperature ?? 0,
+      repeatPenalty: { penalty: 1.15 },
+    } as const;
+  }
+  return {
+    temperature: 1.0,
+    topP: 1.0,
+    topK: 20,
+    minP: 0,
+    seed: GEN_SEED,
+    repeatPenalty: {
+      penalty: 1.0,
+      presencePenalty: 2.0,
+      lastTokens: genOpts.maxTokens,
+    },
+  } as const;
 }
 
 export async function createNodeBackend(opts: NodeBackendOptions): Promise<InferenceBackend & { dispose(): Promise<void> }> {
   const llama = await getLlama();
-  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath });
+  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath ?? embedModelPathFor(opts.embedModelId) });
   const embedCtx = await embedModel.createEmbeddingContext();
 
   let genModel: LlamaModel | null = null;
@@ -149,6 +263,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     // Supplied by the caller from the loaded manifest; this backend is the one
     // the pack was built with, so it trivially satisfies its own probe.
     probe: opts.probe,
+    ...(opts.queryTemplate === undefined ? {} : { queryTemplate: opts.queryTemplate }),
   };
 
   return {
@@ -182,8 +297,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
         // timed Qwen3's thinking tokens, which the device does not spend.
         await session.prompt(prompt.user, {
           maxTokens: genOpts.maxTokens,
-          temperature: genOpts.temperature ?? 0,
-          repeatPenalty: { penalty: 1.15 },
+          ...samplingFor(genOpts),
           budgets: { thoughtTokens: 0 },
           onTextChunk: (t) => chunks.push(t),
         });

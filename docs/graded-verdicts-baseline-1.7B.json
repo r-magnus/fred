@@ -1,0 +1,571 @@
+{
+  "grader": "Claude Opus 5 (in-session)",
+  "variant": "J: 1.7B, current default pipeline, 100-question tuning set",
+  "runs": "docs/graded-runs-baseline-1.7B.jsonl",
+  "gradedByJudge": 61,
+  "verdicts": [
+    {
+      "questionId": "fa-bleed-01",
+      "acceptable": false,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Direct pressure is right, but 'if bleeding continues after 30 minutes' is a fixed waiting period before escalating, and no tourniquet."
+    },
+    {
+      "questionId": "fa-bleed-02",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "Step 6 says to replace the soaked bandage with a new one. That is the one thing the question is about."
+    },
+    {
+      "questionId": "fa-snake-01",
+      "acceptable": false,
+      "pointsHit": [
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Wound-care advice for a snakebite. No calm/still, no constricting items, no limb position; 'if you have antivenom, administer it' is not field guidance."
+    },
+    {
+      "questionId": "fa-snake-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Leads with 'do not use a tourniquet', limb still and below heart, urgent medical help."
+    },
+    {
+      "questionId": "fa-shock-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Capillary refill >3 s, altered mental status, weak radial pulse, pale skin; control bleeding; alert medical. No warmth/lying-down, but the substance is there."
+    },
+    {
+      "questionId": "fa-burn-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Cool water, no ice, cover, remove jewellery before swelling. Misses the when-to-seek-care threshold."
+    },
+    {
+      "questionId": "fa-burn-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "All four thresholds: >15% BSA, face/hands/groin/joints/circumferential, inhalation injury, associated trauma."
+    },
+    {
+      "questionId": "fa-choke-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Inversion. Question says cannot speak, which is complete obstruction; the answer says do not perform abdominal thrusts and to encourage coughing."
+    },
+    {
+      "questionId": "fa-seizure-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Protects from injury, airway, transfer. Clinical in register and 'administer benzodiazepine' is not a layperson action, but no red flag and no restraint or mouth advice."
+    },
+    {
+      "questionId": "fa-hypo-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Wet clothing off, insulate, warm sweet fluids if conscious, seek medical aid."
+    },
+    {
+      "questionId": "fa-heat-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Signs and treatment both complete, including escalation at 30 minutes."
+    },
+    {
+      "questionId": "fa-heat-02",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Temperature and mental state as the discriminator, names it life-threatening, cooling plus emergency care."
+    },
+    {
+      "questionId": "fa-fracture-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Extractive. Lists materials to secure a splint with; no joint above and below, no padding, no circulation check."
+    },
+    {
+      "questionId": "fa-ankle-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Answers a fracture-splinting question. Known wrong-question failure: no rest, no cold, no compression, no footwear removal."
+    },
+    {
+      "questionId": "fa-cut-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Irrigate, pressure, escalate if deep. Does not say to cover it."
+    },
+    {
+      "questionId": "fa-infection-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Redness, swelling, pain, warmth, pus, fever and chills. Warm-compress advice is from the source."
+    },
+    {
+      "questionId": "fa-unconscious-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "One line, but it is the right line: recovery position."
+    },
+    {
+      "questionId": "fa-head-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Confusion and altered mental status, vomiting and convulsions, do not move, contact emergency services."
+    },
+    {
+      "questionId": "fa-eye-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Do not remove, no pressure, shield it, get help. Leaks 'as described in SOURCE 1' into the prose."
+    },
+    {
+      "questionId": "fa-blister-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Clean, moleskin, dry feet, two pairs of socks. No infection watch."
+    },
+    {
+      "questionId": "sv-water-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Boiling, chemicals, filters. Does not say bring to a boil rather than warm."
+    },
+    {
+      "questionId": "sv-water-02",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses with four citations in hand. The source has chemical and solar options."
+    },
+    {
+      "questionId": "sv-fire-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Answers with metal-match technique to a person holding matches, and calls the dry grass fuel rather than tinder."
+    },
+    {
+      "questionId": "sv-shelter-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2,
+        3
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Site selection, natural materials, ground insulation, ventilation."
+    },
+    {
+      "questionId": "sv-shelter-02",
+      "acceptable": false,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Generic. No site choice, no ground insulation, and a warning about lubricants and fuels that belongs to another question."
+    },
+    {
+      "questionId": "sv-nav-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Answers map orienting, not how to find north. Needs a compass to do what it describes."
+    },
+    {
+      "questionId": "sv-knot-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names timber hitch and clove hitch and describes tying one."
+    },
+    {
+      "questionId": "sv-signal-01",
+      "acceptable": true,
+      "pointsHit": [
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Whistle, mirror, radio. Misses stay-put and the rule of three."
+    },
+    {
+      "questionId": "sv-plant-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        4
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Milky sap, pods, bitter or soapy taste, and repeated caution about unknowns."
+    },
+    {
+      "questionId": "sv-plant-02",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correctly says avoid the legume family. Does not say why."
+    },
+    {
+      "questionId": "sv-river-01",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names the hazardous areas to avoid: rock ledges, estuaries, eddies."
+    },
+    {
+      "questionId": "sv-cold-01",
+      "acceptable": false,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Asked 'what is that' and never names immersion foot. Care advice is sound but it is not the question."
+    },
+    {
+      "questionId": "sv-food-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. The pack has food-storage and wildlife-attraction material."
+    },
+    {
+      "questionId": "sv-lost-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Assess first, stay put if no trail is visible. Following a visible trail is defensible."
+    },
+    {
+      "questionId": "sv-hypo-prevent-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Inversion, and a dangerous one: 'avoid wearing additional layers to prevent heat loss'. Then recommends a thicker bag to someone who said theirs is thin."
+    },
+    {
+      "questionId": "ff-oak-01",
+      "acceptable": true,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Leaflet shape, oak resemblance, flowers, white drupes. Usable field identification even though the sheet asks for growth form."
+    },
+    {
+      "questionId": "ff-oak-02",
+      "acceptable": true,
+      "pointsHit": [
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Lowlands, hillsides, canyons, dry well-drained soils, and names California."
+    },
+    {
+      "questionId": "ff-lion-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Present, and diet given as deer, elk, carrion."
+    },
+    {
+      "questionId": "ff-bear-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses a yes/no question its own pack answers."
+    },
+    {
+      "questionId": "ff-bear-02",
+      "acceptable": true,
+      "pointsHit": [
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Grizzly, mountain lion, gray wolf. Badgers are an embellishment."
+    },
+    {
+      "questionId": "ff-huckleberry-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Dry slopes, canyons, barren ridges near the coast."
+    },
+    {
+      "questionId": "ff-blackoak-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Yes, native, southern Oregon foothills and lower mountains."
+    },
+    {
+      "questionId": "ff-or-bear-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Direct yes."
+    },
+    {
+      "questionId": "ff-or-coyote-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Opportunistic, animal and plant matter, carrion."
+    },
+    {
+      "questionId": "ff-list-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names winterfat, Drummond's willow, jackrabbit, bighorn, sapsucker. Framed as forage value, which reads oddly, but species that occur in Oregon are named."
+    },
+    {
+      "questionId": "ff-berry-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. Both blackberry species are in the pack."
+    },
+    {
+      "questionId": "uv-sucking-chest-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Seals the wound and escalates. 'Perform needle decompression' is not a layperson instruction and should not be there."
+    },
+    {
+      "questionId": "uv-prone-roll-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "One line that neither says to roll as a unit nor explains the twisting risk."
+    },
+    {
+      "questionId": "uv-tongue-airway-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Never mentions the tongue. Answers about consciousness and respiratory muscles instead."
+    },
+    {
+      "questionId": "uv-ingestion-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [
+        0
+      ],
+      "reasoning": "'If the risk is low, nibbling a small amount may be worth trying.' The question asks exactly this and the answer is no."
+    },
+    {
+      "questionId": "uv-tannic-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Asked what in the woods helps. Gives washing advice and never reaches tannic acid from oak bark."
+    },
+    {
+      "questionId": "uv-lice-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        2
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Sanitation, hygiene, repellent and netting. Does not say to check the body for lice and ticks."
+    },
+    {
+      "questionId": "uv-snare-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. Trapping and snaring is in the pack."
+    },
+    {
+      "questionId": "uv-flotation-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Names an improvised flotation aid."
+    },
+    {
+      "questionId": "uv-animalfat-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Refuses. Animal fat as a lubricant is in the pack."
+    },
+    {
+      "questionId": "uv-rust-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Dry it thoroughly and store dry. Misses lubrication."
+    },
+    {
+      "questionId": "uv-moon-01",
+      "acceptable": true,
+      "pointsHit": [
+        0
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Correct on the rises-before-sunset case. Does not give the after-midnight case."
+    },
+    {
+      "questionId": "uv-effort-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Generic triage list. Neither least-effort nor water appears."
+    },
+    {
+      "questionId": "uv-hape-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Lower altitude and emergency services, which is the whole answer."
+    },
+    {
+      "questionId": "uv-smoke-01",
+      "acceptable": false,
+      "pointsHit": [],
+      "redFlagsHit": [],
+      "reasoning": "Asked for a use besides signalling and answers with signalling."
+    },
+    {
+      "questionId": "uv-shoulder-01",
+      "acceptable": true,
+      "pointsHit": [
+        0,
+        1
+      ],
+      "redFlagsHit": [],
+      "reasoning": "Bandaging with pressure and reassessment. 'Swat' is an OCR artifact of 'swathe'."
+    }
+  ]
+}

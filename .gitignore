@@ -9,6 +9,8 @@ packs/*
 # Raw source corpora — large, redistributable only under their own licenses
 corpora/*
 !corpora/.gitkeep
+# Field cards are authored and reviewed here, not downloaded: they are source.
+!corpora/cards/
 
 # Models
 models/

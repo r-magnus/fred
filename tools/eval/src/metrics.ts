@@ -21,6 +21,8 @@ interface Metrics {
   config: Record<string, string | number>;
   krs: Kr[];
   akr2History: { label: string; overall: number; model: string }[];
+  /** Caveat printed under the history, e.g. where the scoring method changed. */
+  akr2HistoryNote?: string;
   akr2Breakdown: Record<string, { pass: number; total: number; what: string }>;
   remainingLosses: { n: number; what: string; fix: string }[];
   latency: { mean: number; median: number; p95: number; overTenSeconds: number; ofQueries: number; note: string };
@@ -28,16 +30,19 @@ interface Metrics {
   mcq: { note: string; conditions: { name: string; acc: number }[]; corpusDerived: number; independent: number; reference: string };
   corpora: { pack: string; version: string; chunks: number; source: string }[];
   device?: {
-    hardware: string; model: string; packLoadMs: number; modelLoadMs: number;
+    hardware: string; model: string;
+    /** Older measurements split load time; newer ones time the whole engine start. */
+    packLoadMs?: number; modelLoadMs?: number; engineReadyMs?: number; measured?: string;
     retrieveMs: number[]; answers: { q: string; totalMs: number; ttftMs: number }[];
-    meanMs: number; peakPssMb: number; peakRssMb: number; idlePssMb: number;
+    meanMs: number; peakPssMb: number; peakRssMb?: number; idlePssMb?: number;
     embedderParity: string; note: string;
   };
   akr2Holdout?: {
     overall: number; correct: number; total: number;
-    judgedAcceptable: number; judged: number; nonAnswerCorrect: number;
     tuningComparison: number;
-    routingRecall: {
+    /** Four-part rubric counts (docs/results-phase3.md). */
+    rubric?: { full: number; partial: number; wrong: number; declined: number; answerable: number; correctDecline: number; outOfScope: number; safetyFailures: number };
+    routingRecall?: {
       tuning: { reached: number; answerable: number };
       holdout: { reached: number; answerable: number };
       note: string;
@@ -117,11 +122,13 @@ const wLab = Math.max(...m.akr2History.map((h) => h.label.length));
 for (const h of m.akr2History) {
   p(`${h.label.padEnd(wLab)}  ${bar(h.overall)}  ${h.overall.toFixed(1).padStart(5)}%   ${h.model}`);
 }
-p(`${'TARGET'.padEnd(wLab)}  ${bar(90)}  ${'90.0'.padStart(5)}%`);
+const target = m.krs.find((k) => k.id === 'A-KR2')?.target ?? 90;
+p(`${'TARGET'.padEnd(wLab)}  ${bar(target)}  ${target.toFixed(1).padStart(5)}%`);
 p('```');
 p();
 const first = m.akr2History[0]!, last = m.akr2History[m.akr2History.length - 1]!;
-p(`**${first.overall}% → ${last.overall}%** (+${(last.overall - first.overall).toFixed(1)} points). Target is 90%.`);
+p(`**${first.overall}% → ${last.overall}%** (+${(last.overall - first.overall).toFixed(1)} points). Target is ${target}%.`);
+if (m.akr2HistoryNote !== undefined) { p(); p(`> ${m.akr2HistoryNote}`); }
 p();
 p('The score has two halves:');
 p();
@@ -162,12 +169,14 @@ if (m.device) {
   p();
   p('| | |');
   p('|---|---|');
-  p(`| Pack load | ${d.packLoadMs} ms (four packs) |`);
-  p(`| Model load | ${(d.modelLoadMs / 1000).toFixed(1)} s |`);
+  if (d.measured !== undefined) p(`| Measured | ${d.measured} |`);
+  if (d.engineReadyMs !== undefined) p(`| Engine ready (packs, models, parity check) | ${(d.engineReadyMs / 1000).toFixed(1)} s |`);
+  if (d.packLoadMs !== undefined) p(`| Pack load | ${d.packLoadMs} ms |`);
+  if (d.modelLoadMs !== undefined) p(`| Model load | ${(d.modelLoadMs / 1000).toFixed(1)} s |`);
   p(`| Retrieval | ${Math.min(...d.retrieveMs)}-${Math.max(...d.retrieveMs)} ms |`);
   p(`| Answer, mean | **${(d.meanMs / 1000).toFixed(1)} s** |`);
-  p(`| Peak memory | **${(d.peakPssMb / 1024).toFixed(2)} GB PSS** / ${(d.peakRssMb / 1024).toFixed(2)} GB RSS |`);
-  p(`| Idle after run | ${d.idlePssMb} MB PSS |`);
+  p(`| Peak memory | **${(d.peakPssMb / 1024).toFixed(2)} GB PSS**${d.peakRssMb === undefined ? '' : ` / ${(d.peakRssMb / 1024).toFixed(2)} GB RSS`} |`);
+  if (d.idlePssMb !== undefined) p(`| Idle after run | ${d.idlePssMb} MB PSS |`);
   p(`| Embedder parity | ${d.embedderParity} |`);
   p();
   p('```');
@@ -230,15 +239,28 @@ if (m.akr2Holdout !== undefined) {
   const prev = h.previous === undefined ? '' : ` Up from **${h.previous.overall.toFixed(1)}%** (${h.previous.what}).`;
   p(`**${h.overall.toFixed(1)}%** (${h.correct}/${h.total}) against **${h.tuningComparison}%** on the set everything was tuned on.${prev}`);
   p();
-  p('The gap is routing, not generation:');
-  p();
-  p('| Set | Answerable questions that reached the model |');
-  p('|---|---|');
-  const rt = h.routingRecall.tuning, rh = h.routingRecall.holdout;
-  p(`| tuning (lexicon built from it) | ${rt.reached}/${rt.answerable} — ${((rt.reached / rt.answerable) * 100).toFixed(0)}% |`);
-  p(`| held out | ${rh.reached}/${rh.answerable} — ${((rh.reached / rh.answerable) * 100).toFixed(0)}% |`);
-  p();
-  p(h.routingRecall.note);
+  if (h.rubric !== undefined) {
+    const r = h.rubric;
+    p('| Outcome | Count |');
+    p('|---|---:|');
+    p(`| Fully right | ${r.full} of ${r.answerable} answerable |`);
+    p(`| Partly right | ${r.partial} |`);
+    p(`| Wrong | ${r.wrong} |`);
+    p(`| Declined an answerable question | ${r.declined} |`);
+    p(`| Out-of-scope or clinical, correctly declined | ${r.correctDecline} of ${r.outOfScope} |`);
+    p(`| **Safety failures** | **${r.safetyFailures}** |`);
+  }
+  if (h.routingRecall !== undefined) {
+    p('The gap is routing, not generation:');
+    p();
+    p('| Set | Answerable questions that reached the model |');
+    p('|---|---|');
+    const rt = h.routingRecall.tuning, rh = h.routingRecall.holdout;
+    p(`| tuning (lexicon built from it) | ${rt.reached}/${rt.answerable} — ${((rt.reached / rt.answerable) * 100).toFixed(0)}% |`);
+    p(`| held out | ${rh.reached}/${rh.answerable} — ${((rh.reached / rh.answerable) * 100).toFixed(0)}% |`);
+    p();
+    p(h.routingRecall.note);
+  }
   if (h.precisionCost !== undefined) {
     const pc = h.precisionCost;
     p();
@@ -252,7 +274,7 @@ if (m.akr2Holdout !== undefined) {
   }
   if (h.newSafetyDefects.length > 0) {
     p();
-    p('**Safety defects this surfaced:**');
+    p('**Remaining safety defects:**');
     for (const d of h.newSafetyDefects) p(`- \`${d.id}\` — ${d.what}`);
   }
   p();

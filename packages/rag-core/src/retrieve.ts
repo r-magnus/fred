@@ -22,13 +22,48 @@ export interface RetrievalOptions {
    * embedding rather than setting alpha=0 keeps the latency comparison honest.
    */
   readonly mode: 'hybrid' | 'lexical-only';
+  /**
+   * What the query vector is built from. 'keywords' embeds the extracted
+   * keyword list, which throws away everything that is not a keyword — "face
+   * down and not responding, can I turn them over" becomes a bag of nouns.
+   * 'question' embeds the question as asked, which is what the encoder was
+   * trained on. Measured on the tuning set: docs/results-strategy-research.md §1e.
+   */
+  readonly queryInput: 'question' | 'keywords';
+  /**
+   * Per-pack count of nearest-by-meaning chunks added to the keyword candidates.
+   * 0 disables it, leaving Stage 2 to re-score keyword hits only.
+   */
+  readonly densePool: number;
+  /**
+   * Field cards (plain-language, reviewed answers) get a reserved slot: when
+   * the best chunk from this pack scores at least `minScore`, it is placed
+   * first among the chunks handed to the model, even if manual passages
+   * outranked it. Undefined disables the reservation.
+   */
+  readonly reserve?: { readonly packId: string; readonly minScore: number };
 }
 
+/**
+ * The measured configuration (docs/results-phase1.md): the question embedded as
+ * asked, 20 nearest-by-meaning chunks per pack added to the keyword candidates,
+ * and meaning alone deciding the final order (alpha 1). With EmbeddingGemma this
+ * put the answer's source passage among the four the model reads for 27 of 49
+ * cited tuning questions, against 22 for the best gte-small setting. Keyword
+ * search still widens the candidate pool; it no longer votes on the order.
+ */
 export const DEFAULT_RETRIEVAL: RetrievalOptions = {
   candidateLimit: 50,
   topK: 4,
-  alpha: DEFAULT_ALPHA,
+  alpha: 1.0,
   mode: 'hybrid',
+  queryInput: 'question',
+  densePool: 20,
+  // 0.35 separates right cards from wrong ones on the tuning set: every best
+  // card at or above it was the card for the question (bleeding at rank 6,
+  // fracture 8, shelter 19, berries 8), and the highest wrong match was the
+  // choking card for a chest wound at 0.308 (docs/results-phase1.md §10).
+  reserve: { packId: 'core-fieldcards', minScore: 0.35 },
 };
 
 export interface ScoredChunk {
@@ -101,6 +136,11 @@ export async function verifyEmbedderParity(
   return { ok: cosine >= minCosine, cosine };
 }
 
+/** Wrap a query the way its encoder expects. See EmbeddingSpec.queryTemplate. */
+export function applyQueryTemplate(template: string | undefined, text: string): string {
+  return template === undefined ? text : template.replace('{text}', text);
+}
+
 export async function retrieve(
   keywords: readonly Keyword[],
   packIds: readonly string[],
@@ -115,6 +155,8 @@ export async function retrieve(
    * answered from a snare that "will cut off the bird's feet".
    */
   domains?: readonly DomainTag[],
+  /** The question as asked. Used when opts.queryInput is 'question'. */
+  query?: string,
 ): Promise<ScoredChunk[]> {
   if (packIds.length === 0) return [];
   // Only the hybrid path compares vectors, so only it requires a matching encoder.
@@ -130,11 +172,32 @@ export async function retrieve(
   // The routed domains go into the query itself, so the quota is spent only on
   // chunks that survive the filter. See PackStore.searchLexical.
   const terms = keywords.map((k) => k.term);
-  const hits = (
+  const lexicalOnly = opts.mode === 'lexical-only';
+  const queryVec = lexicalOnly
+    ? null
+    : await backend.embed(applyQueryTemplate(
+      backend.embeddingSpec().queryTemplate,
+      opts.queryInput === 'question' && query !== undefined && query.trim() !== ''
+        ? query
+        : terms.join(' '),
+    ));
+
+  const lexicalHits = (
     await Promise.all(
       packIds.map((id) => store.searchLexical([id], terms, opts.candidateLimit, domains)),
     )
   ).flat();
+  // Stage 1b — nearest by meaning, so a passage the keywords miss can still
+  // compete. Merged with the keyword hits, then everything is scored on one scale.
+  const denseHits = queryVec !== null && opts.densePool > 0 && store.searchDense !== undefined
+    ? await store.searchDense(packIds, queryVec, opts.densePool, domains)
+    : [];
+  const seen = new Set<string>();
+  const hits = [...lexicalHits, ...denseHits].filter((h) => {
+    if (seen.has(h.chunkId)) return false;
+    seen.add(h.chunkId);
+    return true;
+  });
   if (hits.length === 0) return [];
   const wanted = domains === undefined ? null : new Set<DomainTag>(domains);
 
@@ -148,12 +211,7 @@ export async function retrieve(
 
   const byId = new Map(chunks.map((c) => [c.id, c]));
 
-  // Stage 2 — semantic re-rank over the survivors only.
-  const lexicalOnly = opts.mode === 'lexical-only';
-  const queryVec = lexicalOnly
-    ? null
-    : await backend.embed(keywords.map((k) => k.term).join(' '));
-
+  // Stage 2 — score every candidate on the fused scale.
   // The floor is a property of the running encoder, not of any one pack.
   const floor = backend.embeddingSpec().cosineFloor;
 
@@ -179,5 +237,17 @@ export async function retrieve(
   }
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, opts.topK);
+  return withReservedCard(scored, opts);
+}
+
+/**
+ * Put the best qualifying field card first, then fill the rest by score.
+ * Exported for tests.
+ */
+export function withReservedCard(scored: readonly ScoredChunk[], opts: RetrievalOptions): ScoredChunk[] {
+  const reserve = opts.reserve;
+  if (reserve === undefined) return scored.slice(0, opts.topK);
+  const card = scored.find((c) => c.chunk.packId === reserve.packId);
+  if (card === undefined || card.score < reserve.minScore) return scored.slice(0, opts.topK);
+  return [card, ...scored.filter((c) => c !== card)].slice(0, opts.topK);
 }

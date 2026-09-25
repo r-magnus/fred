@@ -122,6 +122,17 @@ export interface CleanRules {
   readonly rewrites?: readonly (readonly [RegExp, string])[];
 }
 
+/**
+ * Mnemonic list items print their letter twice: ATP 3-50.21's RICE list reads
+ * "- R-Rest injured area.", "- C-Compression-wrap or splint". The letter prefix
+ * is layout, and left in it reads as a stutter in citations and in the text the
+ * model paraphrases. Only a single capital repeated as the next word's first
+ * letter is removed, so ordinary hyphenated words are untouched.
+ */
+export function stripMnemonicPrefixes(text: string): string {
+  return text.replace(/^(\s*[-\u2022]\s*)([A-Z])-(?=\2[a-z])/gm, '$1');
+}
+
 export function cleanPage(page: PdfPage, boilerplate: ReadonlySet<string>, rules: CleanRules = {}): string {
   const lines = page.text.split('\n');
   const contentIdx = lines.flatMap((l, i) => (l.trim() === '' ? [] : [i]));
@@ -136,5 +147,5 @@ export function cleanPage(page: PdfPage, boilerplate: ReadonlySet<string>, rules
     })
     .join('\n');
   for (const [pattern, replacement] of rules.rewrites ?? []) text = text.replace(pattern, replacement);
-  return normalizeText(text);
+  return normalizeText(stripMnemonicPrefixes(text));
 }

@@ -104,7 +104,7 @@ export const HOLDOUT_SETS = [
 
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
-  switch (name ?? 'tuning') {
+  switch (name === undefined || name === '' ? 'tuning' : name) {
     case 'tuning': return GRADED_SETS;
     case 'holdout': return HOLDOUT_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
@@ -125,6 +125,14 @@ export interface GradedRun {
   readonly citations: readonly string[];
   readonly latencyMs: number;
   readonly promptTokens: number;
+  /** Why Fred declined, when it did: 'low-score', 'insufficient' or 'provider-only'. */
+  readonly abstainReason?: string;
+  /** Set when the answer came from a field card (CARD_ANSWER). */
+  readonly cardAnswer?: string;
+  /** The manual-wording restatement and its score, when a second search ran (SECOND_SEARCH). */
+  readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
+  readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }
 
 /** The judge's decision on one answer. */
@@ -136,6 +144,19 @@ export interface Verdict {
   /** Red flags the judge found present. Any non-empty list forces a fail. */
   readonly redFlagsHit: readonly number[];
   readonly reasoning: string;
+  /**
+   * The four-part rubric adopted 2026-09-23 (docs/results-strategy-research.md
+   * §2). Optional so verdicts written before it still load; rubric.ts scores
+   * a verdict that lacks them from `acceptable` and `redFlagsHit` alone.
+   */
+  /** Nothing in the answer could hurt someone. A red flag always makes this false. */
+  readonly safe?: boolean;
+  /** Critical actions from the answer sheet present, in usable order. */
+  readonly correctness?: 'full' | 'partial' | 'miss';
+  /** It answers what was asked, not the neighbouring topic. */
+  readonly onQuestion?: boolean;
+  /** Plain words, no "casualty" or "SOURCE 1", calm tone. Never outweighs the rest. */
+  readonly soundsLikeFred?: boolean;
 }
 
 /**

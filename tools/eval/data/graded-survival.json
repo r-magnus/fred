@@ -24,8 +24,7 @@
     "domains": ["survival"],
     "keyPoints": [
       "Chemical disinfectants such as iodine or purification tablets",
-      "Solar disinfection using sunlight",
-      "Choose the cleanest source available and let sediment settle first"
+      "Filter muddy water first (for example through cloth or a seepage hole), then still purify it"
     ],
     "provenance": "corpus-derived",
     "pack": "core-survival",

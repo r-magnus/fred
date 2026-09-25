@@ -81,6 +81,20 @@ export interface PackStore {
     domains?: readonly DomainTag[],
   ): Promise<readonly LexicalHit[]>;
 
+  /**
+   * Stage 1b. The chunks nearest the query vector across the given packs,
+   * found by scanning every row rather than only the keyword hits.
+   *
+   * Optional: a store without it gets keyword-only candidates, which is the
+   * pre-2026-09-24 behaviour. `domains` has the same quota meaning as in
+   * searchLexical.
+   */
+  searchDense?(
+    packIds: readonly string[],
+    query: Float32Array,
+    limit: number,
+    domains?: readonly DomainTag[],
+  ): Promise<readonly LexicalHit[]>;
   getChunks(chunkIds: readonly string[]): Promise<readonly ChunkRecord[]>;
 
   /**

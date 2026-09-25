@@ -24,6 +24,8 @@ export interface DraftChunk {
   readonly page: number | null;
   readonly domain: DomainTag;
   readonly blockKind: BlockKind;
+  /** Set by the corpus's provider-only rules after chunking. Absent means everyone. */
+  readonly audience?: 'provider';
 }
 
 export interface ChunkOptions {
@@ -162,4 +164,128 @@ export function chunkPages(pages: readonly SourcePage[], opts: ChunkOptions): Dr
   flush();
   buffer = [];
   return out;
+}
+
+/** "13-29. Locate the site" — the Army manuals number every paragraph. */
+const PARAGRAPH_NUMBER = /^\d{1,2}-\d{1,3}\.\s/;
+/** Figure and table captions: layout, not content, and they read as fragments. */
+const CAPTION = /^(?:figure|table)\s+[a-z]?\d+(?:-\d+)?\.?\s/i;
+/** A paragraph's last line usually stops short of the right margin. */
+const SHORT_LINE = 70;
+
+interface Unit {
+  readonly lines: string[];
+  readonly page: number;
+  readonly section: string;
+}
+
+/**
+ * Chunk at the document's own boundaries instead of every N tokens.
+ *
+ * The window chunker cut every 300 tokens wherever that fell, so 56% of ATP
+ * 4-02.11 chunks and 68% of ATP 3-50.21 chunks began mid-sentence
+ * (docs/results-strategy-research.md §1d). A passage that opens "the casualty
+ * for the location, type, and size of the wound" is harder to retrieve, harder
+ * for a small model to read, and was the raw material compression then cut
+ * further.
+ *
+ * Units are paragraphs: they start at a heading, at a numbered paragraph, or
+ * after a short line ending a sentence. A list stays in the unit of the line that
+ * introduces it, so "Do not -" is never separated from its items — the defect
+ * the window chunker needed a lookback to patch. Units are packed whole into
+ * chunks of up to `targetTokens`, and a chunk never spans a section heading. A
+ * single unit longer than the window is split at sentence ends, and each piece
+ * after the first repeats the unit's list header if it has one.
+ *
+ * No overlap: with cuts at paragraph ends there is no sentence straddling a
+ * boundary for overlap to rescue.
+ */
+export function chunkByStructure(pages: readonly SourcePage[], opts: ChunkOptions): DraftChunk[] {
+  const { targetTokens, domain, tokenize } = opts;
+  const units: Unit[] = [];
+  let section = '(front matter)';
+  let current: Unit | null = null;
+  let prev = '';
+
+  const close = (): void => {
+    if (current !== null && current.lines.length > 0) units.push(current);
+    current = null;
+  };
+
+  for (const page of pages) {
+    for (const raw of page.text.split('\n')) {
+      const line = raw.trim();
+      if (line === '' || CAPTION.test(line)) continue;
+      const heading = isHeading(line);
+      const paragraphEnded = /[.!?]["')\]]?$/.test(prev) && prev.length < SHORT_LINE && !isListItem(line);
+      if (heading) {
+        close();
+        section = line;
+      } else if (current === null || PARAGRAPH_NUMBER.test(line) || (paragraphEnded && !isListItem(prev))) {
+        close();
+      }
+      if (current === null) current = { lines: [], page: page.pageNumber, section };
+      current.lines.push(line);
+      prev = line;
+    }
+  }
+  close();
+
+  const out: DraftChunk[] = [];
+  let buf: string[] = [];
+  let bufTokens = 0;
+  let bufPage = 0;
+  let bufSection = '';
+  const flush = (): void => {
+    const text = buf.join('\n').trim();
+    if (text !== '') {
+      out.push({ text, section: bufSection, page: bufPage, domain, blockKind: looksLikeProcedure(text) ? 'procedure' : 'prose' });
+    }
+    buf = [];
+    bufTokens = 0;
+  };
+
+  for (const unit of units) {
+    const pieces = splitOversized(unit.lines, targetTokens, tokenize);
+    for (const piece of pieces) {
+      const n = tokenize(piece.join('\n'));
+      if (buf.length > 0 && (bufTokens + n > targetTokens || unit.section !== bufSection)) flush();
+      if (buf.length === 0) {
+        bufPage = unit.page;
+        bufSection = unit.section;
+      }
+      buf.push(...piece);
+      bufTokens += n;
+    }
+  }
+  flush();
+  return out;
+}
+
+/**
+ * Split a unit that is too long for one chunk at sentence-ending lines. Pieces
+ * after the first repeat the list header, so a long negated list keeps its
+ * polarity in every chunk it lands in.
+ */
+function splitOversized(lines: readonly string[], target: number, tokenize: (t: string) => number): string[][] {
+  if (tokenize(lines.join('\n')) <= target) return [[...lines]];
+  const header = lines.find((l) => isListHeader(l));
+  const pieces: string[][] = [];
+  let cur: string[] = [];
+  let curTokens = 0;
+  for (const line of lines) {
+    const n = tokenize(line);
+    const last = cur[cur.length - 1] ?? '';
+    const atBoundary = cur.length > 0 && (isListItem(line) || /[.!?:]["')\]]?$/.test(last));
+    if (curTokens + n > target && atBoundary) {
+      pieces.push(cur);
+      // Continuing a list: repeat what governs it.
+      cur = header !== undefined && isListItem(line) ? [header] : [];
+      curTokens = cur.reduce((a, l) => a + tokenize(l), 0);
+    }
+    cur.push(line);
+    curTokens += n;
+  }
+  if (cur.length > 0) pieces.push(cur);
+  return pieces;
 }

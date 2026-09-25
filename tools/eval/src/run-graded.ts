@@ -14,23 +14,20 @@
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ask, verifyEmbedderParity, DEFAULT_RETRIEVAL } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, type CardAnswerMode } from '@fred/rag-core';
 import { NodePackStore, createNodeBackend } from './node-pack.ts';
 import { loadGradedSet, describeSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
+import { compressionFromEnv, describeRetrieval, retrievalFromEnv } from './retrieval-env.ts';
 
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
-/**
- * TOPK overrides how many chunks reach the generator, so the distractor question
- * can be swept without editing rag-core. Three of the four graded "wrong passage"
- * failures had the right chunk at SOURCE 1 and were answered from SOURCE 4
- * (docs/results-akr2.md), which is a generation problem wearing a retrieval
- * costume — and the obvious thing to test is whether fewer sources fixes it.
- */
-const topK = process.env.TOPK === undefined ? DEFAULT_RETRIEVAL.topK : Number(process.env.TOPK);
-if (!Number.isInteger(topK) || topK < 1) throw new Error(`TOPK must be a positive integer, got ${process.env.TOPK}`);
-const retrieval = { ...DEFAULT_RETRIEVAL, topK };
+// Retrieval and compression settings come from the environment (TOPK,
+// RETRIEVAL_QUERY, DENSE_POOL, COMPRESS); see retrieval-env.ts. TOPK used to be
+// read here, so a comparison of how many chunks reach the generator still works.
+const retrieval = retrievalFromEnv();
+const PACKS = process.env.PACKS_DIR ?? 'packs';
+const compression = compressionFromEnv();
 
 const questions: GradedQuestion[] = setsFor(process.env.EVAL_SET).flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
@@ -39,21 +36,21 @@ console.log(describeSet(questions));
 const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
 // Printed because these two settings are what an A/B between runs is varying,
 // and a results file that does not say which model produced it is not evidence.
-console.log(`topK=${topK}  model=${genModelPath.split('/').pop()}`);
+console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'off' : 'on'}  model=${genModelPath.split('/').pop()}  packs=${PACKS}`);
 
 const store = new NodePackStore();
-const manifests = readdirSync('packs')
-  .map((d) => join('packs', d))
+const manifests = readdirSync(PACKS)
+  .map((d) => join(PACKS, d))
   .filter((d) => existsSync(join(d, 'manifest.json')))
   .map((d) => store.load(d));
 if (manifests.length === 0) throw new Error('no packs under packs/; run tools/ingest first');
 const base = manifests[0]!;
 
 const backend = await createNodeBackend({
-  embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: base.embedding.modelId,
   cosineFloor: base.embedding.cosineFloor,
   probe: base.embedding.probe,
+  queryTemplate: base.embedding.queryTemplate,
   genModelPath,
 });
 
@@ -74,6 +71,10 @@ for (const [i, q] of questions.entries()) {
   const t0 = Date.now();
   const res = await ask(q.question, { backend, store, packs }, {
     state: q.state, retrieval,
+    ...(compression === undefined ? {} : { compression }),
+    // ABSTAIN_THRESHOLD overrides the decline gate; 0 lets every question
+    // through, which is what calibrate.ts needs to see the score distribution.
+    ...(process.env.ABSTAIN_THRESHOLD !== undefined ? { abstainThreshold: Number(process.env.ABSTAIN_THRESHOLD), fallbackThreshold: Number(process.env.ABSTAIN_THRESHOLD) } : {}),
     // ROUTING_FALLBACK=1 measures what searching everything on a no-match
     // recovers. Off by default so a plain run reflects what ships.
     ...(process.env.ROUTING_FALLBACK === '1' ? { allowRoutingFallback: true } : {}),
@@ -89,10 +90,18 @@ for (const [i, q] of questions.entries()) {
       ? { sufficiencyVariant: 'numeric' as const } : {}),
     // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
     ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
+    ...(process.env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
+    // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
+    ...(process.env.LOCATION === '0' ? { locationInPrompt: false } : {}),
+    // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.
+    ...(process.env.CARD_ANSWER !== undefined ? { cardAnswer: process.env.CARD_ANSWER as CardAnswerMode } : {}),
   });
 
   let answer = '';
-  if (res.kind === 'answer') {
+  // GENERATE=0 records retrieval and the gate's decision without spending a
+  // generation pass: enough for calibrate.ts, seconds instead of twenty minutes.
+  if (res.kind === 'answer' && process.env.GENERATE !== '0') {
     for await (const tok of res.stream) answer += tok;
   }
   const latencyMs = Date.now() - t0;
@@ -110,6 +119,10 @@ for (const [i, q] of questions.entries()) {
       : [],
     latencyMs,
     promptTokens: d.tokensAfter,
+    ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
+    ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
+    ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
+    retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);
 

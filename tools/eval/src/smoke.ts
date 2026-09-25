@@ -11,10 +11,10 @@ console.log(`pack ${manifest.id} v${manifest.version}: ${manifest.chunkCount} ch
   `encoder ${manifest.embedding.modelId} dim ${manifest.embedding.dim} floor ${manifest.embedding.cosineFloor.toFixed(4)}\n`);
 
 const backend = await createNodeBackend({
-  embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: manifest.embedding.modelId,
   cosineFloor: manifest.embedding.cosineFloor,
   probe: manifest.embedding.probe,
+  queryTemplate: manifest.embedding.queryTemplate,
 });
 
 const packs = [{ id: manifest.id, domains: manifest.domains, scope: manifest.scope }];

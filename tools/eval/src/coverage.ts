@@ -64,10 +64,10 @@ if (manifests.length === 0) throw new Error('no packs under packs/; run tools/in
 const base = manifests[0]!;
 
 const backend = await createNodeBackend({
-  embedModelPath: `${process.env.HOME}/models/gte-small_fp16.gguf`,
   embedModelId: base.embedding.modelId,
   cosineFloor: base.embedding.cosineFloor,
   probe: base.embedding.probe,
+  queryTemplate: base.embedding.queryTemplate,
 });
 
 for (const m of manifests) {

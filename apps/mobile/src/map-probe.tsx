@@ -14,7 +14,7 @@
 import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 import { File, Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import type { StyleSpecification } from '@maplibre/maplibre-react-native';
+import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
 import { useEffect, useState } from 'react';
 import { circleRing } from '@fred/geo';
 import { loadCoverage, coverageNear, type CoverageView } from './coverage-layer.ts';
@@ -44,10 +44,16 @@ export const mapFile = (state: string): string => `map-${state}-z14.pmtiles`;
 /**
  * Minimal style rather than @protomaps/basemaps.
  *
- * Three layers is enough to prove tiles are being read, decoded and drawn, and
- * a hand-written style keeps a second dependency out of a throwaway. Source
- * layer names are Protomaps basemap v4's.
+ * Hand-written, and Protomaps basemap v4's source layers are not all one
+ * geometry: `water` carries streams and canals as lines and `earth` carries
+ * cliffs as lines, alongside their polygons. MapLibre fills a line as
+ * straight-edged wedges, so every fill layer below takes polygons only and the
+ * lines get line layers of their own. The style spec reports MultiPolygon and
+ * MultiLineString as Polygon and LineString, so one name covers each.
  */
+const POLYGONS: FilterSpecification = ['==', ['geometry-type'], 'Polygon'];
+const LINES: FilterSpecification = ['==', ['geometry-type'], 'LineString'];
+
 const style = (uri: string, contoursUri: string | null): StyleSpecification => ({
   version: 8,
   sources: {
@@ -59,18 +65,20 @@ const style = (uri: string, contoursUri: string | null): StyleSpecification => (
   layers: [
     { id: 'bg', type: 'background', paint: { 'background-color': '#0d1117' } },
     { id: 'earth', type: 'fill', source: 'proto', 'source-layer': 'earth',
-      paint: { 'fill-color': '#1d2a22' } },
-    // Topo trial (docs/results-topo-research.md, option B): land cover the
-    // archive already carries, plus 40 m contours from a separate archive.
+      filter: POLYGONS, paint: { 'fill-color': '#1d2a22' } },
+    // Topographic map (docs/results-topo-research.md, option B). Land cover is
+    // already in the basemap archive, so it is always drawn; contours come
+    // from a separate per-state archive and are drawn when it is present.
+    { id: 'landuse', type: 'fill', source: 'proto', 'source-layer': 'landuse',
+      filter: POLYGONS,
+      paint: { 'fill-color': ['match', ['get', 'kind'],
+        ['forest', 'wood'], '#1f3a26',
+        ['meadow', 'grassland', 'scrub'], '#2c3b25',
+        ['bare_rock', 'scree'], '#34383a',
+        'glacier', '#56626a',
+        'wetland', '#1c3432',
+        '#1d2a22'] } },
     ...(contoursUri === null ? [] : [
-      { id: 'landuse', type: 'fill', source: 'proto', 'source-layer': 'landuse',
-        paint: { 'fill-color': ['match', ['get', 'kind'],
-          ['forest', 'wood'], '#1f3a26',
-          ['meadow', 'grassland', 'scrub'], '#2c3b25',
-          ['bare_rock', 'scree'], '#34383a',
-          'glacier', '#56626a',
-          'wetland', '#1c3432',
-          '#1d2a22'] } },
       { id: 'contours', type: 'line', source: 'contours', 'source-layer': 'contours',
         paint: {
           'line-color': '#b8a27a',
@@ -78,14 +86,14 @@ const style = (uri: string, contoursUri: string | null): StyleSpecification => (
           'line-width': ['case', ['==', ['get', 'idx'], 1], 1.2, 0.6],
         } },
     ] as StyleSpecification['layers']),
-    // Protomaps' water layer mixes polygons with stream and canal lines, and
-    // filling a line draws straight-edged wedges across the map.
     { id: 'water', type: 'fill', source: 'proto', 'source-layer': 'water',
-      filter: ['==', ['geometry-type'], 'Polygon'],
-      paint: { 'fill-color': '#12303d' } },
+      filter: POLYGONS, paint: { 'fill-color': '#12303d' } },
     { id: 'waterways', type: 'line', source: 'proto', 'source-layer': 'water',
-      filter: ['==', ['geometry-type'], 'LineString'],
-      paint: { 'line-color': '#1f4d61', 'line-width': 1 } },
+      filter: LINES, paint: { 'line-color': '#1f4d61', 'line-width': 1 } },
+    // Cliffs, from earth's line features. On a topo map they matter as much as
+    // contours, so they are drawn dark and a little heavier than a contour.
+    { id: 'cliffs', type: 'line', source: 'proto', 'source-layer': 'earth',
+      filter: LINES, paint: { 'line-color': '#0b0f0c', 'line-width': 1.4 } },
     { id: 'roads', type: 'line', source: 'proto', 'source-layer': 'roads',
       paint: { 'line-color': '#4a5d55', 'line-width': 1 } },
   ],

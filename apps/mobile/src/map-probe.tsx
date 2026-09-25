@@ -48,15 +48,44 @@ export const mapFile = (state: string): string => `map-${state}-z14.pmtiles`;
  * a hand-written style keeps a second dependency out of a throwaway. Source
  * layer names are Protomaps basemap v4's.
  */
-const style = (uri: string): StyleSpecification => ({
+const style = (uri: string, contoursUri: string | null): StyleSpecification => ({
   version: 8,
-  sources: { proto: { type: 'vector', url: `pmtiles://${uri}` } },
+  sources: {
+    proto: { type: 'vector', url: `pmtiles://${uri}` },
+    ...(contoursUri === null ? {} : {
+      contours: { type: 'vector', url: `pmtiles://${contoursUri}` },
+    }),
+  },
   layers: [
     { id: 'bg', type: 'background', paint: { 'background-color': '#0d1117' } },
     { id: 'earth', type: 'fill', source: 'proto', 'source-layer': 'earth',
       paint: { 'fill-color': '#1d2a22' } },
+    // Topo trial (docs/results-topo-research.md, option B): land cover the
+    // archive already carries, plus 40 m contours from a separate archive.
+    ...(contoursUri === null ? [] : [
+      { id: 'landuse', type: 'fill', source: 'proto', 'source-layer': 'landuse',
+        paint: { 'fill-color': ['match', ['get', 'kind'],
+          ['forest', 'wood'], '#1f3a26',
+          ['meadow', 'grassland', 'scrub'], '#2c3b25',
+          ['bare_rock', 'scree'], '#34383a',
+          'glacier', '#56626a',
+          'wetland', '#1c3432',
+          '#1d2a22'] } },
+      { id: 'contours', type: 'line', source: 'contours', 'source-layer': 'contours',
+        paint: {
+          'line-color': '#b8a27a',
+          'line-opacity': ['case', ['==', ['get', 'idx'], 1], 0.7, 0.35],
+          'line-width': ['case', ['==', ['get', 'idx'], 1], 1.2, 0.6],
+        } },
+    ] as StyleSpecification['layers']),
+    // Protomaps' water layer mixes polygons with stream and canal lines, and
+    // filling a line draws straight-edged wedges across the map.
     { id: 'water', type: 'fill', source: 'proto', 'source-layer': 'water',
+      filter: ['==', ['geometry-type'], 'Polygon'],
       paint: { 'fill-color': '#12303d' } },
+    { id: 'waterways', type: 'line', source: 'proto', 'source-layer': 'water',
+      filter: ['==', ['geometry-type'], 'LineString'],
+      paint: { 'line-color': '#1f4d61', 'line-width': 1 } },
     { id: 'roads', type: 'line', source: 'proto', 'source-layer': 'roads',
       paint: { 'line-color': '#4a5d55', 'line-width': 1 } },
   ],
@@ -71,6 +100,9 @@ export function MapProbe(
   const archive = fix?.state == null ? null : mapFile(fix.state);
   const haveMap = archive !== null && new File(Paths.document, archive).exists;
   const uri = archive === null ? null : `${Paths.document.uri}${archive}`;
+  const contours = fix?.state == null ? null : `contours-${fix.state}.pmtiles`;
+  const contoursUri = contours !== null && new File(Paths.document, contours).exists
+    ? `${Paths.document.uri}${contours}` : null;
   // B-KR2's "estimated location zone". The radius is the GPS's own 68%
   // confidence figure, so the circle is a claim the hardware already makes
   // rather than one invented for the display. Outdoors this is single-digit
@@ -93,7 +125,8 @@ export function MapProbe(
   }, [fix]);
   return (
     <View style={styles.root}>
-      <Map style={styles.map} mapStyle={haveMap && uri !== null ? style(uri) : EMPTY_STYLE}
+      <Map style={styles.map}
+        mapStyle={haveMap && uri !== null ? style(uri, contoursUri) : EMPTY_STYLE}
         attribution logo={false}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}

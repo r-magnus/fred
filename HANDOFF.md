@@ -80,6 +80,51 @@ different physical locations, and that has not happened.
    is for hardware no modern phone uses. The device also holds ~440 MB of
    models the app never loads (Qwen3-0.6B, the fp16 encoder). ~630 MB of
    avoidable weight before RC-KR1.
+5. **Topo contours into the main build.** Trialled on the iOS simulator
+   2026-09-25 and the owner wants it kept: 40 m contours plus drawn land
+   cover, over Yosemite only. The style already draws them whenever
+   `contours-<STATE>.pmtiles` sits next to the basemap
+   (`apps/mobile/src/map-probe.tsx`). What is missing is a build script in
+   `scripts/` (next to `build-state-map.mjs`, same bbox) to make the file
+   for a whole state, and shipping it in the same per-state package as the
+   map in item 2. About +110 MB for California (estimate), about 1.2x the
+   basemap. Numbers, method and the trial: `docs/results-topo-research.md`.
+6. **The water bug. Do it with item 5, in the same style change.** The
+   probe's hand-written style fills whole Protomaps layers, and two of them
+   are not all polygons. MapLibre fills a line as straight-edged wedges; an
+   unfilled point is harmless. Found at Santa Barbara, where the creeks through
+   town drew long blue slivers over land. Sampled across 160 California tiles:
+
+   | Layer | Non-polygon features | Status |
+   |---|---|---|
+   | `water` | streams, rivers, canals (lines); labels (points) | fixed in the working tree, uncommitted, **not yet seen working** |
+   | `earth` | cliffs (lines); island labels (points) | **not fixed** |
+   | `landuse` | none in 16,504 features | fine |
+
+   Plan:
+   1. Filter every `fill` layer to `['==', ['geometry-type'], 'Polygon']`. That
+      is already done for `water` in `map-probe.tsx`; `earth` needs the same.
+   2. Keep the lines, just draw them as lines. Streams are already drawn as
+      `waterways`. Cliffs are worth a thin dark `line` layer, since on a topo
+      map they are as useful as contours.
+   3. Look at both on the iOS simulator: Santa Barbara for creeks, and a
+      coastal cliff (for example Big Sur) for `earth`. `xcrun simctl location
+      <udid> set <lat>,<lon>`, then tap the Fred wordmark. Then Android.
+   4. Longer term, item 5 makes this the real map rather than a probe, and the
+      research doc already says the real map should use `@protomaps/basemaps`
+      rather than a hand-written style. A style written for this schema
+      should already separate lines from polygons (not checked), which would
+      fix this class of bug for every layer. The catch
+      offline: it needs glyphs and sprites bundled on the device. Decide that
+      before writing many more hand-written layers.
+7. **Conversation memory.** Researched 2026-09-25, no code yet:
+   `docs/results-memory-research.md`. Every question is currently answered as
+   if it were the first, so follow-ups like "it's still bleeding" lose their
+   context. The plan: store turns in op-sqlite (also closes US-10, ~1-2 KB a
+   turn); let retrieval try the previous question joined to the new one and
+   keep whichever scores higher; show the generator the previous *question*
+   only, never the previous answer or its sources. Build the three small
+   multi-turn eval sets in the doc first, and count refusals before and after.
 
 ## The Expo 57.0.24 upgrade is verified on Android
 

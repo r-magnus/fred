@@ -39,9 +39,12 @@ export const WHO_BEC_PROVIDER_ONLY: readonly ProviderRule[] = [
 ];
 
 export const ATP_FIRST_AID_PROVIDER_ONLY: readonly ProviderRule[] = [
-  // The device description only. The next chunk opens on the device's figure
-  // caption and is otherwise about opening an airway, which everyone should get.
-  { section: /BVM/, text: /catheter[- ]over[- ]needle/i, why: 'Needle decompression device: combat-lifesaver tier, invasive.' },
+  // Every chunk that describes the device, including p.88, which opens on the
+  // device's caption before turning to airway care. Left open, that chunk was
+  // enough for "what size endotracheal tube?" to be answered with "use a
+  // 10-gauge catheter-over-needle device". Its airway material is covered
+  // again on pp.73-77.
+  { text: /catheter[- ]over[- ]needle/i, why: 'Needle decompression device: combat-lifesaver tier, invasive.' },
   { text: /moxifloxacin/i, why: 'Prescription antibiotic dosing from the combat wound pack.' },
 ];
 

@@ -399,3 +399,24 @@ test('the hiker\'s state is named only when a state pack is answered from', asyn
   assert.equal(bleed.kind, 'answer');
   if (bleed.kind === 'answer') assert.doesNotMatch(bleed.prompt.user, /hiker is in/);
 });
+
+test('a clearly matching card is answered verbatim, without the model', async () => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Burns need cool water.')]);
+  store.addPack('core-fieldcards', [seed(
+    "Burns\nCool it and cover it.\n1. Cool the burn with cool water.\n2. Cover it with a clean dressing.\nDon't pull off clothing that is stuck to the burn.",
+    { source: 'Fred field card' },
+  )]);
+  const backend = new FakeBackend();
+  const res = await ask('burns cool cover clothing stuck', { backend, store, packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0, cardAnswer: 'verbatim',
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
+  });
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  let out = '';
+  for await (const t of res.stream) out += t;
+  assert.equal(out, "Cool it and cover it.\n1. Cool the burn with cool water.\n2. Cover it with a clean dressing.\nDon't pull off clothing that is stuck to the burn.");
+  assert.equal(backend.lastPrompt, null);
+  assert.equal(res.citations.length, 1);
+});

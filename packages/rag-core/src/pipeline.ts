@@ -128,6 +128,15 @@ export interface AskOptions {
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
 
+/**
+ * A card below the reserved-slot bar still counts as a clear match when it
+ * outscores every manual passage and clears this floor. On the tuning set the
+ * right card sat at 0.338-0.340 on top for burns, cuts and boil-less water,
+ * while the highest-scoring wrong card (choking, for a chest wound) was 0.308
+ * and below a manual passage (docs/results-phase3.md).
+ */
+export const CARD_TOP_FLOOR = 0.32;
+
 export interface Citation {
   readonly index: number;
   readonly chunkId: string;
@@ -294,10 +303,13 @@ export async function ask(
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
   const cardMode = opts.cardAnswer ?? 'off';
-  if (cardMode !== 'off' && cardMatched) {
-    const card = usable
-      .filter((c) => c.chunk.packId === reservedPack)
-      .reduce((b, c) => (c.score > b.score ? c : b));
+  const bestCard = usable
+    .filter((c) => c.chunk.packId === reservedPack)
+    .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  const cardClear = bestCard !== undefined && (cardMatched ||
+    (bestCard.score >= CARD_TOP_FLOOR && bestCard.score >= (bestManual?.score ?? 0)));
+  if (cardMode !== 'off' && cardClear) {
+    const card = bestCard!;
     const parsed = parseCard(card.chunk.text);
     const cardBlocks: ContextBlock[] = [{ chunk: card.chunk, text: card.chunk.text }];
     const prompt = buildPromptParts(query, cardBlocks, opts.answerVariant);

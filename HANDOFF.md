@@ -37,7 +37,7 @@ Conversation memory (item 4 below) also bears on accuracy.
    - Done: `scripts/build-state-contours.mjs` (Node, worker threads; traces
      200/100/40 m contours from Mapterhorn elevation, `tools/ingest/src/contours.ts`).
      California: **137 MB contours** against a 641 MB basemap, **1.21x**,
-     6 minutes on 15 threads. Matches the Python trial tile for tile on
+     6 minutes on 15 threads (now 8 by default). Matches the Python trial tile for tile on
      Yosemite; an independent decoder reads it back.
    - Done: the style draws land cover on every map, fills polygons only, and
      draws cliffs (`earth` lines) as a line layer. **Seen working on the
@@ -50,9 +50,12 @@ Conversation memory (item 4 below) also bears on accuracy.
    - Done: `scripts/build-state-bundle.mjs` assembles map + contours + coverage +
      flora pack with a `bundle.json` (sizes, SHA-256, attribution);
      `tools/eval/stage-bundle.sh` installs one. California: 791 MB.
-   - To do: build the other states (~13.3 GB basemaps + ~3 GB contours
-     nationally, plus ~tens of GB of elevation downloads at build time), check
-     the style on the phone, then stage.
+   - **In progress (started 2026-09-25 16:28):** building the other states
+     with `scripts/build-all-bundles.sh`, one at a time under an 8 GB memory
+     cap. It skips states that already have a `bundle.json`, so re-running it
+     resumes. Progress is in `~/fred-bundles/build-all.log`. Expect ~13.3 GB of
+     basemaps + ~3 GB of contours nationally, plus tens of GB of elevation
+     downloads at build time. Then check the style on the phone, and stage.
    - **Coverage is missing from every bundle except as a gap in `missing`.** The
      FCC files were downloaded by hand; the California `.bin` exists only on the
      phone. Automating the FCC download is its own task.
@@ -80,6 +83,11 @@ Conversation memory (item 4 below) also bears on accuracy.
   shell running it.** Use PIDs.
 - **A download that dies at 97% leaves a nearly complete file.**
   `build-state-contours.mjs` extracts to `.partial` and renames on success.
+- **The contour build froze WSL on Alaska** (2026-09-25): each worker cached
+  three full-width rows of 1 MB elevation tiles, and Alaska is 571 tiles wide at
+  z12, so ~25 GB was needed on a 15 GB machine. Workers now take 8 x 64-tile
+  blocks (~360 MB each), use half the cores at nice 10, and the batch runs under
+  a memory cap. Alaska z12 runs at ~4.4 GB used.
 - **Alaska crosses the antimeridian.** `scripts/state-bbox.mjs` clamps to -180;
   the westernmost Aleutians have no map.
 - **h3-js crashes Hermes**; `scripts/patch-h3-hermes.mjs` neutralises it.
@@ -108,6 +116,7 @@ npm test                                                   # 200 tests
 npm run typecheck                                          # packages, tools and the app
 EVAL_SET=holdout node tools/eval/src/run-graded.ts out.jsonl
 node scripts/build-state-bundle.mjs CA ~/fred-bundles      # map + contours + flora
+scripts/build-all-bundles.sh                               # every state, resumable
 tools/eval/build-apk.sh [--field-test]
 tools/eval/stage-bundle.sh ~/fred-bundles/CA
 ```

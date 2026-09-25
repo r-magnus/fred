@@ -10,7 +10,7 @@ for the project report.**
 | `who-pfa` | WHO *Psychological First Aid: Guide for Field Workers* | CC BY-NC-SA 3.0 IGO | ❌ No |
 | `atp-4-02-11` | US Army ATP 4-02.11 *Casualty Response, Tactical Combat Casualty Care, and First Aid* (Mar 2026) — used in `core-firstaid-army`, civilian-applicable chapters only | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `atp-3-50-21` | US Army ATP 3-50.21 *Survival* (Sept 2018) — used in `core-survival` | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
-| `fm-21-76` | US Army FM 21-76 / FM 21-76-1 *Survival* — **not used**: superseded by FM 3-05.70 (2002), then ATP 3-50.21 | Public domain (US Gov work) | ✅ Yes |
+| `fm-21-76` | US Army FM 21-76 *Survival* (June 1992) — **Chapter 19, Signaling Techniques, only**, in `core-signaling`. ATP 3-50.21 (2018) has no signalling chapter. The intermediate FM 3-05.70 (2002) was *not* used: its cover carries "Distribution authorized to U.S. Government agencies and their contractors only", so it cannot ship despite commercial reprints. FM 21-76's cover reads "Approved for public release; distribution is unlimited." | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `feis` | USFS *Fire Effects Information System* Species Reviews — used in `state-CA-flora-fauna`, `state-OR-flora-fauna`; review text only (images carry third-party photo credits and are not ingested) | Public domain (US Gov work) | ✅ Yes |
 | `usda-plants` | USDA PLANTS Database | Public domain (US Gov work) | ✅ Yes |
 | `usfws` | US Fish & Wildlife Service species data | Public domain (US Gov work) | ✅ Yes |

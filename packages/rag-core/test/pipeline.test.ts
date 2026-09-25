@@ -392,7 +392,7 @@ test('provider-only passages never reach the model, even beside an answer', asyn
 
 test('the hiker\'s state is named only when a state pack is answered from', async () => {
   const d = deps();
-  const bears = await ask('Black bear encounters: what do I do?', d, { state: 'CO', abstainThreshold: 0, locationInPrompt: true });
+  const bears = await ask('Black bear encounters around here: what do I do?', d, { state: 'CO', abstainThreshold: 0, locationInPrompt: true });
   assert.equal(bears.kind, 'answer');
   if (bears.kind === 'answer') assert.match(bears.prompt.user, /\(The hiker is in Colorado\.\)/);
   const bleed = await ask('How do I control severe bleeding from a wound?', deps(), { state: 'CO', locationInPrompt: true });

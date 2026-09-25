@@ -92,9 +92,9 @@ for (const [i, q] of questions.entries()) {
     ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
     // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
     ...(process.env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
-    // LOCATION=1 names the hiker's state in the prompt for state-pack answers.
-    ...(process.env.LOCATION === '1' ? { locationInPrompt: true } : {}),
-    // CARD_ANSWER=verbatim|card-only|pick answers from a clearly matching field card.
+    // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
+    ...(process.env.LOCATION === '0' ? { locationInPrompt: false } : {}),
+    // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.
     ...(process.env.CARD_ANSWER !== undefined ? { cardAnswer: process.env.CARD_ANSWER as CardAnswerMode } : {}),
   });
 

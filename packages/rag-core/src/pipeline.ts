@@ -102,7 +102,9 @@ export interface AskOptions {
   readonly retrieval?: RetrievalOptions;
   /**
    * How to answer when a field card clearly matches (score at or above the
-   * reserved-card bar). 'off' treats the card as one passage among four;
+   * reserved-card bar, or CARD_TOP_FLOOR and top of the search). Default
+   * 'verbatim', the only mode that cannot invert a card: measured against the
+   * others in docs/results-phase3.md. 'off' treats the card as one passage among four;
    * 'verbatim' shows the card as written; 'card-only' has the model answer
    * from the card alone; 'pick' has the model choose the card's relevant steps
    * and shows those verbatim with the summary, don'ts and get-help line
@@ -115,7 +117,7 @@ export interface AskOptions {
    * generation, only on questions that would otherwise be declined.
    */
   readonly secondSearch?: boolean;
-  /** Name the hiker's state in the prompt when answering from a state pack. Off until measured (plan step 3). */
+  /** Name the hiker's state when the question points at it and a state pack is answered from. Default on. */
   readonly locationInPrompt?: boolean;
   /**
    * Compression bounds. `{ minReduction: 0, maxReduction: 0 }` hands the
@@ -136,6 +138,9 @@ export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
  * and below a manual passage (docs/results-phase3.md).
  */
 export const CARD_TOP_FLOOR = 0.32;
+
+/** Words that point at where the hiker is, which the model cannot resolve alone. */
+const REFERS_TO_LOCATION = /\b(?:this|my|our) (?:state|area|region)\b|\baround here\b|\bnear (?:me|here)\b|\bnearby\b|\bhere\b|\blocal(?:ly)?\b/i;
 
 export interface Citation {
   readonly index: number;
@@ -302,7 +307,7 @@ export async function ask(
   }
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
-  const cardMode = opts.cardAnswer ?? 'off';
+  const cardMode = opts.cardAnswer ?? 'verbatim';
   const bestCard = usable
     .filter((c) => c.chunk.packId === reservedPack)
     .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
@@ -380,10 +385,13 @@ export async function ask(
     }
   }
 
-  // Say where the hiker is only when a state pack is being answered from, the
-  // one case where "this state" or "around here" needs resolving.
+  // Say where the hiker is only when the question points at it ("this state",
+  // "around here") and a state pack is being answered from. Added to every
+  // state-pack answer it fixed ff-bear-01 but also reworded answers that
+  // needed no location, losing details (docs/results-phase3.md).
   const statePacks = new Set(packs.filter((p) => p.scope.kind === 'us-state').map((p) => p.id));
-  const place = opts.state !== null && opts.locationInPrompt === true && blocks.some((b) => statePacks.has(b.chunk.packId))
+  const place = opts.state !== null && opts.locationInPrompt !== false && REFERS_TO_LOCATION.test(query) &&
+    blocks.some((b) => statePacks.has(b.chunk.packId))
     ? STATE_NAMES[opts.state] : undefined;
   const prompt = buildPromptParts(query, blocks, opts.answerVariant, place);
   const generateOpts = opts.signal

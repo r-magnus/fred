@@ -1,5 +1,7 @@
 # Phase 3 plan: what is still wrong, and how to fix each cause
 
+**Outcome (2026-09-25): steps 1, 2 (verbatim), 3 and 6 adopted; 4 rejected; 5 not needed. See `results-phase3.md`.**
+
 Written 2026-09-25 from the phase-2 runs (`graded-runs-phase2.jsonl`,
 `holdout-runs-phase2.jsonl`) and a retrieval-only pass that kept the top 30
 passages per question, so card and manual scores could be compared directly.

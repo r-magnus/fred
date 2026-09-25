@@ -40,7 +40,13 @@ Conversation memory (item 4 below) also bears on accuracy.
      6 minutes on 15 threads. Matches the Python trial tile for tile on
      Yosemite; an independent decoder reads it back.
    - Done: the style draws land cover on every map, fills polygons only, and
-     draws cliffs (`earth` lines) as a line layer. **Not yet seen on a device.**
+     draws cliffs (`earth` lines) as a line layer. **Seen working on the
+     Nothing Phone (3) 2026-09-25** with the California bundle: contours with
+     heavier index lines, land cover, streams as lines with no wedges, a clean
+     coastline. No cliffs were in view, so that layer is still unseen.
+   - Done: California bundle installed on the phone with `stage-bundle.sh`
+     (every file checksummed on the device); the unused gte-small encoder was
+     deleted from the phone (133 MB).
    - Done: `scripts/build-state-bundle.mjs` assembles map + contours + coverage +
      flora pack with a `bundle.json` (sizes, SHA-256, attribution);
      `tools/eval/stage-bundle.sh` installs one. California: 791 MB.
@@ -53,8 +59,8 @@ Conversation memory (item 4 below) also bears on accuracy.
 2. **Downloads.** Bundles are the unit; the recommendation is a signed catalog
    on a static host (Cloudflare R2 or GitHub Releases), with the 1.4 GB of models
    fetched on first run. Not built.
-3. **Trim the app.** APK is arm64-only (148 MB). The phone still holds the old
-   gte-small encoder, unused since EmbeddingGemma.
+3. **Trim the app.** Done for now: the APK is arm64-only (148 MB) and the
+   phone no longer carries the unused gte-small encoder.
 4. **Conversation memory.** Researched, no code: `docs/results-memory-research.md`.
    Build the three multi-turn eval sets first, count refusals before and after.
 5. **Parked: the drive test.** Needs a car; one trip serves B-KR1/2/3.

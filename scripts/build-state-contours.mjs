@@ -24,7 +24,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
-import { availableParallelism } from 'node:os';
+import { availableParallelism, freemem, setPriority } from 'node:os';
 import { Worker } from 'node:worker_threads';
 import { DatabaseSync } from 'node:sqlite';
 import { stateBbox } from './state-bbox.mjs';
@@ -85,10 +85,17 @@ const latToY = (lat, z) => {
 };
 
 // 2. Trace, in parallel: contour-worker.mjs does the decoding and tracing for
-// blocks of rows; this process only writes. CONTOUR_THREADS overrides.
-const THREADS = Number(process.env.CONTOUR_THREADS ?? Math.max(1, availableParallelism() - 1));
+// blocks of tiles; this process only writes. A worker peaks near 360 MB
+// (a block's three cached rows of 1 MB tiles, plus tracing). Half the cores by
+// default, fewer if memory is short, at low priority: running every core
+// flat out froze WSL. CONTOUR_THREADS overrides.
+const WORKER_MB = 400;
+const THREADS = Number(process.env.CONTOUR_THREADS
+  ?? Math.max(1, Math.min(Math.floor(availableParallelism() / 2), Math.floor((freemem() / 1e6 - 2000) / WORKER_MB))));
+setPriority(10); // before the workers start: Linux threads inherit it
 const workers = Array.from({ length: THREADS }, () => new Worker(new URL('./contour-worker.mjs', import.meta.url)));
-const ROWS_PER_BLOCK = 4;
+console.log(`${name}  tracing on ${THREADS} threads`);
+const ROWS_PER_BLOCK = 8, COLS_PER_BLOCK = 64;
 
 // 3. Output.
 const mbtilesPath = `${workDir}/contours-${name}.mbtiles`;
@@ -107,25 +114,29 @@ for (const zs of Object.keys(CONTOUR_LEVELS)) {
   const { interval, index } = CONTOUR_LEVELS[z];
   const [x0, x1] = [lonToX(bbox[0], z), lonToX(bbox[2], z)];
   const [y0, y1] = [latToY(bbox[3], z), latToY(bbox[1], z)];
-  const rows = y1 - y0 + 1;
   const blocks = [];
-  for (let y = y0; y <= y1; y += ROWS_PER_BLOCK) blocks.push([y, Math.min(y + ROWS_PER_BLOCK - 1, y1)]);
-  let rowsDone = 0;
+  for (let y = y0; y <= y1; y += ROWS_PER_BLOCK) {
+    for (let x = x0; x <= x1; x += COLS_PER_BLOCK) {
+      blocks.push({ yStart: y, yEnd: Math.min(y + ROWS_PER_BLOCK - 1, y1), xStart: x, xEnd: Math.min(x + COLS_PER_BLOCK - 1, x1) });
+    }
+  }
+  const total = blocks.length;
+  let blocksDone = 0;
   db.exec('BEGIN');
   await Promise.all(workers.map((w) => new Promise((resolve, reject) => {
     const next = () => {
       const b = blocks.shift();
       if (b === undefined) { w.removeAllListeners('message'); w.removeAllListeners('error'); resolve(); return; }
-      w.postMessage({ demPath, z, interval, index, x0, x1, yStart: b[0], yEnd: b[1] });
+      w.postMessage({ demPath, z, interval, index, ...b });
     };
     w.on('message', (m) => {
-      if (m.done) { next(); return; }
-      if (m.row) {
-        rowsDone++;
-        if (rowsDone % 10 === 0 || rowsDone === rows) {
+      if (m.done) {
+        blocksDone++;
+        if (blocksDone % 10 === 0 || blocksDone === total) {
           const s = (Date.now() - started) / 1000;
-          process.stdout.write(`\r  z${z} row ${rowsDone}/${rows}  ${tilesWritten} tiles  ${(bytes / 1e6).toFixed(1)} MB  ${s.toFixed(0)} s   `);
+          process.stdout.write(`\r  z${z} block ${blocksDone}/${total}  ${tilesWritten} tiles  ${(bytes / 1e6).toFixed(1)} MB  ${s.toFixed(0)} s   `);
         }
+        next();
         return;
       }
       insert.run(m.z, m.x, 2 ** m.z - 1 - m.y, new Uint8Array(m.data));

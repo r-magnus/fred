@@ -1,12 +1,16 @@
 /**
- * Worker for build-state-contours.mjs: traces a block of tile rows.
+ * Worker for build-state-contours.mjs: traces a block of tiles.
  *
- * Receives { demPath, z, interval, index, x0, x1, yStart, yEnd } and posts one
- * { z, x, y, data } message per non-empty tile (gzipped MVT, transferred), then
- * { done: true }. Each worker opens the elevation archive itself and keeps its
- * own decoded-tile cache; blocks are contiguous rows so the cache stays warm,
- * and the rows either side of a block are decoded twice, which is the whole
- * cost of splitting.
+ * Receives { demPath, z, interval, index, xStart, xEnd, yStart, yEnd } and posts
+ * one { z, x, y, data } message per non-empty tile (gzipped MVT, transferred),
+ * then { done: true }. Each worker opens the elevation archive itself and keeps
+ * its own decoded-tile cache for the block; the ring of tiles around a block is
+ * decoded twice, which is the whole cost of splitting.
+ *
+ * Blocks are bounded in both directions because a decoded tile is 1 MB
+ * (512 x 512 Float32) and the cache holds three rows of the block: full-width
+ * rows of Alaska at z12 (571 tiles) came to ~1.7 GB per worker and froze a
+ * 15 GB machine.
  */
 import { parentPort } from 'node:worker_threads';
 import { openSync, readSync, fstatSync } from 'node:fs';
@@ -83,10 +87,10 @@ async function gridWithBorder(z, x, y) {
 parentPort.on('message', async (job) => {
   if (job.demPath !== demPath) { dem = new PMTiles(new NodeFileSource(job.demPath)); demPath = job.demPath; }
   cache.clear();
-  const { z, interval, index, x0, x1, yStart, yEnd } = job;
+  const { z, interval, index, xStart, xEnd, yStart, yEnd } = job;
   for (let y = yStart; y <= yEnd; y++) {
     for (const k of cache.keys()) { if (Number(k.split('/')[2]) < y - 1) cache.delete(k); }
-    for (let x = x0; x <= x1; x++) {
+    for (let x = xStart; x <= xEnd; x++) {
       const grid = await gridWithBorder(z, x, y);
       if (grid === null) continue;
       const features = tileContours(grid, size, BORDER, interval, index);
@@ -95,7 +99,7 @@ parentPort.on('message', async (job) => {
       const ab = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
       parentPort.postMessage({ z, x, y, data: ab }, [ab]);
     }
-    parentPort.postMessage({ row: true });
   }
+  cache.clear();
   parentPort.postMessage({ done: true });
 });

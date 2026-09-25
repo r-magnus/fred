@@ -117,6 +117,14 @@ different physical locations, and that has not happened.
       fix this class of bug for every layer. The catch
       offline: it needs glyphs and sprites bundled on the device. Decide that
       before writing many more hand-written layers.
+7. **Conversation memory.** Researched 2026-09-25, no code yet:
+   `docs/results-memory-research.md`. Every question is currently answered as
+   if it were the first, so follow-ups like "it's still bleeding" lose their
+   context. The plan: store turns in op-sqlite (also closes US-10, ~1-2 KB a
+   turn); let retrieval try the previous question joined to the new one and
+   keep whichever scores higher; show the generator the previous *question*
+   only, never the previous answer or its sources. Build the three small
+   multi-turn eval sets in the doc first, and count refusals before and after.
 
 ## The Expo 57.0.24 upgrade is verified on Android
 

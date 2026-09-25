@@ -138,6 +138,7 @@ export class NodePackStore implements PackStore {
           domain: r.domain as DomainTag,
           licenseId: r.license_id as string,
           blockKind: r.block_kind as BlockKind,
+          audience: r.audience === 'provider' ? 'provider' : 'everyone',
         });
       }
     }

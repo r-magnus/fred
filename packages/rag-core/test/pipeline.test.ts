@@ -11,7 +11,7 @@ import { FakeBackend, FakePackStore, FAKE_SPEC } from './fakes.ts';
 type Seed = Omit<ChunkRecord, 'id' | 'packId' | 'ordinal'>;
 const seed = (text: string, over: Partial<Seed> = {}): Seed => ({
   text, context: '', section: 'sec', source: 'WHO BEC 2018', page: 10,
-  domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', ...over,
+  domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', audience: 'everyone', ...over,
 });
 
 const PACKS = [
@@ -340,4 +340,52 @@ test('a qualifying field card is placed first, even from outside the top K', asy
   const tooWeak = withReservedCard(scored, { ...opts, reserve: { packId: 'cards', minScore: 0.4 } });
   assert.deepEqual(tooWeak.map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
   assert.deepEqual(withReservedCard(scored, opts).map((c) => c.chunk.id), ['a', 'b', 'c', 'd']);
+});
+
+// Provider-only material (docs/plan-phase3.md, class B).
+function clinicalStore(withCard: boolean): FakePackStore {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [
+    seed('Insert the IV cannula into the vein and secure the cannula with tape.', { audience: 'provider' }),
+    seed('Control severe bleeding with firm direct pressure on the wound.'),
+  ]);
+  store.addPack('core-fieldcards', withCard
+    ? [seed('Insert IV cannula vein: you cannot do this out here; keep them warm and get help.', { source: 'Fred field card' })]
+    : []);
+  return store;
+}
+const clinicalPacks = [
+  { id: 'core-firstaid', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-fieldcards', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+];
+
+test('a clinical procedure is referred on, not answered', async () => {
+  const backend = new FakeBackend();
+  const res = await ask('How do I insert an IV cannula into a vein?', { backend, store: clinicalStore(false), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+  });
+  assert.equal(res.kind, 'abstain');
+  if (res.kind !== 'abstain') return;
+  assert.equal(res.reason, 'provider-only');
+  assert.equal(backend.lastPrompt, null, 'the model must never see the procedure');
+});
+
+test('a matching field card takes precedence over provider-only material', async () => {
+  const res = await ask('How do I insert an IV cannula into a vein?', { backend: new FakeBackend(), store: clinicalStore(true), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
+  });
+  assert.equal(res.kind, 'answer');
+});
+
+test('provider-only passages never reach the model, even beside an answer', async () => {
+  const backend = new FakeBackend();
+  const res = await ask('How do I control severe bleeding from a wound?', { backend, store: clinicalStore(false), packs: clinicalPacks }, {
+    state: null, abstainThreshold: 0,
+  });
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  for await (const _ of res.stream) { /* drain */ }
+  assert.ok(!(backend.lastPrompt ?? '').includes('cannula'));
+  assert.ok(res.citations.every((c) => !c.section.includes('cannula')));
 });

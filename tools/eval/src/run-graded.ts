@@ -113,6 +113,8 @@ for (const [i, q] of questions.entries()) {
       : [],
     latencyMs,
     promptTokens: d.tokensAfter,
+    ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
+    retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);
 

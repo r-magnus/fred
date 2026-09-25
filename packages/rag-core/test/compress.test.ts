@@ -13,7 +13,7 @@ const opts = { ...DEFAULT_COMPRESSION, countTokens };
 function chunk(over: Partial<ChunkRecord> & { text: string }): ChunkRecord {
   return {
     id: 'p:0', packId: 'p', ordinal: 0, context: '', section: 's', source: 'src', page: 1,
-    domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose',
+    domain: 'first-aid-physical', licenseId: 'who-bec', blockKind: 'prose', audience: 'everyone',
     ...over,
   };
 }
@@ -176,7 +176,7 @@ test('a sentence from the top chunk outranks an equally relevant one further dow
   // material already in context, that is the wrong direction to be trimming in.
   const mk = (id: string, text: string): ChunkRecord => ({
     id, packId: 'p', ordinal: 0, text, context: '', section: 's', source: 'src', page: 1,
-    domain: 'first-aid-physical', licenseId: 'l', blockKind: 'prose',
+    domain: 'first-aid-physical', licenseId: 'l', blockKind: 'prose', audience: 'everyone',
   });
   // Identical bodies, so only rank can separate them.
   const body = 'Topic sentence about bleeding.\nA filler sentence with no query terms at all.';

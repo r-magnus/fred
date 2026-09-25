@@ -146,6 +146,17 @@ export interface PackManifest {
   readonly ingestVersion: string;
 }
 
+/**
+ * Who a passage is written for.
+ *
+ * WHO BEC is a course for health workers, and its skill stations (IV lines,
+ * needle decompression, airway devices) score well against questions a hiker
+ * should be referred on, not walked through (docs/plan-phase3.md, class B).
+ * Marking them keeps them searchable, so they still identify the question as
+ * clinical, while the pipeline refuses to build an answer from them.
+ */
+export type ChunkAudience = 'everyone' | 'provider';
+
 /** A retrievable unit of knowledge. Mirrors one row of chunks.sqlite. */
 export interface ChunkRecord {
   /** Globally unique: `${packId}:${ordinal}`. */
@@ -171,6 +182,8 @@ export interface ChunkRecord {
   readonly domain: DomainTag;
   readonly licenseId: string;
   readonly blockKind: BlockKind;
+  /** 'everyone' for packs built before the column existed. */
+  readonly audience: ChunkAudience;
 }
 
 export function isDomainTag(v: unknown): v is DomainTag {

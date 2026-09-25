@@ -59,7 +59,10 @@ function writeChunkDb(dbPath: string, packId: string, chunks: readonly DraftChun
       page       INTEGER,
       domain     TEXT NOT NULL,
       license_id TEXT NOT NULL,
-      block_kind TEXT NOT NULL
+      block_kind TEXT NOT NULL,
+      -- 'provider' for clinical procedures a hiker is referred on, not walked
+      -- through. Nullable and additive like context: null reads as everyone.
+      audience   TEXT
     );
     -- External-content FTS5: the index references chunks rather than copying
     -- the text, which keeps the pack roughly half the size on device.
@@ -71,12 +74,12 @@ function writeChunkDb(dbPath: string, packId: string, chunks: readonly DraftChun
     );
   `);
   const insert = db.prepare(`
-    INSERT INTO chunks (ordinal, id, pack_id, text, context, section, source, page, domain, license_id, block_kind)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO chunks (ordinal, id, pack_id, text, context, section, source, page, domain, license_id, block_kind, audience)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   db.exec('BEGIN');
   chunks.forEach((c, i) => {
-    insert.run(i, `${packId}:${i}`, packId, c.text, c.context ?? null, c.section, input.source, c.page, c.domain, input.licenseId, c.blockKind);
+    insert.run(i, `${packId}:${i}`, packId, c.text, c.context ?? null, c.section, input.source, c.page, c.domain, input.licenseId, c.blockKind, c.audience ?? null);
   });
   db.exec('COMMIT');
   db.exec("INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild')");

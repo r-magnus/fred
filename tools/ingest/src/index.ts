@@ -30,6 +30,7 @@ const EMBED_MODEL_ID = 'Supabase/gte-small';
 
 import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
+import { ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, WHO_BEC_PROVIDER_ONLY, type ProviderRule } from './provider-only.ts';
 
 interface CorpusDef {
   readonly pdf: string;
@@ -49,6 +50,8 @@ interface CorpusDef {
    * otherwise useful chapter but must never reach a user of this app.
    */
   readonly dropChunks?: readonly RegExp[];
+  /** Clinical procedures kept searchable but never answered from (provider-only.ts). */
+  readonly providerOnly?: readonly ProviderRule[];
 }
 
 /**
@@ -62,9 +65,11 @@ const CORPORA: Record<string, CorpusDef> = {
   'who-bec': {
     pdf: 'corpora/who/who-bec.pdf',
     domain: 'first-aid-physical',
+    providerOnly: WHO_BEC_PROVIDER_ONLY,
     input: {
       id: 'core-firstaid',
-      version: '1.2.0',
+      // 1.3.0: clinical skill stations marked provider-only (provider-only.ts).
+      version: '1.3.0',
       displayName: 'Physical First Aid',
       description: 'WHO/ICRC Basic Emergency Care — acute illness and injury.',
       domains: ['first-aid-physical'],
@@ -129,6 +134,7 @@ const CORPORA: Record<string, CorpusDef> = {
   'atp-4-02-11': {
     pdf: 'corpora/army/atp-4-02-11.pdf',
     domain: 'first-aid-physical',
+    providerOnly: ATP_FIRST_AID_PROVIDER_ONLY,
     // Only the chapters a civilian responder can act on. Excluded: Ch 1 unit
     // casualty-response operations, Ch 3 TCCC doctrine, Ch 9 combat wound
     // medication packs, Ch 15 military evacuation and DD Form 1380, Ch 18 sickle
@@ -176,7 +182,8 @@ const CORPORA: Record<string, CorpusDef> = {
     input: {
       id: 'core-firstaid-army',
       // 1.1.0: rebuilt with list-header carrying; 1.0.0 has inverted negated lists.
-      version: '1.3.0',
+      // 1.4.0: needle-decompression device and prescription drugs marked provider-only.
+      version: '1.4.0',
       displayName: 'Field First Aid',
       description: 'US Army ATP 4-02.11 — first aid for nonmedical responders: bleeding, airway, burns, fractures, bites, heat and cold.',
       domains: ['first-aid-physical'],
@@ -248,7 +255,11 @@ if (name === 'atp-3-50-21') {
 }
 const scaffolding = chunks.filter((c) => classifyChunk(c.text).drop);
 const excluded = chunks.filter((c) => !classifyChunk(c.text).drop && def.dropChunks?.some((re) => re.test(c.text)));
-const kept = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));
+const unmarked = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));
+const kept = def.providerOnly === undefined ? unmarked : markProviderOnly(unmarked, def.providerOnly);
+if (def.providerOnly !== undefined) {
+  console.log(`      ${kept.filter((c) => c.audience === 'provider').length} chunks marked provider-only`);
+}
 const procedures = kept.filter((c) => c.blockKind === 'procedure').length;
 console.log(`      ${chunks.length} chunks, dropped ${scaffolding.length} course-scaffolding ` +
   `(${((scaffolding.length / chunks.length) * 100).toFixed(1)}%), ${excluded.length} by corpus exclusion rules`);

@@ -24,6 +24,8 @@ export interface DraftChunk {
   readonly page: number | null;
   readonly domain: DomainTag;
   readonly blockKind: BlockKind;
+  /** Set by the corpus's provider-only rules after chunking. Absent means everyone. */
+  readonly audience?: 'provider';
 }
 
 export interface ChunkOptions {

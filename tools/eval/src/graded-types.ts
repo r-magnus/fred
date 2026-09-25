@@ -104,7 +104,7 @@ export const HOLDOUT_SETS = [
 
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
-  switch (name ?? 'tuning') {
+  switch (name === undefined || name === '' ? 'tuning' : name) {
     case 'tuning': return GRADED_SETS;
     case 'holdout': return HOLDOUT_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
@@ -125,6 +125,10 @@ export interface GradedRun {
   readonly citations: readonly string[];
   readonly latencyMs: number;
   readonly promptTokens: number;
+  /** Why Fred declined, when it did: 'low-score', 'insufficient' or 'provider-only'. */
+  readonly abstainReason?: string;
+  /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
+  readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }
 
 /** The judge's decision on one answer. */

@@ -152,9 +152,15 @@ export type AskResult =
       readonly candidatePacks: readonly string[];
       readonly diagnostics: Diagnostics;
     }
-  /** Nothing retrieved cleared the threshold. */
+  /**
+   * Fred declines. `reason` says why: nothing cleared the threshold, the model
+   * judged the passages insufficient, or the question is a clinical procedure
+   * (the best match is provider-only material), which the app answers with
+   * REFER_REPLY rather than "I don't know".
+   */
   | {
       readonly kind: 'abstain';
+      readonly reason: 'low-score' | 'insufficient' | 'provider-only';
       readonly nearest: readonly Citation[];
       readonly diagnostics: Diagnostics;
     };
@@ -213,12 +219,35 @@ export async function ask(
     if (routed.skippedStatePacks.length > 0) {
       return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
     }
-    return { kind: 'abstain', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
+    return { kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
   }
+
+  // Clinical procedures (IV lines, needle decompression, dose tables) are
+  // marked provider-only at ingest. When one is the best manual match and no
+  // field card matched, the question is asking to be walked through it, and
+  // Fred refers the hiker on instead (docs/plan-phase3.md, class B). Otherwise
+  // the marked passages are dropped, so the model is never handed a procedure
+  // that sits beside the one the hiker actually needs.
+  const reservedPack = retrievalOpts.reserve?.packId;
+  const cardMatched = retrievalOpts.reserve !== undefined && candidates.some(
+    (c) => c.chunk.packId === reservedPack && c.score >= retrievalOpts.reserve!.minScore,
+  );
+  const bestManual = candidates
+    .filter((c) => c.chunk.packId !== reservedPack)
+    .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  if (!cardMatched && bestManual?.chunk.audience === 'provider') {
+    return {
+      kind: 'abstain',
+      reason: 'provider-only',
+      nearest: candidates.slice(0, 2).map(toCitation),
+      diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
+    };
+  }
+  const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
   // Stage 3 — compress before prefill.
   const compressed = await compressContext(
-    candidates.map((c) => c.chunk),
+    usable.map((c) => c.chunk),
     keywords,
     { ...(opts.compression ?? NO_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
   );
@@ -244,6 +273,7 @@ export async function ask(
     if (!sufficient) {
       return {
         kind: 'abstain',
+        reason: 'insufficient',
         nearest: candidates.slice(0, 2).map(toCitation),
         diagnostics: {
           ...baseDiag,
@@ -266,9 +296,9 @@ export async function ask(
   return {
     kind: 'answer',
     stream: backend.generate(prompt, generateOpts),
-    citations: candidates.map(toCitation),
+    citations: usable.map(toCitation),
     prompt,
-    medical: candidates.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
+    medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
       ...baseDiag,
       candidates,

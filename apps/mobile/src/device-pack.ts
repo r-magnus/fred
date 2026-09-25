@@ -157,6 +157,7 @@ export class DevicePackStore implements PackStore {
           domain: r.domain as ChunkRecord['domain'],
           licenseId: String(r.license_id),
           blockKind: r.block_kind as ChunkRecord['blockKind'],
+          audience: r.audience === 'provider' ? 'provider' : 'everyone',
         });
       }
     }

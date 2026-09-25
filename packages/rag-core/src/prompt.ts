@@ -28,6 +28,14 @@ export interface ContextBlock {
  */
 export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
 
+/**
+ * What Fred says when the question is a clinical procedure (provider-only
+ * material; pipeline.ts). Fixed text, not generated: the point is that the
+ * model never sees the procedure.
+ */
+export const REFER_REPLY =
+  "That's a procedure for trained medical providers, so I won't walk you through it. Call emergency services or get the person to medical care as fast as you can.";
+
 /** True when a generated answer is really the model declining. */
 export function isRefusal(text: string): boolean {
   const t = text.trim().toLowerCase().replace(/[.!]+$/, '');

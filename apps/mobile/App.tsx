@@ -24,7 +24,7 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, isRefusal, type Citation } from '@fred/rag-core';
+import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, type Citation } from '@fred/rag-core';
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapProbe } from './src/map-probe.tsx';
@@ -157,7 +157,9 @@ function Screen() {
         return;
       }
       if (res.kind === 'abstain') {
-        update(id, { kind: 'abstain', done: true });
+        // A clinical procedure gets a referral, not "I don't know": Fred does
+        // know what it is, and knows it is not for a hiker to attempt.
+        update(id, { kind: 'abstain', text: res.reason === 'provider-only' ? REFER_REPLY : '', done: true });
         return;
       }
       update(id, { citations: res.citations, medical: res.medical });
@@ -326,7 +328,13 @@ function Screen() {
               </View>
             )}
 
-            {t.kind === 'abstain' && (
+            {t.kind === 'abstain' && t.text === REFER_REPLY && (
+              <View style={styles.card}>
+                <Text style={styles.body}>{REFER_REPLY}</Text>
+              </View>
+            )}
+
+            {t.kind === 'abstain' && t.text !== REFER_REPLY && (
               <View style={styles.card}>
                 <Text style={styles.body}>I don&apos;t have reliable information on that.</Text>
                 <Text style={styles.hint}>

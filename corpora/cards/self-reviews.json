@@ -1,10 +1,58 @@
 [
-  {
-    "id": "cpr",
-    "rev": "15566dd908ed",
-    "date": "2026-09-24",
-    "by": "Claude (self-review)",
-    "change": "Split adult and baby/child hand positions into separate steps; added an explicit do-not for infants.",
-    "why": "Held-out hf-cpr-infant-01: the model told someone to use the heel of the hand on a baby, mixing the old card's adult step and trailing child note. Content unchanged otherwise; all quotes re-verified."
-  }
+ {
+  "id": "cpr",
+  "rev": "15566dd908ed",
+  "date": "2026-09-24",
+  "by": "Claude (self-review)",
+  "change": "Split adult and baby/child hand positions into separate steps; added an explicit do-not for infants.",
+  "why": "Held-out hf-cpr-infant-01: the model told someone to use the heel of the hand on a baby, mixing the old card's adult step and trailing child note. Content unchanged otherwise; all quotes re-verified."
+ },
+ {
+  "id": "spinal-injury",
+  "rev": "3190367daa59",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "WHO BEC and ATP 4-02.11 agree; hospital-only steps left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "chest-wound",
+  "rev": "f3b161f5fde2",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "Commercial chest seal replaced by an airtight dressing (ATP 3-50.21 wording); plastic flagged unsourced; provider steps left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "pelvis-injury",
+  "rev": "35147c7a43f0",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "WHO sheet binder kept as the lay version; do-not-rock warning from WHO p.68. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "altitude-illness",
+  "rev": "be674da5ddfe",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "Manuals give no mild-AMS signs, so only serious signs; drugs and oxygen left out as the manual defers them to professionals. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "seizure",
+  "rev": "42a23525e398",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "Drug and oxygen steps excluded (#61); 'don't hold them down' flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "low-blood-sugar",
+  "rev": "45396fe1906a",
+  "date": "2026-09-26",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
+  "why": "Oral glucose is lay care (WHO p.33); everyday sugar forms flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
+ }
 ]

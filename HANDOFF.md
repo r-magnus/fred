@@ -70,8 +70,11 @@ Conversation memory (item 4 below) also bears on accuracy.
      Carriers claim all but 3.9% of California, so red is a floor, not the
      real extent. Small networks are counted as carriers on purpose: 1.8% of
      US ground is covered only by them, nearly all real public carriers (GCI
-     and Alaska co-ops). **Not yet seen on the phone**: the field-test APK is
-     built; install it, stage a bundle, and look at a known dead zone.
+     and Alaska co-ops). **Seen working on the phone 2026-09-26** with test
+     locations (`cmd location providers set-test-provider-location`):
+     Saline Valley and Evolution Basin, SIM read as T-Mobile, picker switch to
+     AT&T. The map now uses a TextureView: the default GLSurfaceView drew over
+     the left third of every overlay on this phone.
 2. **Downloads.** Bundles are the unit; the recommendation is a signed catalog
    on a static host (Cloudflare R2 or GitHub Releases), with the 1.4 GB of models
    fetched on first run. Not built.

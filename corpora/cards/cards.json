@@ -2570,5 +2570,512 @@
         "quote": "Keep a warm compress on the wound for a\ntotal of 30 minutes."
       }
     ]
+  },
+  {
+    "id": "spinal-injury",
+    "title": "Possible neck or back injury",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "neck or back injury after a fall",
+      "could they have hurt their spine",
+      "is it safe to move someone who fell",
+      "numb and tingling legs after a fall"
+    ],
+    "summary": "After a fall, a crash or a hard blow to the head, treat any neck or back pain as a spine injury: keep them still, keep the head in line with the body, and get help.",
+    "steps": [
+      "Suspect a spine injury after a fall or a hard blow if they are unconscious, or awake with neck or back pain, numbness, tingling or weakness.",
+      "Don't move them unless they are in immediate danger where they lie.",
+      "Keep them flat on their back and ask them not to move.",
+      "Kneel at their head and hold it in line with the spine, one hand on each side.",
+      "Pack rolled clothing or anything similar on both sides of the head so the neck can't move.",
+      "If they vomit or must be moved, roll them as one unit: one person holds the head in line while others turn the body together, keeping the spine straight.",
+      "If they are unconscious and you need to open the airway, lift the jaw forward with both hands at the angles of the jaw instead of tilting the head back.",
+      "Stay with them and keep watching their breathing."
+    ],
+    "dont": [
+      "Don't tilt the head back or twist the neck.",
+      "Don't rule out a neck injury because they say it doesn't hurt: pain somewhere else can hide it."
+    ],
+    "getHelp": "Call for help. Anyone who may have a spine injury needs to be moved carefully and seen by specialists.",
+    "reviewerNote": "Built from WHO BEC 2018 (cervical spine immobilization and log-roll skill stations, pp.187-188; spinal cord injury, pp.66-67) and ATP 4-02.11 2026 (jaw thrust p.77, rolling as a unit p.74-75, blunt trauma treated as spinal p.124). The manuals agree. Hospital-only details (backboards, not taping the head to the bed, collars) are left out. The 'don't move unless in immediate danger' step follows ATP 4-02.11 p.124.",
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "who is unconscious; or who is conscious and has neck pain, spine tenderness, numbness or weakness"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 124,
+        "quote": "Casualties with blunt trauma should be treated as though they also have a spinal injury. The casualty should not be moved until the head and neck are stabilized unless they are in immediate danger"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "Keep the patient flat on his or her back and face up on a level surface such as a bed."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 188,
+        "quote": "Keep the person on a flat surface with instructions to lie flat and not to move."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "Hold the patient's head in line with the spine with two hands on either side of the head."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "Prevent the patient's neck from moving with locally available materials (towel rolls, newspaper,"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "If the patient vomits, use the log-roll technique (see below) to turn the whole patient onto his or her side, keeping the head in line with the body."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 188,
+        "quote": "Working together, roll the patient onto his or her side, keeping the spine in line."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 75,
+        "quote": "roll the casualty as a unit so that their body does not twist. The twisting may further complicate a back, neck, or spinal injury."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "In a casualty with a suspected neck injury or severe head trauma, the safest approach to opening the airway is the jaw-thrust technique because in most cases, it can be accomplished without extending the neck."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "grasping the angles of the casualty's lower jaw and lifting with both hands"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 77,
+        "quote": "use extreme care because excess force in performing this maneuver may cause further spinal injury."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "Keep someone with the patient at all times to watch the airway."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 187,
+        "quote": "a patient who has severe pain/injury elsewhere may not be able to feel neck pain, even if there is a fracture."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 67,
+        "quote": "Any patient with possible spinal trauma"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 67,
+        "quote": "needs handover/transfer to a specialist unit."
+      }
+    ]
+  },
+  {
+    "id": "chest-wound",
+    "title": "Wound to the chest",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "a wound in the chest",
+      "chest wound making a sucking noise",
+      "bubbles coming from a chest injury",
+      "something went into their ribs"
+    ],
+    "summary": "A hole in the chest can let air in and collapse a lung. Seal it straight away, check the back for a second wound, and get help fast.",
+    "steps": [
+      "Uncover the wound. Put your hand, gloved if you can, over the hole at once to seal it for now.",
+      "Cover the hole with an airtight dressing and tape it down firmly, reaching about 2 inches past the wound on every side. Press it on while they breathe out.",
+      "Roll them onto their side, or have them sit up, and look at their back. Seal any wound there the same way.",
+      "If they're awake, let them sit in whatever position is easiest. If they're unconscious, lay them on their side with the injured side down.",
+      "Watch their breathing. If it gets harder, lift one edge of the dressing to let trapped air out, then press it back down as they breathe out."
+    ],
+    "dont": [
+      "Don't stuff or pack a chest wound.",
+      "Don't wrap a band tightly around the chest."
+    ],
+    "getHelp": "This is life-threatening. Get them to medical care as fast as you can.",
+    "reviewerNote": "Follows ATP 4-02.11 2026 pp.90-93, which assumes a commercial chest seal. A hiker won't carry one, so the card says 'airtight dressing', the ATP 3-50.21 2018 p.27 wording ('a taped, airtight dressing'), and names plastic as the everyday option in the unsourced list. Needle decompression and other provider steps are left out.",
+    "unsourced": [
+      {
+        "text": "A piece of clean plastic, such as a food bag, works as the airtight dressing.",
+        "why": "Hikers carry no chest seal. The manuals call for an airtight or occlusive dressing (ATP 3-50.21 p.27), and a commercial seal is itself a sheet of plastic sucked against the wound (ATP 4-02.11 p.90)."
+      }
+    ],
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 90,
+        "quote": "An open pneumothorax is also known as a sucking chest wound."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "Sucking chest wounds are recognized by the sucking noise and appearance of foam or bubbles in the wound."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "Once an open wound is discovered, place a gloved hand over the wound to provide a temporary seal."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "Frequently, a taped, airtight dressing is all that is needed"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "Ensure that the edges of the chest seal extend two inches beyond the wound. Firmly press the chest seal on the skin to ensure a good airtight seal."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "Instruct the casualty to fully exhale and then immediately place the vent of the chest seal directly over the first wound encountered."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "Roll the casualty on their side or have the conscious casualty sit up and examine their back for any wounds."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "Place the casualty in a position of comfort (usually sitting) if conscious, or in the recovery position (on the casualty's side), with the injured side down if unconscious."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 91,
+        "quote": "If the casualty has increased difficulty breathing, lift the chest seal, release any trapped air by wiping blood or debris from the wound, and reseal or replace the chest seal upon exhalation."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 90,
+        "quote": "DO NOT pack chest wounds with a hemostatic (or other) dressing."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 27,
+        "quote": "Do not wrap a band snugly around the person's chest."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 93,
+        "quote": "They are considered severe and life-threatening, requiring immediate intervention"
+      }
+    ]
+  },
+  {
+    "id": "pelvis-injury",
+    "title": "Hip or pelvis injury after a fall",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "pain in the hips after a fall",
+      "could the pelvis be broken",
+      "crushed across the hips",
+      "bruising around the hips and groin"
+    ],
+    "summary": "A broken pelvis can bleed heavily inside where you can't see it. Keep them still, wrap the hips firmly, and get help fast.",
+    "steps": [
+      "Suspect a broken pelvis after a hard fall or crush if there is pain in or around the hips or pelvis, bruising around the hips, the top of the legs or the groin, or signs of shock.",
+      "Keep them lying still, and treat it as a possible spine injury too.",
+      "Wrap the hips: slide a sheet or similar wide cloth under them, centre it on the hip bones, cross it over at the front, pull firmly and tie it. It should feel firm but not very painful.",
+      "To get the wrap under them, roll them carefully as one unit with helpers.",
+      "Check the wrap every hour: still firm, and the skin under it unbroken."
+    ],
+    "dont": [
+      "Don't press, rock or pull the hips apart to check for a break. That can make the bleeding worse."
+    ],
+    "getHelp": "A broken pelvis can cause life-threatening bleeding. Get them to medical care as fast as you can.",
+    "reviewerNote": "Built from WHO BEC 2018 (pelvic binder skill station p.192, pelvic fracture management p.68, pain in the hips p.57) and ATP 4-02.11 2026 p.100 (signs). WHO's binder uses a bed sheet 'or similar'; the card keeps that wording. Hospital steps (IV fluids, transfusion) are left out.",
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 57,
+        "quote": "Pain in the pelvis or hips may suggest a fracture in the pelvis which can cause serious bleeding and shock."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "Signs of pelvic fractures include pain or abnormal movement of the pelvis on exam; bruising around the hips, at the top of legs, or to the genitals; and signs and symptoms of shock."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 100,
+        "quote": "Pelvic deformities, penetrating injuries, or bruising near the pelvis."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 47,
+        "quote": "immobilizing the spine if needed."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "Place bed sheet or similar under the pelvis."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "firmly cross-over at the front."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "Pull firmly and tie, but do not cause the person undue pain. It should feel firm but not overly painful."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "You may need to log roll the patient in order to get the binder in position."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "Check the binder each hour. Confirm that the binder is still applying pressure around the pelvis."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 68,
+        "quote": "Do not open and rock pelvis or perform repeat exams as this can worsen internal bleeding."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 192,
+        "quote": "Pelvic fractures can cause life-threatening haemorrhage by damaging blood vessels adjacent to the fractures."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 100,
+        "quote": "If a pelvic fracture is suspected, the casualty will require advanced evaluation by medical personnel"
+      }
+    ]
+  },
+  {
+    "id": "altitude-illness",
+    "title": "Altitude illness",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "sick high up in the mountains",
+      "altitude sickness",
+      "breathless and coughing up high",
+      "confused and clumsy at high altitude"
+    ],
+    "summary": "High up, fluid can build in the lungs or brain. If someone is getting worse, breathless or confused, go down right away.",
+    "steps": [
+      "Watch for serious altitude illness above about 8,000 feet: breathing that gets harder, blue lips or fingertips, confusion, loss of coordination or drowsiness.",
+      "If you see any of these, go down to lower altitude right away. Getting lower is the most important treatment.",
+      "Keep them warm with layers and blankets.",
+      "Let them rest and give them water to drink.",
+      "Keep them calm and reassure them."
+    ],
+    "dont": [
+      "Don't wait at the same height to see whether it gets better once breathing or thinking is getting worse."
+    ],
+    "getHelp": "Fluid in the lungs or brain from altitude is an emergency. Head down and get medical help or a rescue as fast as you can.",
+    "reviewerNote": "Built from ATP 4-02.11 2026 pp.195-196 (altitude emergencies, HAPE, HACE). The manuals do not describe mild altitude sickness (headache, nausea), so the card covers only the serious signs they give. Drugs (nifedipine, sildenafil, dexamethasone) and oxygen are left out: the manual leaves them to medical professionals, and hikers rarely carry them. The 'don't wait' line restates the manual's 'immediate descent'.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "High-Altitude Pulmonary Edema is a serious condition that can occur at higher elevations, typically above 2,500 meters (8,200 feet)."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "If there are signs of severe respiratory distress, such as blue lips or fingertips, it may indicate a critical situation"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "Signs of severe neurological impairment, such as confusion, loss of coordination, or changes in consciousness, require urgent medical attention."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "The most critical first aid measure for HAPE is an immediate descent to lower altitudes."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "The most critical first aid measure for HACE is an immediate and rapid descent to lower altitudes."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "Maintain the person's warmth by using blankets and insulating layers."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "Encourage the individual to drink fluids to stay hydrated."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "Keep the affected individual calm and reassure them."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "HAPE is a medical emergency, and prompt action is crucial."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 196,
+        "quote": "HACE is a critical condition, and time is of the essence."
+      }
+    ]
+  },
+  {
+    "id": "seizure",
+    "title": "Seizure",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "someone is having a fit",
+      "convulsions",
+      "shaking and jerking on the ground",
+      "what to do during a seizure"
+    ],
+    "summary": "Keep them from getting hurt while it happens. Put nothing in their mouth, and once it stops, turn them on their side.",
+    "steps": [
+      "Move hard or sharp things away from them and protect them from falling or hitting anything.",
+      "When the shaking stops, check they are breathing and roll them onto their side so the airway stays clear. If they fell or hit their head, move them as little as possible and treat it as a possible neck injury.",
+      "Stay with them. Confusion afterwards is normal and should clear over half an hour to a few hours."
+    ],
+    "dont": [
+      "Don't put anything in their mouth, including your fingers."
+    ],
+    "getHelp": "Get medical help if they were hurt, if they are pregnant, or if they are still confused after a few hours, which suggests something else is wrong.",
+    "reviewerNote": "Built from WHO BEC 2018 p.33 (seizure management, after the drug and oxygen steps were removed for #61) and p.133 (recovery time, falls, pregnancy). The WHO list also allows 'except to suction airway', a clinical step the card leaves out. 'Don't hold them down' is in the unsourced list: the manuals don't say it, but none say to restrain.",
+    "unsourced": [
+      {
+        "text": "Don't hold them down or try to stop the movements.",
+        "why": "Standard first-aid teaching. The manuals' stated goal is to 'prevent hypoxia and injury' (WHO p.33), and none of them say to restrain a seizing person."
+      }
+    ],
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "The goal in managing seizures/convulsions is to prevent hypoxia and injury."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "Protect the seizing person from falls and from any hard or sharp objects nearby."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "Place patient in recovery position if there is no trauma suspected."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 133,
+        "quote": "With a witnessed convulsion, ask about fall or head trauma."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 133,
+        "quote": "recovery of normal mental status after convulsions usually takes only a half hour to several hours at most"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "Do not place anything in the mouth of a person with active seizure"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 133,
+        "quote": "Longer altered mental status suggests another cause."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 133,
+        "quote": "High blood pressure during pregnancy can lead to eclampsia (or seizures/convulsions and high blood pressure) during pregnancy."
+      }
+    ]
+  },
+  {
+    "id": "low-blood-sugar",
+    "title": "Low blood sugar",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "diabetic acting strange",
+      "low blood sugar",
+      "hypoglycemia",
+      "confused and sweaty after not eating"
+    ],
+    "summary": "Low blood sugar can make someone confused, sweaty or strange, and it can be fixed fast: if they can swallow, give them sugar.",
+    "steps": [
+      "Suspect low blood sugar if someone becomes confused, sweaty or acts strangely, especially if they have diabetes or haven't eaten.",
+      "If they can talk and swallow, give them sugar by mouth right away.",
+      "They should improve quickly. If they don't, something else may be wrong.",
+      "If they are unconscious or can't swallow, give nothing by mouth. Put them on their side and get help."
+    ],
+    "dont": [
+      "Don't give food or drink to someone who is unconscious or can't swallow."
+    ],
+    "getHelp": "Get medical help if they don't improve quickly, can't swallow, pass out or have a seizure.",
+    "reviewerNote": "Built from WHO BEC 2018 p.33 (oral glucose, kept as lay care in #61), p.137 (signs, quick improvement), p.132-133 (diabetes, last meal) and ATP 3-50.21 2018 p.29 (no fluids when unconscious). Everyday sugar sources are in the unsourced list; WHO says only 'oral glucose'.",
+    "unsourced": [
+      {
+        "text": "Glucose tablets, a sweet drink, sugar, honey or candy all work.",
+        "why": "WHO says 'give oral glucose'; these are the forms of sugar a hiker actually carries."
+      }
+    ],
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 132,
+        "quote": "In any patient with diabetes and altered mental status, suspect diabetic crisis, or low blood sugar caused by medications."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 133,
+        "quote": "Low blood glucose levels and dehydration can cause altered mental status."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 137,
+        "quote": "Sweating (diaphoresis)"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "Patients with hypoglycaemia (low blood sugar) need glucose immediately."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "If the person can speak and swallow, give oral glucose."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 137,
+        "quote": "Mental status improves quickly with glucose"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 29,
+        "quote": "Do not give fluids or morphine to unconscious persons."
+      }
+    ]
   }
 ]

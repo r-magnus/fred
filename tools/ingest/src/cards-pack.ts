@@ -104,7 +104,7 @@ const vectors = await embedder.embed(embedInput);
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.1.0',
+  version: '0.2.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],

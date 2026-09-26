@@ -92,7 +92,7 @@ for (const [i, c] of conversations.entries()) {
   const res = await ask(t2.question, harness, {
     ...askOptions,
     state: t2.state,
-    ...(memoryOn ? { previous: { question: t1.question } } : {}),
+    ...(memoryOn ? { previous: { question: t1.question, topScore: first.diagnostics.topScore } } : {}),
   });
   let answer = '';
   if (res.kind === 'answer') for await (const tok of res.stream) answer += tok;

@@ -128,12 +128,17 @@ export interface AskOptions {
   readonly signal?: AbortSignal;
   /**
    * The hiker's previous message, for a follow-up (docs/plan-memory.md). The
-   * message is searched alone and joined to this; the higher-scoring search
-   * wins, so a change of topic keeps the standalone result. Only when the
-   * joined search wins does the model see the earlier question. Absent, ask()
-   * behaves exactly as it does for a single question.
+   * message is searched alone and joined to this; the joined search wins only
+   * when it scores higher, stays on the earlier topic and keeps any strong
+   * match of the message's own (see the rules in ask()). Only then does the
+   * model see the earlier question. Absent, ask() behaves exactly as it does
+   * for a single question.
    */
-  readonly previous?: { readonly question: string };
+  readonly previous?: {
+    readonly question: string;
+    /** That question's own best search score, from its diagnostics. */
+    readonly topScore: number;
+  };
   /** Show the model the earlier question when the joined search wins. Default on. */
   readonly previousInPrompt?: boolean;
 }
@@ -148,6 +153,16 @@ export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
  * and below a manual passage (docs/results-phase3.md).
  */
 export const CARD_TOP_FLOOR = 0.32;
+
+/**
+ * A follow-up whose own best match reaches this keeps that match: the search
+ * joined to the previous question may only win if it contains it. The same
+ * bar that makes a field card a clear match (retrieve.ts reserve.minScore).
+ */
+export const FOLLOW_UP_KEEP = 0.35;
+
+/** Share of the earlier question's own score the joined search must keep. */
+export const FOLLOW_UP_ON_TOPIC = 0.9;
 
 /** Words that point at where the hiker is, which the model cannot resolve alone. */
 const REFERS_TO_LOCATION = /\b(?:this|my|our) (?:state|area|region)\b|\baround here\b|\bnear (?:me|here)\b|\bnearby\b|\bhere\b|\blocal(?:ly)?\b/i;
@@ -250,7 +265,11 @@ export async function ask(
   // too, and keep whichever scores higher.
   let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
   let standalone = candidates;
-  if (opts.previous !== undefined) {
+  // Memory applies only after a question Fred could answer: a follow-up to a
+  // declined question has no topic to build on. With a knot question that
+  // itself fell under the gate as the opener, "what's the capital of France?"
+  // was turned into a request for the hiker's state.
+  if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold) {
     const joined = `${opts.previous.question} ${query}`;
     const keywordsJ = extractKeywords(joined);
     const routedJ = route(keywordsJ, packs, {
@@ -259,7 +278,22 @@ export async function ask(
     });
     const candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
     const joinedTop = best(candidatesJ);
-    followUp = { standaloneTopScore: topScore, joinedTopScore: joinedTop, used: joinedTop > topScore };
+    // A message with a strong match of its own keeps it: the joined search
+    // may win only if it still holds that match. Without this, "find north
+    // without a compass?" then "someone is choking" found the navigation
+    // passages again (0.439 against the choking card's 0.407), and the model
+    // answered a choking question from them (docs/plan-memory.md).
+    const aloneTop = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+    const keepsAlone = topScore < FOLLOW_UP_KEEP || candidatesJ.some((c) => c.chunk.id === aloneTop?.chunk.id);
+    // A follow-up stays on the earlier topic: joining it keeps most of the
+    // earlier question's own match. An unrelated message dilutes it. On the
+    // tuning sets, 17 of 20 follow-ups kept 0.91 or more; the choking switch
+    // kept 0.69, and four out-of-scope follow-ups 0.76-0.85.
+    const staysOnTopic = joinedTop >= FOLLOW_UP_ON_TOPIC * opts.previous.topScore;
+    followUp = {
+      standaloneTopScore: topScore, joinedTopScore: joinedTop,
+      used: joinedTop > topScore && keepsAlone && staysOnTopic,
+    };
     standalone = candidates;
     if (followUp.used) {
       keywords = keywordsJ;

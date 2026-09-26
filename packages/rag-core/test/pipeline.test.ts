@@ -420,3 +420,62 @@ test('a clearly matching card is answered verbatim, without the model', async ()
   assert.equal(backend.lastPrompt, null);
   assert.equal(res.citations.length, 1);
 });
+
+// Conversation memory (docs/plan-memory.md).
+const drain = async (res: Awaited<ReturnType<typeof ask>>): Promise<void> => {
+  if (res.kind === 'answer') for await (const _ of res.stream) { /* drain */ }
+};
+const BLEED = 'How do I control severe bleeding from a wound?';
+const openerScore = async (): Promise<number> =>
+  (await ask(BLEED, deps(), { state: 'CO' })).diagnostics.topScore;
+
+test('without a previous question nothing about memory changes', async () => {
+  const d = deps();
+  const res = await ask('What if it keeps going?', d, { state: 'CO' });
+  await drain(res);
+  assert.equal(res.diagnostics.followUp, undefined);
+  assert.ok(!(d.backend.lastPrompt ?? '').includes('EARLIER QUESTION'));
+});
+
+test('a follow-up that means nothing alone is searched with the earlier question', async () => {
+  const d = deps();
+  const res = await ask('What if it keeps going?', d, {
+    state: 'CO', previous: { question: BLEED, topScore: await openerScore() },
+  });
+  assert.equal(res.diagnostics.followUp?.used, true);
+  assert.equal(res.kind, 'answer');
+  await drain(res);
+  const prompt = d.backend.lastPrompt ?? '';
+  assert.ok(prompt.includes(`EARLIER QUESTION: ${BLEED}\nQUESTION: What if it keeps going?`));
+  assert.ok(prompt.includes('direct pressure'), 'answered from the earlier topic');
+});
+
+test('the model can be kept from seeing the earlier question', async () => {
+  const d = deps();
+  const res = await ask('What if it keeps going?', d, {
+    state: 'CO', previous: { question: BLEED, topScore: await openerScore() }, previousInPrompt: false,
+  });
+  await drain(res);
+  assert.equal(res.diagnostics.followUp?.used, true);
+  assert.ok(!(d.backend.lastPrompt ?? '').includes('EARLIER QUESTION'));
+});
+
+test('no memory after a question Fred could not answer', async () => {
+  // An opener under the gate has no topic to build on.
+  const res = await ask('What if it keeps going?', deps(), {
+    state: 'CO', previous: { question: BLEED, topScore: DEFAULT_ABSTAIN_THRESHOLD - 0.01 },
+  });
+  assert.equal(res.diagnostics.followUp, undefined);
+});
+
+test('a message on a new topic keeps its own search', async () => {
+  const d = deps();
+  const res = await ask('How do I build a fire from dry tinder and kindling?', d, {
+    state: 'CO', previous: { question: BLEED, topScore: await openerScore() },
+  });
+  assert.equal(res.diagnostics.followUp?.used, false);
+  await drain(res);
+  const prompt = d.backend.lastPrompt ?? '';
+  assert.ok(!prompt.includes('EARLIER QUESTION'));
+  assert.ok(prompt.includes('tinder'));
+});

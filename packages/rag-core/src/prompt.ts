@@ -163,7 +163,12 @@ export function renderContext(blocks: readonly ContextBlock[]): string {
  * verbatim. Moving them above the question fixed the echo and cost far more
  * elsewhere (see shapeInstruction), so the echo is the cheaper defect.
  */
-export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[], place?: string): string {
+export function buildQuerySuffix(
+  query: string,
+  blocks: readonly ContextBlock[],
+  place?: string,
+  earlier?: string,
+): string {
   const rules = [shapeInstruction(blocks)];
   // Fired unconditionally before, so it turned up on "what plants and animals are
   // near me?" and on a question about what mountain lions eat.
@@ -174,7 +179,12 @@ export function buildQuerySuffix(query: string, blocks: readonly ContextBlock[],
   // about California unless the model knows "this state" is California: the
   // model refused exactly that with the right passage in hand (ff-bear-01).
   const where = place === undefined ? '' : `\n(The hiker is in ${place}.)`;
-  return `\n\nSOURCES:\n${renderContext(blocks)}\n\nQUESTION: ${query}${where}\n\n${rules.join('\n')}\n\nANSWER:`;
+  // A follow-up ("should I pop it?") means nothing alone. Only the previous
+  // question is shown: never the previous answer, which a small model builds
+  // on instead of the sources, and never the previous sources, which are
+  // distractors (docs/results-memory-research.md).
+  const before = earlier === undefined ? '' : `EARLIER QUESTION: ${earlier}\n`;
+  return `\n\nSOURCES:\n${renderContext(blocks)}\n\n${before}QUESTION: ${query}${where}\n\n${rules.join('\n')}\n\nANSWER:`;
 }
 
 /**
@@ -200,10 +210,11 @@ export function buildPromptParts(
   blocks: readonly ContextBlock[],
   variant: AnswerVariant = 'default',
   place?: string,
+  earlier?: string,
 ): PromptParts {
   return {
     system: variant === 'lead' ? SYSTEM_PREFIX_LEAD : SYSTEM_PREFIX,
-    user: buildQuerySuffix(query, blocks, place).trimStart(),
+    user: buildQuerySuffix(query, blocks, place, earlier).trimStart(),
   };
 }
 

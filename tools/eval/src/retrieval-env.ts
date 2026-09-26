@@ -10,7 +10,7 @@
  * Every run prints the settings it used, because a results file that does not
  * say how it was produced is not evidence.
  */
-import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type RetrievalOptions } from '@fred/rag-core';
+import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type AskOptions, type CardAnswerMode, type RetrievalOptions } from '@fred/rag-core';
 
 function int(name: string, fallback: number, min: number): number {
   const raw = process.env[name];
@@ -53,4 +53,44 @@ export function compressionFromEnv(): { minReduction: number; maxReduction: numb
   if (raw === undefined || raw === '0') return undefined;
   if (raw === '1') return { ...DEFAULT_COMPRESSION };
   throw new Error(`COMPRESS must be 0 or 1, got ${raw}`);
+}
+
+/**
+ * Every pipeline switch an eval run can flip, from the environment, shared by
+ * run-graded.ts and run-conversations.ts so both measure the same pipeline.
+ * The per-question fields (state, previous, signal) are the caller's.
+ */
+export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
+  const retrieval = retrievalFromEnv();
+  const compression = compressionFromEnv();
+  const env = process.env;
+  return {
+    retrieval,
+    ...(compression === undefined ? {} : { compression }),
+    // ABSTAIN_THRESHOLD overrides the decline gate; 0 lets every question
+    // through, which is what calibrate.ts needs to see the score distribution.
+    ...(env.ABSTAIN_THRESHOLD !== undefined ? { abstainThreshold: Number(env.ABSTAIN_THRESHOLD), fallbackThreshold: Number(env.ABSTAIN_THRESHOLD) } : {}),
+    // ROUTING_FALLBACK=1 measures what searching everything on a no-match
+    // recovers. Off by default so a plain run reflects what ships.
+    ...(env.ROUTING_FALLBACK === '1' ? { allowRoutingFallback: true } : {}),
+    ...(env.FALLBACK_THRESHOLD !== undefined ? { fallbackThreshold: Number(env.FALLBACK_THRESHOLD) } : {}),
+    // SUFFICIENCY=1 asks the model whether the retrieved passages answer the
+    // question before generating. Off by default until it has earned its cost.
+    ...(env.SUFFICIENCY === '1' ? { checkSufficiency: true } : {}),
+    // SUFFICIENCY_PROMPT=numeric swaps in the wording that makes "a question
+    // asking for a quantity needs the quantity present" an explicit rule. The
+    // default wording is 0 of 3 on dosing questions.
+    ...(env.SUFFICIENCY_PROMPT === 'numeric' ? { sufficiencyVariant: 'numeric' as const } : {}),
+    // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
+    ...(env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
+    ...(env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
+    // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
+    ...(env.LOCATION === '0' ? { locationInPrompt: false } : {}),
+    // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.
+    ...(env.CARD_ANSWER !== undefined ? { cardAnswer: env.CARD_ANSWER as CardAnswerMode } : {}),
+    // PROMPT_MEMORY=0 keeps the earlier question out of the prompt, so the
+    // search half of conversation memory can be measured alone.
+    ...(env.PROMPT_MEMORY === '0' ? { previousInPrompt: false } : {}),
+  };
 }

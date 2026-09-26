@@ -15,10 +15,12 @@ fi
 for S in $(node -e "import('./scripts/state-bbox.mjs').then(m=>console.log(m.knownStates()))"); do
   [ -f "$OUT/$S/bundle.json" ] && continue
   echo "$(date '+%F %H:%M') $S start" | tee -a "$OUT/build-all.log"
-  if nice -n 10 node scripts/build-state-bundle.mjs "$S" "$OUT" > "$OUT/log-$S.txt" 2>&1; then
+  nice -n 10 node scripts/build-state-bundle.mjs "$S" "$OUT" > "$OUT/log-$S.txt" 2>&1
+  code=$?
+  if [ $code -eq 0 ]; then
     echo "$(date '+%F %H:%M') $S ok" | tee -a "$OUT/build-all.log"
   else
-    echo "$(date '+%F %H:%M') $S FAILED (exit $?), see log-$S.txt" | tee -a "$OUT/build-all.log"
+    echo "$(date '+%F %H:%M') $S FAILED (exit $code), see log-$S.txt" | tee -a "$OUT/build-all.log"
   fi
 done
 echo "$(date '+%F %H:%M') all done" | tee -a "$OUT/build-all.log"

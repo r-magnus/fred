@@ -46,8 +46,9 @@ for f in "${FILES[@]}"; do
 done
 
 echo "== installing as the app user"
-FLORA=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['components']['flora']['path'])" "$DIR/bundle.json")
-"$ADB" shell "run-as $PKG sh -c 'rm -rf files/$FLORA && mkdir -p files/$FLORA'"
+# No flora pack in DC and PR bundles (bundle.json lists it as missing).
+FLORA=$(python3 -c "import json,sys;print((json.load(open(sys.argv[1]))['components']['flora'] or {}).get('path',''))" "$DIR/bundle.json")
+[ -n "$FLORA" ] && "$ADB" shell "run-as $PKG sh -c 'rm -rf files/$FLORA && mkdir -p files/$FLORA'"
 for f in "${FILES[@]}"; do
   "$ADB" shell "run-as $PKG sh -c 'mkdir -p files/$(dirname "$f") && cp $STAGE/$f files/$f'"
 done

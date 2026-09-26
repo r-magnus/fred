@@ -16,7 +16,8 @@
  * Map and contours are built on demand when missing from MAPS_DIR. Coverage
  * needs the FCC's shapefiles, which are downloaded by hand with an account, so
  * it is taken from MAPS_DIR if present and otherwise recorded as missing
- * rather than silently dropped. The flora pack comes from PACKS_DIR (packs/).
+ * rather than silently dropped. The flora pack comes from PACKS_DIR (packs/);
+ * places FEIS has no pack for (DC, PR) record it as missing the same way.
  *
  * bundle.json is what a download catalog points at; the app will verify each
  * file against it before swapping the bundle in (docs, HANDOFF item 2).
@@ -49,8 +50,8 @@ const haveCoverage = existsSync(join(MAPS_DIR, coverageName));
 
 const floraDirs = readdirSync(PACKS_DIR).filter((d) => d.startsWith(`state-${state}-flora-fauna-v`)).sort();
 const floraDir = floraDirs.at(-1);
-if (floraDir === undefined) throw new Error(`no state-${state}-flora-fauna pack in ${PACKS_DIR}`);
-const floraManifest = JSON.parse(readFileSync(join(PACKS_DIR, floraDir, 'manifest.json'), 'utf8'));
+const floraManifest = floraDir === undefined ? null
+  : JSON.parse(readFileSync(join(PACKS_DIR, floraDir, 'manifest.json'), 'utf8'));
 
 // Assemble. Hard links where the filesystem allows, so a bundle of 700 MB of
 // maps does not cost another 700 MB of disk.
@@ -62,7 +63,7 @@ place(join(MAPS_DIR, mapName), join(dir, mapName));
 place(join(MAPS_DIR, contoursName), join(dir, contoursName));
 if (haveCoverage) place(join(MAPS_DIR, coverageName), join(dir, coverageName));
 // Installed under its id without the version, as the app and stage-phone.sh expect.
-cpSync(join(PACKS_DIR, floraDir), join(dir, 'packs', floraManifest.id), { recursive: true });
+if (floraManifest !== null) cpSync(join(PACKS_DIR, floraDir), join(dir, 'packs', floraManifest.id), { recursive: true });
 
 const sha256 = (path) => new Promise((resolve, reject) => {
   const h = createHash('sha256');
@@ -87,15 +88,16 @@ const bundle = {
     basemap: { path: mapName, source: process.env.PMTILES_SOURCE ?? 'https://build.protomaps.com/20260920.pmtiles', maxzoom: 14 },
     contours: { path: contoursName, source: 'https://download.mapterhorn.com/planet.pmtiles', intervals: '200 m z10, 100 m z11, 40 m z12' },
     coverage: haveCoverage ? { path: coverageName, source: 'FCC Broadband Data Collection' } : null,
-    flora: { path: `packs/${floraManifest.id}`, id: floraManifest.id, version: floraManifest.version, encoder: floraManifest.embedding.modelId },
+    flora: floraManifest === null ? null
+      : { path: `packs/${floraManifest.id}`, id: floraManifest.id, version: floraManifest.version, encoder: floraManifest.embedding.modelId },
   },
-  missing: haveCoverage ? [] : ['coverage'],
+  missing: [...(haveCoverage ? [] : ['coverage']), ...(floraManifest === null ? ['flora'] : [])],
   files,
   bytes: files.reduce((s, f) => s + f.bytes, 0),
   attribution: [
     '© OpenStreetMap contributors (basemap, via Protomaps)',
     '© Mapterhorn (terrain for contours; US data USGS 3DEP)',
-    'USFS Fire Effects Information System (plants and wildlife)',
+    ...(floraManifest !== null ? ['USFS Fire Effects Information System (plants and wildlife)'] : []),
     ...(haveCoverage ? ['FCC Broadband Data Collection (coverage)'] : []),
   ],
   tool: { pmtiles: pmtilesVersion },
@@ -104,4 +106,4 @@ writeFileSync(join(dir, 'bundle.json'), JSON.stringify(bundle, null, 2) + '\n');
 const mb = (n) => (n / 1e6).toFixed(1);
 console.log(`${state}: ${files.length} files, ${mb(bundle.bytes)} MB` +
   ` (map ${mb(files.find((f) => f.path === mapName).bytes)}, contours ${mb(files.find((f) => f.path === contoursName).bytes)})` +
-  (haveCoverage ? '' : '  [coverage missing]'));
+  (bundle.missing.length === 0 ? '' : `  [${bundle.missing.join(', ')} missing]`));

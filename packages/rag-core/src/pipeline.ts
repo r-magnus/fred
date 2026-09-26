@@ -290,9 +290,13 @@ export async function ask(
     // tuning sets, 17 of 20 follow-ups kept 0.91 or more; the choking switch
     // kept 0.69, and four out-of-scope follow-ups 0.76-0.85.
     const staysOnTopic = joinedTop >= FOLLOW_UP_ON_TOPIC * opts.previous.topScore;
+    // Memory exists to answer: a joined search that still falls under the gate
+    // must not change how Fred declines (into a location request, say, from the
+    // joined query's routing). None of the 29 measured follow-ups needed it.
+    const answers = joinedTop >= effectiveThreshold;
     followUp = {
       standaloneTopScore: topScore, joinedTopScore: joinedTop,
-      used: joinedTop > topScore && keepsAlone && staysOnTopic,
+      used: joinedTop > topScore && keepsAlone && staysOnTopic && answers,
     };
     standalone = candidates;
     if (followUp.used) {

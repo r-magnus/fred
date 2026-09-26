@@ -479,3 +479,19 @@ test('a message on a new topic keeps its own search', async () => {
   assert.ok(!prompt.includes('EARLIER QUESTION'));
   assert.ok(prompt.includes('tinder'));
 });
+
+test('a joined search that still cannot answer changes nothing', async () => {
+  // Find the joined score, then set the gate just above it, with the opener
+  // clearing that gate and the joined search keeping 90% of it: only the
+  // "must clear the gate" rule can refuse memory here.
+  const probe = await ask('What if it keeps going?', deps(), {
+    state: 'CO', previous: { question: BLEED, topScore: await openerScore() }, abstainThreshold: 0, fallbackThreshold: 0,
+  });
+  const joined = probe.diagnostics.followUp!.joinedTopScore;
+  const gate = joined + 0.01;
+  const res = await ask('What if it keeps going?', deps(), {
+    state: 'CO', previous: { question: BLEED, topScore: gate }, abstainThreshold: gate, fallbackThreshold: gate,
+  });
+  assert.equal(res.diagnostics.followUp?.used, false);
+  assert.equal(res.kind, 'abstain');
+});

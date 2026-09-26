@@ -428,3 +428,23 @@ test('a clearly matching card is answered verbatim, without the model', async ()
   assert.equal(backend.lastPrompt, null);
   assert.equal(res.citations.length, 1);
 });
+
+test('a provider-only passage just behind the top still triggers the referral', async () => {
+  // The needle-decompression failure: the procedure came second by 0.001.
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [
+    // Same words as the question, plus one: just behind the ordinary passage.
+    seed('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty insert', { audience: 'provider' }),
+    seed('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty'),
+  ]);
+  store.addPack('core-fieldcards', []);
+  const backend = new FakeBackend();
+  const res = await ask('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty',
+    { backend, store, packs: clinicalPacks }, { state: null, abstainThreshold: 0 });
+  const ranked = [...res.diagnostics.candidates].sort((a, b) => b.score - a.score);
+  assert.equal(ranked[0]!.chunk.audience ?? 'everyone', 'everyone', 'fixture: the ordinary passage must rank first');
+  assert.ok(ranked[1]!.score >= 0.95 * ranked[0]!.score, `fixture: near-tie, got ${ranked[1]!.score} vs ${ranked[0]!.score}`);
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'provider-only');
+  assert.equal(backend.lastPrompt, null);
+});

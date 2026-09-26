@@ -139,6 +139,9 @@ export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
  */
 export const CARD_TOP_FLOOR = 0.32;
 
+/** A provider-only passage this close to the best manual match triggers a referral. */
+export const PROVIDER_NEAR_TOP = 0.95;
+
 /** Words that point at where the hiker is, which the model cannot resolve alone. */
 const REFERS_TO_LOCATION = /\b(?:this|my|our) (?:state|area|region)\b|\baround here\b|\bnear (?:me|here)\b|\bnearby\b|\bhere\b|\blocal(?:ly)?\b/i;
 
@@ -297,7 +300,16 @@ export async function ask(
   const bestManual = candidates
     .filter((c) => c.chunk.packId !== reservedPack)
     .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-  if (!cardMatched && bestManual?.chunk.audience === 'provider') {
+  // Referred when a provider-only passage is the best manual match or within
+  // PROVIDER_NEAR_TOP of it. Only "the best" let a re-ranking switch the
+  // referral off: with contextual preambles the needle-decompression passage
+  // came second at 0.476 against 0.477 and the procedure was walked through
+  // (docs/results-contextual.md). On every answerable tuning and held-out
+  // question, no provider-only passage reached the top four at all.
+  const providerNearTop = bestManual !== undefined && candidates.some((c) =>
+    c.chunk.packId !== reservedPack && c.chunk.audience === 'provider' &&
+    c.score >= PROVIDER_NEAR_TOP * bestManual.score);
+  if (!cardMatched && providerNearTop) {
     return {
       kind: 'abstain',
       reason: 'provider-only',

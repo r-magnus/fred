@@ -57,13 +57,21 @@ Conversation memory (item 4 below) also bears on accuracy.
      Elevation downloads are cached in `~/fred-maps/.contours-work` (31 GB),
      safe to delete. Next: check the style on the phone in other terrain
      (e.g. AK, CO), then stage.
-   - **Coverage is missing from every bundle except as a gap in `missing`.** The
-     FCC files were downloaded by hand; the California `.bin` exists only on the
-     phone. Automating the FCC download is its own task.
-   - **Coverage redesign decided 2026-09-26 (#58):** the map shows two warning
-     zones instead of "possible service": *your carrier has no reported
-     coverage*, and *no carrier does* (911 likely won't connect). Anywhere
-     unshaded is assumed to have signal. Needs per-carrier packs and #57 first.
+   - **Coverage redesigned and built for all 52 (2026-09-26, #57, #58).** The
+     map now warns instead of reassuring: amber where *your* carrier reports
+     no coverage (another does, so 911 may connect), red where *no* carrier
+     does (911 may fail; satellite SOS mentioned). Unshaded = assumed covered.
+     `scripts/build-state-coverage.mjs` pulls every provider's FCC **mobile
+     voice** file (Dec 2025 filing) via the API and writes
+     `coverage-<ST>-voice.bin` (carriers kept apart, 0.2-37 KB); bundles build
+     it on demand. Carrier: Android reads the SIM (expo-cellular, no
+     permission), with a picker on the map; iOS has only the picker. Red is
+     bounded to the state outline so sea and neighbours are never "dead".
+     Carriers claim all but 3.9% of California, so red is a floor, not the
+     real extent. Small networks are counted as carriers on purpose: 1.8% of
+     US ground is covered only by them, nearly all real public carriers (GCI
+     and Alaska co-ops). **Not yet seen on the phone**: the field-test APK is
+     built; install it, stage a bundle, and look at a known dead zone.
 2. **Downloads.** Bundles are the unit; the recommendation is a signed catalog
    on a static host (Cloudflare R2 or GitHub Releases), with the 1.4 GB of models
    fetched on first run. Not built.
@@ -111,16 +119,18 @@ cost in accuracy.
 - `~/fred-tracks/` — drive-test CSVs with real coordinates.
 - `~/models/` — GGUFs and encoders, needed by the eval.
 - `packs/` — the 55 current packs (EmbeddingGemma); old ones in `~/fred-packs-gte-backup`.
-- `~/fred-maps/` — basemaps and contours; `~/fred-bundles/<STATE>/` — bundles.
+- `~/fred-maps/` — basemaps, contours, coverage; `~/fred-bundles/<STATE>/` — bundles.
+  Caches, safe to delete: `.contours-work` (31 GB elevation), `.fcc-work` (12 GB FCC zips).
 - `~/toolchain/pmtiles/pmtiles` — go-pmtiles 1.31.2 (set `PMTILES_BIN`).
 
 ## Commands
 
 ```
-npm test                                                   # 200 tests
+npm test                                                   # 215 tests
 npm run typecheck                                          # packages, tools and the app
 EVAL_SET=holdout node tools/eval/src/run-graded.ts out.jsonl
-node scripts/build-state-bundle.mjs CA ~/fred-bundles      # map + contours + flora
+node scripts/build-state-coverage.mjs CA ~/fred-maps       # FCC carrier coverage
+node scripts/build-state-bundle.mjs CA ~/fred-bundles      # map + contours + coverage + flora
 scripts/build-all-bundles.sh                               # every state, resumable
 tools/eval/build-apk.sh [--field-test]
 tools/eval/stage-bundle.sh ~/fred-bundles/CA

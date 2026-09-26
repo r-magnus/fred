@@ -1,9 +1,11 @@
 /**
- * B-KR3 on the map: where carriers report signal, and which way to walk.
+ * B-KR3 on the map: where your carrier reports nothing, where no carrier does,
+ * and which way to walk (issue #58).
  *
- * Loads the coverage pack written by tools/ingest/src/coverage-pack.ts —
- * gzipped delta varints, 7.1 KB for California's three major LTE carriers —
- * and turns the cells near the user into polygons MapLibre can shade.
+ * Loads the coverage pack written by scripts/build-state-coverage.mjs (the
+ * FCC's mobile voice layer, carriers kept apart, a few KB per state) and turns
+ * the cells near the user into two warning shapes. Everywhere else is assumed
+ * to have signal and is drawn as nothing.
  *
  * This imports h3-js, which needs scripts/patch-h3-hermes.mjs to load at all
  * under Hermes. Kept in its own module, and off '@fred/geo''s barrel, so the
@@ -11,63 +13,103 @@
  */
 import { File, Paths } from 'expo-file-system';
 import { gunzipSync } from 'fflate';
-import { cellToBoundary, latLngToCell } from 'h3-js';
+import { cellsToMultiPolygon, latLngToCell } from 'h3-js';
+import { insideState, MAJOR_CARRIERS } from '@fred/geo';
 import {
-  decodeCells, nearestCoverage, describeBearing, COVERAGE_RES,
-  type CoverageIndex,
+  decodePack, nearestCoverage, describeBearing, zoneOf, zonesNear, anyCarrier, carrierCells,
+  COVERAGE_RES, type CoveragePack, type NearestCoverage,
 } from '@fred/geo/coverage';
 
 /** Staged per state, like the flora packs. */
-export const coverageFile = (state: string): string => `coverage-${state}-lte.bin`;
+export const coverageFile = (state: string): string => `coverage-${state}-voice.bin`;
 
 /**
- * Read and decode a state's coverage pack. Null when it is not on the device.
- *
- * Async because SDK 57's File is Blob-like and its reads return promises. The
- * pack is a few kilobytes, so this is one await at screen open, not per frame.
+ * Read and decode a state's coverage pack. Null when it is not on the device,
+ * or is an old single-layer pack the app can no longer read.
  */
-export async function loadCoverage(state: string): Promise<CoverageIndex | null> {
+export async function loadCoverage(state: string): Promise<CoveragePack | null> {
   const f = new File(Paths.document, coverageFile(state));
   if (!f.exists) return null;
-  return new Set(decodeCells(gunzipSync(new Uint8Array(await f.arrayBuffer()))));
+  try {
+    return decodePack(gunzipSync(new Uint8Array(await f.arrayBuffer())));
+  } catch {
+    return null;
+  }
 }
 
+/** GeoJSON MultiPolygon coordinates: polygons, rings, [lng, lat] points. */
+type MultiPolygon = number[][][][];
+
 export interface CoverageView {
-  /** GeoJSON ring per covered cell near the user, for shading. */
-  readonly polygons: [number, number][][];
-  /** Human-readable answer: null when nothing is in range. */
-  readonly advice: string | null;
-  /** Metres to the nearest covered cell, for the caller to render distinctly. */
-  readonly meters: number | null;
+  /** Your carrier reports nothing here; another carrier does. */
+  readonly carrierGap: MultiPolygon;
+  /** No carrier reports anything: 911 may not connect. */
+  readonly noService: MultiPolygon;
+  /** Human-readable answer for where the user stands. */
+  readonly advice: string;
+  /** Name of the carrier the gaps are drawn for, or null when none is. */
+  readonly carrierName: string | null;
 }
+
+/** A carrier's display name: the pack's, then the national list's. */
+export function carrierName(pack: CoveragePack | null, id: string | null): string | null {
+  if (id === null) return null;
+  return pack?.carriers.find((c) => c.id === id)?.name ?? MAJOR_CARRIERS[id] ?? null;
+}
+
+const walk = (n: NearestCoverage | null, rings: number): string => n === null
+  ? `none within about ${Math.round(rings * 1.2)} km`
+  : `about ${(n.meters / 1000).toFixed(1)} km ${describeBearing(n.bearing)}`;
 
 /**
  * What to draw and what to say, for a position.
  *
- * `cellToBoundary(cell, true)` returns [lng, lat] pairs, which is GeoJSON order
- * — the non-obvious argument, and getting it wrong silently puts California in
- * the Indian Ocean.
+ * `cellsToMultiPolygon(cells, true)` merges neighbouring hexagons into one
+ * outline and returns [lng, lat] pairs, which is GeoJSON order: the
+ * non-obvious argument, and getting it wrong silently puts California in the
+ * Indian Ocean.
  */
 export function coverageNear(
   latitude: number,
   longitude: number,
-  index: CoverageIndex,
-  maxRings = 25,
+  state: string,
+  pack: CoveragePack,
+  carrierId: string | null,
+  rings = 25,
 ): CoverageView {
   const origin = latLngToCell(latitude, longitude, COVERAGE_RES);
-  const found = nearestCoverage(origin, index, maxRings);
-  if (found === null) {
-    const km = Math.round((maxRings * 1.2));
-    return { polygons: [], advice: `No reported signal within about ${km} km.`, meters: null };
+  const mine = carrierCells(pack, carrierId);
+  const name = carrierName(pack, carrierId);
+  // A carrier the pack does not list gets no gap zone: it files nothing in
+  // this state, and its phones roam on whoever is there.
+  const gapFor = mine === null ? null : carrierId;
+  const zones = zonesNear(origin, pack, gapFor, (lat, lng) => insideState(lat, lng, state), rings);
+  const shape = (cells: readonly string[]): MultiPolygon =>
+    cells.length === 0 ? [] : cellsToMultiPolygon([...cells], true);
+
+  // Deliberately "reports", never "you will have signal": the source is the
+  // carriers' own propagation models, least reliable in the canyons and
+  // timber Fred is for.
+  let advice: string;
+  const here = zoneOf(origin, pack, gapFor);
+  if (here === 'no-service') {
+    advice = 'No carrier reports coverage here, so 911 calls may not connect. '
+      + 'Satellite SOS may still work if your phone has it. '
+      + `Nearest reported coverage: ${walk(nearestCoverage(origin, anyCarrier(pack), rings), rings)}.`;
+  } else if (here === 'carrier-gap') {
+    advice = `${name} reports no coverage here. Other carriers do, so 911 may still connect. `
+      + `${name} coverage: ${walk(nearestCoverage(origin, mine!, rings), rings)}.`;
+  } else if (mine !== null) {
+    advice = `${name} reports coverage here.`;
+  } else if (name !== null) {
+    advice = `${name} reports no coverage of its own in ${state}; shown is only where no carrier does.`;
+  } else {
+    advice = 'A carrier reports coverage here. Set your carrier to see its gaps.';
   }
-  const polygons = found.covered.map(
-    (c) => cellToBoundary(c, true) as [number, number][],
-  );
-  // Deliberately "carriers report", not "you will have signal": the source is
-  // modelled propagation, least reliable in the canyons and timber Fred is for.
-  const advice = found.rings === 0
-    ? 'Carriers report signal where you are standing.'
-    : `Carriers report signal about ${(found.meters / 1000).toFixed(1)} km `
-      + `${describeBearing(found.bearing)}.`;
-  return { polygons, advice, meters: found.meters };
+  return {
+    carrierGap: shape(zones.carrierGap),
+    noService: shape(zones.noService),
+    advice,
+    carrierName: gapFor === null ? null : name,
+  };
 }

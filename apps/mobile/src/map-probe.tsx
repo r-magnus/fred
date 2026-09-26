@@ -1,23 +1,18 @@
 /**
- * Throwaway probe: does a PMTiles basemap render from local storage, offline?
- *
- * `docs/results-map-research.md` proposes MapLibre reading a Protomaps PMTiles
- * archive off the device, and names one unverified risk: the React Native
- * wrapper's PMTiles path is newer than the native engine's, and had never been
- * run on Fred's build. This answers that and nothing else.
- *
- * Deliberately not a feature. No B-KR2 zone, no B-KR3 overlay, no interaction
- * beyond a close button. If this draws with the radios off, the library and
- * file-format decisions in that document are settled and the real map work can
- * start; if it does not, the fallback is MBTiles.
+ * The map screen. It began as a throwaway probe (does a PMTiles basemap render
+ * from local storage, offline? It does: docs/results-map-research.md) and has
+ * since grown the B-KR2 location zone, the topographic layers and the B-KR3
+ * coverage warnings. The name stayed.
  */
 import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 import { File, Paths } from 'expo-file-system';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { circleRing } from '@fred/geo';
-import { loadCoverage, coverageNear, type CoverageView } from './coverage-layer.ts';
+import type { CoveragePack } from '@fred/geo/coverage';
+import { loadCoverage, coverageNear, carrierName } from './coverage-layer.ts';
+import { loadCarrier, saveCarrier, forgetCarrier, type CarrierChoice } from './carrier.ts';
 import type { LocationFix } from './location.ts';
 
 /**
@@ -119,18 +114,29 @@ export function MapProbe(
   const ring = fix === null || fix.accuracyMeters === null
     ? [] : circleRing(fix.latitude, fix.longitude, fix.accuracyMeters);
 
-  // B-KR3. Loaded once per screen open rather than per render: the pack is a
-  // few kilobytes but the ring search walks outward until it finds something.
-  const [coverage, setCoverage] = useState<CoverageView | null>(null);
+  // B-KR3 (issue #58): where your carrier reports nothing, and where no
+  // carrier does. The pack is loaded once per state; the zones are recomputed
+  // only when the position or the carrier changes.
+  const [pack, setPack] = useState<CoveragePack | null>(null);
+  const [carrier, setCarrier] = useState<CarrierChoice | null>(null);
+  const [picking, setPicking] = useState(false);
+  const packState = fix?.state ?? null;
   useEffect(() => {
-    if (fix === null || fix.state === null) return;
+    if (packState === null) return;
     let live = true;
-    void loadCoverage(fix.state).then((index) => {
-      if (!live || index === null) return;
-      setCoverage(coverageNear(fix.latitude, fix.longitude, index));
-    });
+    void loadCoverage(packState).then((p) => { if (live) setPack(p); });
     return () => { live = false; };
-  }, [fix]);
+  }, [packState]);
+  useEffect(() => { void loadCarrier().then(setCarrier); }, []);
+  const coverage = useMemo(() =>
+    fix === null || fix.state === null || pack === null || carrier === null ? null
+      : coverageNear(fix.latitude, fix.longitude, fix.state, pack, carrier.id),
+  [fix, pack, carrier]);
+  const choose = (id: string | null | 'sim'): void => {
+    setPicking(false);
+    if (id === 'sim') forgetCarrier(); else saveCarrier(id);
+    void loadCarrier().then(setCarrier);
+  };
   return (
     <View style={styles.root}>
       <Map style={styles.map}
@@ -142,19 +148,31 @@ export function MapProbe(
           center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
           zoom: fix === null ? 9 : 13,
         }} />
-        {coverage !== null && coverage.polygons.length > 0 && (
+        {/* Under the location ring in draw order, so the user's own zone
+            stays readable on top of the shading. Unshaded means assumed
+            covered; the two zones never overlap. */}
+        {coverage !== null && coverage.carrierGap.length > 0 && (
           <GeoJSONSource
-            id="coverage"
+            id="carrier-gap"
             data={{ type: 'Feature', properties: {},
-              geometry: { type: 'MultiPolygon',
-                coordinates: coverage.polygons.map((p) => [p]) } }}
+              geometry: { type: 'MultiPolygon', coordinates: coverage.carrierGap } }}
           >
-            {/* Under the location ring in draw order, so the user's own zone
-                stays readable on top of the shading. */}
-            <Layer id="cov-fill" type="fill"
-              paint={{ 'fill-color': '#e8b04f', 'fill-opacity': 0.22 }} />
-            <Layer id="cov-edge" type="line"
-              paint={{ 'line-color': '#e8b04f', 'line-opacity': 0.5, 'line-width': 1 }} />
+            <Layer id="gap-fill" type="fill"
+              paint={{ 'fill-color': GAP, 'fill-opacity': 0.25 }} />
+            <Layer id="gap-edge" type="line"
+              paint={{ 'line-color': GAP, 'line-opacity': 0.6, 'line-width': 1 }} />
+          </GeoJSONSource>
+        )}
+        {coverage !== null && coverage.noService.length > 0 && (
+          <GeoJSONSource
+            id="no-service"
+            data={{ type: 'Feature', properties: {},
+              geometry: { type: 'MultiPolygon', coordinates: coverage.noService } }}
+          >
+            <Layer id="none-fill" type="fill"
+              paint={{ 'fill-color': NONE, 'fill-opacity': 0.35 }} />
+            <Layer id="none-edge" type="line"
+              paint={{ 'line-color': NONE, 'line-opacity': 0.8, 'line-width': 1.2 }} />
           </GeoJSONSource>
         )}
         {ring.length > 0 && (
@@ -183,8 +201,50 @@ export function MapProbe(
           {fix.state === null ? '' : ` · ${fix.state}`}
         </Text>
       )}
-      {coverage?.advice !== undefined && coverage.advice !== null && (
-        <Text style={styles.covNote}>{coverage.advice}</Text>
+      {coverage !== null && (
+        <View style={styles.covPanel}>
+          <Text style={styles.covNote}>{coverage.advice}</Text>
+          <View style={styles.legend}>
+            {coverage.carrierName !== null && (
+              <Text style={styles.legendItem}>
+                <Text style={{ color: GAP }}>{'\u25A0 '}</Text>
+                {`No ${coverage.carrierName}`}
+              </Text>
+            )}
+            <Text style={styles.legendItem}>
+              <Text style={{ color: NONE }}>{'\u25A0 '}</Text>
+              No carrier: 911 may fail
+            </Text>
+          </View>
+        </View>
+      )}
+      {pack !== null && carrier !== null && (
+        <Pressable style={styles.carrierChip} onPress={() => setPicking(true)} hitSlop={12}>
+          <Text style={styles.carrierText}>
+            {carrier.id === null ? 'Carrier: not set' : `Carrier: ${carrierName(pack, carrier.id) ?? carrier.id}`}
+            {carrier.source === 'sim' ? ' (SIM)' : ''}
+          </Text>
+        </Pressable>
+      )}
+      {picking && pack !== null && (
+        <View style={styles.picker}>
+          <Text style={styles.pickerTitle}>Your carrier</Text>
+          <Text style={styles.pickerHint}>
+            Budget carriers use a big network: Mint and Metro use T-Mobile,
+            Visible uses Verizon, Cricket uses AT&T.
+          </Text>
+          {[...pack.carriers].sort((a, b) => b.cells.size - a.cells.size).map((c) => (
+            <Pressable key={c.id} onPress={() => choose(c.id)} style={styles.pickerRow}>
+              <Text style={styles.pickerText}>{c.name}</Text>
+            </Pressable>
+          ))}
+          <Pressable onPress={() => choose(null)} style={styles.pickerRow}>
+            <Text style={styles.pickerText}>I don't know</Text>
+          </Pressable>
+          <Pressable onPress={() => choose('sim')} style={styles.pickerRow}>
+            <Text style={styles.pickerSub}>Read it from my SIM</Text>
+          </Pressable>
+        </View>
       )}
       <Pressable style={styles.close} onPress={onClose} hitSlop={12}>
         <Text style={styles.closeText}>close probe</Text>
@@ -192,6 +252,10 @@ export function MapProbe(
     </View>
   );
 }
+
+/** Your carrier's gaps: amber. No carrier at all: red, the stronger warning. */
+const GAP = '#e8a04f';
+const NONE = '#e5484d';
 
 const styles = StyleSheet.create({
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0d1117' },
@@ -209,13 +273,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#0d1117cc', borderRadius: 12,
     paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden',
   },
-  covNote: {
-    position: 'absolute', bottom: 80, alignSelf: 'center',
-    color: '#e8b04f', fontSize: 13, fontWeight: '600', textAlign: 'center',
-    backgroundColor: '#0d1117cc', borderRadius: 12,
-    paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden',
-    maxWidth: '86%',
+  covPanel: {
+    position: 'absolute', bottom: 80, alignSelf: 'center', maxWidth: '90%',
+    backgroundColor: '#0d1117dd', borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 8,
   },
+  covNote: { color: '#e6edf3', fontSize: 13, fontWeight: '600', textAlign: 'center' },
+  legend: { flexDirection: 'row', justifyContent: 'center', gap: 14, marginTop: 6 },
+  legendItem: { color: '#8b9a96', fontSize: 12 },
+  carrierChip: {
+    position: 'absolute', top: 60, left: 16,
+    backgroundColor: '#161b1e', borderRadius: 12,
+    borderWidth: 1, borderColor: '#2a3a35',
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  carrierText: { color: '#6ca', fontSize: 12, fontWeight: '600' },
+  picker: {
+    position: 'absolute', top: 100, left: 16, right: 16,
+    backgroundColor: '#161b1e', borderRadius: 14,
+    borderWidth: 1, borderColor: '#2a3a35', padding: 14,
+  },
+  pickerTitle: { color: '#e6edf3', fontSize: 15, fontWeight: '700' },
+  pickerHint: { color: '#8b9a96', fontSize: 12, marginTop: 4, marginBottom: 6 },
+  pickerRow: { paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#22302b' },
+  pickerText: { color: '#e6edf3', fontSize: 14 },
+  pickerSub: { color: '#6ca', fontSize: 13 },
   zoneNote: {
     position: 'absolute', bottom: 40, alignSelf: 'center',
     color: '#4fd1a5', fontSize: 13, fontWeight: '600',

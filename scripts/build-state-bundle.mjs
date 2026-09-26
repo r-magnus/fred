@@ -10,13 +10,13 @@
  *     bundle.json
  *     map-<USPS>-z14.pmtiles         basemap (build-state-map.mjs)
  *     contours-<USPS>.pmtiles        topo contours (build-state-contours.mjs)
- *     coverage-<USPS>-lte.bin        signal coverage (tools/ingest/src/coverage-pack.ts)
+ *     coverage-<USPS>-voice.bin      carrier coverage (build-state-coverage.mjs)
  *     packs/state-<USPS>-flora-fauna/  plants and wildlife (tools/ingest/src/feis-pack.ts)
  *
- * Map and contours are built on demand when missing from MAPS_DIR. Coverage
- * needs the FCC's shapefiles, which are downloaded by hand with an account, so
- * it is taken from MAPS_DIR if present and otherwise recorded as missing
- * rather than silently dropped. The flora pack comes from PACKS_DIR (packs/);
+ * Map, contours and coverage are built on demand when missing from MAPS_DIR.
+ * Coverage needs FCC API credentials (build-state-coverage.mjs); without them,
+ * or if the FCC is unreachable, it is recorded as missing rather than silently
+ * dropped. The flora pack comes from PACKS_DIR (packs/);
  * places FEIS has no pack for (DC, PR) record it as missing the same way.
  *
  * bundle.json is what a download catalog points at; the app will verify each
@@ -45,7 +45,10 @@ const mapName = `map-${state}-z14.pmtiles`;
 if (!existsSync(join(MAPS_DIR, mapName))) run('build-state-map.mjs', [state, '14', MAPS_DIR]);
 const contoursName = `contours-${state}.pmtiles`;
 if (!existsSync(join(MAPS_DIR, contoursName))) run('build-state-contours.mjs', [state, MAPS_DIR]);
-const coverageName = `coverage-${state}-lte.bin`;
+const coverageName = `coverage-${state}-voice.bin`;
+if (!existsSync(join(MAPS_DIR, coverageName))) {
+  try { run('build-state-coverage.mjs', [state, MAPS_DIR]); } catch { console.log(`${state}: coverage not built`); }
+}
 const haveCoverage = existsSync(join(MAPS_DIR, coverageName));
 
 const floraDirs = readdirSync(PACKS_DIR).filter((d) => d.startsWith(`state-${state}-flora-fauna-v`)).sort();
@@ -87,7 +90,7 @@ const bundle = {
   components: {
     basemap: { path: mapName, source: process.env.PMTILES_SOURCE ?? 'https://build.protomaps.com/20260920.pmtiles', maxzoom: 14 },
     contours: { path: contoursName, source: 'https://download.mapterhorn.com/planet.pmtiles', intervals: '200 m z10, 100 m z11, 40 m z12' },
-    coverage: haveCoverage ? { path: coverageName, source: 'FCC Broadband Data Collection' } : null,
+    coverage: haveCoverage ? { path: coverageName, source: 'FCC Broadband Data Collection, mobile voice' } : null,
     flora: floraManifest === null ? null
       : { path: `packs/${floraManifest.id}`, id: floraManifest.id, version: floraManifest.version, encoder: floraManifest.embedding.modelId },
   },

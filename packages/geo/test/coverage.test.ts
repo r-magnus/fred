@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { latLngToCell, gridDisk, cellToParent } from 'h3-js';
 import {
   COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
+  zoneOf, zonesNear, anyCarrier, carrierCells, type CoveragePack,
 } from '../src/coverage-entry.ts';
 
 // Yosemite Valley, already used by states.test.ts, so no real position enters
@@ -74,4 +75,55 @@ test('bearings become words someone can act on', () => {
   assert.equal(describeBearing(315), 'north-west');
   assert.equal(describeBearing(359), 'north');
   assert.equal(describeBearing(-90), 'west');
+});
+
+// Issue #58: two warning zones. AT&T covers HOME and its first ring; Verizon
+// covers only HOME's ring-2 band; beyond ring 2 nobody reports anything.
+const ring = (k: number): string[] => gridDisk(HOME, k).filter((c) => !gridDisk(HOME, k - 1).includes(c));
+const PACK: CoveragePack = { asOf: '2025-12-31', carriers: [
+  { id: '130077', name: 'AT&T', cells: new Set(gridDisk(HOME, 1)) },
+  { id: '131425', name: 'Verizon', cells: new Set(ring(2)) },
+] };
+const ATT = '130077', VZW = '131425';
+const everywhere = (): boolean => true;
+
+test('no carrier at all is no-service, whoever the user is with', () => {
+  const far = ring(3)[0]!;
+  for (const who of [ATT, VZW, null]) assert.equal(zoneOf(far, PACK, who), 'no-service');
+});
+
+test('your carrier missing where another reports is a carrier gap', () => {
+  assert.equal(zoneOf(HOME, PACK, VZW), 'carrier-gap');
+  assert.equal(zoneOf(ring(2)[0]!, PACK, ATT), 'carrier-gap');
+  assert.equal(zoneOf(HOME, PACK, ATT), 'covered');
+});
+
+test('an unknown carrier gets only the no-service warning', () => {
+  // With no carrier, a gap cannot be claimed: absence of your carrier is unknowable.
+  assert.equal(zoneOf(HOME, PACK, null), 'covered');
+  assert.equal(zoneOf(ring(2)[0]!, PACK, null), 'covered');
+  // Same for a carrier that files nothing in this state and roams here.
+  assert.equal(zoneOf(HOME, PACK, '999999'), 'covered');
+  assert.equal(carrierCells(PACK, '999999'), null);
+});
+
+test('zonesNear splits the neighbourhood into the two warnings', () => {
+  const z = zonesNear(HOME, PACK, VZW, everywhere, 3);
+  assert.deepEqual([...z.carrierGap].sort(), [...gridDisk(HOME, 1)].sort());
+  assert.deepEqual([...z.noService].sort(), [...ring(3)].sort());
+  const unknown = zonesNear(HOME, PACK, null, everywhere, 3);
+  assert.equal(unknown.carrierGap.length, 0);
+  assert.equal(unknown.noService.length, ring(3).length);
+});
+
+test('nothing is claimed outside the area the pack describes', () => {
+  // Outside the state, a missing cell is missing data, not a dead zone.
+  const z = zonesNear(HOME, PACK, VZW, () => false, 3);
+  assert.equal(z.carrierGap.length + z.noService.length, 0);
+});
+
+test('anyCarrier is the union, which is what 911 depends on', () => {
+  const u = anyCarrier(PACK);
+  assert.equal(u.size, gridDisk(HOME, 2).length);
+  assert.equal(anyCarrier(PACK), u, 'computed once per pack');
 });

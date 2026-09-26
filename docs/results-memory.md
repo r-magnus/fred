@@ -31,6 +31,14 @@ course invented for "what antibiotic should I take for it?". With memory, the
 first became "keep it below the heart" and the second "I don't have reliable
 information on that".
 
+## On the phone (2026-09-26)
+
+Blister question, then "should I pop it?", then a fire question, through the
+devhooks inbox. The follow-up used memory (`followUp=yes`, 0.103 alone, 0.362
+joined) and answered "Do not pop the blister", then moleskin, keep it clean.
+The fire question kept its own search (`followUp=no`, 0.447 against 0.407)
+and got the fire card word for word.
+
 ## What was built
 
 `ask()` takes the previous question and its search score. The new message is
@@ -95,9 +103,12 @@ topic, and whether it has a strong topic of its own.
 
 ## Cost
 
-One more search per message after the first (a search is 54-106 ms on the
-phone, `METRICS.md`; not yet measured with memory on the phone) and about 20
-prompt tokens when the earlier question is shown. No extra generation, and the system prefix is untouched, so
+One more search per message after the first, and about 20 prompt tokens when
+the earlier question is shown. On the Nothing Phone (3), 2026-09-26: the
+follow-up "should I pop it?" spent 1.66 s in retrieval against 0.76 s for the
+opening blister question, so the second search costs about 0.9 s there, beside
+7-13 s of generation. A topic change that keeps its own search still pays for
+both searches (1.58 s before the fire card was shown). No extra generation, and the system prefix is untouched, so
 the KV cache still reuses it.
 
 ## Grader caveat

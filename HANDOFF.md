@@ -50,12 +50,13 @@ Conversation memory (item 4 below) also bears on accuracy.
    - Done: `scripts/build-state-bundle.mjs` assembles map + contours + coverage +
      flora pack with a `bundle.json` (sizes, SHA-256, attribution);
      `tools/eval/stage-bundle.sh` installs one. California: 791 MB.
-   - **In progress (started 2026-09-25 16:28):** building the other states
-     with `scripts/build-all-bundles.sh`, one at a time under an 8 GB memory
-     cap. It skips states that already have a `bundle.json`, so re-running it
-     resumes. Progress is in `~/fred-bundles/build-all.log`. Expect ~13.3 GB of
-     basemaps + ~3 GB of contours nationally, plus tens of GB of elevation
-     downloads at build time. Then check the style on the phone, and stage.
+   - **Done 2026-09-25 (16:28-19:03): all 52 bundles built** (50 states, DC,
+     PR) with `scripts/build-all-bundles.sh`, in `~/fred-bundles/`: 15.7 GB in
+     all, 13.3 GB basemaps + 1.9 GB contours. Largest: AK 1.27 GB, CA 791 MB,
+     TX 781 MB. DC and PR have no flora pack, recorded under `missing`.
+     Elevation downloads are cached in `~/fred-maps/.contours-work` (31 GB),
+     safe to delete. Next: check the style on the phone in other terrain
+     (e.g. AK, CO), then stage.
    - **Coverage is missing from every bundle except as a gap in `missing`.** The
      FCC files were downloaded by hand; the California `.bin` exists only on the
      phone. Automating the FCC download is its own task.

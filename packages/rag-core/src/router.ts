@@ -131,7 +131,11 @@ export function route(
         // On the fallback path every domain is wanted, so every state pack
         // would qualify and "what is the capital of France?" would come back
         // as "which state are you in?" — speculation dressed up as evidence.
-        if (!fallback) skippedForState.push(pack.id);
+        // And only when the location is unknown: with the hiker in California,
+        // Oregon's pack is not waiting on a location, and counting it turned
+        // low-scoring California questions ("birds eat salmonberries, are they
+        // OK for people?") into "which state are you in?".
+        if (!fallback && ctx.state === null) skippedForState.push(pack.id);
         continue;
       }
     }

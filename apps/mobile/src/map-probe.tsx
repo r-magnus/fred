@@ -141,12 +141,17 @@ export function MapProbe(
     <View style={styles.root}>
       <Map style={styles.map}
         mapStyle={haveMap && uri !== null ? style(uri, contoursUri) : EMPTY_STYLE}
+        // TextureView, not the default GLSurfaceView: on the Nothing Phone (3)
+        // the surface drew over the left third of every overlay (2026-09-26).
+        androidView="texture"
         attribution logo={false}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
         <Camera initialViewState={{
           center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
-          zoom: fix === null ? 9 : 13,
+          // 11 shows the coverage zones around the user (~1.2 km cells, 30 km
+          // searched); 13 showed three hexagons and no context.
+          zoom: fix === null ? 9 : 11,
         }} />
         {/* Under the location ring in draw order, so the user's own zone
             stays readable on top of the shading. Unshaded means assumed
@@ -185,6 +190,19 @@ export function MapProbe(
               paint={{ 'fill-color': '#4fd1a5', 'fill-opacity': 0.18 }} />
             <Layer id="zone-edge" type="line"
               paint={{ 'line-color': '#4fd1a5', 'line-width': 2 }} />
+          </GeoJSONSource>
+        )}
+        {/* The accuracy ring is metres wide and vanishes when zoomed out to
+            see the coverage zones, so the position also gets a fixed-size dot. */}
+        {fix !== null && (
+          <GeoJSONSource
+            id="me"
+            data={{ type: 'Feature', properties: {},
+              geometry: { type: 'Point', coordinates: [fix.longitude, fix.latitude] } }}
+          >
+            <Layer id="me-dot" type="circle"
+              paint={{ 'circle-radius': 6, 'circle-color': '#4fd1a5',
+                'circle-stroke-color': '#0d1117', 'circle-stroke-width': 2 }} />
           </GeoJSONSource>
         )}
       </Map>

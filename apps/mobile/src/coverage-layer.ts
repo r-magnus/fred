@@ -95,7 +95,9 @@ export function coverageNear(
   if (here === 'no-service') {
     advice = 'No carrier reports coverage here, so 911 calls may not connect. '
       + 'Satellite SOS may still work if your phone has it. '
-      + `Nearest reported coverage: ${walk(nearestCoverage(origin, anyCarrier(pack), rings), rings)}.`;
+      + `Nearest reported coverage: ${walk(nearestCoverage(origin, anyCarrier(pack), rings), rings)}.`
+      // For 911 any carrier will do; for your own calls and texts, only yours.
+      + (mine === null ? '' : ` ${name}: ${walk(nearestCoverage(origin, mine, rings), rings)}.`);
   } else if (here === 'carrier-gap') {
     advice = `${name} reports no coverage here. Other carriers do, so 911 may still connect. `
       + `${name} coverage: ${walk(nearestCoverage(origin, mine!, rings), rings)}.`;

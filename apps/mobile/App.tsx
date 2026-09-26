@@ -45,6 +45,8 @@ interface Turn {
   /** State packs that would have answered, when the location is unknown. */
   candidateStates: readonly string[];
   done: boolean;
+  /** The search's best score, passed on when the next message is a follow-up. */
+  topScore?: number;
 }
 
 /** The provider has to sit above anything calling useSafeAreaInsets. */
@@ -60,6 +62,9 @@ function Screen() {
   const insets = useSafeAreaInsets();
   const [load, setLoad] = useState<LoadPhase>({ phase: 'idle' });
   const [turns, setTurns] = useState<Turn[]>([]);
+  // send() reads the latest turns without re-creating itself on every token.
+  const turnsRef = useRef(turns);
+  turnsRef.current = turns;
   const [draft, setDraft] = useState('');
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -135,6 +140,12 @@ function Screen() {
 
     const id = nextId.current++;
     const askState = withState === undefined ? state : withState;
+    // Conversation memory: the message just before, if Fred answered it. ask()
+    // decides whether this one is really a follow-up (docs/plan-memory.md).
+    const last = turnsRef.current.at(-1);
+    const previous = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
+      last.topScore !== undefined && last.question !== question
+      ? { question: last.question, topScore: last.topScore } : undefined;
     setTurns((ts) => [...ts, {
       id, question, state: askState, text: '', kind: 'answer',
       citations: [], medical: false, candidateStates: [], done: false, stopped: false,
@@ -145,7 +156,7 @@ function Screen() {
     const ctrl = new AbortController();
     abort.current = ctrl;
     try {
-      const res = await eng.ask(question, askState, ctrl.signal);
+      const res = await eng.ask(question, askState, ctrl.signal, previous);
       if (res.kind === 'needs-location') {
         update(id, {
           kind: 'needs-location', done: true,
@@ -162,7 +173,7 @@ function Screen() {
         update(id, { kind: 'abstain', text: res.reason === 'provider-only' ? REFER_REPLY : '', done: true });
         return;
       }
-      update(id, { citations: res.citations, medical: res.medical });
+      update(id, { citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore });
       let text = '';
       for await (const tok of res.stream) {
         text += tok;

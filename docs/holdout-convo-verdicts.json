@@ -1,0 +1,94 @@
+{
+ "grader": "Claude Opus 5.5 (in-session), rubric 2026-09-24",
+ "note": "Held-out two-turn set, run once 2026-09-26 with and without memory.",
+ "verdicts": [
+  {
+   "convoId": "hc-headtilt-01",
+   "answer": "1. Check if the person is breathing. If not, start CPR.  \n2. Do not tilt their head back; instead, open the airway using the jaw-thrust technique for possible neck injury.  \n3. If there is a suspected neck or head injury, use the jaw-thrust method to open the airway without tilting the head.  \n4. Do not push fingers into the mouth to look for something.  \n5. Call for help immediately.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Do not tilt; jaw thrust for a possible neck injury. No firm flat surface."
+  },
+  {
+   "convoId": "hc-cpr-01",
+   "answer": "1. For adults, compress the chest at least 2 inches (5 centimeters) deep.  \n2. Allow the chest to fully recoil between each compression.  \n3. Perform compressions at a rate of 100 to 120 times per minute.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "At least 2 inches (5 cm), full recoil, 100-120 a minute. The depth asked for."
+  },
+  {
+   "convoId": "hc-cprinfant-01",
+   "answer": "1. For an adult, compress the chest at least 2 inches (5 centimeters) deep.  \n2. For a baby, use two or three fingers instead of both hands.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "For a baby, two or three fingers instead of both hands."
+  },
+  {
+   "convoId": "hc-hemostatic-01",
+   "answer": "1. Apply the hemostatic gauze to the wound and ensure it extends 1-2 inches above the skin.  \n2. Hold pressure for a minimum of three minutes.",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "At least three minutes; not where hemostatic dressings are for."
+  },
+  {
+   "convoId": "hc-woundpack-01",
+   "answer": "1. Do not pack the wound unless it is a penetrating injury.  \n2. If the wound is in the belly, do not attempt to pack it.  \n3. Avoid applying pressure to the abdomen.  \n4. Do not give the casualty anything by mouth.  \n5. Seek medical assistance immediately.",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Do not pack the belly, seek help; the opening \"unless it is a penetrating injury\" muddles it; no groin/armpit/neck."
+  },
+  {
+   "convoId": "hc-saddle-01",
+   "answer": "Contour lines on a topo map show elevation and terrain features such as hills, valleys, ridges, and depressions. A saddle is a dip or low point between two areas of higher ground, often represented by an hourglass shape.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "A dip or low point between two areas of higher ground."
+  },
+  {
+   "convoId": "hc-hill-01",
+   "answer": "A hill is shown on a map by contour lines forming concentric circles, with the inside of the smallest closed circle indicating the hilltop.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Concentric circles, smallest circle is the hilltop."
+  },
+  {
+   "convoId": "hc-hill-01",
+   "answer": "A hill is represented by contour lines forming concentric circles, with the inside of the smallest closed circle indicating the hilltop.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Concentric circles, smallest circle is the hilltop."
+  },
+  {
+   "convoId": "hc-manzanita-01",
+   "answer": "Bigberry manzanita can grow up to 19.8 feet (6 m) in height.",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Up to 19.8 ft; lower bound and forms missing."
+  },
+  {
+   "convoId": "hc-fish-01",
+   "answer": "1. Check for signs of spoilage: Look for dents that stay in the fish's flesh after pressed with a thumb, slimy body, or sharp taste.  \n2. Do not cook spoiled fish thoroughly; it may cause illness.  \n3. If the fish is spoiled, do not eat it.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Spoiled fish: do not cook and eat it; signs of spoilage."
+  },
+  {
+   "convoId": "hc-gps-01",
+   "answer": "1. Protect the GPS and conserve battery life to increase its operational life during isolation.  \n2. Zero out the GPS prior to capture to mitigate its exploitation value.  \n3. Use GPS in conjunction with other navigation tools to minimize the chances of becoming lost or unable to correctly execute ISG/EPA.",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "reasoning": "Conserve battery, use with other tools; military wording (\"prior to capture\")."
+  }
+ ]
+}

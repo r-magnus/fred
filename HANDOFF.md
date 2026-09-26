@@ -117,14 +117,15 @@ different physical locations, and that has not happened.
       fix this class of bug for every layer. The catch
       offline: it needs glyphs and sprites bundled on the device. Decide that
       before writing many more hand-written layers.
-7. **Conversation memory.** Researched 2026-09-25, no code yet:
-   `docs/results-memory-research.md`. Every question is currently answered as
-   if it were the first, so follow-ups like "it's still bleeding" lose their
-   context. The plan: store turns in op-sqlite (also closes US-10, ~1-2 KB a
-   turn); let retrieval try the previous question joined to the new one and
-   keep whichever scores higher; show the generator the previous *question*
-   only, never the previous answer or its sources. Build the three small
-   multi-turn eval sets in the doc first, and count refusals before and after.
+7. **Conversation memory (#60, branch `memory`): built and measured.**
+   Held-out two-turn conversations 46% → 81%, single questions byte for byte
+   unchanged, no unsafe answers (`docs/results-memory.md`). Retrieval tries
+   the previous question joined to the new one under four measured rules; the
+   model sees the previous *question* only. Left: see it on the phone (APK
+   built; `tools/eval/ask-phone.sh` with a two-line file), then #50
+   (clarifying questions), which needs it. Saving turns (US-10, #31) is
+   separate. Found on the way: #61, WHO seizure/shock pages give drug steps
+   to hikers.
 
 ## The Expo 57.0.24 upgrade is verified on Android
 

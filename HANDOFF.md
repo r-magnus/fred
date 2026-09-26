@@ -60,6 +60,10 @@ Conversation memory (item 4 below) also bears on accuracy.
    - **Coverage is missing from every bundle except as a gap in `missing`.** The
      FCC files were downloaded by hand; the California `.bin` exists only on the
      phone. Automating the FCC download is its own task.
+   - **Coverage redesign decided 2026-09-26 (#58):** the map shows two warning
+     zones instead of "possible service": *your carrier has no reported
+     coverage*, and *no carrier does* (911 likely won't connect). Anywhere
+     unshaded is assumed to have signal. Needs per-carrier packs and #57 first.
 2. **Downloads.** Bundles are the unit; the recommendation is a signed catalog
    on a static host (Cloudflare R2 or GitHub Releases), with the 1.4 GB of models
    fetched on first run. Not built.

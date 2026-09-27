@@ -14,7 +14,7 @@ the bundles are complete**, by the owner's decision.
 
 ## A-KR2 — accuracy, due 2026-10-12
 
-**70.0% held out (28.0/40), target 80%; 84.0/104 tuning; 0 safety failures.**
+**72.5% held out (29.0/40), target 80%; 85.0/104 tuning; 0 safety failures.**
 `docs/METRICS.md`. Since phase 3 (2026-09-26/27):
 
 - WHO drug, oxygen and IV steps removed at ingest (#61); plant-database
@@ -33,8 +33,13 @@ the bundles are complete**, by the owner's decision.
 - **Measured and rejected:** contextual retrieval (`results-contextual.md`),
   Qwen3 thinking mode (`results-thinking.md`), lay-vocabulary expansion (the
   refusals are gate misses with the right passage ranked 1-2, not vocabulary).
-- **Next card batch** (same syllabus): eye injuries, river crossing, knots and
-  cordage, staying healthy (hygiene, insects), heart attack and stroke.
+- **Field cards, batch 4:** six more from the same syllabus (eye injury, snow
+  blindness, river crossing, knots and cord, staying healthy, chest pain and
+  stroke); 42 cards, 558 quotes. Held-out 70.0% -> 72.5% (snow blindness
+  full, plant cordage test partial). The knots card answers "is this plant
+  strong enough for cord?" only in its last step: the verbatim-card weakness
+  again (#50, clarifying questions, and short direct answers per card are the
+  candidate fixes).
 
 ## What is owed, in order
 

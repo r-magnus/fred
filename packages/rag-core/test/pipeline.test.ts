@@ -502,6 +502,7 @@ test('a joined search that still cannot answer changes nothing', async () => {
   });
   assert.equal(res.diagnostics.followUp?.used, false);
   assert.equal(res.kind, 'abstain');
+});
 
 test('a provider-only passage just behind the top still triggers the referral', async () => {
   // The needle-decompression failure: the procedure came second by 0.001.

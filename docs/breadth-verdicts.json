@@ -1,0 +1,233 @@
+{
+ "grader": "Claude, blind: each pair shown as A/B in random order, key opened after all grades were saved",
+ "scores": {
+  "br-heat-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-sling-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-smoke-01": {
+   "old": 0.5,
+   "new": 1
+  },
+  "br-neg-sports-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-hypo-ground-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-shellfish-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-firerain-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-water-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-neg-recipe-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-sweat-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-catbird-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-burnhand-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-concussion-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-tarragon-01": {
+   "new": 0.5,
+   "old": 0.5
+  },
+  "br-rope-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-mirror-01": {
+   "new": 0.5,
+   "old": 0.5
+  },
+  "br-maggots-01": {
+   "old": 0,
+   "new": 0
+  },
+  "br-buttonbush-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-frostbite-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-bowdrill-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-azimuth-01": {
+   "new": 0.5,
+   "old": 0.5
+  },
+  "br-soaked-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-cold-night-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-thistle-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-neg-stitch-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-eye-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-tq-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-diabetic-01": {
+   "new": 1,
+   "old": 0
+  },
+  "br-poisonivy-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-sprain-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-berries-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-lost-01": {
+   "old": 0,
+   "new": 0
+  },
+  "br-hace-01": {
+   "old": 0,
+   "new": 1
+  },
+  "br-sorrel-01": {
+   "old": 0,
+   "new": 0
+  },
+  "br-infect-01": {
+   "new": 0.5,
+   "old": 0.5
+  },
+  "br-sycamore-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-neg-weather-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-rattler-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-tootight-01": {
+   "old": 0.5,
+   "new": 0.5
+  },
+  "br-loc-plants-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-neg-car-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-hawk-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-neg-dog-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-cpr-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-loc-animals-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-neg-dose-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-bugs-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-moose-01": {
+   "new": 1,
+   "old": 1
+  },
+  "br-beesting-01": {
+   "old": 0,
+   "new": 0
+  },
+  "br-stress-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-shelter-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-shoulder-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-moon-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-kidbelly-01": {
+   "new": 0,
+   "old": 0
+  },
+  "br-choke-01": {
+   "old": 0,
+   "new": 1
+  },
+  "br-cook-01": {
+   "old": 1,
+   "new": 1
+  },
+  "br-deer-01": {
+   "old": 1,
+   "new": 1
+  }
+ }
+}

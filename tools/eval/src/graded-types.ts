@@ -102,13 +102,24 @@ export const HOLDOUT_SETS = [
   'tools/eval/data/holdout-negative.json',
 ] as const;
 
+/**
+ * The breadth set (2026-09-27): 57 questions written after every change it is
+ * used to judge, to check those changes against topics and phrasings none of
+ * them were fitted to. Half from passages drawn at random from the packs
+ * (seed 20260927), a third from a general wilderness first-aid and survival
+ * syllabus, the rest out of scope. Compared old Fred against new, graded
+ * blind (docs/results-breadth.md).
+ */
+export const BREADTH_SETS = ['tools/eval/data/holdout-breadth.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
     case 'tuning': return GRADED_SETS;
     case 'holdout': return HOLDOUT_SETS;
+    case 'breadth': return BREADTH_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | all, got "${name}"`);
   }
 }
 
@@ -128,6 +139,8 @@ export interface GradedRun {
   readonly promptTokens: number;
   /** Why Fred declined, when it did: 'low-score', 'insufficient' or 'provider-only'. */
   readonly abstainReason?: string;
+  /** The field card offered folded beside a decline or small talk (INTENT=1), by title. */
+  readonly offer?: string;
   /** Set when the answer came from a field card (CARD_ANSWER). */
   readonly cardAnswer?: string;
   /** The manual-wording restatement and its score, when a second search ran (SECOND_SEARCH). */

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { loadGradedSet, describeSet, GRADED_SETS, HOLDOUT_SETS, setsFor } from '../src/graded-types.ts';
+import { loadGradedSet, describeSet, GRADED_SETS, HOLDOUT_SETS, BREADTH_SETS, setsFor } from '../src/graded-types.ts';
 
 const read = (p: string): string => readFileSync(p, 'utf8');
 const SETS = [
@@ -140,7 +140,8 @@ test('setsFor selects a family and rejects anything else', () => {
   assert.deepEqual(setsFor('tuning'), GRADED_SETS);
   assert.deepEqual(setsFor('holdout'), HOLDOUT_SETS);
   assert.equal(setsFor('all').length, GRADED_SETS.length + HOLDOUT_SETS.length);
-  assert.throws(() => setsFor('graded'), /tuning \| holdout \| all/);
+  assert.deepEqual(setsFor('breadth'), BREADTH_SETS);
+  assert.throws(() => setsFor('graded'), /tuning \| holdout \| breadth \| all/);
 });
 
 test('the holdout set covers every corpus and both non-answer outcomes', () => {

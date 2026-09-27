@@ -32,6 +32,14 @@ export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
 export const CHAT_REPLY = "Got it. I'm here if anything comes up, whether it's first aid, survival, or the plants and animals around you.";
 
 /**
+ * Small talk that still matched a field card. "I think I'm lost" was read as
+ * chat on the breadth set, and "I'm here if anything comes up" is the wrong
+ * thing to say to someone who might be in trouble, so when a card matched the
+ * reply points at it instead.
+ */
+export const CHAT_REPLY_WITH_OFFER = "Got it. In case you need it, here's what to do:";
+
+/**
  * What Fred says when the question is a clinical procedure (provider-only
  * material; pipeline.ts). Fixed text, not generated: the point is that the
  * model never sees the procedure.

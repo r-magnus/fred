@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
@@ -145,9 +145,9 @@ export interface AskOptions {
   /**
    * Decide what the hiker wants as well as what they are talking about
    * (intent.ts, docs/results-intent-probe.md): an emergency opens the top field
-   * card even under the gate, small talk gets a short reply with the card only
-   * offered, and a prevention question is answered from the manuals with the
-   * card offered. Costs one short generation. Off by default until measured.
+   * card even under the gate, and where Fred would otherwise say nothing
+   * useful (small talk, a decline) the card that led the search is offered,
+   * folded. Costs one short generation. Off by default until measured.
    */
   readonly intent?: boolean;
 }
@@ -245,8 +245,6 @@ export type AskResult =
        * the citation labels alone cannot show.
        */
       readonly prompt: PromptParts;
-      /** A related field card offered folded, beside a prevention answer. */
-      readonly offer?: CardOffer;
       readonly diagnostics: Diagnostics;
     }
   /** Small talk: a short fixed reply, with the matching card offered if any. */
@@ -272,7 +270,7 @@ export type AskResult =
       readonly kind: 'abstain';
       readonly reason: 'low-score' | 'insufficient' | 'provider-only';
       readonly nearest: readonly Citation[];
-      /** A related field card, when a prevention question found no manual answer. */
+      /** The field card that led the search, when one did: shown folded under the decline. */
       readonly offer?: CardOffer;
       readonly diagnostics: Diagnostics;
     };
@@ -394,8 +392,18 @@ export async function ask(
     // question too opened the cuts card for "talk me through stitching a cut
     // closed" on the tuning set. And a pet is never the patient: veterinary
     // care is out of scope, and "my dog cut his paw" opened the human card.
-    if (topCard !== undefined && intent === 'chat') offer = toOffer(topCard);
     if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
+    // Otherwise the card is offered, folded, wherever Fred would say nothing
+    // useful: beside small talk, and beside a decline. On the breadth set
+    // (docs/results-breadth.md) the right card led the search for "I just
+    // grabbed a hot pot handle and my palm is blistering" and "everything is
+    // wet, how do I get a fire going", both under the gate, and Fred said
+    // only "I don't have reliable information". Across all three sets every
+    // card this offers beside a decline was the right one or, for questions
+    // Fred must decline ("walk me through stitching a cut"), a safe
+    // alternative (the cuts card: clean it and cover it). Only an answer
+    // leaves it out; a pet still never gets a human card.
+    else if (topCard !== undefined && !ABOUT_A_PET.test(query)) offer = toOffer(topCard);
     // A prevention question takes the normal path, cards included: several
     // cards are prevention guidance ("staying warm on a cold night", "staying
     // healthy", "river crossing"), and hiding them cost three tuning answers.
@@ -415,7 +423,7 @@ export async function ask(
 
   if (intent === 'chat') {
     return {
-      kind: 'chat', reply: CHAT_REPLY, offer: offer ?? null,
+      kind: 'chat', reply: offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: offer ?? null,
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
   }
@@ -579,7 +587,6 @@ export async function ask(
     stream: backend.generate(prompt, generateOpts),
     citations: usable.map(toCitation),
     prompt,
-    ...(offer === undefined ? {} : { offer }),
     medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
       ...baseDiag,

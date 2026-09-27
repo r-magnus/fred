@@ -92,9 +92,10 @@ Everything below is outside git, so nothing here needs committing.
   `20260920` Protomaps build. The docs say 598 MB, and the gap is unexplained.
 - **Simulator** "FredTest", iPhone 18 Pro, iOS 27.0, located in Yosemite
   Valley, with all of the above staged.
-- **Not staged: coverage.** `coverage-CA-lte.bin` needs FCC BDC downloads,
-  and the API credentials live in `~/.config/fred/fcc.env` on the Linux
-  machine only.
+- **Coverage** is now in every state bundle (`coverage-<ST>-voice.bin`, built
+  on the Linux machine, which holds the FCC credentials). iOS cannot read the
+  carrier, so the map's carrier picker is the only way to get the amber
+  "your carrier" zone there (#58).
 
 ## Still unknown
 

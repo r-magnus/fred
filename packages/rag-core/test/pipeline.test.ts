@@ -98,15 +98,23 @@ test('the same query answers once the state is known', async () => {
 });
 
 test('a pack from another state is never searched', async () => {
+  // The hiker is in Ohio and only Colorado's pack is installed. Asking "which
+  // state are you in?" would be asking what Fred already knows, and its state
+  // buttons would offer Colorado's answer to someone in Ohio: decline instead.
   const res = await ask('What do I do if I see a bear?', deps(), { state: 'OH' });
-  assert.equal(res.kind, 'needs-location');
+  assert.equal(res.kind, 'abstain');
   const r = route(extractKeywords('bear'), PACKS, { state: 'OH' });
   // The invariant is that the wrong state's pack is not searched — not that
-  // nothing is. Routing now widens to the unscoped packs rather than returning
-  // empty, and the location prompt is decided after retrieval instead.
+  // nothing is. Routing widens to the unscoped packs rather than returning empty.
   assert.ok(!r.packIds.includes('state-CO-wildlife'), r.packIds.join(', '));
+  assert.deepEqual(r.skippedStatePacks, []);
+});
+
+test('an unknown location still asks for one', async () => {
+  const res = await ask('What do I do if I see a bear?', deps(), { state: null });
+  assert.equal(res.kind, 'needs-location');
+  const r = route(extractKeywords('bear'), PACKS, { state: null });
   assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
-  assert.ok(r.reason.includes('outside OH'));
 });
 
 test('plural domain terms still route to their domain', () => {
@@ -494,4 +502,23 @@ test('a joined search that still cannot answer changes nothing', async () => {
   });
   assert.equal(res.diagnostics.followUp?.used, false);
   assert.equal(res.kind, 'abstain');
+
+test('a provider-only passage just behind the top still triggers the referral', async () => {
+  // The needle-decompression failure: the procedure came second by 0.001.
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [
+    // Same words as the question, plus one: just behind the ordinary passage.
+    seed('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty insert', { audience: 'provider' }),
+    seed('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty'),
+  ]);
+  store.addPack('core-fieldcards', []);
+  const backend = new FakeBackend();
+  const res = await ask('needle decompression tension pneumothorax chest wall collapsed lung trauma breathing emergency casualty',
+    { backend, store, packs: clinicalPacks }, { state: null, abstainThreshold: 0 });
+  const ranked = [...res.diagnostics.candidates].sort((a, b) => b.score - a.score);
+  assert.equal(ranked[0]!.chunk.audience ?? 'everyone', 'everyone', 'fixture: the ordinary passage must rank first');
+  assert.ok(ranked[1]!.score >= 0.95 * ranked[0]!.score, `fixture: near-tie, got ${ranked[1]!.score} vs ${ranked[0]!.score}`);
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'provider-only');
+  assert.equal(backend.lastPrompt, null);
 });

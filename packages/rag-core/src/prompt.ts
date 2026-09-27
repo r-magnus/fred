@@ -133,6 +133,26 @@ function isMedical(blocks: readonly ContextBlock[]): boolean {
 export const MEDICAL_DISCLAIMER =
   'This is general guidance from offline reference material, not professional medical advice. If you can reach emergency services, do that first.';
 
+/**
+ * The plant and wildlife database (FEIS) describes plants as food for animals
+ * in whole sections, and a 1.7B model reads "palatable to livestock" as
+ * "edible": "is quaking aspen something a person can eat?" got "Yes, quaking
+ * aspen is palatable to all browsing livestock", and a held-out marsh question
+ * called wildlife forage edible. A note in front of those passages says what
+ * they are about. Added to the prompt only, never the index: in the index its
+ * words would pull these passages up for "can I eat" questions.
+ */
+const FORAGE_NOTE: readonly [RegExp, string][] = [
+  [/ > (?:Importance to Wildlife and Livestock|Palatability and Nutritional Value)$/,
+    '(About animals eating this plant. It does not say whether people can eat it.)'],
+  [/ > Diet$/, '(About what this animal eats. It does not say whether people can eat those plants.)'],
+];
+
+const forageNote = (section: string): string => {
+  const hit = FORAGE_NOTE.find(([re]) => re.test(section));
+  return hit === undefined ? '' : `${hit[1]}\n`;
+};
+
 export function renderContext(blocks: readonly ContextBlock[]): string {
   return blocks
     .map((b, i) => {
@@ -142,7 +162,7 @@ export function renderContext(blocks: readonly ContextBlock[]): string {
       // as instructions (arXiv 2605.13829, and twice in our own eval), and a
       // first line saying "Lists actions to AVOID" is what prevents that.
       const context = b.chunk.context === '' ? '' : `${b.chunk.context}\n`;
-      return `SOURCE ${i + 1} (${b.chunk.source}${page})\n${context}${b.text}`;
+      return `SOURCE ${i + 1} (${b.chunk.source}${page})\n${context}${forageNote(b.chunk.section)}${b.text}`;
     })
     .join('\n\n');
 }

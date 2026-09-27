@@ -30,7 +30,10 @@ const EMBED_MODEL_ID = 'Supabase/gte-small';
 
 import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
-import { ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, WHO_BEC_PROVIDER_ONLY, type ProviderRule } from './provider-only.ts';
+import {
+  ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, stripTreatmentSteps, WHO_BEC_PROVIDER_ONLY, WHO_BEC_TREATMENT_STEPS,
+  type ProviderRule,
+} from './provider-only.ts';
 
 interface CorpusDef {
   readonly pdf: string;
@@ -52,6 +55,8 @@ interface CorpusDef {
   readonly dropChunks?: readonly RegExp[];
   /** Clinical procedures kept searchable but never answered from (provider-only.ts). */
   readonly providerOnly?: readonly ProviderRule[];
+  /** Treatment steps removed item by item from mixed lists (provider-only.ts). */
+  readonly treatmentSteps?: readonly { readonly pattern: RegExp; readonly why: string }[];
 }
 
 /**
@@ -66,10 +71,13 @@ const CORPORA: Record<string, CorpusDef> = {
     pdf: 'corpora/who/who-bec.pdf',
     domain: 'first-aid-physical',
     providerOnly: WHO_BEC_PROVIDER_ONLY,
+    treatmentSteps: WHO_BEC_TREATMENT_STEPS,
     input: {
       id: 'core-firstaid',
       // 1.3.0: clinical skill stations marked provider-only (provider-only.ts).
-      version: '1.3.0',
+      // 1.4.0: drug, oxygen and IV steps removed from management lists, and the
+      // dosage reference marked provider-only (#61).
+      version: '1.4.0',
       displayName: 'Physical First Aid',
       description: 'WHO/ICRC Basic Emergency Care — acute illness and injury.',
       domains: ['first-aid-physical'],
@@ -278,7 +286,24 @@ if (name === 'atp-3-50-21') {
 }
 const scaffolding = chunks.filter((c) => classifyChunk(c.text).drop);
 const excluded = chunks.filter((c) => !classifyChunk(c.text).drop && def.dropChunks?.some((re) => re.test(c.text)));
-const unmarked = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));
+let unmarked = chunks.filter((c) => !scaffolding.includes(c) && !excluded.includes(c));
+if (def.treatmentSteps !== undefined) {
+  const steps = def.treatmentSteps;
+  const hits = steps.map(() => 0);
+  let removed = 0, emptied = 0;
+  unmarked = unmarked.flatMap((c) => {
+    const r = stripTreatmentSteps(c.text, steps);
+    r.hits.forEach((h, i) => { hits[i]! += h; });
+    removed += r.removed.length;
+    if (r.removed.length === 0) return [c];
+    // A chunk that was nothing but treatment steps has nothing left to say.
+    if (r.text.replace(/\[See [A-Z ]+\]|\s+/g, '').length < 40) { emptied++; return []; }
+    return [{ ...c, text: r.text }];
+  });
+  const dead = steps.filter((_, i) => hits[i] === 0);
+  if (dead.length > 0) throw new Error(`treatment-step patterns matched nothing: ${dead.map((d) => d.why).join(' | ')}`);
+  console.log(`      ${removed} treatment steps removed (${hits.join('/')} by pattern), ${emptied} chunks left empty and dropped`);
+}
 const kept = def.providerOnly === undefined ? unmarked : markProviderOnly(unmarked, def.providerOnly);
 if (def.providerOnly !== undefined) {
   console.log(`      ${kept.filter((c) => c.audience === 'provider').length} chunks marked provider-only`);

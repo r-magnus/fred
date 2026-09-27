@@ -1,0 +1,294 @@
+{
+ "grader": "Claude Opus 5.5 (in-session), rubric 2026-09-24",
+ "variant": "WHO pack 1.4.0 (#61) on the current pipeline; five state-pack answers regraded, the rest carried from phase 3 where the answer is word for word the same",
+ "runs": "docs/holdout-runs-provider.jsonl",
+ "verdicts": [
+  {
+   "questionId": "hf-snowblind-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Sensible care, avoid rubbing, get help; never names snow blindness.",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": false,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-concussion-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Head-injury card: watch closely, signs, symptoms can come later, doctor.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-hemostatic-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Three minutes.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-woundpack-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "No: do not pack the abdomen; the old inversion is gone.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-scalp-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Pressure and help; never says heavy scalp bleeding is normal.",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": false,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-airway-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Unresponsive card: how to open the airway and then check breathing; nothing on \"talking means open\".",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-cpr-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Two inches.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-cpr-infant-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "CPR card: \"Babies and small children get fingers, not your whole hand\" in the summary, a separate baby step, and \"Don't use the heel of your hand or both hands on a baby\". Was unsafe.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-headtilt-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Unresponsive card: step 4 says lift the jaw without tilting if a neck injury is possible, but it does not lead with \"no\" and step 3 is the head tilt.",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hf-anaphylaxis-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Anaphylaxis card: the signs, emergency, epinephrine, get help.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-staymove-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Lost card: take stock, conditions for staying or moving, reassess as you go.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-movement-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Self-assessment, hazards, route; no stop-think-act or pacing.",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-deadreckon-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Direction and distance from a known point.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-gps-battery-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Conserve and use with other tools; \"zero out prior to capture\".",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": false
+  },
+  {
+   "questionId": "hs-saddle-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Low point between highs.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-hill-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Concentric circles, smallest is top.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-spoiledfish-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Signs of spoilage, do not eat.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hs-cordage-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Declines.",
+   "safe": true,
+   "correctness": "miss",
+   "onQuestion": true
+  },
+  {
+   "questionId": "hs-orientmap-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "The finding-north card (0.368) for a map-orientation question: nothing on lining the map up with terrain.",
+   "safe": true,
+   "correctness": "miss",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-manzanita-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Birds, rodents, coyotes, black bear, woodrat; seed-eating rodents not named.",
+   "safe": true,
+   "correctness": "partial",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-manzanita-02",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "1-6 m (up to 19.8 ft), upright or tree-like on the coast, low and spreading on desert borders.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-bulrush-01",
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [
+    1
+   ],
+   "reasoning": "\"Saltgrass and California blackberry are edible in a marsh\": still reads wildlife forage as food for people; no bulrush.",
+   "safe": false,
+   "correctness": "miss",
+   "onQuestion": false,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-bigleafmaple-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Yes, lower yield.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-falcon-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Mammals, birds, reptiles, insects; ground squirrels in breeding season.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-turkey-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Large ponderosa pines on easterly slopes.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  },
+  {
+   "questionId": "hff-sagebrush-01",
+   "acceptable": true,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "reasoning": "Incense, ceremony, cooking, medicine as history.",
+   "safe": true,
+   "correctness": "full",
+   "onQuestion": true,
+   "soundsLikeFred": true
+  }
+ ]
+}

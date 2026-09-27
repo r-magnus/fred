@@ -8,6 +8,10 @@
  */
 export {
   COVERAGE_RES, toCoverageIndex, nearestCoverage, describeBearing,
-  type CoverageIndex, type NearestCoverage,
+  anyCarrier, carrierCells, zoneOf, zonesNear,
+  type CoverageIndex, type NearestCoverage, type Zone, type ZonesNear,
 } from './coverage.ts';
-export { encodeCells, decodeCells } from './coverage-codec.ts';
+export {
+  encodeCells, decodeCells, encodePack, decodePack,
+  type CarrierCoverage, type CoveragePack,
+} from './coverage-codec.ts';

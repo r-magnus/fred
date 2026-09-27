@@ -1,28 +1,31 @@
 /**
- * Build a B-KR3 coverage pack from FCC Broadband Data Collection downloads.
+ * Build a coverage pack from FCC Broadband Data Collection downloads.
  *
- *   node tools/ingest/src/coverage-pack.ts <out.json> <file.shp.zip>...
+ *   node tools/ingest/src/coverage-pack.ts <out.bin> <as-of> <file.shp.zip>...
+ *
+ * scripts/build-state-coverage.mjs fetches the files and calls `buildPack`;
+ * the command line is for zips downloaded by hand.
  *
  * The FCC publishes mobile coverage as zipped shapefiles whose attribute table
- * carries an `h3_res9_id` per row. **Only the .dbf is read.** The .shp holds the
- * hexagon geometry and is roughly a third of the archive; H3 indices are
+ * carries an `h3_res9_id` per row. **Only the .dbf is read**, streamed straight
+ * out of the zip. The .shp holds the hexagon geometry; H3 indices are
  * self-locating, so the geometry is dead weight here and decoding it would mean
  * a GIS dependency for nothing.
  *
  * Res 9 collapses to res 7 (`packages/geo/src/coverage.ts`), which matches
- * B-KR3's ±1 km rubric at 49x fewer cells. Carriers are unioned: B-KR3 asks
- * whether signal is plausible, not whose.
+ * B-KR3's ±1 km rubric at 49x fewer cells. Carriers are kept apart, by the
+ * `providerid` column (issue #58): the map warns where *your* carrier reports
+ * nothing, and where *no* carrier does.
  *
  * The DBF field layout is parsed from the file header rather than hardcoded,
  * because the FCC reissues these per filing round and a silently shifted offset
  * would produce plausible-looking garbage rather than an error.
  */
-import { createReadStream, writeFileSync } from 'node:fs';
-import { open } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { cellToParent } from 'h3-js';
-import { COVERAGE_RES, encodeCells } from '@fred/geo/coverage';
-import { execFileSync } from 'node:child_process';
+import { COVERAGE_RES, encodePack, type CoveragePack } from '@fred/geo/coverage';
 
 interface DbfField { readonly name: string; readonly offset: number; readonly length: number }
 
@@ -45,62 +48,93 @@ function parseHeader(head: Buffer): {
   return { records, headerLength, recordLength, fields };
 }
 
-async function cellsFrom(zipPath: string, into: Set<string>): Promise<number> {
-  // unzip is not installed everywhere; Python's zipfile is, and streaming the
-  // dbf out beats materialising a 686 MB file per carrier.
-  const dbfName = execFileSync('python3', ['-c',
-    `import zipfile,sys;print([n for n in zipfile.ZipFile(sys.argv[1]).namelist() if n.endswith('.dbf')][0])`,
-    zipPath]).toString().trim();
-  const tmp = `${zipPath}.dbf`;
-  execFileSync('python3', ['-c',
-    `import zipfile,sys,shutil
+/**
+ * One file's reported cells, per provider id, collapsed to res 7.
+ *
+ * unzip is not installed everywhere; Python's zipfile is. It writes the .dbf to
+ * a pipe, so a 700 MB table never lands on disk.
+ */
+export async function readCoverageZip(zipPath: string): Promise<Map<string, Set<string>>> {
+  const py = spawn('python3', ['-c', `import zipfile,sys,shutil
 z=zipfile.ZipFile(sys.argv[1])
-with z.open(sys.argv[2]) as f, open(sys.argv[3],'wb') as o: shutil.copyfileobj(f,o,1<<22)`,
-    zipPath, dbfName, tmp]);
+n=[n for n in z.namelist() if n.endswith('.dbf')][0]
+with z.open(n) as f: shutil.copyfileobj(f,sys.stdout.buffer,1<<22)`, zipPath],
+  { stdio: ['ignore', 'pipe', 'inherit'] });
+  const exited = new Promise<number>((resolve) => py.on('close', (code) => resolve(code ?? 1)));
 
-  const fh = await open(tmp, 'r');
-  const head = Buffer.alloc(4096);
-  await fh.read(head, 0, 4096, 0);
-  const { records, headerLength, recordLength, fields } = parseHeader(head);
-  const h3 = fields.find((f) => f.name === 'h3_res9_id');
-  if (h3 === undefined) throw new Error(`${zipPath}: no h3_res9_id field; layout changed`);
-  await fh.close();
-
+  const byProvider = new Map<string, Set<string>>();
+  let buf: Buffer = Buffer.alloc(0);
+  let layout: ReturnType<typeof parseHeader> | null = null;
+  let h3: DbfField | undefined, prov: DbfField | undefined;
   let seen = 0;
-  await new Promise<void>((resolve, reject) => {
-    const stream = createReadStream(tmp, { start: headerLength, highWaterMark: 1 << 22 });
-    let carry = Buffer.alloc(0);
-    stream.on('data', (chunk: string | Buffer) => {
-      const buf: Buffer = carry.length === 0
-        ? Buffer.from(chunk as Buffer) : Buffer.concat([carry, chunk as Buffer]);
-      let p = 0;
-      for (; p + recordLength <= buf.length; p += recordLength) {
-        const id = buf.subarray(p + h3.offset, p + h3.offset + h3.length).toString('latin1').trim();
-        if (id.length > 0) { into.add(cellToParent(id, COVERAGE_RES)); seen++; }
+  for await (const chunk of py.stdout) {
+    buf = buf.length === 0 ? chunk as Buffer : Buffer.concat([buf, chunk as Buffer]);
+    if (layout === null) {
+      if (buf.length < 32 || buf.length < buf.readUInt16LE(8)) continue;
+      layout = parseHeader(buf);
+      h3 = layout.fields.find((f) => f.name === 'h3_res9_id');
+      prov = layout.fields.find((f) => f.name === 'providerid');
+      if (h3 === undefined || prov === undefined) {
+        py.kill();
+        throw new Error(`${zipPath}: no h3_res9_id or providerid field; layout changed`);
       }
-      carry = Buffer.from(buf.subarray(p));
-    });
-    stream.on('end', () => resolve());
-    stream.on('error', reject);
-  });
-  execFileSync('rm', ['-f', tmp]);
-  if (seen !== records) console.warn(`  warning: read ${seen} of ${records} records`);
-  return seen;
+      buf = buf.subarray(layout.headerLength);
+    }
+    const { recordLength } = layout;
+    let p = 0;
+    for (; p + recordLength <= buf.length; p += recordLength) {
+      if (buf[p] === 0x1a) break; // end-of-file marker
+      const id = buf.subarray(p + h3!.offset, p + h3!.offset + h3!.length).toString('latin1').trim();
+      if (id.length === 0) continue;
+      const who = buf.subarray(p + prov!.offset, p + prov!.offset + prov!.length).toString('latin1').trim();
+      let cells = byProvider.get(who);
+      if (cells === undefined) byProvider.set(who, cells = new Set());
+      cells.add(cellToParent(id, COVERAGE_RES));
+      seen++;
+    }
+    buf = buf.subarray(p);
+  }
+  const code = await exited;
+  if (code !== 0) throw new Error(`${zipPath}: reading the .dbf failed (python exit ${code})`);
+  if (layout === null) throw new Error(`${zipPath}: empty .dbf`);
+  if (seen !== layout.records) {
+    throw new Error(`${zipPath}: read ${seen} of ${layout.records} records; truncated download?`);
+  }
+  return byProvider;
 }
 
-const [out, ...inputs] = process.argv.slice(2);
-if (out === undefined || inputs.length === 0) {
-  throw new Error('usage: coverage-pack.ts <out.json> <file.shp.zip>...');
+/**
+ * Merge files into one pack. Several files can carry one provider (a national
+ * file and a state file, say); their cells are unioned. `names` labels ids.
+ */
+export async function buildPack(
+  zips: readonly string[],
+  asOf: string,
+  names: Readonly<Record<string, string>> = {},
+  log: (line: string) => void = () => {},
+): Promise<{ pack: CoveragePack; bytes: Uint8Array }> {
+  const all = new Map<string, Set<string>>();
+  for (const z of zips) {
+    for (const [id, cells] of await readCoverageZip(z)) {
+      const into = all.get(id) ?? new Set<string>();
+      for (const c of cells) into.add(c);
+      all.set(id, into);
+      log(`${z.split('/').pop()}: provider ${id}, ${cells.size.toLocaleString()} res-7 cells`);
+    }
+  }
+  // Sorted by id, so the same inputs always produce the same bytes.
+  const carriers = [...all].sort(([a], [b]) => a.localeCompare(b))
+    .map(([id, cells]) => ({ id, name: names[id] ?? id, cells }));
+  const pack = { asOf, carriers };
+  return { pack, bytes: gzipSync(encodePack(pack), { level: 9 }) };
 }
-const cells = new Set<string>();
-for (const f of inputs) {
-  const before = cells.size;
-  const n = await cellsFrom(f, cells);
-  console.log(`${f.split('/').pop()}: ${n.toLocaleString()} res-9 rows -> +${(cells.size - before).toLocaleString()} new res-7 cells`);
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const [out, asOf, ...inputs] = process.argv.slice(2);
+  if (out === undefined || asOf === undefined || inputs.length === 0) {
+    throw new Error('usage: coverage-pack.ts <out.bin> <as-of> <file.shp.zip>...');
+  }
+  const { pack, bytes } = await buildPack(inputs, asOf, {}, console.log);
+  writeFileSync(out, bytes);
+  console.log(`${pack.carriers.length} carriers -> ${out} (${(bytes.length / 1024).toFixed(1)} KB)`);
 }
-// Delta varints, gzipped. Measured 8,833 bytes for AT&T's California LTE
-// footprint against 1,204,963 as a JSON array of ids — see coverage-codec.ts.
-const packed = gzipSync(encodeCells([...cells]), { level: 9 });
-writeFileSync(out, packed);
-console.log(`\n${cells.size.toLocaleString()} res-7 cells -> ${out}`
-  + ` (${(packed.length / 1024).toFixed(1)} KB)`);

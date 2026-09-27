@@ -217,7 +217,17 @@ const QWEN_SAMPLING = process.env.GEN_SAMPLING === 'qwen';
 const GEN_SEED = Number(process.env.GEN_SEED ?? 1729);
 if (!Number.isInteger(GEN_SEED)) throw new Error(`GEN_SEED must be an integer, got ${process.env.GEN_SEED}`);
 
+/** Reasoning tokens Qwen3 may spend before answering; 0 (the default) turns thinking off. */
+const THINKING_BUDGET = Number(process.env.THINKING ?? 0);
+
 function samplingFor(genOpts: GenerateOptions) {
+  // Qwen3's model card for thinking mode: temperature 0.6, top-p 0.95, top-k
+  // 20, min-p 0, and no greedy decoding, which loops while reasoning. The
+  // device's repeat penalty is left off: it also penalises every word of the
+  // reasoning, and with it the first thinking run came back empty.
+  if (THINKING_BUDGET > 0 && genOpts.temperature === undefined) {
+    return { temperature: 0.6, topP: 0.95, topK: 20, minP: 0, seed: GEN_SEED } as const;
+  }
   if (!QWEN_SAMPLING) {
     return {
       temperature: genOpts.temperature ?? 0,
@@ -286,7 +296,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
           contextSequence: sequence,
           systemPrompt: prompt.system,
         });
-        const chunks: string[] = [];
+
         // These three must mirror device-pack.ts. The shared-pipeline claim —
         // "the eval harness measures the code that ships" — held for retrieval
         // once embedder parity was fixed (docs/results-m3.md), but generation
@@ -295,13 +305,35 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
         //
         // Left as it was, the harness graded prose the phone never produces and
         // timed Qwen3's thinking tokens, which the device does not spend.
-        await session.prompt(prompt.user, {
-          maxTokens: genOpts.maxTokens,
+        // THINKING=<n> is the #36 experiment: Qwen3 may reason for up to n
+        // tokens before answering, on top of the answer's own budget, so the
+        // reasoning cannot starve the visible answer (which is what emptied the
+        // answers the first time thinking was tried). Off by default, as on
+        // the device.
+        // Fred's prompt ("two or three short sentences and nothing else ...
+        // ANSWER:") leads Qwen3 to skip reasoning entirely: 0 tokens on every
+        // smoke question. /think is Qwen3's documented per-message switch.
+        const user = THINKING_BUDGET > 0 ? `${prompt.user}\n/think` : prompt.user;
+        const meta = await session.promptWithMeta(user, {
+          maxTokens: genOpts.maxTokens + THINKING_BUDGET,
           ...samplingFor(genOpts),
-          budgets: { thoughtTokens: 0 },
-          onTextChunk: (t) => chunks.push(t),
+          budgets: { thoughtTokens: THINKING_BUDGET },
         });
-        for (const c of chunks) yield c;
+        // Qwen3 sometimes writes its closing </think> as plain text rather than
+        // the special token, so the library files the whole answer under the
+        // reasoning segment and returns nothing as the reply. The answer is
+        // whatever follows that tag.
+        let answer = '', thought = '';
+        for (const part of meta.response) {
+          if (typeof part === 'string') { answer += part; continue; }
+          if (part.type !== 'segment') continue;
+          const close = part.text.indexOf('</think>');
+          if (close === -1) { thought += part.text; continue; }
+          thought += part.text.slice(0, close);
+          answer += part.text.slice(close + '</think>'.length);
+        }
+        if (THINKING_BUDGET > 0) console.log(`[think] ${genModel!.tokenize(thought).length} reasoning tokens`);
+        yield answer.trim();
       } finally {
         sequence.dispose();
       }

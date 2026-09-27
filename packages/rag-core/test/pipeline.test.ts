@@ -98,15 +98,23 @@ test('the same query answers once the state is known', async () => {
 });
 
 test('a pack from another state is never searched', async () => {
+  // The hiker is in Ohio and only Colorado's pack is installed. Asking "which
+  // state are you in?" would be asking what Fred already knows, and its state
+  // buttons would offer Colorado's answer to someone in Ohio: decline instead.
   const res = await ask('What do I do if I see a bear?', deps(), { state: 'OH' });
-  assert.equal(res.kind, 'needs-location');
+  assert.equal(res.kind, 'abstain');
   const r = route(extractKeywords('bear'), PACKS, { state: 'OH' });
   // The invariant is that the wrong state's pack is not searched — not that
-  // nothing is. Routing now widens to the unscoped packs rather than returning
-  // empty, and the location prompt is decided after retrieval instead.
+  // nothing is. Routing widens to the unscoped packs rather than returning empty.
   assert.ok(!r.packIds.includes('state-CO-wildlife'), r.packIds.join(', '));
+  assert.deepEqual(r.skippedStatePacks, []);
+});
+
+test('an unknown location still asks for one', async () => {
+  const res = await ask('What do I do if I see a bear?', deps(), { state: null });
+  assert.equal(res.kind, 'needs-location');
+  const r = route(extractKeywords('bear'), PACKS, { state: null });
   assert.deepEqual(r.skippedStatePacks, ['state-CO-wildlife']);
-  assert.ok(r.reason.includes('outside OH'));
 });
 
 test('plural domain terms still route to their domain', () => {

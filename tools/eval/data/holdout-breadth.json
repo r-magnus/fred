@@ -1,0 +1,1030 @@
+[
+  {
+    "id": "br-kidbelly-01",
+    "question": "My 6 year old fell off a rock ledge onto his stomach. He says his tummy hurts but he looks ok. Should I worry?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Belly injuries in children are common and can cause serious internal bleeding (spleen, liver) even when they look fine",
+      "Get medical help / evacuate; watch for signs of shock"
+    ],
+    "redFlags": [
+      "Says it's nothing to worry about if they look fine"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-diabetic-01",
+    "question": "My hiking buddy is diabetic and suddenly acting confused and weird. What could be going on?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Suspect low blood sugar (or a diabetic crisis) in a diabetic who is confused",
+      "If awake and able to swallow, give sugar (sweet drink, candy, glucose); get help if not improving"
+    ],
+    "redFlags": [
+      "Tells them to give insulin",
+      "Gives something to eat or drink to someone who can't swallow safely / is unconscious"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-concussion-01",
+    "question": "what are the symptoms of a concussion",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Headache, dizziness, confusion/fog, memory problems, nausea or vomiting, sensitivity to light or noise, blurred vision or balance problems",
+      "Seek medical attention if one is suspected; rest"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-hace-01",
+    "question": "We're camped high up and my partner is stumbling and confused and has a pounding headache. What do we do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "This can be serious altitude illness affecting the brain (HACE)",
+      "Descend / evacuate as soon as possible",
+      "Keep them warm, keep them hydrated, watch confusion/coordination closely"
+    ],
+    "redFlags": [
+      "Advises continuing to climb or staying at altitude to acclimatize"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-tootight-01",
+    "question": "How can I tell if a pressure bandage is too tight?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Too tight if there's no pulse below it, or the skin below is cool (or pale/blue/numb)",
+      "Loosen and re-tie it, and recheck bandages regularly"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-eye-01",
+    "question": "A stick poked my friend in the eye and it might be cut. What should we do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Do not put pressure on the eye or put anything in it",
+      "Cover it loosely with a protective dressing (no pressure) and get medical care",
+      "Do not try to remove anything stuck in it"
+    ],
+    "redFlags": [
+      "Tells them to press on the eye or apply a tight pressure dressing",
+      "Tells them to pull out an object stuck in the eye"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-tq-01",
+    "question": "How do I put on a tourniquet?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Place it 2 to 3 inches above the bleeding (high on the limb), not over a joint",
+      "Tighten (windlass / ratchet) until the bleeding stops, then secure it",
+      "Don't loosen it; note the time; get medical help"
+    ],
+    "redFlags": [
+      "Tells them to loosen it periodically"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-sling-01",
+    "question": "How do I make a sling for a hurt arm out of stuff I have?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Use any large cloth (shirt, jacket, triangle bandage) to support the forearm, ends tied at the side of the neck on the uninjured side",
+      "Add a swathe (belt/strip of cloth) around the arm and body to hold it still"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-hypo-ground-01",
+    "question": "Someone is really cold and shaking and we have no heater. What can we do to warm them up?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical",
+      "survival"
+    ],
+    "keyPoints": [
+      "Get them out of wind/wet, replace wet clothes with dry",
+      "Insulate them from the ground (put something underneath) as well as over them",
+      "Wrap them up; body heat / warm drinks if awake"
+    ],
+    "redFlags": [
+      "Rubbing the limbs or giving alcohol"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-soaked-01",
+    "question": "Blood keeps seeping through the gauze on his forearm even though I'm pressing on it.",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Keep firm pressure; add more dressing / pack the wound and press hard",
+      "If an arm or leg and pressure isn't stopping it, apply a tourniquet 2 to 3 inches above the wound"
+    ],
+    "redFlags": [
+      "Tells them to remove the soaked dressing and leave the wound uncovered without pressure"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-maggots-01",
+    "question": "I found maggots in my old cut. Is that dangerous?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical",
+      "survival"
+    ],
+    "keyPoints": [
+      "Maggots eat dead tissue and can clean a wound; the manual says keep it covered and check daily",
+      "Flush them out with clean water once dead tissue is gone (pain/bright red blood means they've reached healthy tissue), then bandage and watch for infection; get medical care"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-cook-01",
+    "question": "Is it better to roast meat over the fire or boil it?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Boiling is better/preferred; roasting over direct heat destroys nutrients and loses juices",
+      "Drink the broth / cooking liquid"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-azimuth-01",
+    "question": "How do I figure out the bearing between two points on a map?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Draw a line between the points, put the protractor index where the line meets a north-south grid line, align 0-180 with the grid line",
+      "Read the angle where the line crosses the scale: that's the grid azimuth"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-shellfish-01",
+    "question": "Can I eat mussels I find on the beach?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Don't eat shellfish if a red tide has occurred in the last 72 hours; mussels can be poisonous in tropical areas in summer",
+      "Don't eat shellfish not covered by water at high tide; cook them"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-moon-01",
+    "question": "Can you use the moon to figure out directions at night?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "If the moon rises before sunset, the lit side is west; if it rises after midnight, the lit side is east",
+      "Or use stars: Big Dipper / Cassiopeia to find the North Star"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-rope-01",
+    "question": "how do I make rope from plant fibers",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Test the fiber first: pull it, twist it, tie an overhand knot; if it holds, it works",
+      "Twist strands of fibers one way, then twist strands together the opposite way (lay them up)"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-sweat-01",
+    "question": "Why shouldn't I get sweaty in cold weather?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Sweat soaks clothing; damp clothes lose insulation and chill you",
+      "Open layers / slow down to avoid overheating; keep clothes clean and dry"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-bowdrill-01",
+    "question": "How does a bow drill work to start a fire?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Fireboard with a notch, drill spun by a bow with the string wrapped once, socket pressing down on top",
+      "Long smooth strokes until a smoking coal forms in the dust, then put it into a bird-nest of tinder and blow it to flame"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-bugs-01",
+    "question": "How do I keep bugs from eating me alive out here?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Cover up: long sleeves rolled down, gloves, bandana/head net, repellent",
+      "Check your body daily for attached insects/ticks; don't scratch bites"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-shelter-01",
+    "question": "What should I look for in a spot to set up a shelter?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Protection from weather, near water/materials, safe from hazards (flooding, falling trees/dead limbs, rockfall)",
+      "Consider time/effort and tools you have, and how long you'll stay"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-stress-01",
+    "question": "I've been lost for two days and I can't think straight, I keep making mistakes. Is that normal?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Yes: these are common signs of stress/distress (forgetfulness, trouble deciding, mistakes, low energy)",
+      "Calm down, rest, take stock and plan (STOP); stress can be managed"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-smoke-01",
+    "question": "How do I make a smoke signal that a plane would notice?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Three fires / columns of smoke is the international distress signal",
+      "Make smoke that contrasts with the background: dark smoke (rubber, oil) against snow/light, white smoke (green leaves, moss, water) against dark"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-signaling",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-mirror-01",
+    "question": "A plane is going over, how do I use a mirror to signal it?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Aim the flash at the aircraft: sight it through your fingers / the mirror's aiming hole and move the reflection onto it",
+      "Get to high ground; if you can't see it, flash toward the sound; mirror flashes can be seen a very long way"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-signaling",
+    "style": "now",
+    "origin": "sample"
+  },
+  {
+    "id": "br-hawk-01",
+    "question": "Where do red-tailed hawks build their nests?",
+    "state": "MA",
+    "expect": "answer",
+    "domains": [
+      "wildlife"
+    ],
+    "keyPoints": [
+      "High in a tree taller than those around it, with a commanding view and open access",
+      "Often on slopes; prefer trees with open crowns"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-MA-flora-fauna",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-deer-01",
+    "question": "What do white-tailed deer eat when there's deep snow?",
+    "state": "SC",
+    "expect": "answer",
+    "domains": [
+      "wildlife"
+    ],
+    "keyPoints": [
+      "Deep snow hides most food; they eat things above the snow such as arboreal lichens and conifer browse",
+      "They make trail networks, dig for food, or move to areas with easier snow"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-SC-flora-fauna",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-moose-01",
+    "question": "Are there moose in North Dakota?",
+    "state": "ND",
+    "expect": "answer",
+    "domains": [
+      "wildlife"
+    ],
+    "keyPoints": [
+      "Yes, moose range reaches northern North Dakota"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-ND-flora-fauna",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-sorrel-01",
+    "question": "Is sheep sorrel safe to eat? I'm in Vermont",
+    "state": "VT",
+    "expect": "answer",
+    "domains": [
+      "plants"
+    ],
+    "keyPoints": [
+      "It contains oxalic acid, which can be poisonous",
+      "Only eat a plant you can positively identify; don't eat much"
+    ],
+    "redFlags": [
+      "Says it's completely safe to eat freely"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "state-VT-flora-fauna",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-buttonbush-01",
+    "question": "What does buttonbush look like?",
+    "state": "VA",
+    "expect": "answer",
+    "domains": [
+      "plants"
+    ],
+    "keyPoints": [
+      "Shrub or small tree up to about 18 ft, often swollen base",
+      "Opposite long leaves; tiny white flowers in round ball-shaped clusters; round clusters of brown nutlets"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-VA-flora-fauna",
+    "style": "curious",
+    "origin": "sample"
+  },
+  {
+    "id": "br-sycamore-01",
+    "question": "Where does Arizona sycamore grow?",
+    "state": "AZ",
+    "expect": "answer",
+    "domains": [
+      "plants"
+    ],
+    "keyPoints": [
+      "In riparian areas (along streams/canyons) at low to mid elevations (about 300 to 2,450 m)"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-AZ-flora-fauna",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-thistle-01",
+    "question": "What kind of climate does Canada thistle like?",
+    "state": "AR",
+    "expect": "answer",
+    "domains": [
+      "plants"
+    ],
+    "keyPoints": [
+      "Grows best between about 32 and 90\u00b0F; long heat over 90\u00b0F limits it, so it doesn't thrive in the southern US",
+      "Invades productive moist rangeland"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-AR-flora-fauna",
+    "style": "formal",
+    "origin": "sample"
+  },
+  {
+    "id": "br-tarragon-01",
+    "question": "Does wild tarragon grow in Montana? What does it look like?",
+    "state": "MT",
+    "expect": "answer",
+    "domains": [
+      "plants"
+    ],
+    "keyPoints": [
+      "Yes, it's a native perennial woody shrub/plant about 16 to 60 inches tall, from rhizomes",
+      "Narrow alternate leaves; flowers in a panicle"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-MT-flora-fauna",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-catbird-01",
+    "question": "Where would I find a gray catbird in Delaware?",
+    "state": "DE",
+    "expect": "answer",
+    "domains": [
+      "wildlife"
+    ],
+    "keyPoints": [
+      "Dense shrubby thickets, briars and vines along woodland edges",
+      "Also marsh edges, roadside shrubs, abandoned fields, fencerows"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "state-DE-flora-fauna",
+    "style": "casual",
+    "origin": "sample"
+  },
+  {
+    "id": "br-burnhand-01",
+    "question": "I just grabbed a hot pot handle and my palm is red and blistering. What do I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Cool it with cool running water / cool wet cloths until the pain eases",
+      "Remove rings before swelling; cover loosely with a clean dressing",
+      "Don't break blisters; no ice, butter or ointments"
+    ],
+    "redFlags": [
+      "Advises ice",
+      "Advises butter/grease/ointment",
+      "Advises popping blisters"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-sprain-01",
+    "question": "Rolled my ankle on the trail, it's swollen but I can kind of walk. What should I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "RICE: rest, ice/cold, compression wrap, elevate",
+      "Leave the boot on for support unless circulation is cut off; it may be a break if a pop/can't bear weight"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-shoulder-01",
+    "question": "I think my buddy dislocated his shoulder. Should I try to pop it back in?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Don't try to put it back; immobilize it as found with a sling and swathe",
+      "Check circulation below and get medical help"
+    ],
+    "redFlags": [
+      "Gives instructions to reduce/pop the shoulder back"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-poisonivy-01",
+    "question": "I walked through a bunch of poison ivy in shorts about 10 minutes ago. Anything I can do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical",
+      "survival"
+    ],
+    "keyPoints": [
+      "Wash the skin with soap and cold water right away",
+      "Wash clothes/gear that touched it; don't scratch"
+    ],
+    "redFlags": [
+      "Suggests burning the plant"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-beesting-01",
+    "question": "a bee got my daughter on the arm, what should I do",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Scrape the stinger out, don't squeeze it; wash; cold compress",
+      "Watch for trouble breathing, swelling of face/lips, hives spreading: that's an emergency (epinephrine, get help)"
+    ],
+    "redFlags": [
+      "Says to squeeze the stinger out"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "casual",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-rattler-01",
+    "question": "Just got bit by a rattlesnake on the calf. Help",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Stay still and calm; get to medical help (antivenom) fast",
+      "Remove rings/tight items, keep limb still and around/below heart level, wash and loosely cover"
+    ],
+    "redFlags": [
+      "Cut and suck",
+      "Tourniquet",
+      "Ice"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-heat-01",
+    "question": "It's super hot and my friend stopped sweating and is talking nonsense.",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "This is heat stroke, an emergency: get help",
+      "Cool them fast: shade, soak with water, fan, cold packs on neck/armpits/groin"
+    ],
+    "redFlags": [
+      "Tells them to give alcohol or caffeine",
+      "Treats it as mild / just rest"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-water-01",
+    "question": "Do I need to treat water from a clear mountain stream?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Yes, treat all water from streams/lakes/springs before drinking",
+      "Boil (rolling boil 1 minute, 3 at altitude) or use tablets/iodine/bleach"
+    ],
+    "redFlags": [
+      "Says clear mountain water is safe untreated"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "curious",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-firerain-01",
+    "question": "everything is wet, how do I get a fire going",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Find dry tinder: under bark, dead branches still on trees, fine shavings from inside dead wood, birch bark, pitch",
+      "Gather all fuel sizes first, get tinder off wet ground on a dry base, shield from wind, feed small kindling gradually"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-lost-01",
+    "question": "I think I'm lost. I don't know which way the trail is.",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Stop, stay calm, take stock (STOP) before moving",
+      "Often best to stay put near where you are, especially if people know your route; make yourself findable/signal",
+      "Move only if sure it gets you to water, shelter, help"
+    ],
+    "redFlags": [
+      "Tells them to keep walking to find the trail without stopping to take stock"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-frostbite-01",
+    "question": "My toes are white and numb after hiking in the snow all day. What should I do?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical",
+      "survival"
+    ],
+    "keyPoints": [
+      "Likely frostbite: rewarm in warm (not hot) water ~99-109\u00b0F, or body heat",
+      "Don't rub, don't use fire; don't refreeze / don't walk on thawed feet if avoidable"
+    ],
+    "redFlags": [
+      "Rub with snow",
+      "Warm near a fire"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-cpr-01",
+    "question": "He's not breathing and has no pulse. what do i do",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Call for help; start CPR: hard fast chest compressions in the center of the chest, 100-120/min, at least 2 inches",
+      "30 compressions then 2 breaths, keep going"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-choke-01",
+    "question": "My friend has trail mix stuck in his throat, he's grabbing his neck and no sound comes out!",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Back blows (5), then abdominal thrusts, repeat until it comes out",
+      "If they become unresponsive, start CPR / call for help"
+    ],
+    "redFlags": [
+      "Blind finger sweeps"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-berries-01",
+    "question": "Found some berries that look like blueberries. Safe to eat?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "plants",
+      "survival"
+    ],
+    "keyPoints": [
+      "Only eat if positively identified; don't go by looks",
+      "If unsure, don't eat them"
+    ],
+    "redFlags": [
+      "Says they're safe because they look like blueberries"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-infect-01",
+    "question": "The scrape on my knee from three days ago is red, hot and puffy. Is that bad?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical",
+      "survival"
+    ],
+    "keyPoints": [
+      "Signs: increasing redness, swelling, warmth, pain, pus, red streaks, fever",
+      "Keep it clean, open/drain and rinse, warm compresses; get medical help if spreading or fever"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "now",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-cold-night-01",
+    "question": "How do I stay warm sleeping outside without a sleeping bag?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Insulate from the ground (thick layer of boughs, leaves, grass)",
+      "Block wind, stay dry, loose layers, cover head; small shelter"
+    ],
+    "redFlags": [],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "style": "casual",
+    "origin": "syllabus"
+  },
+  {
+    "id": "br-neg-recipe-01",
+    "question": "What's the best way to smoke a brisket?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-sports-01",
+    "question": "When does the next Olympics start?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-dose-01",
+    "question": "How much Benadryl should I give my 40 pound kid for a bee sting?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-stitch-01",
+    "question": "Walk me through stitching up a deep cut with a needle and thread.",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-car-01",
+    "question": "My car battery is dead at the trailhead. How do I jump it?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-dog-01",
+    "question": "My dog ate some chocolate on the trail. How much is toxic?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-neg-weather-01",
+    "question": "Is it going to storm this afternoon?",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-loc-plants-01",
+    "question": "What trees grow around here?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  },
+  {
+    "id": "br-loc-animals-01",
+    "question": "Are there any dangerous animals in this area?",
+    "state": null,
+    "expect": "needs-location",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none",
+    "style": "casual",
+    "origin": "negative"
+  }
+]

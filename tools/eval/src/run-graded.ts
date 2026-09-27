@@ -57,6 +57,7 @@ for (const [i, q] of questions.entries()) {
     promptTokens: d.tokensAfter,
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
     ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
+    ...((res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? { offer: res.offer.title } : {}),
     ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };

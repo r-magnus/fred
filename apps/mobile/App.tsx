@@ -47,7 +47,7 @@ interface Turn {
   done: boolean;
   /** The search's best score, passed on when the next message is a follow-up. */
   topScore?: number;
-  /** A field card offered folded (small talk, prevention); opened on tap. */
+  /** A field card offered folded (small talk, a decline); opened on tap. */
   offer?: CardOffer;
   offerOpen?: boolean;
 }
@@ -187,7 +187,6 @@ function Screen() {
       }
       update(id, {
         citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore,
-        ...(res.offer === undefined ? {} : { offer: res.offer }),
       });
       let text = '';
       for await (const tok of res.stream) {
@@ -363,10 +362,14 @@ function Screen() {
             {t.kind === 'abstain' && t.text !== REFER_REPLY && (
               <View style={styles.card}>
                 <Text style={styles.body}>I don&apos;t have reliable information on that.</Text>
-                <Text style={styles.hint}>
-                  Fred only answers from the manuals he carries, and says nothing rather
-                  than guessing.
-                </Text>
+                {t.offer === undefined ? (
+                  <Text style={styles.hint}>
+                    Fred only answers from the manuals he carries, and says nothing rather
+                    than guessing.
+                  </Text>
+                ) : (
+                  <Text style={styles.hint}>The closest field card, in case it&apos;s what you need:</Text>
+                )}
               </View>
             )}
 

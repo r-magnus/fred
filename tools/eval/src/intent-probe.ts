@@ -22,7 +22,7 @@ const rows: { id: string; label: string; text: string; result: string; card: str
 for (const m of set.messages) {
   const r = await ask(m.text, h, { ...opts, state: m.state });
   const card = r.kind === 'answer' && r.diagnostics.cardAnswer !== undefined ? r.citations[0]!.section : null;
-  const offered = (r.kind === 'chat' || r.kind === 'abstain' || r.kind === 'answer') ? r.offer?.title ?? null : null;
+  const offered = (r.kind === 'chat' || r.kind === 'abstain') ? r.offer?.title ?? null : null;
   const result = card !== null ? 'card' : r.kind === 'answer' ? 'model' : r.kind === 'chat' ? 'chat' : r.kind;
   rows.push({ id: m.id, label: m.label, text: m.text, result, card: card ?? (offered === null ? null : `offer: ${offered}`), top: Number(r.diagnostics.topScore.toFixed(3)), ...(r.diagnostics.intent === undefined ? {} : { intent: r.diagnostics.intent }) });
 }

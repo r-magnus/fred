@@ -78,5 +78,53 @@
   "by": "Claude (self-review)",
   "change": "New card, batch 3 (syllabus topic).",
   "why": "Military and hiker-dangerous methods (tree torch, burning rubber) left out; phone and stay-with-signals lines flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "eye-injury",
+  "rev": "e3ceadec15d2",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "ATP 4-02.11 ch.10 in lay words; combat details left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "snow-blindness",
+  "rev": "a8b3109815ea",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "ATP 4-02.11 pp.193-194; artificial tears left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "river-crossing",
+  "rev": "ea589ff54a09",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "ATP 3-50.21 pp.155-156; rope method left out (needs the figure). Summary corrected to narrow channels after self-review. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "knots-cordage",
+  "rev": "42973f6a2e1b",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "ATP 3-50.21 ch.8 and appendix A; purposes and short tying descriptions only. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "staying-healthy",
+  "rev": "16c20dee856b",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "ATP 3-50.21 p.20; expedient remedies (tannin tea, induced vomiting, DDT) left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "heart-stroke",
+  "rev": "fecb85681382",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 4 (syllabus topic).",
+  "why": "WHO BEC gives recognition only; no drugs (aspirin) given; call-for-help and CPR lines flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
  }
 ]

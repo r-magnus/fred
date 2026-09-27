@@ -3452,5 +3452,622 @@
         "quote": "A radio is probably the surest and quickest way to let others know where"
       }
     ]
+  },
+  {
+    "id": "eye-injury",
+    "title": "Eye injury",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "something in my eye",
+      "poked in the eye by a stick",
+      "chemical splashed in the eye",
+      "cut near the eye"
+    ],
+    "summary": "Protect the eye and don't press on it. Rinse out chemicals at once; leave anything stuck in the eye for a doctor.",
+    "steps": [
+      "Chemical in the eye: flood it with clean water immediately, pouring from the inner corner (by the nose) outward, and keep rinsing for at least 20 minutes, then get help.",
+      "A loose speck, like dirt or an eyelash, can be flushed out with clean water.",
+      "Something stuck in or poking out of the eye: leave it there. Build clean padding around it so it can't move.",
+      "Cover the hurt eye with something hard that doesn't touch the eye, like the bottom of a cup, and tape or tie it in place from cheek to forehead.",
+      "A cut on the eyelid or the eye: cover it with a loose, clean dressing without pressing on it.",
+      "Keep them still and calm, and stay with them."
+    ],
+    "dont": [
+      "Don't rub the eye or press on the eyeball.",
+      "Don't try to pull out anything stuck to or into the eye.",
+      "Don't put anything under the eye shield or directly on the eye."
+    ],
+    "getHelp": "Any eye injury beyond a speck that rinses out needs a doctor. Get medical help as soon as you can.",
+    "reviewerNote": "Built from ATP 4-02.11 2026 chapter 10 (pp.106-119). Combat details (leaving the good eye uncovered to move under fire, the combat pill pack, DD Form 1380) are left out. Flushing a loose speck follows the manual's expedient skills (p.119) and its note that a casualty may remove a non-embedded speck (p.114).",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 118,
+        "quote": "IMMEDIATELY flood the eye with water."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 118,
+        "quote": "from the inner eye (nearest the nose) to the outer eye (towards the ear)"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 118,
+        "quote": "continue washing out the eye or eyes for at least 20 minutes"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 117,
+        "quote": "After the eye has been flushed, evacuate the casualty immediately."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 114,
+        "quote": "by the casualty if it can easily be removed (for example, a surface non-embedded material such as an eyelash or speck of"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 119,
+        "quote": "If there are chemicals or irritants in the eye, use immediate and gentle irrigation with clean water"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 114,
+        "quote": "DO NOT attempt to remove a foreign object stuck to or sticking into the eyeball."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 115,
+        "quote": "Apply dry sterile dressings to build around and support the object. This will help prevent further contamination and minimize movement of the object."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 114,
+        "quote": "The bottom of a disposable cup"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 114,
+        "quote": "Secure the rigid eye-shield by applying tape from the cheek to the forehead. If tape is unavailable, use gauze, cloth dressing, shoelace, or string to secure in place."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 112,
+        "quote": "Cover the injury with a loose sterile dressing. DO NOT put pressure on the eyeball because additional damage may occur."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 115,
+        "quote": "Limit movements that could cause further eye injury."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 115,
+        "quote": "stay with the casualty until relieved by medical personnel"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 119,
+        "quote": "Avoid touching or rubbing the eye, as this can exacerbate the damage."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 118,
+        "quote": "NEVER place anything under the shield or directly on the eye."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 119,
+        "quote": "Eye trauma should always be evaluated and treated by a qualified medical professional as soon as possible."
+      }
+    ]
+  },
+  {
+    "id": "snow-blindness",
+    "title": "Snow blindness",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "eyes hurt after a day on the snow",
+      "gritty painful eyes in bright sun",
+      "snow blindness",
+      "sunburned eyes"
+    ],
+    "summary": "Snow blindness is a sunburn of the eye from UV light reflected off snow or ice. Get out of the light, rest the eyes, and protect them from then on.",
+    "steps": [
+      "Suspect it after bright sun on snow or ice without good sunglasses: painful, gritty, red, watering eyes, blurred vision or a feeling of something in the eye. It often starts hours later.",
+      "Get into shade or somewhere dark.",
+      "Keep the eyes closed and rest them.",
+      "Lay a cool, damp cloth over the closed eyes to ease the pain.",
+      "If you must be in bright light, wear sunglasses with full UV protection, ideally wrap-around, or goggles."
+    ],
+    "dont": [
+      "Don't rub the eyes.",
+      "Don't put ice straight on the skin."
+    ],
+    "getHelp": "Get medical help if it doesn't settle, gets worse, or vision is lost. Prevent it with UV-blocking sunglasses or goggles and a wide-brimmed hat.",
+    "reviewerNote": "Built from ATP 4-02.11 2026 pp.193-194. Artificial tears are left out: few hikers carry them, and the manual says to follow the package or a professional.",
+    "sources": [
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "typically from sunlight reflected off snow or ice."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Snow blindness is essentially a temporary sunburn of the cornea"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Eye pain or a sensation of grittiness."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Redness and inflammation of the eyes."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Watery eyes and excessive tearing."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Blurred vision or sensitivity to light."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Feeling as if there is something in the eye."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 193,
+        "quote": "Snow blindness can be painful as it gets closer to three to five hours later."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Get the person indoors or to a shaded area to protect the eyes from further exposure to bright light."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Keep the eyes closed or minimize eye movements to reduce discomfort"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Place a cold, damp cloth or cool pack over closed eyes"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "ensure they wear sunglasses that offer 100 percent UV protection. Wrap-around sunglasses or goggles with side shields provide the best protection."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Rubbing the eyes can exacerbate the condition and potentially cause additional damage."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Avoid using ice directly on the skin."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "It is advisable to seek medical advice if the symptoms persist, worsen, or if vision loss occurs."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 194,
+        "quote": "Additionally, using wide-brimmed hats or visors can help shield the eyes from indirect sunlight."
+      }
+    ]
+  },
+  {
+    "id": "river-crossing",
+    "title": "Crossing a river or stream",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "how to ford a stream safely",
+      "where should we cross this creek",
+      "fast water crossing",
+      "fell into a river with a current"
+    ],
+    "summary": "Look before you cross: pick a shallow stretch that splits into several narrow channels, angle downstream across the current, and use a pole on the upstream side.",
+    "steps": [
+      "Find a high spot first and look along the river for the best place to cross.",
+      "Choose a level stretch where the river splits into several channels, or a shallow bank or sandbar. Start a little upstream of it, so the current carries you to it if you lose your footing.",
+      "Cross heading slightly downstream, meeting the current at about 45 degrees.",
+      "In fast water, use a strong pole about 3 inches thick and 7 to 8 feet long. Plant it firmly on the upstream side, lean on it, and move one foot or the pole at a time.",
+      "In a group, cross together holding the pole side by side: heaviest person downstream, lightest upstream.",
+      "If you are swept away in fast, shallow water, lie on your back with your feet downstream and up, and steer with your hands. In deep, swift water, swim with the current, angling toward the shore, not against it."
+    ],
+    "dont": [
+      "Don't cross where a ledge of rock crosses the river: it often means dangerous rapids.",
+      "Don't cross at a river mouth: it's wide, with strong currents and tides.",
+      "Don't cross near eddies behind obstacles or where currents meet: they can pull you under."
+    ],
+    "getHelp": "If the crossing looks unsafe, don't cross: go back upstream to an easier place, or wait.",
+    "reviewerNote": "Built from ATP 3-50.21 2018 pp.155-156 (water crossings). The rope method for three or more people is left out: it needs the manual's figure to follow safely. 'Or wait' in the last line is an ordinary extension of the manual's 'go back upstream to an easier crossing site'.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 155,
+        "quote": "The first step is to look for a high place from which to get a good view of the river or stream."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 155,
+        "quote": "A level stretch where it breaks into several channels. Two or three narrow channels are usually easier to cross than a wide river."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 155,
+        "quote": "A shallow bank or sandbar. If possible, select a point upstream from the bank or sandbar so that the current will carry them to it if they lose their footing."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 155,
+        "quote": "A course across the river that leads downstream so that isolated persons will cross the current at about a 45- degree angle."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "Find a strong pole about 3 inches in diameter and 7 to 8 feet long to help ford the stream."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "Grasp the pole and plant it firmly on the upstream side to break the current."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "ensure that they all cross the stream together."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "the heaviest person on the downstream end of the pole and the lightest person on the upstream end"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "In fast, shallow rapids, lie on your back, feet pointing downstream, finning your hands alongside your hips."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "Keep your feet up to avoid getting them caught by rocks."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "To swim across a deep, swift river, swim with the current; do no swim against the current."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "head downstream, and angling toward the shore."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "A ledge of rocks that crosses the river. This often indicates dangerous rapids or canyons."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "An estuary of a river, because it is normally wide, has strong currents and is subject to tides."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "Eddies, which can produce a powerful backward pull downstream of the obstruction causing the eddy and pull personnel under the surface."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "be careful of backwater eddies and converging currents, as they often contain dangerous swirls."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 156,
+        "quote": "personnel should go back upstream to an easier crossing site."
+      }
+    ]
+  },
+  {
+    "id": "knots-cordage",
+    "title": "Knots and cord",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "good knots for camp",
+      "tie a rope to a tree",
+      "join two ropes together",
+      "make cord from plants"
+    ],
+    "summary": "A few knots cover most needs: two half hitches or a round turn to tie to a tree, a square knot to join two ropes, and an overhand or figure-eight to stop an end.",
+    "steps": [
+      "To tie a line to a tree or pole: take a round turn around it, then two half hitches around the line. It holds under heavy load and doesn't jam. For something quick and light, two half hitches alone will do, and a clove hitch also works.",
+      "To join two ropes of the same thickness: a square knot. Check that each end lies alongside its own rope; if not, it's a granny knot, which slips.",
+      "To stop the end of a rope slipping through: tie an overhand knot, or a figure-eight for a bigger knot.",
+      "Line every knot up neatly and pull it tight. A messy knot can lose half its strength or come undone.",
+      "Need thin cord? Paracord pulls apart into an outer cover and inner strands you can use as fishing line, thread or lashing.",
+      "Testing a plant for cord: pull it to test its strength, twist and roll the fibres between your fingers, then tie an overhand knot and tighten it gently. If it survives all that without breaking, it will work. Braid several strands together for more strength."
+    ],
+    "dont": [
+      "Don't trust a half hitch on its own. It can undo itself when there's no load on it."
+    ],
+    "getHelp": "Test any knot or cord gently before you put your weight or anything important on it.",
+    "reviewerNote": "Built from ATP 3-50.21 2018 chapter 8 (cordage, pp.189-190) and appendix A (knots, pp.195-207). The manual's knot illustrations aren't available, so the card gives each knot's purpose and the manual's own short tying descriptions only. The last line is an ordinary extension of the manual's 'test the cord to be sure it is strong enough for their purpose'.",
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 195,
+        "quote": "The round turn and two half hitches"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 198,
+        "quote": "jam and difficult to untie. It is most used to anchor rope to a pole or tree."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 206,
+        "quote": "A quick method for tying a rope to a timber or pole is to use two half hitches."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 207,
+        "quote": "A clove hitch is used to fasten a rope to a timber, pipe, or post."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 200,
+        "quote": "The square knot is used for tying two ropes of equal diameter together to prevent slippage"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 200,
+        "quote": "If each running end does not come parallel to the standing part of its own rope, the knot is called a \"granny knot.\" Because it will slip under the strain, a granny knot should not be used."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 195,
+        "quote": "An overhand knot may be used to prevent the end of a rope from untwisting, to form a knot at the end of a rope, or as part of another knot."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 198,
+        "quote": "Use the figure-eight knot to form a larger knot than would be formed by an overhand knot at the end of a rope."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 195,
+        "quote": "Neglecting this can result in a 50 percent reduction in knot strength."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 195,
+        "quote": "A loosely tied knot can easily deform under strain and change, becoming a slipknot or worse, untying."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 189,
+        "quote": "The parachute cord can be broken down into its components of the outer cover and the inner core strands for other purposes such as fishing line, thread for sewing, and lashing."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 189,
+        "quote": "First, pull on a length of the material to test for strength. Next, twist it between your fingers and roll the fibers together. If it withstands this handling and does not snap apart, then tie an overhand knot with the fibers and gently tighten. If the knot does not break, it will work."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 190,
+        "quote": "These materials can be made stronger by braiding several strands together."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 205,
+        "quote": "Because ithad a tendency to undo itself without load"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 190,
+        "quote": "Isolated persons should test the cord to be sure it is strong enough for their purpose."
+      }
+    ]
+  },
+  {
+    "id": "staying-healthy",
+    "title": "Staying healthy on a long trip",
+    "domain": "survival",
+    "medical": true,
+    "askedAs": [
+      "avoid getting sick while camping",
+      "camp hygiene",
+      "keep bugs off me",
+      "look after my feet on a long hike"
+    ],
+    "summary": "Most illness out here is prevented: clean water, clean hands, a latrine away from water, and checking yourself for bites, ticks and sore feet every day.",
+    "steps": [
+      "Treat all water from lakes, streams and springs before drinking: purification tablets, bleach, or boiling.",
+      "Wash your hands after the toilet, after caring for someone sick, and before touching food or drinking water. No soap? White ash or sand works as a substitute.",
+      "Put your toilet area at least 200 feet from water and away from camp.",
+      "Clean your cooking and eating things after every meal.",
+      "Look after your feet: change and wash your socks, dry your feet, and check them often for blisters and red spots. Tape or moleskin hot spots early.",
+      "Prevent bites with repellent, netting and clothing. Check your body regularly for ticks, lice and fleas and pick them off.",
+      "Keep your clothes and sleeping bag as clean as you can, clean your teeth daily, and try to get 7 to 8 hours of sleep."
+    ],
+    "dont": [
+      "Don't crush insects or eggs you pick off your body."
+    ],
+    "getHelp": "Out here, illness and infection can become serious quickly. Get medical help if they develop.",
+    "reviewerNote": "Built from ATP 3-50.21 2018 p.20 (personal hygiene and sanitation) and p.30. The manual's expedient remedies (tannin tea, induced vomiting for plant poisoning, DDT for lice) are left out. The warning signs to watch for are gathered from other cards and listed as unsourced.",
+    "unsourced": [
+      {
+        "text": "Watch for fever, spreading redness around a bite or wound, or diarrhoea with blood, and get medical help if they appear.",
+        "why": "Warning signs from the manuals' infection and dysentery descriptions (ATP 3-50.21 pp.30-32; the cuts and dehydration cards), gathered here as a reminder; not on the hygiene page itself."
+      }
+    ],
+    "sources": [
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Isolated persons can avoid many different kinds of illnesses and infections by practicing good sanitation and hygiene."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Purify all water obtained from natural sources by using iodine tablets, bleach, or boiling for"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Wash your hands thoroughly after handling any material that is likely to carry germs, after urinating or defecating, after caring for the sick, and before handling any food, food utensils, or drinking water."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Use white ashes, sand, or loamy soil as soap substitutes."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Locate latrines 200 feet from water and away from shelter."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Clean all eating utensils after each meal."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Change and wash socks"
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Check frequently for blisters and red areas."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Use adhesive tape/mole skin to prevent damage."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Prevent insect bites by using repellent, netting, and clothing."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Check body for lice, fleas, ticks."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Pick off insects and eggs (DO NOT crush)."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Keep your clothing and bedding as clean as possible to reduce the chances of skin infection or parasitic infestation."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Cleanse mouth and brush teeth."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 20,
+        "quote": "Try to get 7-8 hours' sleep per day."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 30,
+        "quote": "Isolated persons will face debilitating illness, infection, and soft tissue trauma which can become life threatening"
+      }
+    ]
+  },
+  {
+    "id": "heart-stroke",
+    "title": "Chest pain or signs of a stroke",
+    "domain": "first-aid-physical",
+    "medical": true,
+    "askedAs": [
+      "crushing chest pain",
+      "could this be a heart attack",
+      "face drooping and slurred speech",
+      "suddenly weak on one side"
+    ],
+    "summary": "Chest pain with trouble breathing can be a heart attack; sudden weakness on one side or trouble speaking can be a stroke. Both need emergency help fast.",
+    "steps": [
+      "Suspect a heart attack if someone has chest pain together with difficulty breathing, especially with a history of heart disease.",
+      "Suspect a stroke if someone suddenly has weakness or numbness on one side of the body, or trouble speaking or walking.",
+      "Low blood sugar can look like a stroke. If they have diabetes or haven't eaten and can swallow, give them sugar (see the low blood sugar card)."
+    ],
+    "dont": [
+      "Don't give anything by mouth to someone who can't swallow properly or is drowsy."
+    ],
+    "getHelp": "Both are emergencies. Get medical help as fast as you possibly can.",
+    "reviewerNote": "The manuals describe heart attack and stroke mainly for diagnosis by health workers (WHO BEC 2018 pp.88, 130-138) and give no lay treatment beyond recognition and urgent referral. The card stays within that. Aspirin is not mentioned: it is a drug dose, which Fred does not give. 'Call for emergency help' and the CPR pointer are in the unsourced list.",
+    "unsourced": [
+      {
+        "text": "Call for emergency help straight away and keep watching their breathing. If they become unresponsive and stop breathing normally, start CPR (see the CPR card).",
+        "why": "The manuals frame both as conditions for rapid transfer (WHO p.130 onward). Calling for help and starting CPR follow from the CPR and unresponsive cards."
+      }
+    ],
+    "sources": [
+      {
+        "source": "WHO BEC 2018",
+        "page": 88,
+        "quote": "Difficulty in breathing with chest pain can suggest heart attack"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 88,
+        "quote": "Heart attack may present with difficulty in breathing."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 130,
+        "quote": "Weakness or loss of sensation on one side suggests a mass, bleeding, or blocked blood vessels in the brain (stroke), though hypoglycemia can also present this way."
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 138,
+        "quote": "Weakness on one side of the body or speech problems"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 131,
+        "quote": "Change in mental status with weakness or sensory loss in one area of the body, or problems with walking and balance"
+      },
+      {
+        "source": "WHO BEC 2018",
+        "page": 33,
+        "quote": "If the person can speak and swallow, give oral glucose."
+      },
+      {
+        "source": "ATP 3-50.21 Survival 2018",
+        "page": 29,
+        "quote": "Do not give fluids or morphine to unconscious persons."
+      }
+    ]
   }
 ]

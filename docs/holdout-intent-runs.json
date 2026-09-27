@@ -1,0 +1,272 @@
+[
+ {
+  "id": "hi-chat-snake",
+  "label": "no-card",
+  "text": "we heard a rattle near the creek but never saw the snake",
+  "result": "abstain",
+  "card": null,
+  "top": 0.064,
+  "intent": "now"
+ },
+ {
+  "id": "hi-chat-sprain",
+  "label": "no-card",
+  "text": "my knee's been a little stiff since my last trip, nothing major",
+  "result": "chat",
+  "card": null,
+  "top": 0.056,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-chat-fire",
+  "label": "no-card",
+  "text": "the kids loved roasting marshmallows over the fire tonight",
+  "result": "chat",
+  "card": null,
+  "top": 0.042,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-chat-cold",
+  "label": "no-card",
+  "text": "woke up to frost on the tent, beautiful morning",
+  "result": "chat",
+  "card": null,
+  "top": 0.128,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-chat-bleed",
+  "label": "no-card",
+  "text": "I donated blood before this trip so I'm taking it easy",
+  "result": "chat",
+  "card": null,
+  "top": 0.018,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-chat-sting",
+  "label": "no-card",
+  "text": "a wasp got into the tent last night but it flew out",
+  "result": "abstain",
+  "card": null,
+  "top": 0,
+  "intent": "now"
+ },
+ {
+  "id": "hi-chat-burn",
+  "label": "no-card",
+  "text": "got a little sunburned on my nose yesterday, no big deal",
+  "result": "chat",
+  "card": null,
+  "top": 0.064,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-chat-water",
+  "label": "no-card",
+  "text": "we boiled all our water this trip and it worked great",
+  "result": "chat",
+  "card": "offer: Making water safe to drink",
+  "top": 0.304,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-prev-lightning",
+  "label": "prevention",
+  "text": "what should I pack in a first aid kit for a week in the backcountry?",
+  "result": "abstain",
+  "card": null,
+  "top": 0.217,
+  "intent": "prevent"
+ },
+ {
+  "id": "hi-prev-bear",
+  "label": "prevention",
+  "text": "how should I store food so animals don't get into camp?",
+  "result": "abstain",
+  "card": null,
+  "top": 0.06,
+  "intent": "question"
+ },
+ {
+  "id": "hi-prev-frost",
+  "label": "prevention",
+  "text": "how can I keep my toes from getting frostbite on a winter hike?",
+  "result": "model",
+  "card": null,
+  "top": 0.42,
+  "intent": "prevent"
+ },
+ {
+  "id": "hi-prev-water",
+  "label": "prevention",
+  "text": "how much water should I bring for a 10 mile day?",
+  "result": "abstain",
+  "card": null,
+  "top": 0.234,
+  "intent": "prevent"
+ },
+ {
+  "id": "hi-prev-lost",
+  "label": "prevention",
+  "text": "what can I do so I don't get lost off trail?",
+  "result": "card",
+  "card": "Lost: should I stay or keep moving?",
+  "top": 0.324,
+  "intent": "question"
+ },
+ {
+  "id": "hi-card-cut",
+  "label": "card",
+  "text": "sliced my thumb open with my knife and it won't stop bleeding",
+  "result": "abstain",
+  "card": null,
+  "top": 0.284,
+  "intent": "question"
+ },
+ {
+  "id": "hi-card-burn",
+  "label": "card",
+  "text": "boiling water just spilled all over my foot, it's blistering",
+  "result": "card",
+  "card": "Burns",
+  "top": 0.259,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-fall",
+  "label": "card",
+  "text": "my friend fell off a ledge and isn't moving",
+  "result": "card",
+  "card": "Possible neck or back injury",
+  "top": 0.233,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-sting",
+  "label": "card",
+  "text": "stung by a bee and now my throat feels tight and my face is swelling",
+  "result": "card",
+  "card": "Bee, wasp and insect stings, spider bites",
+  "top": 0.382,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-heat",
+  "label": "card",
+  "text": "my son is confused and his skin is really hot and dry, we've been in the sun all day",
+  "result": "card",
+  "card": "Heat exhaustion and heat stroke",
+  "top": 0.268,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-cold",
+  "label": "card",
+  "text": "we fell through the ice and he can't stop shivering",
+  "result": "card",
+  "card": "Hypothermia: shivering, confused, too cold",
+  "top": 0.333,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-ankle",
+  "label": "card",
+  "text": "I twisted my knee jumping off a rock and can't put weight on it",
+  "result": "card",
+  "card": "Twisted or sprained ankle, or a strained muscle",
+  "top": 0.317,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-snake",
+  "label": "card",
+  "text": "a rattlesnake just got my hand, what do I do",
+  "result": "model",
+  "card": null,
+  "top": 0.336,
+  "intent": "question"
+ },
+ {
+  "id": "hi-card-seizure",
+  "label": "card",
+  "text": "my wife just collapsed and her arms and legs are jerking",
+  "result": "abstain",
+  "card": null,
+  "top": 0.145,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-breath",
+  "label": "card",
+  "text": "my friend is gasping and can't get words out, she's clutching her throat",
+  "result": "card",
+  "card": "Someone is choking",
+  "top": 0.372,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-shelter",
+  "label": "card",
+  "text": "the storm is coming in fast and we have no tent",
+  "result": "card",
+  "card": "Setting up a shelter for the night",
+  "top": 0.161,
+  "intent": "now"
+ },
+ {
+  "id": "hi-card-water",
+  "label": "card",
+  "text": "we ran out of water and only have a muddy pond",
+  "result": "chat",
+  "card": null,
+  "top": 0.051,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-either-blister",
+  "label": "either",
+  "text": "hot spot forming on my big toe, should I stop?",
+  "result": "abstain",
+  "card": null,
+  "top": 0.198,
+  "intent": "question"
+ },
+ {
+  "id": "hi-either-rash",
+  "label": "either",
+  "text": "brushed against some leaves and my arm's getting itchy",
+  "result": "chat",
+  "card": "offer: Rash from poison ivy, oak or sumac",
+  "top": 0.32,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-either-head",
+  "label": "either",
+  "text": "hit my head on the car door, slight headache",
+  "result": "card",
+  "card": "Head injury or concussion",
+  "top": 0.3,
+  "intent": "now"
+ },
+ {
+  "id": "hi-either-tick",
+  "label": "either",
+  "text": "found a tick crawling on my sock, didn't bite I think",
+  "result": "chat",
+  "card": "offer: Removing a tick",
+  "top": 0.284,
+  "intent": "chat"
+ },
+ {
+  "id": "hi-either-dizzy",
+  "label": "either",
+  "text": "feeling a bit lightheaded after the climb",
+  "result": "card",
+  "card": "Altitude illness",
+  "top": 0.265,
+  "intent": "now"
+ }
+]

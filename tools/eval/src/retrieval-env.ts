@@ -92,5 +92,7 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     // PROMPT_MEMORY=0 keeps the earlier question out of the prompt, so the
     // search half of conversation memory can be measured alone.
     ...(env.PROMPT_MEMORY === '0' ? { previousInPrompt: false } : {}),
+    // INTENT=1 decides what the hiker wants as well as the topic (intent.ts).
+    ...(env.INTENT === '1' ? { intent: true } : {}),
   };
 }

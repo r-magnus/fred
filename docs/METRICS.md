@@ -66,6 +66,13 @@ The score has two halves:
 | answerable | **16/31** — 51.6% | held-out questions Fred should answer, fully right (7 more partly right, 1 wrong, 6 declined) |
 | decline | **8/9** — 88.9% | held-out questions Fred should decline or ask a location for, handled correctly |
 
+### Follow-up questions (conversation memory, 2026-09-26)
+
+Measured separately: a second question that only makes sense after the first.
+Held-out two-turn set, 13 conversations, run once: **46% → 81%** with memory
+(6.0 → 10.5), no unsafe answers either way. Single-question answers are byte for
+byte unchanged, so the 66.3% above stands. docs/results-memory.md.
+
 ### Where the remaining points are
 
 | Lost | Why | What would fix it |

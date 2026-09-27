@@ -126,6 +126,21 @@ export interface AskOptions {
   readonly compression?: { readonly minReduction: number; readonly maxReduction: number };
   readonly abstainThreshold?: number;
   readonly signal?: AbortSignal;
+  /**
+   * The hiker's previous message, for a follow-up (docs/plan-memory.md). The
+   * message is searched alone and joined to this; the joined search wins only
+   * when it scores higher, stays on the earlier topic and keeps any strong
+   * match of the message's own (see the rules in ask()). Only then does the
+   * model see the earlier question. Absent, ask() behaves exactly as it does
+   * for a single question.
+   */
+  readonly previous?: {
+    readonly question: string;
+    /** That question's own best search score, from its diagnostics. */
+    readonly topScore: number;
+  };
+  /** Show the model the earlier question when the joined search wins. Default on. */
+  readonly previousInPrompt?: boolean;
 }
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
@@ -138,6 +153,16 @@ export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
  * and below a manual passage (docs/results-phase3.md).
  */
 export const CARD_TOP_FLOOR = 0.32;
+
+/**
+ * A follow-up whose own best match reaches this keeps that match: the search
+ * joined to the previous question may only win if it contains it. The same
+ * bar that makes a field card a clear match (retrieve.ts reserve.minScore).
+ */
+export const FOLLOW_UP_KEEP = 0.35;
+
+/** Share of the earlier question's own score the joined search must keep. */
+export const FOLLOW_UP_ON_TOPIC = 0.9;
 
 /** A provider-only passage this close to the best manual match triggers a referral. */
 export const PROVIDER_NEAR_TOP = 0.95;
@@ -169,6 +194,8 @@ export interface Diagnostics {
   readonly sufficient?: boolean | null;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** Conversation memory: both searches' top scores, and whether the joined one won. */
+  readonly followUp?: { readonly standaloneTopScore: number; readonly joinedTopScore: number; readonly used: boolean };
   /** Set when the answer was built from a field card rather than the passages. */
   readonly cardAnswer?: CardAnswerMode;
 }
@@ -237,6 +264,53 @@ export async function ask(
   const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
   let topScore = best(candidates);
 
+  // Conversation memory: search the follow-up joined to the previous question
+  // too, and keep whichever scores higher.
+  let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
+  let standalone = candidates;
+  // Memory applies only after a question Fred could answer: a follow-up to a
+  // declined question has no topic to build on. With a knot question that
+  // itself fell under the gate as the opener, "what's the capital of France?"
+  // was turned into a request for the hiker's state.
+  if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold) {
+    const joined = `${opts.previous.question} ${query}`;
+    const keywordsJ = extractKeywords(joined);
+    const routedJ = route(keywordsJ, packs, {
+      state: opts.state,
+      ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
+    });
+    const candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
+    const joinedTop = best(candidatesJ);
+    // A message with a strong match of its own keeps it: the joined search
+    // may win only if it still holds that match. Without this, "find north
+    // without a compass?" then "someone is choking" found the navigation
+    // passages again (0.439 against the choking card's 0.407), and the model
+    // answered a choking question from them (docs/plan-memory.md).
+    const aloneTop = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+    const keepsAlone = topScore < FOLLOW_UP_KEEP || candidatesJ.some((c) => c.chunk.id === aloneTop?.chunk.id);
+    // A follow-up stays on the earlier topic: joining it keeps most of the
+    // earlier question's own match. An unrelated message dilutes it. On the
+    // tuning sets, 17 of 20 follow-ups kept 0.91 or more; the choking switch
+    // kept 0.69, and four out-of-scope follow-ups 0.76-0.85.
+    const staysOnTopic = joinedTop >= FOLLOW_UP_ON_TOPIC * opts.previous.topScore;
+    // Memory exists to answer: a joined search that still falls under the gate
+    // must not change how Fred declines (into a location request, say, from the
+    // joined query's routing). None of the 29 measured follow-ups needed it.
+    const answers = joinedTop >= effectiveThreshold;
+    followUp = {
+      standaloneTopScore: topScore, joinedTopScore: joinedTop,
+      used: joinedTop > topScore && keepsAlone && staysOnTopic && answers,
+    };
+    standalone = candidates;
+    if (followUp.used) {
+      keywords = keywordsJ;
+      routed = routedJ;
+      candidates = candidatesJ;
+      topScore = joinedTop;
+    }
+  }
+  const earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
+
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
     let rewrite = '';
@@ -263,6 +337,7 @@ export async function ask(
     maxTokens,
     memoryPressure: pressure,
     ...(secondSearch === undefined ? {} : { secondSearch }),
+    ...(followUp === undefined ? {} : { followUp }),
   };
 
   if (candidates.length === 0 || topScore < effectiveThreshold) {
@@ -320,13 +395,19 @@ export async function ask(
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
-  const bestCard = usable
-    .filter((c) => c.chunk.packId === reservedPack)
-    .reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-  const cardClear = bestCard !== undefined && (cardMatched ||
-    (bestCard.score >= CARD_TOP_FLOOR && bestCard.score >= (bestManual?.score ?? 0)));
-  if (cardMode !== 'off' && cardClear) {
-    const card = bestCard!;
+  let clear = clearCard(usable, retrievalOpts.reserve);
+  // Showing a card word for word claims it answers the question, so for a
+  // follow-up the card must also clearly match the new message on its own.
+  // Matched on the joined search alone, "can I stitch it closed?" after a cut
+  // repeated the cuts card: every out-of-scope follow-up in the tuning set was
+  // answered that way (docs/plan-memory.md). Without the card, the model
+  // answers from the passages and can say the sources do not cover it.
+  if (followUp?.used === true && clear !== undefined &&
+      clearCard(standalone, retrievalOpts.reserve)?.chunk.id !== clear.chunk.id) {
+    clear = undefined;
+  }
+  if (cardMode !== 'off' && clear !== undefined) {
+    const card = clear;
     const parsed = parseCard(card.chunk.text);
     const cardBlocks: ContextBlock[] = [{ chunk: card.chunk, text: card.chunk.text }];
     const prompt = buildPromptParts(query, cardBlocks, opts.answerVariant);
@@ -405,7 +486,7 @@ export async function ask(
   const place = opts.state !== null && opts.locationInPrompt !== false && REFERS_TO_LOCATION.test(query) &&
     blocks.some((b) => statePacks.has(b.chunk.packId))
     ? STATE_NAMES[opts.state] : undefined;
-  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place);
+  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place, earlier);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };
@@ -426,6 +507,24 @@ export async function ask(
       contextReduction: compressed.reduction,
     },
   };
+}
+
+/**
+ * The field card that clearly matches: at or above the reserved-slot bar, or
+ * at least CARD_TOP_FLOOR and above every manual passage. Undefined otherwise.
+ */
+function clearCard(
+  cands: readonly ScoredChunk[],
+  reserve: RetrievalOptions['reserve'],
+): ScoredChunk | undefined {
+  if (reserve === undefined) return undefined;
+  const top = (cs: readonly ScoredChunk[]): ScoredChunk | undefined =>
+    cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  const card = top(cands.filter((c) => c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider'));
+  if (card === undefined) return undefined;
+  const manual = top(cands.filter((c) => c.chunk.packId !== reserve.packId));
+  return card.score >= reserve.minScore || (card.score >= CARD_TOP_FLOOR && card.score >= (manual?.score ?? 0))
+    ? card : undefined;
 }
 
 async function* once(text: string): AsyncIterable<string> {

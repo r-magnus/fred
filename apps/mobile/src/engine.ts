@@ -30,8 +30,16 @@ export type LoadPhase =
   | { readonly phase: 'failed'; readonly message: string };
 
 export interface Engine {
-  /** `signal` aborts generation; see US-07. */
-  ask(question: string, state: string | null, signal?: AbortSignal): Promise<AskResult>;
+  /**
+   * `signal` aborts generation; see US-07. `previous` is the question just
+   * answered and its search score, for a follow-up (docs/plan-memory.md).
+   */
+  ask(
+    question: string,
+    state: string | null,
+    signal?: AbortSignal,
+    previous?: { readonly question: string; readonly topScore: number },
+  ): Promise<AskResult>;
   /** States with a flora-fauna pack installed, for the location picker. */
   availableStates(): readonly string[];
   release(): Promise<void>;
@@ -123,9 +131,13 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     });
 
     return {
-      ask: async (question, state, signal) => {
+      ask: async (question, state, signal, previous) => {
         const t0 = Date.now();
-        const res = await ask(question, { backend, store, packs }, signal ? { state, signal } : { state });
+        const res = await ask(question, { backend, store, packs }, {
+          state,
+          ...(signal === undefined ? {} : { signal }),
+          ...(previous === undefined ? {} : { previous }),
+        });
         return timed(res, t0);
       },
       availableStates: () => states,
@@ -155,8 +167,11 @@ export function setVerboseLogging(on: boolean): void { verbose = on; }
 function timed(res: AskResult, t0: number): AskResult {
   const retrievalMs = Date.now() - t0;
   const top = verbose ? res.diagnostics.candidates.slice(0, 4).map((c) => c.chunk.section).join(' | ') : '-';
+  // Whether this message was treated as a follow-up, and on what scores.
+  const f = res.diagnostics.followUp;
+  const mem = f === undefined ? '' : ` followUp=${f.used ? 'yes' : 'no'}(${f.standaloneTopScore.toFixed(3)}/${f.joinedTopScore.toFixed(3)})`;
   if (res.kind !== 'answer') {
-    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)} top=${top}`);
+    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem} top=${top}`);
     return res;
   }
   const inner = res.stream;
@@ -172,7 +187,7 @@ function timed(res: AskResult, t0: number): AskResult {
     }
     const end = Date.now();
     if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
-    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)} tokens=${res.diagnostics.tokensAfter} top=${top}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter} top=${top}`);
   }
   return { ...res, stream: stream() };
 }

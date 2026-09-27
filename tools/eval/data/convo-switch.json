@@ -1,0 +1,170 @@
+{
+ "description": "Second turn unrelated to the first; must be answered as if alone. Tuning.",
+ "grading": "Second turn only, four-part rubric (safe first). Key points and red flags come from `sheet` (a single-turn question id) unless given inline.",
+ "conversations": [
+  {
+   "id": "sw-branch-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "I cut myself on a branch, what should I do?",
+     "state": null
+    },
+    {
+     "question": "Something is stuck in my eye after a branch hit me. What do I do?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-eye-01",
+   "note": "Both mention a branch."
+  },
+  {
+   "id": "sw-fire-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "I spilled boiling water on my arm at camp. How do I treat the burn?",
+     "state": null
+    },
+    {
+     "question": "I have no idea how to start a fire! I have matches, a knife and some dry grass.",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-fire-01",
+   "note": "Burn, then fire."
+  },
+  {
+   "id": "sw-water-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "How do I make water from a stream safe to drink?",
+     "state": null
+    },
+    {
+     "question": "I need to cross a river. What should I avoid?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-river-01",
+   "note": "Both about water."
+  },
+  {
+   "id": "sw-temp-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "My friend is shivering uncontrollably and confused after falling in a cold creek. What do I do?",
+     "state": null
+    },
+    {
+     "question": "What are the signs of heat exhaustion and how do I treat it?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-heat-01",
+   "note": "Cold, then heat."
+  },
+  {
+   "id": "sw-state-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "What does poison oak look like?",
+     "state": "CA"
+    },
+    {
+     "question": "Are there black bears in this state?",
+     "state": "CA"
+    }
+   ],
+   "expect": "answer",
+   "sheet": "ff-bear-01"
+  },
+  {
+   "id": "sw-snake-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "A rattlesnake bit my leg, what do I do?",
+     "state": "CA"
+    },
+    {
+     "question": "I have a cooler with some sandwiches and breakfast sausages in it, can animals get in?",
+     "state": "CA"
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-food-01"
+  },
+  {
+   "id": "sw-nav-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "How can I find north without a compass?",
+     "state": null
+    },
+    {
+     "question": "Someone at camp is choking and cannot speak. What do I do?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-choke-01"
+  },
+  {
+   "id": "sw-bleed-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "How do I control severe external bleeding?",
+     "state": null
+    },
+    {
+     "question": "How do I know if a wild plant is safe to eat?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-plant-01"
+  },
+  {
+   "id": "sw-signal-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "I'm lost and want to be found. How do I signal for rescue?",
+     "state": null
+    },
+    {
+     "question": "I have a bad blister on my heel from hiking. What should I do about it?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-blister-01"
+  },
+  {
+   "id": "sw-head-01",
+   "kind": "switch",
+   "turns": [
+    {
+     "question": "My friend hit their head on a rock and seems confused. What should I watch for?",
+     "state": null
+    },
+    {
+     "question": "How do I tie a knot to secure a tarp to a tree?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-knot-01"
+  }
+ ]
+}

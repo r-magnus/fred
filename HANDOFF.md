@@ -80,8 +80,12 @@ Conversation memory (item 4 below) also bears on accuracy.
    fetched on first run. Not built.
 3. **Trim the app.** Done for now: the APK is arm64-only (148 MB) and the
    phone no longer carries the unused gte-small encoder.
-4. **Conversation memory.** Researched, no code: `docs/results-memory-research.md`.
-   Build the three multi-turn eval sets first, count refusals before and after.
+4. **Conversation memory (#60): built, measured, seen on the phone.**
+   Held-out two-turn conversations 46% → 81%, single questions byte for byte
+   unchanged, no unsafe answers (`docs/results-memory.md`). Retrieval tries
+   the previous question joined to the new one under measured rules; the model
+   sees the previous *question* only. Next it enables #50 (clarifying
+   questions). Saving turns (US-10, #31) is separate.
 5. **Parked: the drive test.** Needs a car; one trip serves B-KR1/2/3.
 
 ## Traps that already bit, so they do not bite again

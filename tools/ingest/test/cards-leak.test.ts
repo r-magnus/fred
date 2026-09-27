@@ -20,9 +20,17 @@ const words = (s: string): Set<string> =>
 
 test('no card phrasing echoes an eval question', () => {
   const cards = JSON.parse(readFileSync('corpora/cards/cards.json', 'utf8')) as FieldCard[];
+  // Single-question sets are arrays; two-turn sets (convo-*, holdout-convo)
+  // hold conversations, and every turn of those counts as a question too.
+  type Convo = { id: string; turns: { question: string }[] };
   const questions = readdirSync('tools/eval/data')
-    .filter((f) => f.startsWith('graded-') || f.startsWith('holdout-'))
-    .flatMap((f) => JSON.parse(readFileSync(`tools/eval/data/${f}`, 'utf8')) as { id: string; question: string }[]);
+    .filter((f) => f.startsWith('graded-') || f.startsWith('holdout-') || f.startsWith('convo-'))
+    .flatMap((f) => {
+      const data = JSON.parse(readFileSync(`tools/eval/data/${f}`, 'utf8')) as
+        { id: string; question: string }[] | { conversations: Convo[] };
+      return Array.isArray(data) ? data
+        : data.conversations.flatMap((c) => c.turns.map((t, i) => ({ id: `${c.id}#${i + 1}`, question: t.question })));
+    });
   const leaks: string[] = [];
   for (const c of cards) {
     for (const a of c.askedAs) {

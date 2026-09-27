@@ -118,3 +118,22 @@ everything.
 - I wrote the syllabus questions knowing which cards exist. 3 of 16 echoed card
   wording and were reworded. The random-passage half is free of that, and new
   Fred leads there too (20.5 against 18.0).
+
+## On the phone (2026-09-27)
+
+Nothing Phone (3), card pack 0.3.0, through the devhooks inbox:
+
+| Message | Fred | Time before the reply or card |
+|---|---|---:|
+| Hot pot handle, palm blistering | declined, Burns card offered | 3.0 s (first message after launch) |
+| "I think I'm lost…" | "Got it. In case you need it, here's what to do:" + Lost card | 1.7 s |
+| Trail mix stuck, no sound | Choking card opened (intent: now) | 1.2 s |
+| "I thought I burned myself but i think it's okay" | chat, Burns card offered folded | 1.1 s |
+| Smoke signal a plane would notice | Signalling card | 2.6 s |
+| Smoking a brisket | declined, no card | 1.8 s |
+
+These times include search and the intent check. Without intent, search alone
+took 0.8 s on this phone (`results-memory.md`), so the intent check costs
+roughly 0.3 to 2 s. Every row shows its card or decline without generating any
+text. The app log now records the intent and any offered card, and
+`ask-phone.sh` waits for chat replies too.

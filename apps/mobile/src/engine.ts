@@ -173,8 +173,11 @@ function timed(res: AskResult, t0: number): AskResult {
   // Whether this message was treated as a follow-up, and on what scores.
   const f = res.diagnostics.followUp;
   const mem = f === undefined ? '' : ` followUp=${f.used ? 'yes' : 'no'}(${f.standaloneTopScore.toFixed(3)}/${f.joinedTopScore.toFixed(3)})`;
+  // What intent decided, and the card offered folded beside a decline or chat.
+  const intent = res.diagnostics.intent === undefined ? '' : ` intent=${res.diagnostics.intent}`;
+  const offered = (res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? ` offer=${JSON.stringify(res.offer.title)}` : '';
   if (res.kind !== 'answer') {
-    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem} top=${top}`);
+    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${offered} top=${top}`);
     return res;
   }
   const inner = res.stream;
@@ -190,7 +193,7 @@ function timed(res: AskResult, t0: number): AskResult {
     }
     const end = Date.now();
     if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
-    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter} top=${top}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent} top=${top}`);
   }
   return { ...res, stream: stream() };
 }

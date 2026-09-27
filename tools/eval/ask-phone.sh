@@ -22,10 +22,10 @@ grep -q 'DEBUGGABLE' <<<"$flags" || { echo "installed $PKG is not debuggable; in
 "$ADB" logcat -c
 "$ADB" shell am force-stop $PKG
 "$ADB" shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
-# One "[fred] answer|abstain|needs-location" line per question.
+# One "[fred] answer|abstain|needs-location|chat" line per question.
 deadline=$((SECONDS + 120 * n + 60))
 while [ $SECONDS -lt $deadline ]; do
-  done_n=$("$ADB" logcat -d -s ReactNativeJS | grep -cE '\[fred\] (answer|abstain|needs-location) ' || true)
+  done_n=$("$ADB" logcat -d -s ReactNativeJS | grep -cE '\[fred\] (answer|abstain|needs-location|chat) ' || true)
   [ "$done_n" -ge "$n" ] && break
   sleep 5
 done

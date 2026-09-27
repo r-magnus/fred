@@ -9,8 +9,9 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
+import { classifyIntent, type Intent } from './intent.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, readPick, renderCard } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -141,9 +142,38 @@ export interface AskOptions {
   };
   /** Show the model the earlier question when the joined search wins. Default on. */
   readonly previousInPrompt?: boolean;
+  /**
+   * Decide what the hiker wants as well as what they are talking about
+   * (intent.ts, docs/results-intent-probe.md): an emergency opens the top field
+   * card even under the gate, small talk gets a short reply with the card only
+   * offered, and a prevention question is answered from the manuals with the
+   * card offered. Costs one short generation. Off by default until measured.
+   */
+  readonly intent?: boolean;
 }
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
+
+/** A field card shown folded, for the hiker to open if they want it. */
+export interface CardOffer {
+  readonly title: string;
+  readonly text: string;
+  readonly citation: Citation;
+}
+
+/**
+ * With intent on, a field card that is the top search result opens for an
+ * emergency or a question even under the gate, down to this floor. Casually
+ * worded emergencies put the right card first at 0.19-0.43 on the practice
+ * set, under the 0.29 gate, while the gate still refused them.
+ */
+export const INTENT_CARD_FLOOR = 0.15;
+
+/** An animal as the patient: no human first-aid card is forced open for it. */
+const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)s?\b/i;
+
+/** The best card counts as leading when it scores at least this share of the top result. */
+export const INTENT_CARD_NEAR_TOP = 0.85;
 
 /**
  * A card below the reserved-slot bar still counts as a clear match when it
@@ -194,6 +224,8 @@ export interface Diagnostics {
   readonly sufficient?: boolean | null;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** What the hiker wants, when intent is on. */
+  readonly intent?: Intent;
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
   readonly followUp?: { readonly standaloneTopScore: number; readonly joinedTopScore: number; readonly used: boolean };
   /** Set when the answer was built from a field card rather than the passages. */
@@ -213,6 +245,15 @@ export type AskResult =
        * the citation labels alone cannot show.
        */
       readonly prompt: PromptParts;
+      /** A related field card offered folded, beside a prevention answer. */
+      readonly offer?: CardOffer;
+      readonly diagnostics: Diagnostics;
+    }
+  /** Small talk: a short fixed reply, with the matching card offered if any. */
+  | {
+      readonly kind: 'chat';
+      readonly reply: string;
+      readonly offer: CardOffer | null;
       readonly diagnostics: Diagnostics;
     }
   /** The query needs a state pack but the location is unknown. */
@@ -231,6 +272,8 @@ export type AskResult =
       readonly kind: 'abstain';
       readonly reason: 'low-score' | 'insufficient' | 'provider-only';
       readonly nearest: readonly Citation[];
+      /** A related field card, when a prevention question found no manual answer. */
+      readonly offer?: CardOffer;
       readonly diagnostics: Diagnostics;
     };
 
@@ -331,7 +374,37 @@ export async function ask(
     }
   }
 
+  // Intent: what the hiker wants, beside what they are talking about.
+  let intent: Intent | undefined;
+  let forcedCard: ScoredChunk | undefined;
+  let offer: CardOffer | undefined;
+  const reserve = retrievalOpts.reserve;
+  const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
+  if (opts.intent === true) {
+    intent = await classifyIntent(query, backend, opts.signal);
+    // The leading card: the best field card, if it is first or within
+    // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
+    // ranked a manual passage first (0.289) and the bleeding card second
+    // (0.256); for an emergency the card is the safer answer.
+    const cardsHere = candidates.filter(isCard);
+    const bestCard = cardsHere.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+    const topCard = bestCard !== undefined && bestCard.score >= INTENT_CARD_FLOOR &&
+      bestCard.score >= INTENT_CARD_NEAR_TOP * best(candidates) ? bestCard : undefined;
+    // Only an emergency forces a card open under the gate. Forcing it for any
+    // question too opened the cuts card for "talk me through stitching a cut
+    // closed" on the tuning set. And a pet is never the patient: veterinary
+    // care is out of scope, and "my dog cut his paw" opened the human card.
+    if (topCard !== undefined && intent === 'chat') offer = toOffer(topCard);
+    if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
+    // A prevention question takes the normal path, cards included: several
+    // cards are prevention guidance ("staying warm on a cold night", "staying
+    // healthy", "river crossing"), and hiding them cost three tuning answers.
+    // The price is that "how do I avoid snakebite?" can still get the
+    // treatment card (docs/results-intent-probe.md).
+  }
+
   const baseDiag = {
+    ...(intent === undefined ? {} : { intent }),
     keywords,
     route: routed,
     maxTokens,
@@ -340,7 +413,14 @@ export async function ask(
     ...(followUp === undefined ? {} : { followUp }),
   };
 
-  if (candidates.length === 0 || topScore < effectiveThreshold) {
+  if (intent === 'chat') {
+    return {
+      kind: 'chat', reply: CHAT_REPLY, offer: offer ?? null,
+      diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
+    };
+  }
+
+  if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
     const weak = {
       ...baseDiag,
       candidates,
@@ -359,7 +439,10 @@ export async function ask(
     if (routed.skippedStatePacks.length > 0) {
       return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
     }
-    return { kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak };
+    return {
+      kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
+      ...(offer === undefined ? {} : { offer }),
+    };
   }
 
   // Clinical procedures (IV lines, needle decompression, dose tables) are
@@ -395,7 +478,7 @@ export async function ask(
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
-  let clear = clearCard(usable, retrievalOpts.reserve);
+  let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);
   // Showing a card word for word claims it answers the question, so for a
   // follow-up the card must also clearly match the new message on its own.
   // Matched on the joined search alone, "can I stitch it closed?" after a cut
@@ -496,6 +579,7 @@ export async function ask(
     stream: backend.generate(prompt, generateOpts),
     citations: usable.map(toCitation),
     prompt,
+    ...(offer === undefined ? {} : { offer }),
     medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
       ...baseDiag,
@@ -507,6 +591,10 @@ export async function ask(
       contextReduction: compressed.reduction,
     },
   };
+}
+
+function toOffer(card: ScoredChunk): CardOffer {
+  return { title: card.chunk.section, text: renderCard(parseCard(card.chunk.text)), citation: toCitation(card, 0) };
 }
 
 /**

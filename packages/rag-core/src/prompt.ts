@@ -28,6 +28,9 @@ export interface ContextBlock {
  */
 export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
 
+/** Fred's reply to small talk (intent 'chat'): no advice, nothing invented. */
+export const CHAT_REPLY = "Got it. I'm here if anything comes up, whether it's first aid, survival, or the plants and animals around you.";
+
 /**
  * What Fred says when the question is a clinical procedure (provider-only
  * material; pipeline.ts). Fixed text, not generated: the point is that the

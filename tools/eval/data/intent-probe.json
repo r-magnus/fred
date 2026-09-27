@@ -1,0 +1,215 @@
+{
+ "description": "Conversational messages that mention a card topic, labelled by whether a treatment card should open. Not graded for content; measures when cards fire (docs/results-intent-probe.md). Written 2026-09-27 before measuring.",
+ "labels": {
+  "no-card": "Chat, a past or resolved event, or curiosity: no request for help.",
+  "prevention": "Asks how to avoid something; the treatment steps are not the answer.",
+  "card": "A real request for help, phrased casually: the card should open.",
+  "either": "Ambiguous: offering or opening the card are both reasonable."
+ },
+ "messages": [
+  {
+   "id": "ip-burn-resolved",
+   "label": "no-card",
+   "state": null,
+   "text": "I thought I burned myself on the stove earlier but I think it's okay now"
+  },
+  {
+   "id": "ip-cut-handled",
+   "label": "no-card",
+   "state": null,
+   "text": "My friend's a nurse so she already patched up the cut on my hand"
+  },
+  {
+   "id": "ip-snake-sighting",
+   "label": "no-card",
+   "state": "CA",
+   "text": "Saw a rattlesnake sunning on the trail today, it was pretty cool"
+  },
+  {
+   "id": "ip-blister-fine",
+   "label": "no-card",
+   "state": null,
+   "text": "Had a blister last week but it healed up fine"
+  },
+  {
+   "id": "ip-tick-removed",
+   "label": "no-card",
+   "state": null,
+   "text": "Found a tick on my dog yesterday and got it off, all good"
+  },
+  {
+   "id": "ip-cold-story",
+   "label": "no-card",
+   "state": null,
+   "text": "Last winter I got so cold I couldn't stop shivering, crazy trip"
+  },
+  {
+   "id": "ip-ankle-past",
+   "label": "no-card",
+   "state": null,
+   "text": "I rolled my ankle years ago on this same trail, funny to be back"
+  },
+  {
+   "id": "ip-bleed-movie",
+   "label": "no-card",
+   "state": null,
+   "text": "Watched a movie where someone used a tourniquet, is that realistic?"
+  },
+  {
+   "id": "ip-heat-weather",
+   "label": "no-card",
+   "state": null,
+   "text": "It's going to be really hot tomorrow, I'm excited for the lake"
+  },
+  {
+   "id": "ip-fire-nice",
+   "label": "no-card",
+   "state": null,
+   "text": "Our campfire tonight was so nice, best part of the trip"
+  },
+  {
+   "id": "ip-lost-joke",
+   "label": "no-card",
+   "state": null,
+   "text": "Ha, I almost got lost earlier but the trail markers were right there"
+  },
+  {
+   "id": "ip-water-taste",
+   "label": "no-card",
+   "state": null,
+   "text": "The stream water tasted amazing after I filtered it"
+  },
+  {
+   "id": "ip-burn-avoid",
+   "label": "prevention",
+   "state": null,
+   "text": "How do I avoid burning myself when cooking on a camp stove?"
+  },
+  {
+   "id": "ip-snake-avoid",
+   "label": "prevention",
+   "state": "CA",
+   "text": "How can I avoid getting bitten by a snake on this hike?"
+  },
+  {
+   "id": "ip-blister-avoid",
+   "label": "prevention",
+   "state": null,
+   "text": "What's the best way to prevent blisters on a long hike?"
+  },
+  {
+   "id": "ip-hypo-avoid",
+   "label": "prevention",
+   "state": null,
+   "text": "How do I keep from getting too cold at night in the fall?"
+  },
+  {
+   "id": "ip-tick-avoid",
+   "label": "prevention",
+   "state": null,
+   "text": "Any tips to keep ticks off me this weekend?"
+  },
+  {
+   "id": "ip-heat-avoid",
+   "label": "prevention",
+   "state": null,
+   "text": "How do I stay safe hiking in the desert heat?"
+  },
+  {
+   "id": "ip-burn-now",
+   "label": "card",
+   "state": null,
+   "text": "ugh I just grabbed the hot pot handle and my palm is red and stinging"
+  },
+  {
+   "id": "ip-bleed-now",
+   "label": "card",
+   "state": null,
+   "text": "my buddy slipped on a rock and his leg is bleeding a lot, help"
+  },
+  {
+   "id": "ip-snake-now",
+   "label": "card",
+   "state": "CA",
+   "text": "something bit my ankle in the grass, I think it was a snake"
+  },
+  {
+   "id": "ip-ankle-now",
+   "label": "card",
+   "state": null,
+   "text": "just rolled my ankle pretty bad, it's already swelling"
+  },
+  {
+   "id": "ip-hypo-now",
+   "label": "card",
+   "state": null,
+   "text": "she's shaking and slurring words after we got soaked in the rain"
+  },
+  {
+   "id": "ip-blister-now",
+   "label": "card",
+   "state": null,
+   "text": "got a huge blister on my heel and still have 6 miles to go"
+  },
+  {
+   "id": "ip-tick-now",
+   "label": "card",
+   "state": null,
+   "text": "there's a tick stuck in my arm, how do I get it out"
+  },
+  {
+   "id": "ip-choke-now",
+   "label": "card",
+   "state": null,
+   "text": "he's got a granola bar stuck in his throat and can't make a sound"
+  },
+  {
+   "id": "ip-heat-now",
+   "label": "card",
+   "state": null,
+   "text": "I feel dizzy and sick and I've stopped sweating, it's super hot"
+  },
+  {
+   "id": "ip-lost-now",
+   "label": "card",
+   "state": null,
+   "text": "I have no idea where I am and it's getting dark"
+  },
+  {
+   "id": "ip-burn-check",
+   "label": "either",
+   "state": null,
+   "text": "I burned my finger on the stove, it's a bit red, do I need to do anything?"
+  },
+  {
+   "id": "ip-cut-check",
+   "label": "either",
+   "state": null,
+   "text": "small cut on my knee from a rock, it stopped bleeding already, anything I should do?"
+  },
+  {
+   "id": "ip-headbump",
+   "label": "either",
+   "state": null,
+   "text": "bumped my head on a branch, feel fine though"
+  },
+  {
+   "id": "ip-sting-mild",
+   "label": "either",
+   "state": null,
+   "text": "a bee stung me, it's just a little swollen"
+  },
+  {
+   "id": "ip-cold-hands",
+   "label": "either",
+   "state": null,
+   "text": "can barely feel my fingertips this freezing morning"
+  },
+  {
+   "id": "ip-water-unsure",
+   "label": "either",
+   "state": null,
+   "text": "I drank some stream water without treating it, oops"
+  }
+ ]
+}

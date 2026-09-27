@@ -22,14 +22,17 @@ test('no card phrasing echoes an eval question', () => {
   const cards = JSON.parse(readFileSync('corpora/cards/cards.json', 'utf8')) as FieldCard[];
   // Single-question sets are arrays; two-turn sets (convo-*, holdout-convo)
   // hold conversations, and every turn of those counts as a question too.
+  // Intent sets (intent-probe, holdout-intent) hold messages with `text`.
   type Convo = { id: string; turns: { question: string }[] };
+  type Message = { id: string; text: string };
   const questions = readdirSync('tools/eval/data')
-    .filter((f) => f.startsWith('graded-') || f.startsWith('holdout-') || f.startsWith('convo-'))
+    .filter((f) => f.startsWith('graded-') || f.startsWith('holdout-') || f.startsWith('convo-') || f.startsWith('intent-'))
     .flatMap((f) => {
       const data = JSON.parse(readFileSync(`tools/eval/data/${f}`, 'utf8')) as
-        { id: string; question: string }[] | { conversations: Convo[] };
-      return Array.isArray(data) ? data
-        : data.conversations.flatMap((c) => c.turns.map((t, i) => ({ id: `${c.id}#${i + 1}`, question: t.question })));
+        { id: string; question: string }[] | { conversations: Convo[] } | { messages: Message[] };
+      if (Array.isArray(data)) return data;
+      if ('messages' in data) return data.messages.map((m) => ({ id: m.id, question: m.text }));
+      return data.conversations.flatMap((c) => c.turns.map((t, i) => ({ id: `${c.id}#${i + 1}`, question: t.question })));
     });
   const leaks: string[] = [];
   for (const c of cards) {

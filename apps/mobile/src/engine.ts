@@ -135,6 +135,9 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
         const t0 = Date.now();
         const res = await ask(question, { backend, store, packs }, {
           state,
+          // Decide what the hiker wants, not just the topic: casual emergencies
+          // open their card, small talk gets a reply (docs/results-intent-probe.md).
+          intent: true,
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
         });

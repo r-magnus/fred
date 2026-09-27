@@ -24,7 +24,7 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, type Citation } from '@fred/rag-core';
+import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, type CardOffer, type Citation } from '@fred/rag-core';
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapProbe } from './src/map-probe.tsx';
@@ -37,7 +37,7 @@ interface Turn {
   readonly state: string | null;
   /** Streams in as tokens arrive. */
   text: string;
-  kind: 'answer' | 'abstain' | 'needs-location' | 'error';
+  kind: 'answer' | 'abstain' | 'needs-location' | 'error' | 'chat';
   /** True when the reader stopped it; the partial answer is kept. */
   stopped: boolean;
   citations: readonly Citation[];
@@ -47,6 +47,9 @@ interface Turn {
   done: boolean;
   /** The search's best score, passed on when the next message is a follow-up. */
   topScore?: number;
+  /** A field card offered folded (small talk, prevention); opened on tap. */
+  offer?: CardOffer;
+  offerOpen?: boolean;
 }
 
 /** The provider has to sit above anything calling useSafeAreaInsets. */
@@ -167,13 +170,25 @@ function Screen() {
         });
         return;
       }
+      if (res.kind === 'chat') {
+        // Small talk: a fixed reply, never model-written advice, and the
+        // matching card folded in case it's wanted (docs/results-intent-probe.md).
+        update(id, { kind: 'chat', text: res.reply, done: true, ...(res.offer === null ? {} : { offer: res.offer }) });
+        return;
+      }
       if (res.kind === 'abstain') {
         // A clinical procedure gets a referral, not "I don't know": Fred does
         // know what it is, and knows it is not for a hiker to attempt.
-        update(id, { kind: 'abstain', text: res.reason === 'provider-only' ? REFER_REPLY : '', done: true });
+        update(id, {
+          kind: 'abstain', text: res.reason === 'provider-only' ? REFER_REPLY : '', done: true,
+          ...(res.offer === undefined ? {} : { offer: res.offer }),
+        });
         return;
       }
-      update(id, { citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore });
+      update(id, {
+        citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore,
+        ...(res.offer === undefined ? {} : { offer: res.offer }),
+      });
       let text = '';
       for await (const tok of res.stream) {
         text += tok;
@@ -355,6 +370,28 @@ function Screen() {
               </View>
             )}
 
+            {t.kind === 'chat' && (
+              <View style={styles.card}>
+                <Text style={styles.body}>{t.text}</Text>
+              </View>
+            )}
+
+            {t.offer !== undefined && t.done && (
+              <View style={styles.card}>
+                <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} hitSlop={8}
+                  accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}>
+                  <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
+                </Pressable>
+                {t.offerOpen === true && (
+                  <>
+                    <Text style={styles.body}>{t.offer.text}</Text>
+                    <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
+                    <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
+                  </>
+                )}
+              </View>
+            )}
+
             {t.kind === 'error' && (
               <View style={styles.card}><Text style={styles.error}>{t.text}</Text></View>
             )}
@@ -436,6 +473,7 @@ function Screen() {
 }
 
 const styles = StyleSheet.create({
+  offerTitle: { color: '#6ca', fontSize: 15, fontWeight: '600' },
   root: { flex: 1, backgroundColor: '#0e1113' },
   centre: { alignItems: 'center', justifyContent: 'center' },
   wordmark: { color: '#eaf2ef', fontSize: 40, fontWeight: '700', letterSpacing: 1 },

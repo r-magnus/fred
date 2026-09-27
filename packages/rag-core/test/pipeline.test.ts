@@ -523,3 +523,43 @@ test('a provider-only passage just behind the top still triggers the referral', 
   if (res.kind === 'abstain') assert.equal(res.reason, 'provider-only');
   assert.equal(backend.lastPrompt, null);
 });
+
+// Intent (docs/results-intent-probe.md).
+const intentStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Control severe bleeding with firm direct pressure on the wound.')]);
+  store.addPack('core-fieldcards', [seed('friend bleeding badly from his leg: press hard on the wound and get help', { source: 'Fred field card', section: 'Heavy bleeding' })]);
+  return store;
+};
+const saying = (word: string): FakeBackend => {
+  const b = new FakeBackend();
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) { if (p.user.endsWith('->')) { yield word; return; } yield* gen(p, o); };
+  return b;
+};
+const intentOpts = { state: null, abstainThreshold: 0.99, fallbackThreshold: 0.99, intent: true,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.35 } } } as const;
+
+test('an emergency opens the leading card even under the gate', async () => {
+  const res = await ask('my friend is bleeding badly from his leg', { backend: saying('NOW'), store: intentStore(), packs: clinicalPacks }, intentOpts);
+  assert.equal(res.diagnostics.intent, 'now');
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') assert.equal(res.citations[0]!.source, 'Fred field card');
+});
+
+test('small talk gets the fixed reply, with the card only offered', async () => {
+  const res = await ask('my friend was bleeding badly yesterday but he is fine now', { backend: saying('CHAT'), store: intentStore(), packs: clinicalPacks }, intentOpts);
+  assert.equal(res.kind, 'chat');
+  if (res.kind === 'chat') assert.equal(res.offer?.citation.source, 'Fred field card');
+});
+
+test('a pet is never the patient: no card is forced open', async () => {
+  const res = await ask('my dog is bleeding badly from his leg', { backend: saying('NOW'), store: intentStore(), packs: clinicalPacks }, intentOpts);
+  assert.notEqual(res.kind, 'answer');
+});
+
+test('with intent off, nothing changes', async () => {
+  const res = await ask('my friend is bleeding badly from his leg', { backend: saying('NOW'), store: intentStore(), packs: clinicalPacks }, { ...intentOpts, intent: false });
+  assert.equal(res.diagnostics.intent, undefined);
+  assert.equal(res.kind, 'abstain');
+});

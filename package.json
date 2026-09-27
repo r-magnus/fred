@@ -17,7 +17,9 @@
     "metrics": "node tools/eval/src/metrics.ts"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
-    "@types/node": "^22.10.2"
+    "@types/node": "^22.10.2",
+    "pmtiles": "^4.5.0",
+    "sharp": "^0.35.4",
+    "typescript": "^5.7.2"
   }
 }

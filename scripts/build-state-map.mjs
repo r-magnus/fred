@@ -16,7 +16,7 @@
  * z15 1417 MB. z14 is the shipping choice — see docs/results-map-research.md.
  */
 import { execFileSync } from 'node:child_process';
-import { STATE_BOUNDARIES } from '../packages/geo/src/us-states.ts';
+import { knownStates, stateBbox } from './state-bbox.mjs';
 
 const [state, zoomArg, outDir = '.'] = process.argv.slice(2);
 if (state === undefined) {
@@ -24,25 +24,20 @@ if (state === undefined) {
   process.exit(1);
 }
 const maxzoom = Number(zoomArg ?? 14);
-const b = STATE_BOUNDARIES[state.toUpperCase()];
-if (b === undefined) {
-  console.error(`unknown state ${state}; known: ${Object.keys(STATE_BOUNDARIES).sort().join(' ')}`);
+const box = stateBbox(state);
+if (box === undefined) {
+  console.error(`unknown state ${state}; known: ${knownStates()}`);
   process.exit(1);
 }
-
-// A little margin so a fix near the border still has map under it — the
-// boundaries are the 1:20M cartographic set and are simplified by up to ~9 km
-// on a coastline, which is exactly where someone stands and looks at a map.
-const PAD = 0.15;
-const [minLon, minLat, maxLon, maxLat] = b.bbox;
-const bbox = [minLon - PAD, minLat - PAD, maxLon + PAD, maxLat + PAD].map((n) => n.toFixed(4));
+// Census box plus a margin, shared with the contours (state-bbox.mjs).
+const bbox = box.map((n) => n.toFixed(4));
 
 const SOURCE = process.env.PMTILES_SOURCE
   ?? 'https://build.protomaps.com/20260920.pmtiles';
 const out = `${outDir}/map-${state.toUpperCase()}-z${maxzoom}.pmtiles`;
 
 console.log(`${state.toUpperCase()}  bbox=${bbox.join(',')}  maxzoom=${maxzoom}`);
-execFileSync('pmtiles', [
+execFileSync(process.env.PMTILES_BIN ?? 'pmtiles', [
   'extract', SOURCE, out, `--bbox=${bbox.join(',')}`, `--maxzoom=${maxzoom}`,
 ], { stdio: 'inherit' });
 console.log(`\nwrote ${out}`);

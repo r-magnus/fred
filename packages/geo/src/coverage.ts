@@ -13,16 +13,15 @@
  * this project several days (`docs/results-m3.md`).
  */
 import { cellToParent, gridDisk, greatCircleDistance, cellToLatLng, UNITS } from 'h3-js';
+import type { CoveragePack } from './coverage-codec.ts';
 
 /** H3 resolution B-KR3 stores and searches at. ~5.16 km², ~1.2 km edge. */
 export const COVERAGE_RES = 7;
 
 /**
- * Coverage as a set of res-7 cell ids that at least one carrier reports.
- *
- * A Set of strings rather than a bitmask per carrier: B-KR3 asks only whether
- * signal is plausible, not whose. Carrier identity can be added later without
- * changing the search.
+ * A set of res-7 cell ids with reported coverage: one carrier's, or every
+ * carrier's together (`anyCarrier`). Packs keep carriers apart
+ * (`CoveragePack`); the search works on whichever set the question is about.
  */
 export type CoverageIndex = ReadonlySet<string>;
 
@@ -83,13 +82,13 @@ export function nearestCoverage(
   maxRings = 25,
 ): NearestCoverage | null {
   const origin = cellToLatLng(originCell) as [number, number];
-  const covered: string[] = [];
+  const covered = new Set<string>();
   let found: { cell: string; meters: number; rings: number } | null = null;
 
   for (let k = 0; k <= maxRings; k++) {
     for (const cell of gridDisk(originCell, k)) {
-      if (!index.has(cell) || covered.includes(cell)) continue;
-      covered.push(cell);
+      if (!index.has(cell) || covered.has(cell)) continue;
+      covered.add(cell);
       if (found !== null) continue;
       const m = greatCircleDistance(origin, cellToLatLng(cell) as [number, number], UNITS.m);
       found = { cell, meters: m, rings: k };
@@ -104,8 +103,83 @@ export function nearestCoverage(
     meters: found.meters,
     bearing: bearingBetween(origin, cellToLatLng(found.cell) as [number, number]),
     cell: found.cell,
-    covered,
+    covered: [...covered],
   };
+}
+
+/**
+ * What the map says about one cell, for one carrier (issue #58).
+ *
+ * - `no-service`: no carrier reports coverage. The only place Fred warns that
+ *   even 911 may not connect: an emergency call uses any carrier's tower.
+ * - `carrier-gap`: your carrier reports nothing, another carrier does. Your
+ *   own calls and texts likely fail; 911 may still connect.
+ * - `covered`: assumed to have signal, and drawn as nothing.
+ *
+ * All three are about *reported* coverage: FCC filings are carriers' own
+ * propagation models, optimistic in the canyons and timber Fred is for.
+ */
+export type Zone = 'covered' | 'carrier-gap' | 'no-service';
+
+const unions = new WeakMap<CoveragePack, CoverageIndex>();
+
+/** Every carrier's cells together: where anyone at all reports coverage. */
+export function anyCarrier(pack: CoveragePack): CoverageIndex {
+  let u = unions.get(pack);
+  if (u === undefined) {
+    const all = new Set<string>();
+    for (const c of pack.carriers) for (const cell of c.cells) all.add(cell);
+    unions.set(pack, all);
+    u = all;
+  }
+  return u;
+}
+
+/**
+ * The carrier's own footprint, or null when the pack has none for it: an
+ * unknown carrier, or one that files nothing in this state and roams there.
+ * Null means no carrier-gap claim can be made, not that there is no signal.
+ */
+export function carrierCells(pack: CoveragePack, carrierId: string | null): CoverageIndex | null {
+  if (carrierId === null) return null;
+  return pack.carriers.find((c) => c.id === carrierId)?.cells ?? null;
+}
+
+export function zoneOf(cell: string, pack: CoveragePack, carrierId: string | null): Zone {
+  if (!anyCarrier(pack).has(cell)) return 'no-service';
+  const mine = carrierCells(pack, carrierId);
+  return mine === null || mine.has(cell) ? 'covered' : 'carrier-gap';
+}
+
+export interface ZonesNear {
+  readonly carrierGap: readonly string[];
+  readonly noService: readonly string[];
+}
+
+/**
+ * The warning cells within `rings` of the origin (25 rings is ~30 km).
+ *
+ * `inArea` bounds the claim: a state's pack only knows cells inside that
+ * state, so outside it (the sea, the next state) absence is not evidence.
+ * It receives a cell centre as latitude, longitude.
+ */
+export function zonesNear(
+  originCell: string,
+  pack: CoveragePack,
+  carrierId: string | null,
+  inArea: (latitude: number, longitude: number) => boolean,
+  rings = 25,
+): ZonesNear {
+  const carrierGap: string[] = [];
+  const noService: string[] = [];
+  for (const cell of gridDisk(originCell, rings)) {
+    const zone = zoneOf(cell, pack, carrierId);
+    if (zone === 'covered') continue;
+    const [lat, lng] = cellToLatLng(cell);
+    if (!inArea(lat, lng)) continue;
+    (zone === 'no-service' ? noService : carrierGap).push(cell);
+  }
+  return { carrierGap, noService };
 }
 
 /** "north-east", for an instruction a person can act on without a compass rose. */

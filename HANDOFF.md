@@ -1,203 +1,143 @@
-# Handoff — 2026-09-22
+# Handoff — 2026-09-25
 
-Supersedes the 2026-09-20 note. Sixteen commits since. Everything measured is
-in `docs/`; this is the state of play and what to do next.
+Supersedes the 2026-09-22 note and the items added to it earlier today.
+Everything measured is in `docs/`; this is the state of play and what to do next.
 
 ## The short version
 
-Alpha's accuracy work is **stalled on purpose** — the generator lever is closed
-and the remaining failures are all generation quality. Beta went from "not
-started" to **mostly built and verified on the device**: position, map and
-signal coverage all render offline. The one thing nobody can do from a desk is
-the drive test.
+Alpha accuracy moved again after a stall: **66.3% held out** (from 62.5%), with
+**one** safety failure left, and PR #55 is merged. All 50 state plant-and-wildlife
+packs are rebuilt for EmbeddingGemma. The map is being upgraded to the
+topographic version (option B, ~1.2x): contours are built in Node, and each state
+now assembles into one downloadable bundle. **Nothing new goes on the phone until
+the bundles are complete**, by the owner's decision.
 
 ## A-KR2 — accuracy, due 2026-10-12
 
-**62.5% held out, target 80%.** Unchanged since the last note, and not for lack
-of trying.
+**66.3% held out (26.5/40), target 80%; 83.0% tuning; 1 safety failure.**
+`docs/results-phase3.md`, `docs/METRICS.md`.
 
-- **The generator stays Qwen3-1.7B.** SmolLM2-1.7B was screened and lost 28 to
-  38 on graded tuning answers. It is *extractive* — it emits raw document
-  fragments with the manual's own numbering ("13-29. Locate the site of the
-  suspected fracture"), which is maximally faithful and useless. Qwen3.5-2B was
-  dropped as too large by the owner. `docs/graded-runs-smollm2.jsonl`.
-- **Dosing is not a prompting problem.** Two independent wordings both scored
-  0 of 3. Parked at the owner's request. The numeric wording is otherwise a
-  strict improvement (tuning outcome 71 → 79, zero regressions) and is
-  committed but still `SUFFICIENCY=1`, default off.
-- **Every remaining held-out failure is the generator, not retrieval.** All
-  nine have four citations and non-zero scores. Three decline with good sources
-  in hand, three invert the source, three answer the wrong question. The
-  `paracord` lexical gap the old research flagged is already fixed by the
-  routing change.
+- Clinical procedures (IV lines, needle decompression, dose tables) are marked
+  provider-only at ingest and get a fixed referral.
+- A clearly matching field card is shown **verbatim**, the only mode measured
+  that cannot invert a card; card answers take under a second on the phone.
+- The hiker's state is named in the prompt when the question points at it.
+- FM 21-76 ch. 19 is the signalling source (FM 3-05.70 is distribution-restricted).
+- Rejected with measurements: a second search in manual wording (let 14
+  out-of-scope questions through), model-picked card steps, card-only rewriting,
+  and earlier the NLI verification pass.
 
-**Superseded: see `docs/results-generator-research.md` for what is left to try.** The verification pass below was measured and rejected (`docs/results-verifier-test.md`), as was answer-shape prompting (`docs/results-answer-shape.md`). The two untried levers are Qwen3's thinking mode with a raised token cap, and a larger generator — both desktop-only, both free to test.
-
-~~The lever with evidence behind it is a verification pass.~~ `results-nli-research.md`
-sized it at +3-6 points and shelved it on latency; the owner has since said
-accuracy beats latency, so that objection is gone. It targets the inversion
-class, which includes both safety defects.
-
-A methodology trap, recorded because it cost a run: **`outcome matches
-expectation` cannot see a generator change.** It measures answer-vs-abstain,
-decided by retrieval and the gate upstream. A-KR2 is a graded read of the prose
-(README §04 QR-02) and nothing substitutes for it.
-
-## B-KR1 / B-KR2 / B-KR3 — the Beta trio
-
-**B-KR1 is an A outdoors.** First outdoor measurement the project has: median
-**9.5 m**, best 5.6 m, five attempts, **airplane mode on**, partial sky
-obstruction. Against 33.5 m indoors. The 15 s refine window is generous, not
-tight — three of five attempts hit the target on their first reading.
-`docs/results-bkr1-outdoor.md`.
-
-**That reprices B-KR2.** It asks for ±1 km with WiFi off; the measurement above
-*is* that case, about a hundred times inside target. Recorded as a falsifiable
-prediction: B-KR2's difficulty is the map, not positioning.
-
-**All three now render on the device, offline:**
-
-| | State |
-|---|---|
-| Position | Green ring sized by the GPS's own 68% confidence radius |
-| Map | MapLibre + Protomaps PMTiles, **z14, 598 MB for California** |
-| Coverage | Amber res-7 hexagons + "carriers report signal about N km north-east" |
-
-**None of this closes a KR.** The proposal verifies all three by driving to
-different physical locations, and that has not happened.
+What is left: 6 wrongful declines and 7 partly-right answers held out, one
+unsafe answer (`hff-bulrush-01`). Untried: Qwen3 thinking mode (#36).
+Conversation memory (item 4 below) also bears on accuracy.
 
 ## What is owed, in order
 
-1. **The drive test.** Needs a car and nothing else — arm the recorder by
-   long-pressing the location chip, drive, long-press to stop. It records
-   continuously; the driver never touches the phone. One trip serves all three
-   KRs. A reminder routine exists.
-2. **Per-state packaging.** Map and coverage packs are staged by hand with
-   `adb push`. They should ship like the flora packs do, keyed off
-   `stateForCoords`. Coverage is 7.1 KB per state; maps are the real cost.
-3. **The verification pass for A-KR2**, per the research above.
-4. **Trim the app.** The APK carries four CPU architectures; 195 MB of 350 MB
-   is for hardware no modern phone uses. The device also holds ~440 MB of
-   models the app never loads (Qwen3-0.6B, the fp16 encoder). ~630 MB of
-   avoidable weight before RC-KR1.
-5. **Topo contours into the main build.** Trialled on the iOS simulator
-   2026-09-25 and the owner wants it kept: 40 m contours plus drawn land
-   cover, over Yosemite only. The style already draws them whenever
-   `contours-<STATE>.pmtiles` sits next to the basemap
-   (`apps/mobile/src/map-probe.tsx`). What is missing is a build script in
-   `scripts/` (next to `build-state-map.mjs`, same bbox) to make the file
-   for a whole state, and shipping it in the same per-state package as the
-   map in item 2. About +110 MB for California (estimate), about 1.2x the
-   basemap. Numbers, method and the trial: `docs/results-topo-research.md`.
-6. **The water bug. Do it with item 5, in the same style change.** The
-   probe's hand-written style fills whole Protomaps layers, and two of them
-   are not all polygons. MapLibre fills a line as straight-edged wedges; an
-   unfilled point is harmless. Found at Santa Barbara, where the creeks through
-   town drew long blue slivers over land. Sampled across 160 California tiles:
-
-   | Layer | Non-polygon features | Status |
-   |---|---|---|
-   | `water` | streams, rivers, canals (lines); labels (points) | fixed in the working tree, uncommitted, **not yet seen working** |
-   | `earth` | cliffs (lines); island labels (points) | **not fixed** |
-   | `landuse` | none in 16,504 features | fine |
-
-   Plan:
-   1. Filter every `fill` layer to `['==', ['geometry-type'], 'Polygon']`. That
-      is already done for `water` in `map-probe.tsx`; `earth` needs the same.
-   2. Keep the lines, just draw them as lines. Streams are already drawn as
-      `waterways`. Cliffs are worth a thin dark `line` layer, since on a topo
-      map they are as useful as contours.
-   3. Look at both on the iOS simulator: Santa Barbara for creeks, and a
-      coastal cliff (for example Big Sur) for `earth`. `xcrun simctl location
-      <udid> set <lat>,<lon>`, then tap the Fred wordmark. Then Android.
-   4. Longer term, item 5 makes this the real map rather than a probe, and the
-      research doc already says the real map should use `@protomaps/basemaps`
-      rather than a hand-written style. A style written for this schema
-      should already separate lines from polygons (not checked), which would
-      fix this class of bug for every layer. The catch
-      offline: it needs glyphs and sprites bundled on the device. Decide that
-      before writing many more hand-written layers.
-7. **Conversation memory.** Researched 2026-09-25, no code yet:
-   `docs/results-memory-research.md`. Every question is currently answered as
-   if it were the first, so follow-ups like "it's still bleeding" lose their
-   context. The plan: store turns in op-sqlite (also closes US-10, ~1-2 KB a
-   turn); let retrieval try the previous question joined to the new one and
-   keep whichever scores higher; show the generator the previous *question*
-   only, never the previous answer or its sources. Build the three small
-   multi-turn eval sets in the doc first, and count refusals before and after.
-
-## The Expo 57.0.24 upgrade is verified on Android
-
-The iOS build needed `expo@57.0.23+` for Xcode 27's scene life cycle, and that
-upgrade moves `expo-modules-core`, `expo-modules-jsi` and `op-sqlite` — shared
-with Android. `docs/results-ios-build.md` flagged it as untested there.
-
-**Tested 2026-09-22 on the Nothing Phone (3): it is fine.** Builds clean at
-152 MB, launches, loads the packs, and answers "How do I treat a burn" from
-three sources with citations and the medical disclaimer — which exercises
-op-sqlite, the ONNX encoder and llama.rn together. The pre-upgrade APK is backed
-up at `~/fred-preupgrade.apk` if it is ever needed.
+1. **Topographic map, per-state bundles (in progress, branch `topo-map`).**
+   - Done: `scripts/build-state-contours.mjs` (Node, worker threads; traces
+     200/100/40 m contours from Mapterhorn elevation, `tools/ingest/src/contours.ts`).
+     California: **137 MB contours** against a 641 MB basemap, **1.21x**,
+     6 minutes on 15 threads (now 8 by default). Matches the Python trial tile for tile on
+     Yosemite; an independent decoder reads it back.
+   - Done: the style draws land cover on every map, fills polygons only, and
+     draws cliffs (`earth` lines) as a line layer. **Seen working on the
+     Nothing Phone (3) 2026-09-25** with the California bundle: contours with
+     heavier index lines, land cover, streams as lines with no wedges, a clean
+     coastline. No cliffs were in view, so that layer is still unseen.
+   - Done: California bundle installed on the phone with `stage-bundle.sh`
+     (every file checksummed on the device); the unused gte-small encoder was
+     deleted from the phone (133 MB).
+   - Done: `scripts/build-state-bundle.mjs` assembles map + contours + coverage +
+     flora pack with a `bundle.json` (sizes, SHA-256, attribution);
+     `tools/eval/stage-bundle.sh` installs one. California: 791 MB.
+   - **Done 2026-09-25 (16:28-19:03): all 52 bundles built** (50 states, DC,
+     PR) with `scripts/build-all-bundles.sh`, in `~/fred-bundles/`: 15.7 GB in
+     all, 13.3 GB basemaps + 1.9 GB contours. Largest: AK 1.27 GB, CA 791 MB,
+     TX 781 MB. DC and PR have no flora pack, recorded under `missing`.
+     Elevation downloads are cached in `~/fred-maps/.contours-work` (31 GB),
+     safe to delete. Next: check the style on the phone in other terrain
+     (e.g. AK, CO), then stage.
+   - **Coverage redesigned and built for all 52 (2026-09-26, #57, #58).** The
+     map now warns instead of reassuring: amber where *your* carrier reports
+     no coverage (another does, so 911 may connect), red where *no* carrier
+     does (911 may fail; satellite SOS mentioned). Unshaded = assumed covered.
+     `scripts/build-state-coverage.mjs` pulls every provider's FCC **mobile
+     voice** file (Dec 2025 filing) via the API and writes
+     `coverage-<ST>-voice.bin` (carriers kept apart, 0.2-37 KB); bundles build
+     it on demand. Carrier: Android reads the SIM (expo-cellular, no
+     permission), with a picker on the map; iOS has only the picker. Red is
+     bounded to the state outline so sea and neighbours are never "dead".
+     Carriers claim all but 3.9% of California, so red is a floor, not the
+     real extent. Small networks are counted as carriers on purpose: 1.8% of
+     US ground is covered only by them, nearly all real public carriers (GCI
+     and Alaska co-ops). **Seen working on the phone 2026-09-26** with test
+     locations (`cmd location providers set-test-provider-location`):
+     Saline Valley and Evolution Basin, SIM read as T-Mobile, picker switch to
+     AT&T. The map now uses a TextureView: the default GLSurfaceView drew over
+     the left third of every overlay on this phone.
+2. **Downloads.** Bundles are the unit; the recommendation is a signed catalog
+   on a static host (Cloudflare R2 or GitHub Releases), with the 1.4 GB of models
+   fetched on first run. Not built.
+3. **Trim the app.** Done for now: the APK is arm64-only (148 MB) and the
+   phone no longer carries the unused gte-small encoder.
+4. **Conversation memory.** Researched, no code: `docs/results-memory-research.md`.
+   Build the three multi-turn eval sets first, count refusals before and after.
+5. **Parked: the drive test.** Needs a car; one trip serves B-KR1/2/3.
 
 ## Traps that already bit, so they do not bite again
 
-- **`adb push` silently reports success while writing nothing** for large files
-  over the USB/IP link. Small files run at 44-90 MB/s. Split into 40-50 MB
-  chunks, verify each by size, retry the failures — typically one or two per
-  pass. Restarting the adb server clears some stalls.
-- **Gradle reuses a cached JS bundle.** A JS-only fix can be correct and never
-  reach the APK. After any such change, grep the bundle *inside* the APK for a
-  symbol that should or should not be there. Deleting
-  `android/app/build/generated/assets/react/release/index.android.bundle`
-  forces a fresh one. This masked a correct fix for most of a morning.
-- **h3-js crashes Hermes** via an Emscripten `TextDecoder("utf-16le")` that is
-  never used. `scripts/patch-h3-hermes.mjs` neutralises it. Patching only the
-  package's `main` is not enough — it ships umd, esm and browser builds and
-  remaps entries — and matching a whole line is not enough either, because one
-  build is minified.
-- **A release build is not debuggable**, so `adb run-as` refuses and drive data
-  cannot be read back. `scripts/patch-android-fieldtest.mjs` sets
-  `debuggable true`. **That flag must come off before RC-KR1.**
-- **Expo was upgraded 57.0.20 → 57.0.24 on 2026-09-22 for iOS**, before the
-  drive test, by the owner's decision. Xcode 27 will not launch an app without
-  the UIKit scene life cycle, and only 57.0.23+ supports it. The lockfile was
-  regenerated, which also moved **op-sqlite 18.1.4 → 18.2.5**. **Android has
-  not been rebuilt since.** The APK already on the phone is the old one. Any
-  new APK needs a quick pass before it is driven. Details, and how to roll back:
-  `docs/results-ios-build.md`.
-- **Expo SDK 57 deprecated `writeAsStringAsync`** — it throws at runtime. The
-  File/Paths API is the current one. `apps/mobile/AGENTS.md` says to read the
-  versioned docs first, and it is right.
+- **`adb push` silently truncates large files** over this link. Use
+  `tools/eval/adb-lib.sh`'s `push_verified` (45 MB chunks, checksummed), which
+  `stage-phone.sh`, `stage-bundle.sh` and `install-apk.sh` do.
+- **Gradle reuses a cached JS bundle.** `tools/eval/build-apk.sh` deletes it.
+- **Release builds are not debuggable** (#30, fixed): `build-apk.sh` builds a
+  shippable APK and checks its manifest; `--field-test` builds the debuggable one
+  that `run-as` staging needs. The phone scripts refuse a shippable install.
+- **llama.rn reuses an embedding context wrongly**; the app creates a fresh one
+  per text (`apps/mobile/src/device-pack.ts`).
+- **`pkill -f` with a pattern that also appears in the same command kills the
+  shell running it.** Use PIDs.
+- **A download that dies at 97% leaves a nearly complete file.**
+  `build-state-contours.mjs` extracts to `.partial` and renames on success.
+- **The contour build froze WSL on Alaska** (2026-09-25): each worker cached
+  three full-width rows of 1 MB elevation tiles, and Alaska is 571 tiles wide at
+  z12, so ~25 GB was needed on a 15 GB machine. Workers now take 8 x 64-tile
+  blocks (~360 MB each), use half the cores at nice 10, and the batch runs under
+  a memory cap. Alaska z12 runs at ~4.4 GB used.
+- **Alaska crosses the antimeridian.** `scripts/state-bbox.mjs` clamps to -180;
+  the westernmost Aleutians have no map.
+- **h3-js crashes Hermes**; `scripts/patch-h3-hermes.mjs` neutralises it.
+- **Expo SDK 57 deprecated `writeAsStringAsync`**; use the File/Paths API.
 
 ## Commercial use is blocked, and it is not the FCC
 
-`docs/licensing.md` has the register. FCC coverage, the Army manuals, FEIS and
-Census are all public domain. **WHO Basic Emergency Care and WHO Psychological
-First Aid are CC BY-NC-SA** — NonCommercial, with share-alike propagating.
+`docs/licensing.md`. WHO BEC and PFA are CC BY-NC-SA. Everything else in use is
+public domain or open with attribution (OSM via Protomaps, Mapterhorn). Nothing
+enforces `nonCommercial` in code, and nobody has measured what dropping WHO would
+cost in accuracy.
 
-The mitigation is already half-built: `core-firstaid-army` is 410 chunks of
-public-domain first aid sitting beside the WHO pack's 667. Nobody has measured
-what dropping WHO costs in accuracy, and that number should exist before it
-becomes a business decision.
-
-**Nothing enforces this.** The pack format carries `nonCommercial: true` and no
-code reads it.
-
-## Credentials and local files, none of them in git
+## Local files, none of them in git
 
 - `~/.config/fred/fcc.env` — FCC API username and token, mode 600.
-- `~/fred-tracks/` — drive-test CSVs. They hold real coordinates;
-  `.gitignore` refuses `bkr1-*.csv`.
-- `~/fred-known-good.apk` — a working build, if one is ever needed back.
-- `~/models/` — the GGUFs and the encoder. Not in git, needed by the eval.
+- `~/fred-tracks/` — drive-test CSVs with real coordinates.
+- `~/models/` — GGUFs and encoders, needed by the eval.
+- `packs/` — the 55 current packs (EmbeddingGemma); old ones in `~/fred-packs-gte-backup`.
+- `~/fred-maps/` — basemaps, contours, coverage; `~/fred-bundles/<STATE>/` — bundles.
+  Caches, safe to delete: `.contours-work` (31 GB elevation), `.fcc-work` (12 GB FCC zips).
+- `~/toolchain/pmtiles/pmtiles` — go-pmtiles 1.31.2 (set `PMTILES_BIN`).
 
 ## Commands
 
 ```
-npm test                                            # 152 tests
-npm run typecheck                                   # packages, tools AND the app
-EVAL_SET=holdout node tools/eval/src/run-graded.ts docs/holdout-runs.jsonl
-node tools/ingest/src/coverage-pack.ts out.bin <fcc.shp.zip>...
+npm test                                                   # 215 tests
+npm run typecheck                                          # packages, tools and the app
+EVAL_SET=holdout node tools/eval/src/run-graded.ts out.jsonl
+node scripts/build-state-coverage.mjs CA ~/fred-maps       # FCC carrier coverage
+node scripts/build-state-bundle.mjs CA ~/fred-bundles      # map + contours + coverage + flora
+scripts/build-all-bundles.sh                               # every state, resumable
+tools/eval/build-apk.sh [--field-test]
+tools/eval/stage-bundle.sh ~/fred-bundles/CA
 ```
 
-Ingest and measurement must not share a machine — a build at 1504% CPU once
+Ingest and measurement must not share a machine: a build at 1504% CPU once
 turned a 5 s eval question into 98 s (`docs/results-m2.md`).

@@ -55,3 +55,69 @@ export function decodeCells(bytes: Uint8Array): string[] {
   }
   return cells;
 }
+
+/**
+ * One carrier's reported footprint in a pack. `id` is the FCC provider id
+ * (`carriers.ts` maps a SIM to it); `name` is for display.
+ */
+export interface CarrierCoverage {
+  readonly id: string;
+  readonly name: string;
+  readonly cells: ReadonlySet<string>;
+}
+
+/**
+ * A state's coverage pack: every carrier's footprint kept apart, so the map can
+ * say where *your* carrier has nothing and where *no* carrier has anything
+ * (issue #58). The FCC's mobile voice layer: where a call can be made.
+ */
+export interface CoveragePack {
+  /** The FCC filing the data comes from, e.g. "2025-12-31". */
+  readonly asOf: string;
+  readonly carriers: readonly CarrierCoverage[];
+}
+
+const MAGIC = [0x46, 0x43, 0x56, 0x32]; // "FCV2"
+
+/**
+ * Pack wire format, before gzip:
+ *
+ *   "FCV2" | u32 LE header length | header JSON (UTF-8) | cell blobs
+ *
+ * The header lists `{ id, name, bytes }` per carrier in blob order; each blob is
+ * `encodeCells`. Carriers overlap heavily, but each footprint is contiguous, so
+ * per-carrier delta runs still gzip to a few KB each.
+ */
+export function encodePack(pack: CoveragePack): Uint8Array {
+  const blobs = pack.carriers.map((c) => encodeCells([...c.cells]));
+  const header = new TextEncoder().encode(JSON.stringify({
+    asOf: pack.asOf,
+    carriers: pack.carriers.map((c, i) => ({ id: c.id, name: c.name, bytes: blobs[i]!.length })),
+  }));
+  const out = new Uint8Array(8 + header.length + blobs.reduce((s, b) => s + b.length, 0));
+  out.set(MAGIC, 0);
+  new DataView(out.buffer).setUint32(4, header.length, true);
+  out.set(header, 8);
+  let p = 8 + header.length;
+  for (const b of blobs) { out.set(b, p); p += b.length; }
+  return out;
+}
+
+/** Decode what `encodePack` wrote. Throws on anything else, including a v1 pack. */
+export function decodePack(bytes: Uint8Array): CoveragePack {
+  if (bytes.length < 8 || MAGIC.some((m, i) => bytes[i] !== m)) {
+    throw new Error('not a coverage pack (FCV2)');
+  }
+  const len = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(4, true);
+  const header = JSON.parse(new TextDecoder().decode(bytes.subarray(8, 8 + len))) as {
+    asOf: string; carriers: { id: string; name: string; bytes: number }[];
+  };
+  let p = 8 + len;
+  const carriers = header.carriers.map((c) => {
+    const cells = new Set(decodeCells(bytes.subarray(p, p + c.bytes)));
+    p += c.bytes;
+    return { id: c.id, name: c.name, cells };
+  });
+  if (p !== bytes.length) throw new Error(`coverage pack: ${bytes.length - p} trailing bytes`);
+  return { asOf: header.asOf, carriers };
+}

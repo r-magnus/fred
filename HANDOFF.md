@@ -14,22 +14,27 @@ the bundles are complete**, by the owner's decision.
 
 ## A-KR2 — accuracy, due 2026-10-12
 
-**66.3% held out (26.5/40), target 80%; 83.0% tuning; 1 safety failure.**
-`docs/results-phase3.md`, `docs/METRICS.md`.
+**70.0% held out (28.0/40), target 80%; 84.0/104 tuning; 0 safety failures.**
+`docs/METRICS.md`. Since phase 3 (2026-09-26/27):
 
-- Clinical procedures (IV lines, needle decompression, dose tables) are marked
-  provider-only at ingest and get a fixed referral.
-- A clearly matching field card is shown **verbatim**, the only mode measured
-  that cannot invert a card; card answers take under a second on the phone.
-- The hiker's state is named in the prompt when the question points at it.
-- FM 21-76 ch. 19 is the signalling source (FM 3-05.70 is distribution-restricted).
-- Rejected with measurements: a second search in manual wording (let 14
-  out-of-scope questions through), model-picked card steps, card-only rewriting,
-  and earlier the NLI verification pass.
-
-What is left: 6 wrongful declines and 7 partly-right answers held out, one
-unsafe answer (`hff-bulrush-01`). Untried: Qwen3 thinking mode (#36).
-Conversation memory (item 4 below) also bears on accuracy.
+- WHO drug, oxygen and IV steps removed at ingest (#61); plant-database
+  passages about animals eating carry a "not food for people" note in the
+  prompt (last held-out safety failure gone); a location is asked for only
+  when unknown; referral fires on any near-top provider-only passage.
+- **Field cards, batch 3:** nine cards on wilderness first-aid syllabus topics
+  (spinal, chest wound, pelvis, belly wound, altitude, seizure, low blood
+  sugar, dehydration, signalling), self-reviewed per Ryan's standing rule
+  (`corpora/cards/self-reviews.json`) and on the review page. Held-out: the
+  pelvis card rescues a declined question (+1); the belly card answers "can I
+  pack a wound in someone's belly?" without a "no" first (-0.5).
+- **Known card gap, deliberately not fixed:** the belly card should say "don't
+  pack a belly wound". It was found through a held-out answer, so adding it
+  makes `hf-woundpack-01` a tuning question; do it with that noted.
+- **Measured and rejected:** contextual retrieval (`results-contextual.md`),
+  Qwen3 thinking mode (`results-thinking.md`), lay-vocabulary expansion (the
+  refusals are gate misses with the right passage ranked 1-2, not vocabulary).
+- **Next card batch** (same syllabus): eye injuries, river crossing, knots and
+  cordage, staying healthy (hygiene, insects), heart attack and stroke.
 
 ## What is owed, in order
 

@@ -54,5 +54,29 @@
   "by": "Claude (self-review)",
   "change": "New card, batch 3 (wilderness first-aid syllabus topic).",
   "why": "Oral glucose is lay care (WHO p.33); everyday sugar forms flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "belly-wound",
+  "rev": "eeb2bc5691ba",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (syllabus topic).",
+  "why": "ATP 4-02.11 abdominal-wound steps in lay words; improvised dressing allowed by the manual. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "dehydration",
+  "rev": "a1d493a455f8",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (syllabus topic).",
+  "why": "No lay rehydration recipe in the manuals, so none invented; extreme isolation treatments left out. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "signal-rescue",
+  "rev": "05efb7bd3240",
+  "date": "2026-09-27",
+  "by": "Claude (self-review)",
+  "change": "New card, batch 3 (syllabus topic).",
+  "why": "Military and hiker-dangerous methods (tree torch, burning rubber) left out; phone and stay-with-signals lines flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
  }
 ]

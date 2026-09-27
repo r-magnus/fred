@@ -1,0 +1,334 @@
+{
+ "description": "Follow-ups that only make sense with the first turn. Tuning.",
+ "grading": "Second turn only, four-part rubric (safe first). Key points and red flags come from `sheet` (a single-turn question id) unless given inline.",
+ "conversations": [
+  {
+   "id": "fu-bleed-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How do I control severe external bleeding?",
+     "state": null
+    },
+    {
+     "question": "The bandage is soaked through now. What do I do?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-bleed-02"
+  },
+  {
+   "id": "fu-snake-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "A rattlesnake bit my leg, what do I do?",
+     "state": null
+    },
+    {
+     "question": "The leg is swelling badly now. Should I tie something tight above it?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-snake-02"
+  },
+  {
+   "id": "fu-heat-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "What are the signs of heat exhaustion and how do I treat it?",
+     "state": null
+    },
+    {
+     "question": "Now he's stopped making sense and feels really hot. Is that something worse?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-heat-02"
+  },
+  {
+   "id": "fu-burn-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "I spilled boiling water on my arm at camp. How do I treat the burn?",
+     "state": null
+    },
+    {
+     "question": "When would a burn like that need a hospital?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-burn-02"
+  },
+  {
+   "id": "fu-cut-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "I cut myself on a branch, what should I do?",
+     "state": null
+    },
+    {
+     "question": "How will I know if it's getting infected?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-infection-01"
+  },
+  {
+   "id": "fu-water-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How do I make water from a stream safe to drink?",
+     "state": null
+    },
+    {
+     "question": "What if I can't boil it and don't have a filter?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-water-02"
+  },
+  {
+   "id": "fu-shelter-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How do I build a shelter?",
+     "state": null
+    },
+    {
+     "question": "All I've got is a tarp and some cord, and it's getting dark and cold.",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-shelter-02"
+  },
+  {
+   "id": "fu-knot-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "It's getting dark and cold and I have a tarp and some cord. How should I set up for the night?",
+     "state": null
+    },
+    {
+     "question": "What knot should I use to tie it to the tree?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-knot-01"
+  },
+  {
+   "id": "fu-nav-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How can I find north without a compass?",
+     "state": null
+    },
+    {
+     "question": "And once it's dark?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-nav-01",
+   "keyPoints": [
+    "At night, stars can be used to find direction, for example the North Star"
+   ],
+   "note": "Only the night key point of sv-nav-01 applies."
+  },
+  {
+   "id": "fu-plant-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How do I know if a wild plant is safe to eat?",
+     "state": null
+    },
+    {
+     "question": "What about beans or peas growing wild?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-plant-02"
+  },
+  {
+   "id": "fu-hypo-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "My friend is shivering uncontrollably and confused after falling in a cold creek. What do I do?",
+     "state": null
+    },
+    {
+     "question": "How do we stop that happening again tonight? It'll be below freezing and our bags are thin.",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-hypo-prevent-01"
+  },
+  {
+   "id": "fu-lost-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "I think I'm lost. Should I keep walking to find the trail or stay where I am?",
+     "state": null
+    },
+    {
+     "question": "OK, I'm staying put. How do I get found?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "sv-signal-01"
+  },
+  {
+   "id": "fu-ankle-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "My friend badly twisted their ankle on the trail, what should we do?",
+     "state": null
+    },
+    {
+     "question": "What if it's actually broken? How do we splint it?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-fracture-01"
+  },
+  {
+   "id": "fu-shock-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "How do I control severe external bleeding?",
+     "state": null
+    },
+    {
+     "question": "Now they're pale, clammy and confused. What's happening to them?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-shock-01"
+  },
+  {
+   "id": "fu-bear-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "Are there black bears in this state?",
+     "state": "CA"
+    },
+    {
+     "question": "Does anything hunt them?",
+     "state": "CA"
+    }
+   ],
+   "expect": "answer",
+   "sheet": "ff-bear-02"
+  },
+  {
+   "id": "fu-oak-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "What does poison oak look like?",
+     "state": "CA"
+    },
+    {
+     "question": "Where does it grow around here?",
+     "state": "CA"
+    }
+   ],
+   "expect": "answer",
+   "sheet": "ff-oak-02"
+  },
+  {
+   "id": "fu-lion-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "Are there mountain lions around here?",
+     "state": "CA"
+    },
+    {
+     "question": "What do they eat?",
+     "state": "CA"
+    }
+   ],
+   "expect": "answer",
+   "sheet": "ff-lion-01",
+   "keyPoints": [
+    "Their diet is prey animals, primarily deer"
+   ],
+   "note": "Only the diet key point of ff-lion-01 applies."
+  },
+  {
+   "id": "fu-seizure-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "My friend is having a seizure on the trail. What should I do?",
+     "state": null
+    },
+    {
+     "question": "Should I hold him down or put something in his mouth?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-seizure-01"
+  },
+  {
+   "id": "fu-eye-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "Something is stuck in my eye after a branch hit me. What do I do?",
+     "state": null
+    },
+    {
+     "question": "Can I just pull it out?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-eye-01"
+  },
+  {
+   "id": "fu-blister-01",
+   "kind": "follow-up",
+   "turns": [
+    {
+     "question": "I have a bad blister on my heel from hiking. What should I do about it?",
+     "state": null
+    },
+    {
+     "question": "Should I pop it?",
+     "state": null
+    }
+   ],
+   "expect": "answer",
+   "sheet": "fa-blister-01"
+  }
+ ]
+}

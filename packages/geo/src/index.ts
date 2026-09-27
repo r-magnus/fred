@@ -123,6 +123,27 @@ export function stateForCoords(
   return nearest;
 }
 
+/**
+ * Whether a point lies inside a state's outline, with no snapping.
+ *
+ * The coverage map uses this to bound its warnings: a state's pack only knows
+ * that state's cells, so outside the outline (the sea, the next state) "no
+ * carrier reports coverage" would be a claim the data never made.
+ */
+export function insideState(
+  latitude: number,
+  longitude: number,
+  state: string,
+  boundaries: StateBoundaries = STATE_BOUNDARIES,
+): boolean {
+  const b = boundaries[state];
+  if (b === undefined) return false;
+  if (longitude < b.bbox[0] || longitude > b.bbox[2] || latitude < b.bbox[1] || latitude > b.bbox[3]) {
+    return false;
+  }
+  return b.rings.some((ring) => ringContains(ring, longitude, latitude));
+}
+
 /** How far the fallback reached, in km, or 0 when the point was contained. */
 export const SNAP_DISTANCE_KM = SNAP_KM;
 
@@ -139,3 +160,6 @@ export {
 // module the app needs for stateForCoords.
 
 export { circleRing, distanceMeters } from './circle.ts';
+
+// Which network a phone is on; pure data, safe for the app's bundle.
+export { carrierFromSim, MAJOR_CARRIERS, type SimInfo } from './carriers.ts';

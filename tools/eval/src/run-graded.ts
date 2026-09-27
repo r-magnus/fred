@@ -12,91 +12,27 @@
  * That is the point: the MCQ harness constrains output to one letter, so it
  * cannot see an answer that names every correct step and also invents one.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { ask, verifyEmbedderParity, type CardAnswerMode } from '@fred/rag-core';
-import { NodePackStore, createNodeBackend } from './node-pack.ts';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { ask } from '@fred/rag-core';
+import { openHarness } from './harness.ts';
 import { loadGradedSet, describeSet, setsFor, type GradedQuestion, type GradedRun } from './graded-types.ts';
-import { compressionFromEnv, describeRetrieval, retrievalFromEnv } from './retrieval-env.ts';
+import { askOptionsFromEnv } from './retrieval-env.ts';
 
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
-
-// Retrieval and compression settings come from the environment (TOPK,
-// RETRIEVAL_QUERY, DENSE_POOL, COMPRESS); see retrieval-env.ts. TOPK used to be
-// read here, so a comparison of how many chunks reach the generator still works.
-const retrieval = retrievalFromEnv();
-const PACKS = process.env.PACKS_DIR ?? 'packs';
-const compression = compressionFromEnv();
 
 const questions: GradedQuestion[] = setsFor(process.env.EVAL_SET).flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
 );
 console.log(describeSet(questions));
-const genModelPath = process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`;
-// Printed because these two settings are what an A/B between runs is varying,
-// and a results file that does not say which model produced it is not evidence.
-console.log(`${describeRetrieval(retrieval)} compress=${compression === undefined ? 'off' : 'on'}  model=${genModelPath.split('/').pop()}  packs=${PACKS}`);
-
-const store = new NodePackStore();
-const manifests = readdirSync(PACKS)
-  .map((d) => join(PACKS, d))
-  .filter((d) => existsSync(join(d, 'manifest.json')))
-  .map((d) => store.load(d));
-if (manifests.length === 0) throw new Error('no packs under packs/; run tools/ingest first');
-const base = manifests[0]!;
-
-const backend = await createNodeBackend({
-  embedModelId: base.embedding.modelId,
-  cosineFloor: base.embedding.cosineFloor,
-  probe: base.embedding.probe,
-  queryTemplate: base.embedding.queryTemplate,
-  genModelPath,
-});
-
-// A parity failure invalidates every number below it, so check before spending
-// an hour of generation rather than discovering it in the results.
-for (const m of manifests) {
-  const parity = await verifyEmbedderParity(m.embedding, backend);
-  if (!parity.ok) {
-    throw new Error(`pack ${m.id}: embedder parity ${parity.cosine.toFixed(4)}, refusing to run`);
-  }
-}
-console.log(`${manifests.length} packs, embedder parity OK\n`);
-
-const packs = manifests.map((m) => ({ id: m.id, domains: m.domains, scope: m.scope }));
+const harness = await openHarness();
+const { backend, store, packs } = harness;
+const askOptions = askOptionsFromEnv();
 const runs: GradedRun[] = [];
 
 for (const [i, q] of questions.entries()) {
   const t0 = Date.now();
-  const res = await ask(q.question, { backend, store, packs }, {
-    state: q.state, retrieval,
-    ...(compression === undefined ? {} : { compression }),
-    // ABSTAIN_THRESHOLD overrides the decline gate; 0 lets every question
-    // through, which is what calibrate.ts needs to see the score distribution.
-    ...(process.env.ABSTAIN_THRESHOLD !== undefined ? { abstainThreshold: Number(process.env.ABSTAIN_THRESHOLD), fallbackThreshold: Number(process.env.ABSTAIN_THRESHOLD) } : {}),
-    // ROUTING_FALLBACK=1 measures what searching everything on a no-match
-    // recovers. Off by default so a plain run reflects what ships.
-    ...(process.env.ROUTING_FALLBACK === '1' ? { allowRoutingFallback: true } : {}),
-    ...(process.env.FALLBACK_THRESHOLD !== undefined
-      ? { fallbackThreshold: Number(process.env.FALLBACK_THRESHOLD) } : {}),
-    // SUFFICIENCY=1 asks the model whether the retrieved passages answer the
-    // question before generating. Off by default until it has earned its cost.
-    ...(process.env.SUFFICIENCY === '1' ? { checkSufficiency: true } : {}),
-    // SUFFICIENCY_PROMPT=numeric swaps in the wording that makes "a question
-    // asking for a quantity needs the quantity present" an explicit rule. The
-    // default wording is 0 of 3 on dosing questions.
-    ...(process.env.SUFFICIENCY_PROMPT === 'numeric'
-      ? { sufficiencyVariant: 'numeric' as const } : {}),
-    // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
-    ...(process.env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
-    // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
-    ...(process.env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
-    // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
-    ...(process.env.LOCATION === '0' ? { locationInPrompt: false } : {}),
-    // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.
-    ...(process.env.CARD_ANSWER !== undefined ? { cardAnswer: process.env.CARD_ANSWER as CardAnswerMode } : {}),
-  });
+  const res = await ask(q.question, { backend, store, packs }, { ...askOptions, state: q.state });
 
   let answer = '';
   // GENERATE=0 records retrieval and the gate's decision without spending a
@@ -148,5 +84,4 @@ if (answered.length > 0) {
   console.log(`answered: ${answered.length}  latency mean ${mean}ms  p95 ${lat[Math.floor(lat.length * 0.95)]}ms`);
 }
 
-await backend.dispose();
-store.close();
+await harness.close();

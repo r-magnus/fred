@@ -144,6 +144,26 @@ export interface PackManifest {
   readonly builtAt: string;
   /** Version of tools/ingest that produced this pack, for reproducibility. */
   readonly ingestVersion: string;
+  /**
+   * Field-card packs only: the cards whose advice depends on one detail, keyed
+   * by chunk id. Fred asks the question with a button per answer, and each
+   * answer shows a subset of the card's own steps (#50).
+   */
+  readonly clarify?: Readonly<Record<string, CardClarify>>;
+}
+
+/** One question a field card asks when its steps depend on the situation. */
+export interface CardClarify {
+  /** "What does the burned skin look like?" */
+  readonly question: string;
+  readonly choices: readonly {
+    /** Button text: "Blistered". */
+    readonly label: string;
+    /** Phrases that already answer the question when the hiker says them. */
+    readonly words: readonly string[];
+    /** 1-based card steps to show, in the order to show them. */
+    readonly steps: readonly number[];
+  }[];
 }
 
 /**

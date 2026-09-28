@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type {
-  ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest,
+  ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest, CardClarify,
 } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
 import { denseTopK, vectorRow } from '@fred/rag-core';
@@ -45,6 +45,11 @@ export class NodePackStore implements PackStore {
     const p = this.packs.get(packId);
     if (!p) throw new Error(`pack not loaded: ${packId}`);
     return p.manifest.embedding;
+  }
+
+  clarifyFor(chunkId: string): CardClarify | undefined {
+    // Chunk ids are "<packId>:<ordinal>", and pack ids contain no colon.
+    return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.clarify?.[chunkId];
   }
 
   async searchLexical(

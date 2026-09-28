@@ -13,7 +13,7 @@ import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSuffici
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
-import { buildPickParts, parseCard, readPick, renderCard } from './card-answer.ts';
+import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 
 /**
@@ -234,6 +234,16 @@ export interface Diagnostics {
   readonly cardAnswer?: CardAnswerMode;
 }
 
+/** A card's clarifying question, ready to show (see AskResult 'answer'). */
+export interface ClarifyView {
+  readonly question: string;
+  readonly choices: readonly { readonly label: string; readonly text: string }[];
+  /** The answer the message already gave, or null when Fred should ask. */
+  readonly picked: string | null;
+  /** The whole card, for "Not sure". */
+  readonly whole: string;
+}
+
 export type AskResult =
   /** Retrieval succeeded and cleared the gate; stream the answer. */
   | {
@@ -247,6 +257,13 @@ export type AskResult =
        * the citation labels alone cannot show.
        */
       readonly prompt: PromptParts;
+      /**
+       * A field card whose steps depend on one detail (#50). The app shows
+       * the question with a button per answer; each answer's text is the
+       * card's own steps for that case. `picked` is set when the message
+       * already said which (the answer then shows only that case).
+       */
+      readonly clarify?: ClarifyView;
       readonly diagnostics: Diagnostics;
     }
   /** Small talk: a short fixed reply, with the matching card offered if any. */
@@ -513,7 +530,18 @@ export async function ask(
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
     }
     if (cardMode === 'verbatim') {
-      return { ...common, stream: once(renderCard(parsed)) };
+      const ask = store.clarifyFor?.(card.chunk.id);
+      if (ask === undefined) return { ...common, stream: once(renderCard(parsed)) };
+      const choices = ask.choices.map((c) => ({ label: c.label, text: renderCardSteps(parsed, c.steps) }));
+      const picked = pickChoice(ask.choices, query);
+      // Vague ("how do I treat a burn?"): the whole card, as before, with the
+      // question offered to narrow it. Already said ("my palm is
+      // blistering"): only that case, with the others a tap away.
+      return {
+        ...common,
+        stream: once(picked === null ? renderCard(parsed) : choices[picked]!.text),
+        clarify: { question: ask.question, choices, picked: picked === null ? null : choices[picked]!.label, whole: renderCard(parsed) },
+      };
     }
     const signal = opts.signal;
     return {

@@ -429,6 +429,40 @@ test('a clearly matching card is answered verbatim, without the model', async ()
   assert.equal(res.citations.length, 1);
 });
 
+test('a card with a clarifying question: whole card and the question, or the case already named', async () => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Burns need cool water.')]);
+  store.addPack('core-fieldcards', [seed(
+    "Burns\nStop it, then check the skin.\n1. Stop, drop and roll.\n2. Surface burn: cool water.\n3. Blistering burn: cool and cover.\nDon't use ice.",
+    { source: 'Fred field card' },
+  )]);
+  const clarify = { question: 'What does the skin look like?', choices: [
+    { label: 'Red', words: ['just red'], steps: [1, 2] },
+    { label: 'Blistered', words: ['blister'], steps: [1, 3] },
+  ] };
+  const withClarify = Object.assign(store, { clarifyFor: (id: string) => (id === 'core-fieldcards:0' ? clarify : undefined) });
+  const opts = {
+    state: null, abstainThreshold: 0, cardAnswer: 'verbatim' as const,
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
+  };
+  const text = async (r: Awaited<ReturnType<typeof ask>>): Promise<string> => {
+    let out = '';
+    if (r.kind === 'answer') for await (const t of r.stream) out += t;
+    return out;
+  };
+
+  const vague = await ask('burns stop drop roll cool cover', { backend: new FakeBackend(), store: withClarify, packs: clinicalPacks }, opts);
+  assert.equal(vague.kind, 'answer');
+  if (vague.kind !== 'answer') return;
+  assert.equal(vague.clarify?.picked, null);
+  assert.equal(vague.clarify?.choices[1]?.text, "Stop it, then check the skin.\n1. Stop, drop and roll.\n2. Blistering burn: cool and cover.\nDon't use ice.");
+  assert.match(await text(vague), /1\. Stop, drop and roll\.\n2\. Surface burn/);
+
+  const named = await ask('burns stop drop roll cool cover, it is starting to blister', { backend: new FakeBackend(), store: withClarify, packs: clinicalPacks }, opts);
+  assert.equal(named.kind === 'answer' ? named.clarify?.picked : undefined, 'Blistered');
+  assert.equal(await text(named), "Stop it, then check the skin.\n1. Stop, drop and roll.\n2. Blistering burn: cool and cover.\nDon't use ice.");
+});
+
 // Conversation memory (docs/plan-memory.md).
 const drain = async (res: Awaited<ReturnType<typeof ask>>): Promise<void> => {
   if (res.kind === 'answer') for await (const _ of res.stream) { /* drain */ }

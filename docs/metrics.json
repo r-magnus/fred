@@ -1,6 +1,6 @@
 {
   "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md — it is generated.",
-  "updated": "2026-09-25",
+  "updated": "2026-09-27",
   "config": {
     "model": "Qwen3-1.7B-Q4_K_M",
     "embedder": "EmbeddingGemma-300M (GGUF Q8), meaning-only search of the whole question",
@@ -9,7 +9,7 @@
     "abstainThreshold": 0.29,
     "scoring": "four-part rubric since 2026-09-24: safe first, then correct, on the question, sounds like Fred",
     "measuredOn": "desktop harness for accuracy; Nothing Phone (3) for device latency and memory",
-    "akr2Target": "80% (working target, lowered from 90% on 2026-09-18)"
+    "akr2Target": "70% (final proposal v1.2, 2026-09-27); an A needs more than 80%"
   },
   "krs": [
     {
@@ -32,21 +32,21 @@
       "id": "A-KR2",
       "name": "Response accuracy",
       "due": "2026-10-12",
-      "value": 66.3,
+      "value": 72.5,
       "unit": "%",
-      "target": 80,
+      "target": 70,
       "bands": [
-        ">90",
-        "90-80",
-        "79-70",
-        "69-60",
-        "<60"
+        ">80",
+        "79-60",
+        "59-50",
+        "49-30",
+        "<30"
       ],
-      "grade": "D",
-      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md.",
+      "grade": "B",
+      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating (\"not food for people\"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers \"can I pack a wound in someone's belly?\" with the whole card rather than \"no\" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.",
       "secondary": {
-        "value": 83.0,
-        "label": "tuning set"
+        "value": 67.5,
+        "label": "fresh breadth set, graded blind"
       }
     },
     {
@@ -55,17 +55,17 @@
       "due": "2026-10-19",
       "value": 15.4,
       "unit": "s",
-      "target": 10,
+      "target": 20,
       "lowerIsBetter": true,
       "bands": [
-        "<10s",
-        "10-20s",
-        "21-40s",
-        "1-3m",
-        ">3m"
+        "<20s",
+        "20-40s",
+        "~2m",
+        "~5m",
+        ">5m"
       ],
-      "grade": "B",
-      "note": "Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Still inside the 10-20 s band."
+      "grade": "A",
+      "note": "Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Inside the <20 s target (proposal v1.2); the phone mean predates phase 3 and should be re-measured."
     },
     {
       "id": "B-KR1",
@@ -73,25 +73,31 @@
       "due": "2026-10-26",
       "value": 9.5,
       "grade": "A",
-      "note": "9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.",
+      "note": "9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened. Proposal v1.2 also asks that the location be served to the LLM: today Fred's prompt gets the state only (see B-KR2).",
       "unit": "m",
-      "target": 10,
       "lowerIsBetter": true,
       "bands": [
-        "±10m",
-        "±50m",
-        "±200m",
-        "±500m",
-        ">±1km"
+        "Known, shown accurately on-map",
+        "Rough, via GPS out of service",
+        "Rough, via GPS in service",
+        "State known",
+        "Unknown"
       ]
     },
     {
       "id": "B-KR2",
-      "name": "Offline location estimate",
+      "name": "Location in Fred's answers",
       "due": "2026-11-10",
-      "value": "on device",
-      "grade": "built",
-      "note": "Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its ±1 km target. Unverified: needs the drive."
+      "value": "state only",
+      "grade": "D",
+      "note": "Redefined in proposal v1.2: the LLM should know where the user is, ideally relative to nearby points of interest, and tailor answers to it. Today the prompt names the user's state and picks the state's plant and animal pack; it knows nothing finer. The offline map and GPS zone (built, unverified) show the user where they are but are not given to Fred.",
+      "bands": [
+        "Rough location relative to POIs",
+        "Rough location",
+        "Can be told the location",
+        "State only",
+        "Separate"
+      ]
     },
     {
       "id": "B-KR3",
@@ -99,7 +105,14 @@
       "due": "2026-11-16",
       "value": "on device",
       "grade": "built",
-      "note": "Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive."
+      "note": "Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.",
+      "bands": [
+        "±2km",
+        "±5km",
+        "±7.5km",
+        "±10km",
+        ">±10km"
+      ]
     },
     {
       "id": "RC-KR1",
@@ -111,19 +124,26 @@
     },
     {
       "id": "RC-KR2",
-      "name": "Product page",
+      "name": "User population",
       "due": "2026-12-02",
       "value": null,
       "grade": "—",
-      "note": "Not started."
+      "note": "Redefined in proposal v1.2: at least 10 people using Fred across iOS and Android, with qualitative reviews collected. Not started.",
+      "bands": [
+        ">10",
+        "9-5",
+        "5-2",
+        "1",
+        "none"
+      ]
     },
     {
       "id": "RC-KR3",
-      "name": "Promotional material",
+      "name": "Product page and promo",
       "due": "2026-12-09",
       "value": null,
       "grade": "—",
-      "note": "Not started."
+      "note": "Proposal v1.2: a product page with at least 3 videos and 8 images of Fred in use. Not started."
     }
   ],
   "akr2History": [
@@ -175,6 +195,31 @@
     {
       "label": "phase 3: card answers, referral (held out)",
       "overall": 66.3,
+      "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "re-measured, WHO drug steps out (held out)",
+      "overall": 67.5,
+      "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "forage note, location fix (held out)",
+      "overall": 68.8,
+      "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "cards batch 3: six syllabus cards (held out)",
+      "overall": 71.3,
+      "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "+ belly, dehydration, signal (held out)",
+      "overall": 70.0,
+      "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "cards batch 4: six more (held out)",
+      "overall": 72.5,
       "model": "Qwen3-1.7B"
     }
   ],
@@ -443,5 +488,15 @@
     ],
     "note": "This is the number to quote for A-KR2. Run once per phase and never fitted to. The phase-3 run used the first version of the location line; the narrowed version leaves the affected questions with their phase-2 prompts."
   },
-  "akr2HistoryNote": "The rows are not all the same measurement. Rows before \"rubric\" were scored yes/no, all but the last on the tuning set. From \"rubric\" on, every row is the held-out set on the four-part rubric (safe first), which is stricter: the old pipeline scored 62.5% yes/no and 50.0% on the rubric. Compare within each group."
+  "akr2HistoryNote": "The rows are not all the same measurement. Rows before \"rubric\" were scored yes/no, all but the last on the tuning set. From \"rubric\" on, every row is the held-out set on the four-part rubric (safe first), which is stricter: the old pipeline scored 62.5% yes/no and 50.0% on the rubric. Compare within each group.",
+  "akr2Notes": [
+    {
+      "title": "Follow-up questions (conversation memory, 2026-09-26)",
+      "text": "Measured separately: a second question that only makes sense after the first. Held-out two-turn set, 13 conversations, run once: **46% → 81%** with memory (6.0 → 10.5), no unsafe answers either way. Single-question answers are byte for byte unchanged. docs/results-memory.md."
+    },
+    {
+      "title": "Fresh questions, graded blind (2026-09-27)",
+      "text": "57 questions written after every change they judge (random manual passages, general syllabus topics, out of scope), pipeline of 2026-09-25 against today's, A/B shuffled: **61.4% → 67.5%**, 4 wins, 0 losses, 0 unsafe. The held-out set runs about 5 points above fresh questions. docs/results-breadth.md."
+    }
+  ]
 }

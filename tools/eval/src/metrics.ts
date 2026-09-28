@@ -23,6 +23,8 @@ interface Metrics {
   akr2History: { label: string; overall: number; model: string }[];
   /** Caveat printed under the history, e.g. where the scoring method changed. */
   akr2HistoryNote?: string;
+  /** Measurements beside the headline score (follow-ups, fresh questions), one short section each. */
+  akr2Notes?: { title: string; text: string }[];
   akr2Breakdown: Record<string, { pass: number; total: number; what: string }>;
   remainingLosses: { n: number; what: string; fix: string }[];
   latency: { mean: number; median: number; p95: number; overTenSeconds: number; ofQueries: number; note: string };
@@ -139,6 +141,13 @@ for (const [name, b] of Object.entries(m.akr2Breakdown)) {
 }
 p();
 
+for (const n of m.akr2Notes ?? []) {
+  p(`### ${n.title}`);
+  p();
+  p(n.text);
+  p();
+}
+
 p('### Where the remaining points are');
 p();
 p('| Lost | Why | What would fix it |');
@@ -149,10 +158,12 @@ p();
 p('## A-KR3 — response time');
 p();
 p('```');
-p('(longer bar = slower; the target is to stay left of the 10s mark)');
+// The chart spans twice the target, so the target mark sits mid-bar.
+const tTarget = m.krs.find((k) => k.id === 'A-KR3')?.target ?? 20;
+p(`(longer bar = slower; the target is to stay left of the ${tTarget}s mark)`);
 p('');
-const sec = (v: number): string => `${v.toFixed(1).padStart(5)} s   ${bar(Math.min(100, (v / 20) * 100))}`;
-p(`target  ${sec(10)}  <-- 10s`);
+const sec = (v: number): string => `${v.toFixed(1).padStart(5)} s   ${bar(Math.min(100, (v / (2 * tTarget)) * 100))}`;
+p(`target  ${sec(tTarget)}  <-- ${tTarget}s`);
 p(`mean    ${sec(m.latency.mean)}`);
 p(`median  ${sec(m.latency.median)}`);
 p(`p95     ${sec(m.latency.p95)}`);
@@ -184,7 +195,7 @@ if (m.device) {
   for (const a of d.answers) {
     p(`${a.q.padEnd(wq)}  ${bar(Math.min(100, (a.totalMs / 25000) * 100))}  ${(a.totalMs / 1000).toFixed(1).padStart(5)} s   (TTFT ${(a.ttftMs / 1000).toFixed(1)}s)`);
   }
-  p(`${'10s target'.padEnd(wq)}  ${bar(40)}`);
+  p(`${`${tTarget}s target`.padEnd(wq)}  ${bar(Math.min(100, (tTarget * 1000 / 25000) * 100))}`);
   p('```');
   p();
   p(`> ${d.note}`);

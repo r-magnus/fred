@@ -6,7 +6,7 @@
 
 <p align="center">
   CS-195 Senior Seminar · Fall 2026 · Ryan Magnuson<br>
-  <sub>Project proposal v0.5 (rolling draft), submitted 9/12/2026</sub>
+  <sub>Project proposal v1.2 (final), submitted 9/27/2026</sub>
 </p>
 
 ---
@@ -38,8 +38,10 @@
 | **Course** | CS-195 Senior Seminar |
 | **Term** | Fall 2026 |
 | **Instructor** | Mike Ryu |
-| **Submitted** | 9/12/2026 |
-| **Version** | v0.5 — Rolling First Draft |
+| **Submitted** | 9/27/2026 |
+| **Version** | v1.2 — Final Submission |
+
+**Artifacts:** [Core repository](https://github.com/r-magnus/fred) · [Project board](https://github.com/users/r-magnus/projects/1) · CS-195 Project Proposal Draft
 
 ---
 
@@ -57,7 +59,7 @@ user's last known whereabouts. In other words, Fred is a security anchor for the
 less-travelled adventurer, for the explorer who accidentally wandered off the trail,
 for the thrill-seeker hiker who just twisted an ankle. Fred doesn't replace human best
 judgement and reasoning, but instead provides additional counsel when a question arises
-that fails otherwise be answered.
+that fails to be otherwise answered.
 
 Fred will have access to wildlife, plantlife, and first aid knowledge corpora, track
 your location until connection is lost, show a local map of the surrounding area of a
@@ -74,7 +76,7 @@ me, that meant I had to find a vertical where using an enterprise model wasn't a
 option. Where are you most cut off from the Internet of Things? The great outdoors.
 Things began clicking: running a model on my phone.
 
-The true personal investment clicked soon after for me. My grandfather, Fred, passed
+The true personal investment clicked soon after for me. My grandfather, Fred James, passed
 away a few years ago. He served 45 years as part of the USDA Forest Service — I still
 remember visiting his home in Wisconsin, seeing the maps he made on the walls and the
 topographical software running on his ancient computer. I called his daughter, my
@@ -97,7 +99,7 @@ signal, to help find a nearby location to regain connection and make a call.
 | **Context** | On a hiking trail with no signal, where one particularly excited student ends up badly twisting an ankle. |
 | **How it's handled today** | The students rally, put their heads together, and try to help out their fallen comrade by hefting them up and carrying them. One student runs around wildly to try to get service on their phone, to call for help. They slowly make their way back out of the trail. |
 | **What's still hard** | • The students did not consider what the best immediate form of treatment should be.<br>• The students had no way to make a call besides hoping to get lucky.<br>• The students only had each other as resources to rely on — if the group doesn't know something, they can't answer what they don't know. |
-| **Evidence** | Westmont College is a small Christian liberal arts school in Santa Barbara, CA, with many surrounding hiking trails. In 2024, a nameless student attending Westmont broke his ankle near the top of the trail and was escorted back down the trail by two other students, until they luckily found signal and were able to call for assistance. If they had not found signal, they would have had to escort the injured peer down a rock wall, adjacent to a waterfall, via a single knotted rope. The above fictional example mirrors real things that have happened in the real world. |
+| **Evidence** | The above fictional example anecdote mirrors experiences happening today. Westmont College is a small Christian liberal arts school in Santa Barbara, CA, with many surrounding hiking trails. In 2024, a nameless student attending Westmont broke his ankle near the top of the trail and was escorted back down the trail by two other students, until they luckily found signal and were able to call for assistance. If they had not found signal, they would have had to escort the injured peer down a rock wall, adjacent to a waterfall, via a single knotted rope. If the students had been better technologically equipped on their adventures, they would have had a greater number of available options to solve their problems. |
 
 ### Proposed Solution
 
@@ -141,6 +143,7 @@ glean relevant information on their situation from Fred. To boil it down, Fred i
 | [US-10](#us-10--re-read-previous-conversations) | Re-read previous conversations | Core | RC |
 | [US-11](#us-11--respond-under-poor-hardware-conditions) | Respond under poor hardware conditions | Core | Beta |
 | [US-12](#us-12--learn-how-to-build-a-shelter) | Learn how to build a shelter | Core | Beta |
+| [US-13](#us-13--view-battery-consumption) | View battery consumption | Stretch | RC |
 
 #### US-01 · Ask about surrounding fauna and flora
 
@@ -202,7 +205,7 @@ glean relevant information on their situation from Fred. To boil it down, Fred i
 **US-05-AC1 — Lost, and request to be found**
 - **Given** the user is lost, and has no signal or service
 - **When** the user asks Fred "where am I?"
-- **Then** Fred responds with a brief text summary and map of the surrounding area, with a circle range estimate of the user's location.
+- **Then** Fred opens the included local map system in-app, and is generally informed of the user's whereabouts when responding to queries.
 
 #### US-06 · Get directions on how to regain signal
 
@@ -277,7 +280,7 @@ glean relevant information on their situation from Fred. To boil it down, Fred i
 **Priority** Core · **Milestone** Beta · **Depends on** LLM RAG Corpora Functionality & Hardware Optimization
 
 **US-11-AC1 — Using new tech with an old phone**
-- **Given** a user has an older generation of mobile device, with weaker hardware
+- **Given** a user has an older generation of mobile device, with weaker hardware (i.e. 2GB RAM)
 - **When** the user asks any question to Fred
 - **Then** Fred's response is shorter, and still within a reasonable amount of time.
 
@@ -292,6 +295,18 @@ glean relevant information on their situation from Fred. To boil it down, Fred i
 - **Given** it's getting late, and a user has decided to set up to spend the night outside
 - **When** the user asks "How do I build a shelter?"
 - **Then** Fred gives a step-by-step walkthrough on how best to build a simple shelter.
+
+#### US-13 · View battery consumption
+
+> As a user, I want to see roughly how much a particular query might drain my phone's
+> battery.
+
+**Priority** Stretch · **Milestone** RC · **Depends on** LLM Benchmarking & per-device hardware analysis
+
+**US-13-AC1 — Asking any question to Fred**
+- **Given** a user is typing in a question to send to Fred
+- **When** the user has completed their message, but hasn't sent it yet
+- **Then** the app displays a rough estimate of expected battery usage per the prompt.
 
 ---
 
@@ -342,7 +357,7 @@ flowchart TB
 
 For example, a user asks a flora corpus-relevant question:
 
-1. Query: "What does poison oak look like, and how do I treat the rash?"
+1. Query: "What does poison ivy look like, and how do I treat the rash?"
 2. Question text is sent to RAG core
 3. SQLite full text search finds top relevant passages & sources
 4. A compound prompt (RAG output and user query) is sent to the local LLM
@@ -358,7 +373,7 @@ sequenceDiagram
   participant DB as SQLite FTS5
   participant LLM as Qwen3-0.6B (llama.rn/ONNX)
 
-  User->>FE: "What does poison oak look like, and how do I treat the rash?"
+  User->>FE: "What does poison ivy look like, and how do I treat the rash?"
   FE->>RAG: Send question text
   RAG->>DB: Full-text search
   DB-->>RAG: Top passages
@@ -385,8 +400,8 @@ sequenceDiagram
 
 | ID | Attribute | Target | Verification |
 |---|---|---|---|
-| QR-01 | Response Time | < 10 s | Over a series of RAG-empowered queries, time each response and measure the average. |
-| QR-02 | Response Accuracy | > 90% | Give an enterprise model a test to administer to Fred, alongside an answer sheet. Compare Fred's outputs to the expected answers, determine if an answer is acceptable or not, and compare correct to incorrect responses. |
+| QR-01 | Response Time | < 30 s | Over a series of RAG-empowered user queries, time each response and measure the average, on a mobile device with 6+ GB RAM. |
+| QR-02 | Semantic Response Accuracy | > 80% | Give an enterprise model a test to administer to Fred, alongside an answer sheet. Compare Fred's outputs to the expected answers, determine if an answer is acceptable or not, and compare correct to incorrect responses. This evaluation is semantic in the sense of evaluating like a real user would: ask a question in a natural way, and receive an answer accurate to the user's specific request, in an evenly natural way. |
 
 ---
 
@@ -447,12 +462,22 @@ sequenceDiagram
 | Accessibility | Price & Platform | Fred will be free-to-use, on a donation income model. Available on iOS & Android. |
 | Social Impact | How people would otherwise handle a problem together in the wilderness | Fred isn't here to redefine how people work together in the wild, but instead help them make informed decisions, together. |
 
+### Impact
+
+| | |
+|---|---|
+| **Stakeholders** | Directly affected are those who would use Fred themselves. Assuming that Fred proves to be effective — used by many, in genuinely helpful contexts — Fred would redefine decision making in the wild. Thus, indirectly affected are those who might have a friend with Fred on their phone, with Fred's input steering their conversations. |
+| **Power to** | The goal of Fred is to empower the not-so enlightened adventurers — that is to say, people who might not know what they're doing in the great outdoors and need a helping hand. Instead of just using a "best guess" in a survival scenario, a user has a little extra information to make an informed decision on. |
+| **Power over** | A simple case is where a user asks Fred a question, and argues their perspective in a survival dispute using Fred as argumentative ammunition. Fred isn't meant to tell others that they are wrong, but merely tune into conversation to assist groups in making informed decisions together. While that is the intention, it's not the only possibility. |
+| **What changes** | I think there's something very special about little things in life. With intention, Fred isn't meant to replace anything — things as simple as tiny pocket survival FAQ handbooks lining gift shop walls hold advice tailored by the person who wrote them. Such a thing is human, and such a thing is special. Fred could jeopardize these little things, if the project proves to be widely accepted. |
+| **Drawbacks** | Should the previous thoughts come to reality, and Fred becomes the global go-to wilderness guru, technology is woven deeper into places it was not already. That is to say, Fred is bringing tech even further outdoors. This is worthy of lament. It's a very human thing to "take over" our world with our own creations, and that variety of behavior can be more destructive than not. Even as a software developer I believe we don't need more technology, but less. That all said, Fred offers a service that could transform how people exist in the natural world, making them safer and smarter for it. |
+| **Meta reflection** | Despite this reflection, little changes in terms of technologies to be implemented. Fred still holds the same goals as stated in this document. This reflection may however necessitate conversation with prospective users or test users to reveal dangers or weak points of Fred's design philosophy before a fully-sent launch. |
+
 ---
 
 ## 06 · Mission & Milestone OKRs
 
-> **Mission:** Fred provides a means for anyone to confidently wander throughout the
-> natural world.
+> **Mission:** Empower anyone to confidently wander throughout the natural world.
 
 ### Alpha — 10/19/2026
 
@@ -461,8 +486,8 @@ sequenceDiagram
 | ID | Result | Measurement | Target · deadline | Verification | Connects to |
 |---|---|---|---|---|---|
 | A-KR1 | Fred can make informed responses based off his knowledge corpora | The following corpora are all accounted for: First Aid · Per-state flora & fauna · Survival skills | 9/18/2026 | When asked a corpora-relevant question, Fred uses RAG on the proper material. | US-01→04, US-08, US-11→12 |
-| A-KR2 | Fred's responses are useful and accurate | > 90% LLM accuracy in all corpora-related questions | 10/12/2026 | Test Fred's inputs/outputs against an enterprise model armed with an answer sheet | US-01→04, US-08, US-11→12 |
-| A-KR3 | Fred's responses are quick and timely | < 10 s LLM response time, per query | 10/19/2026 | Run a series of queries, timing each response. | US-01→04, US-08, US-11→12 |
+| A-KR2 | Fred's responses are useful and accurate | > 70% LLM accuracy in all corpora-related questions | 10/12/2026 | Test Fred's inputs/outputs against an enterprise model armed with an answer sheet | US-01→04, US-08, US-11→12 |
+| A-KR3 | Fred's responses are quick and timely | < 20 s LLM response time, per query | 10/19/2026 | Run a series of queries, timing each response. | US-01→04, US-08, US-11→12 |
 
 ### Beta — 11/16/2026
 
@@ -472,20 +497,21 @@ service.
 
 | ID | Result | Measurement | Target · deadline | Verification | Connects to |
 |---|---|---|---|---|---|
-| B-KR1 | While in service, Fred is aware of a user's location. | When running, the app can retrieve a user's location within a few meters of accuracy. | 10/26/2026 | Drive to different physical locations and run the estimation program, WiFi on. | US-05 |
-| B-KR2 | Fred can provide a user's estimated location. | The user can access a map with an estimated location zone, within ~1 km of accuracy. | 11/10/2026 | Drive to different physical locations and run the estimation program, WiFi off. | US-05 |
-| B-KR3 | Fred can provide suggestions on where to go to find service. | The user can access a map with the estimated location zone alongside a shaded "possible service" region, within ~1 km of accuracy. | 11/16/2026 | Drive to different physical locations and run the estimation program, WiFi off. | US-05 |
+| B-KR1 | While in service, Fred is aware of a user's location. | When running, the app can retrieve a user's location, and serve it to both the LLM and user. | 10/26/2026 | Drive to different physical locations and run the estimation program, WiFi on. | US-05 |
+| B-KR2 | Fred can make the connection between a user's location and their queries. | When prompted, the recorded location of the user directs Fred's responses to become tailored to the specific user. | 11/10/2026 | Drive to different physical locations and run the estimation program, WiFi off, and ask questions. | US-05 |
+| B-KR3 | Fred can provide suggestions on where to go to find service. | The user can access a map with the estimated location zone alongside a shaded "possible service" region, within a several-km perimeter around the user. | 11/16/2026 | Drive to different physical locations and run the estimation program, WiFi off. Test service accuracy in and out of zones. | US-05 |
 
 ### Release Candidate — 12/9/2026
 
-**Objective:** Fred has a public product page & website, with downloads available for an
-iOS & Android frontend application.
+**Objective:** Users have Fred in their hands, as a packaged MVP, fully functional in
+intended no-WiFi environments. Fred additionally has a public product page & website,
+with downloads available for an iOS & Android frontend application.
 
 | ID | Result | Measurement | Target · deadline | Verification | Connects to |
 |---|---|---|---|---|---|
-| RC-KR1 | Fred is available as an app, compatible with both iOS and Android. | Both Android and iOS users can download and properly use Fred. | 11/25/2026 | Test on both Android and iOS, from discovery to download to use. | US-07, US-10 |
-| RC-KR2 | Fred has a public product page & website. | The site is publicly accessible, with a means to download Fred from GitHub. Site contains: Home page · Donation button · About Page | 12/2/2026 | Navigate through site on a different computer; test donation system on a different computer. | US-07, US-10 |
-| RC-KR3 | Fred's product page has promotional material. | Displayed on-page are at least 3 videos and 8 images of Fred use and content. | 12/9/2026 | See that the promotional material exists. | US-07, US-10 |
+| RC-KR1 | Fred is available as an app, compatible with both iOS and Android. | Both Android and iOS users can download and properly use Fred. | 11/25/2026 | Test on both Android and iOS, from discovery to download to use. | US-09, US-10 |
+| RC-KR2 | Fred has been user-tested and is live in the hands of a population of users. | Fred has a user base of at least 10 individuals across both iOS and Android. | 12/2/2026 | Outsource a testing population of peers and colleagues to collect qualitative review. | US-09, US-10 |
+| RC-KR3 | Fred has a product page, including professional promotional material. | Displayed on-page are at least 3 videos and 8 images of Fred use and content. | 12/9/2026 | Navigate through the site as an external user, and forward the site to non-stakeholders. | US-09, US-10 |
 
 ---
 
@@ -496,14 +522,14 @@ iOS & Android frontend application.
 | KR | Metric & evidence | A | B | C | D | F |
 |---|---|---|---|---|---|---|
 | A-KR1 | Necessary Knowledge Corpora | All needed corpora are functional. | Most required corpora are functional. | Bare minimum corpora are functional. | Corpora is missing or non-functional. | The entire RAG-corpora system is non-functional. |
-| A-KR2 | Accuracy ↑ | > 90% | 90–80% | 79–70% | 69–60% | < 60% |
-| A-KR3 | Response Time ↓ | < 10 s | 10–20 s | 21–40 s | 1–3 m | > 3 m |
-| B-KR1 | User Online Location Accuracy ↓ | ±10 m | ±50 m | ±200 m | ±500 m | > ±1 km |
-| B-KR2 | User Offline Location Accuracy ↓ | ±1 km | ±2 km | ±3 km | ±4 km | > ±5 km |
-| B-KR3 | Predicted Service Zone Accuracy ↓ | ±1 km | ±2.5 km | ±5 km | ±7.5 km | > ±10 km |
+| A-KR2 | Accuracy ↑ | > 80% | 79–60% | 59–50% | 49–30% | < 30% |
+| A-KR3 | Response Time ↓ | < 20 s | 20–40 s | ~2 m | ~5 m | > 5 m |
+| B-KR1 | User Location | The user's location is known, and can be displayed accurately on-map. | The user's rough location is available via GPS out of service. | The user's rough location is available via GPS in service. | The user's state is known. | Location is completely unknown. |
+| B-KR2 | LLM & Location | LLM knows the user's rough location in relation to POIs. | LLM knows the user's rough location. | LLM can be told the user's location. | LLM only knows the user's state. | LLM is entirely separate from location. |
+| B-KR3 | Predicted Service Zone Accuracy ↓ | ±2 km | ±5 km | ±7.5 km | ±10 km | > ±10 km |
 | RC-KR1 | App Availability | iOS && Android | iOS \|\| Android | App only works on Expo Go (or equivalent) | App exists, but is barely functional. | App is non-existent. |
-| RC-KR2 | Product Page Functionality | 3/3 | 2/3 | 1/3 | 0/3 | Product page does not exist. |
-| RC-KR3 | Promotional Material | 3 videos, 8 images | 1 video, 5 images | 1 video, 2 images | 0 videos, 1 image | Zip, nada, nothing. |
+| RC-KR2 | User Population ↑ | > 10 | 9–5 | 5–2 | 1 | No one is using Fred. |
+| RC-KR3 | Product & Promo | 3 videos, 8 images | 1 video, 5 images | 1 video, 2 images | 0 videos, 1 image | Zip, nada, nothing. |
 
 **Notes**
 - **A-KR1** — Less quantitative, so metrics are described instead of numeric.
@@ -512,6 +538,11 @@ iOS & Android frontend application.
 ---
 
 ## 08 · References & Acknowledgments
+
+### Iterations
+
+- **Draft.** Draft Proposal — as submitted 9/12/2026 (v0.5).
+- **Final.** v1.2 — submitted 9/27/2026, mirrored in this README.
 
 ### References
 

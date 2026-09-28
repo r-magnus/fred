@@ -124,7 +124,11 @@ function useCoverage(fix: LocationFix | null) {
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom }: { fix: LocationFix | null; coverage: CoverageView | null; zoom: number },
+  { fix, coverage, zoom, credit = true }: {
+    fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
+    /** The map-data credit button. The chat preview leaves it to the full map it opens. */
+    credit?: boolean;
+  },
 ): React.JSX.Element {
   // No state means no map to choose; an absent file means that state has not
   // been downloaded. Both render the terrain-less background rather than
@@ -150,7 +154,7 @@ function FredMap(
         // TextureView, not the default GLSurfaceView: on the Nothing Phone (3)
         // the surface drew over the left third of every overlay (2026-09-26).
         androidView="texture"
-        attribution logo={false}>
+        attribution={credit} logo={false}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
         <Camera initialViewState={{
@@ -308,7 +312,7 @@ export function MapPreview(
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Open the map">
       <View style={styles.preview} pointerEvents="none">
-        <FredMap fix={fix} coverage={coverage} zoom={12} />
+        <FredMap fix={fix} coverage={coverage} zoom={12} credit={false} />
       </View>
       <Text style={styles.previewCaption}>{caption}</Text>
       <Text style={styles.previewOpen}>Tap to open the map</Text>

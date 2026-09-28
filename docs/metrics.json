@@ -90,7 +90,7 @@
       "due": "2026-11-10",
       "value": "state only",
       "grade": "D",
-      "note": "Redefined in proposal v1.2: the LLM should know where the user is, ideally relative to nearby points of interest, and tailor answers to it. Today the prompt names the user's state and picks the state's plant and animal pack; it knows nothing finer. The offline map and GPS zone (built, unverified) show the user where they are but are not given to Fred.",
+      "note": "Redefined in proposal v1.2: the user's location should shape Fred's answers. Planned (#77): when signal comes up, Fred says how far and which way the nearest reported coverage is, and prompts the user to open the map. Today the prompt names the user's state and picks the state's plant and animal pack. The map already shows the coverage zones and the nearest coverage, but Fred's answers don't use them.",
       "bands": [
         "Rough location relative to POIs",
         "Rough location",

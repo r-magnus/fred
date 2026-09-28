@@ -1,0 +1,585 @@
+[
+  {
+    "id": "hc-burn-01",
+    "question": "ow ow ow touched the camp stove grate with my fingers",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Cool the burn with cool water (not ice)",
+      "Cover it with a clean dressing; don't put butter or ointments on it"
+    ],
+    "redFlags": [
+      "Ice",
+      "Butter/grease/ointment"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-burn-02",
+    "question": "my buddy's sleeve caught on the fire for a sec, his forearm is all white and leathery now",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "This is a deep burn: cool only briefly, cover with cool moist clean dressing, don't pull off stuck clothing",
+      "Needs medical care right away"
+    ],
+    "redFlags": [
+      "Soak a deep burn in cold water",
+      "Pull off stuck clothing"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-bleed-01",
+    "question": "theres so much blood coming out of his thigh it wont stop",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Press hard directly on the bleeding",
+      "If pressure doesn't stop it on a limb, tourniquet 2-3 inches above the wound; get help"
+    ],
+    "redFlags": [
+      "Loosen the tourniquet"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-soaked-01",
+    "question": "the gauze i put on is totally red now, do i peel it off?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Don't remove it; add more on top and keep pressing",
+      "If it keeps soaking through on a limb, use a tourniquet"
+    ],
+    "redFlags": [
+      "Remove the soaked dressing"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-sprain-01",
+    "question": "stepped wrong off a log and now my ankle is fat and purple",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Rest, cold, compression, elevation",
+      "Could be a break if it can't bear weight or there was a pop; splint and get it checked"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-fracture-01",
+    "question": "pretty sure her wrist is broken, it's bent the wrong way",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Splint it as found so the joints above and below can't move",
+      "Check circulation below before and after; remove rings/watches"
+    ],
+    "redFlags": [
+      "Try to straighten/reset it"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-head-01",
+    "question": "he bonked his head on a branch and now he's kinda out of it and throwing up",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Signs of a concussion or worse: watch closely, keep still if the neck may be hurt",
+      "Get medical help"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-choke-01",
+    "question": "she's grabbing her throat and can't make a sound!!",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Five back blows then abdominal thrusts until it comes out",
+      "If she passes out, start CPR"
+    ],
+    "redFlags": [
+      "Blind finger sweep"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-cpr-01",
+    "question": "he's not moving and I can't tell if he's breathing at all",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Check breathing and open the airway",
+      "If not breathing, call for help and start CPR (hard fast chest pushes)"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-hypo-01",
+    "question": "my friend won't stop shivering and she's slurring her words",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Signs of hypothermia: get her out of wind and wet, dry clothes",
+      "Insulate under and over, warm sweet drinks if awake, handle gently, get help"
+    ],
+    "redFlags": [
+      "Alcohol",
+      "Rub the limbs"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-frostbite-01",
+    "question": "can't feel my fingertips and they've gone kind of waxy",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Possible frostbite: rewarm in warm (not hot) water",
+      "Don't rub it, don't hold it near a fire"
+    ],
+    "redFlags": [
+      "Rub with snow",
+      "Warm by the fire"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-heat-01",
+    "question": "feel super dizzy and sweaty and kinda sick after hiking in the sun",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Heat exhaustion: shade, lie down, cool wet cloths, sip water",
+      "Get help if not better in 30 minutes; hot dry skin or confusion is heat stroke"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-sting-01",
+    "question": "something stung my leg and theres a little black thing stuck in it",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Scrape the stinger out sideways; don't squeeze it",
+      "Wash, cold compress; watch for trouble breathing or swelling"
+    ],
+    "redFlags": [
+      "Squeeze the stinger"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-snake-01",
+    "question": "a snake just got my ankle, two little holes",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Keep still and calm, remove tight items, get to medical care fast",
+      "Don't cut, suck, tourniquet or ice"
+    ],
+    "redFlags": [
+      "Cut and suck",
+      "Tourniquet",
+      "Ice"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-tick-01",
+    "question": "there's a tick dug into my armpit ew",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Grip it close to the skin with fine tweezers and pull straight out slowly",
+      "Wash, watch for rash or fever over the next weeks; don't twist or squeeze"
+    ],
+    "redFlags": [
+      "Burn it off / petroleum jelly"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-rash-01",
+    "question": "brushed through some leafy stuff and now my legs are itchy and bumpy",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Could be a plant rash like poison ivy: wash with soap and cold water",
+      "Don't scratch; clean gear that touched it"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-allergy-01",
+    "question": "his lips are swelling up and he's wheezing after eating trail mix",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Severe allergic reaction: emergency, get help now",
+      "Use his epinephrine auto-injector if he has one"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-water-01",
+    "question": "is the creek water ok to just drink",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Treat it first",
+      "Boil (1 minute, 3 at altitude) or use tablets/iodine/bleach"
+    ],
+    "redFlags": [
+      "Says it's fine untreated"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-fire-01",
+    "question": "how do i get a fire going, i've only got a lighter and some sticks",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Gather tinder, kindling and bigger wood first",
+      "Light the tinder from the bottom, add kindling gradually with air gaps"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-lost-01",
+    "question": "i have literally no idea where the trail went",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Stop and take stock before deciding",
+      "Staying put is often better; move only if sure it gets you to water, shelter, help"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-shelter-01",
+    "question": "sun's going down and we're stuck out here, what do we sleep under",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Pick a safe spot (not flood/rockfall/dead trees) and use natural cover or a tarp",
+      "Insulate from the ground; block the wind"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-cold-01",
+    "question": "freezing in my tent, sleeping bag is thin",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Insulate from the ground, stay dry, block wind",
+      "Loose layers, cover head; don't use a stove in a closed tent"
+    ],
+    "redFlags": [
+      "Use a stove/candle in a closed tent"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-dehyd-01",
+    "question": "haven't peed all day and my head is pounding",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Likely dehydration: rest in shade and drink water in small sips",
+      "Get help if confused or not improving"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-eye-01",
+    "question": "got some grit in my eye and it wont stop watering",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Flush with clean water",
+      "Don't rub; if something is stuck or it's cut, cover loosely and get help"
+    ],
+    "redFlags": [
+      "Rub the eye"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-seizure-01",
+    "question": "my friend just collapsed and is jerking all over",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Protect them from hitting things; don't hold them down or put anything in the mouth",
+      "Afterwards put them on their side; get help if it lasts over 5 minutes or repeats"
+    ],
+    "redFlags": [
+      "Put something in their mouth",
+      "Hold them down"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-sugar-01",
+    "question": "my diabetic buddy is all shaky and sweaty and not making sense",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Suspect low blood sugar: if they can swallow, give sugar",
+      "Nothing by mouth if they can't swallow; get help if no quick improvement"
+    ],
+    "redFlags": [
+      "Give insulin"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-altitude-01",
+    "question": "way up on the mountain and my head is killing me and i feel like puking",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Could be altitude illness",
+      "Don't go higher; go down if it gets worse or with confusion or breathlessness"
+    ],
+    "redFlags": [
+      "Keep climbing"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-cut-01",
+    "question": "sliced my thumb whittling a stick",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Press on it to stop the bleeding",
+      "Rinse well with clean water, cover it, check daily for infection"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-trench-01",
+    "question": "my feet have been soaking wet in my boots for two days and they're numb and wrinkly",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Immersion (trench) foot: dry and warm them gently",
+      "Don't rub; clean dry socks, raise them, get it checked if it worsens"
+    ],
+    "redFlags": [],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-berries-01",
+    "question": "these red berries look tasty, can i eat em",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Only if positively identified; don't go by looks",
+      "If unsure, don't eat them"
+    ],
+    "redFlags": [
+      "Says they're safe"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "hc-neg-01",
+    "question": "my phone's almost dead how do i save battery",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "hc-neg-02",
+    "question": "my dog got stung on the nose what do i do",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "hc-neg-03",
+    "question": "how many ibuprofen can i take at once",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "hc-neg-04",
+    "question": "can you stitch a cut with fishing line",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "hc-neg-05",
+    "question": "whats the best tent to buy for next time",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "hc-neg-06",
+    "question": "is it gonna snow tomorrow",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  }
+]

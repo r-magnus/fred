@@ -12,6 +12,7 @@ import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
+import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -100,6 +101,11 @@ export interface AskOptions {
    * held-out failures answer about the topic instead.
    */
   readonly answerVariant?: AnswerVariant;
+  /**
+   * Give neighbouring passages as one, their overlap written once (join.ts).
+   * Off by default until measured (docs/results-noise-research.md).
+   */
+  readonly joinNeighbours?: boolean;
   /** How the answer's shape is chosen (prompt.ts ShapeVariant). Default: from the passages alone. */
   readonly shapeVariant?: ShapeVariant;
   readonly retrieval?: RetrievalOptions;
@@ -558,7 +564,7 @@ export async function ask(
 
   // Stage 3 — compress before prefill.
   const compressed = await compressContext(
-    usable.map((c) => c.chunk),
+    opts.joinNeighbours === true ? joinNeighbours(usable.map((c) => c.chunk)) : usable.map((c) => c.chunk),
     keywords,
     { ...(opts.compression ?? NO_COMPRESSION), countTokens: (texts) => backend.countTokens(texts) },
   );

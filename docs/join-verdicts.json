@@ -1,0 +1,134 @@
+{
+ "grader": "Claude, blind (A/B shuffled, key opened after grades were saved)",
+ "note": "fa-heat-01 and br-heat-01 differ from baseline because of the clarifying-question change (#50), not joining; excluded",
+ "scores": {
+  "fa-blister-01": {
+   "base": 1,
+   "join": 1
+  },
+  "ff-oak-01": {
+   "join": 0.5,
+   "base": 0.5
+  },
+  "ff-oak-02": {
+   "join": 0.5,
+   "base": 1
+  },
+  "ff-lion-01": {
+   "join": 1,
+   "base": 1
+  },
+  "ff-bear-02": {
+   "base": 1,
+   "join": 0.5
+  },
+  "ff-huckleberry-01": {
+   "join": 1,
+   "base": 1
+  },
+  "ff-or-bear-01": {
+   "base": 1,
+   "join": 1
+  },
+  "ff-or-coyote-01": {
+   "base": 1,
+   "join": 1
+  },
+  "neg-state-01": {
+   "join": 0,
+   "base": 0
+  },
+  "uv-ingestion-01": {
+   "join": 0,
+   "base": 1
+  },
+  "uv-snare-01": {
+   "base": 0.5,
+   "join": 0.5
+  },
+  "uv-moon-01": {
+   "join": 0.5,
+   "base": 0
+  },
+  "uv-smoke-01": {
+   "join": 0,
+   "base": 0
+  },
+  "uv-shoulder-01": {
+   "base": 0.5,
+   "join": 0.5
+  },
+  "br-tootight-01": {
+   "join": 0.5,
+   "base": 0.5
+  },
+  "br-sling-01": {
+   "join": 0.5,
+   "base": 0.5
+  },
+  "br-maggots-01": {
+   "base": 0,
+   "join": 0.5
+  },
+  "br-cook-01": {
+   "base": 1,
+   "join": 1
+  },
+  "br-azimuth-01": {
+   "join": 0.5,
+   "base": 0.5
+  },
+  "br-shellfish-01": {
+   "base": 0.5,
+   "join": 1
+  },
+  "br-moon-01": {
+   "base": 0,
+   "join": 0.5
+  },
+  "br-rope-01": {
+   "join": 0.5,
+   "base": 0.5
+  },
+  "br-bowdrill-01": {
+   "join": 0,
+   "base": 0.5
+  },
+  "br-bugs-01": {
+   "join": 1,
+   "base": 0
+  },
+  "br-mirror-01": {
+   "base": 0.5,
+   "join": 1
+  },
+  "br-hawk-01": {
+   "join": 1,
+   "base": 1
+  },
+  "br-buttonbush-01": {
+   "join": 1,
+   "base": 1
+  },
+  "br-sycamore-01": {
+   "base": 1,
+   "join": 1
+  },
+  "br-thistle-01": {
+   "base": 1,
+   "join": 1
+  },
+  "br-tarragon-01": {
+   "base": 0.5,
+   "join": 0.5
+  },
+  "br-catbird-01": {
+   "base": 1,
+   "join": 0
+  },
+  "br-infect-01": {
+   "base": 0.5,
+   "join": 0.5
+  }
+ }
+}

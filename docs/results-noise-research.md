@@ -69,3 +69,54 @@ al., "Lost in the Middle", TACL 2024).
 Each option is kept only if it wins more than it loses on the tuning and
 breadth sets, graded blind, with no new unsafe answers, and is confirmed once
 on held-out.
+
+## Tested 2026-09-28: options 1 and 2
+
+### Option 2, a reranker: judged offline, rejected
+
+`tools/eval/src/rerank-check.ts` reranks the search's top 20 for each of the
+84 answerable tuning and held-out questions with a known source passage, then
+records where that passage lands.
+
+| Right passage in | Search | jina-reranker-v1-tiny (33M) | bge-reranker-v2-m3 (568M, Q4) |
+|---|---:|---:|---:|
+| top 1 | 21 | 16 | **28** |
+| top 2 | 38 | 28 | 36 |
+| top 4 | 49 | 40 | **53** |
+| moved up / down | | 16 / 34 | 22 / 19 |
+| time per question (desktop CPU, 20 passages) | | 0.8 s | **13.6 s** |
+
+The small model is worse than the search at every depth. The large one puts
+the right passage first more often (+7) and brings 4 more into the four Fred
+reads, but it moves nearly as many down as up. It costs 13.6 s per question
+on the desktop, and the phone is several times slower than that. Too slow for
+a mixed gain; no generation run was spent on either.
+
+### Option 1, joining neighbours: graded blind, rejected
+
+`JOIN=1` (`join.ts`, off by default) on the tuning (104) and breadth (57)
+sets, against today's pipeline. 34 answers changed. The two heat answers
+differ only because of the clarifying-question change (#50) and are left out.
+The other 32 were graded A/B shuffled (`join-verdicts.json`,
+`join-runs-*.jsonl`).
+
+| | Base | Joined | Wins | Losses | Refusals (tuning) |
+|---|---:|---:|---:|---:|---:|
+| 32 changed answers | 20.0 | 20.0 | 6 | 5 | 45 → 46 |
+
+Wins: signal mirror, shellfish (red tide now named), bug protection, both
+moon questions, maggots. Losses: "is it worth nibbling an unknown plant?"
+(a correct "no" became a refusal), the catbird (a refusal), black bear
+predators, poison oak range, bow drill.
+
+A wash. It moves which answers are good rather than how many, and one of the
+new refusals is a safety answer. Not shipped.
+
+### What this leaves
+
+The noise is in the passages themselves: fixed-size windows that mix topics.
+Filtering or reordering around them, whether by score, by count, by joining
+or by reranking, trades one answer for another. Option 3, cutting the manuals
+at their own numbered paragraphs, is the one that changes the passages
+themselves. It can be judged without generation first: the source-passage
+rank on these same 84 questions, before and after.

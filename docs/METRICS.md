@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-25**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-27**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -10,7 +10,7 @@ answers            a clearly matching field card verbatim; otherwise Qwen3-1.7B 
 abstainThreshold   0.29
 scoring            four-part rubric since 2026-09-24: safe first, then correct, on the question, sounds like Fred
 measuredOn         desktop harness for accuracy; Nothing Phone (3) for device latency and memory
-akr2Target         80% (working target, lowered from 90% on 2026-09-18)
+akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 80%
 ```
 
 ## Milestone scorecard
@@ -18,47 +18,47 @@ akr2Target         80% (working target, lowered from 90% on 2026-09-18)
 | KR | What | Due | Now | Grade |
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
-| `A-KR2` | Response accuracy | 2026-10-12 | **72.5%** / 80%<br><sub>0 safety failures</sub> | 🟡 C |
-| `A-KR3` | Response time | 2026-10-19 | **15.4s** / 10s | 🟡 B |
-| `B-KR1` | Location while in service | 2026-10-26 | **9.5m** / 10m | 🟢 A |
-| `B-KR2` | Offline location estimate | 2026-11-10 | **on device** | 🔵 built, unverified |
+| `A-KR2` | Response accuracy | 2026-10-12 | **72.5%** / 70%<br><sub>67.5% fresh breadth set, graded blind</sub> | 🟡 B |
+| `A-KR3` | Response time | 2026-10-19 | **15.4s** / 20s | 🟢 A |
+| `B-KR1` | Location while in service | 2026-10-26 | **9.5m** | 🟢 A |
+| `B-KR2` | Location in Fred's answers | 2026-11-10 | **state only** | 🔴 D |
 | `B-KR3` | Predicted service zone | 2026-11-16 | **on device** | 🔵 built, unverified |
 | `RC-KR1` | iOS and Android app | 2026-11-25 | — | ⚪ not started |
-| `RC-KR2` | Product page | 2026-12-02 | — | ⚪ not started |
-| `RC-KR3` | Promotional material | 2026-12-09 | — | ⚪ not started |
+| `RC-KR2` | User population | 2026-12-02 | — | ⚪ not started |
+| `RC-KR3` | Product page and promo | 2026-12-09 | — | ⚪ not started |
 
 - `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
 - `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
-- `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Still inside the 10-20 s band.
-- `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened.
-- `B-KR2` — Built and rendering on device: per-state PMTiles basemap at z14 via MapLibre, with the estimated zone drawn as the GPS's own 68% confidence radius. The 9.5 m airplane-mode measurement above is the WiFi-off case this KR asks about, ~100x inside its ±1 km target. Unverified: needs the drive.
+- `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Inside the <20 s target (proposal v1.2); the phone mean predates phase 3 and should be re-measured.
+- `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened. Proposal v1.2 also asks that the location be served to the LLM: today Fred's prompt gets the state only (see B-KR2).
+- `B-KR2` — Redefined in proposal v1.2: the LLM should know where the user is, ideally relative to nearby points of interest, and tailor answers to it. Today the prompt names the user's state and picks the state's plant and animal pack; it knows nothing finer. The offline map and GPS zone (built, unverified) show the user where they are but are not given to Fred.
 - `B-KR3` — Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.
 - `RC-KR1` — iOS launches on the simulator (Xcode 27). Needed expo 57.0.24 + scene support; Android not rebuilt since. See results-ios-build.md.
-- `RC-KR2` — Not started.
-- `RC-KR3` — Not started.
+- `RC-KR2` — Redefined in proposal v1.2: at least 10 people using Fred across iOS and Android, with qualitative reviews collected. Not started.
+- `RC-KR3` — Proposal v1.2: a product page with at least 3 videos and 8 images of Fred in use. Not started.
 
 ## A-KR2 — answer accuracy over time
 
 ```
-baseline (0.6B)                             ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
-+ conditional prompt                        ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
-+ Qwen3-1.7B                                ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
-+ scope gate, lay lexicon                   ███████████████████░░░░░░░░░   69.1%   1.7B
-+ gate 0.29                                 ████████████████████░░░░░░░░   70.6%   1.7B
-I: routing as a hint (held out)             ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
-rubric: old pipeline regraded (held out)    ██████████████░░░░░░░░░░░░░░   50.0%   Qwen3-1.7B
-phase 1: EmbeddingGemma, cards (held out)   ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
-phase 2: card slot, redactions (held out)   █████████████████░░░░░░░░░░░   61.3%   Qwen3-1.7B
-phase 3: card answers, referral (held out)  ███████████████████░░░░░░░░░   66.3%   Qwen3-1.7B
-re-measured, WHO drug steps out (held out)  ███████████████████░░░░░░░░░   67.5%   Qwen3-1.7B
-forage note, location fix (held out)        ███████████████████░░░░░░░░░   68.8%   Qwen3-1.7B
-cards batch 3: six syllabus cards (held out) ████████████████████░░░░░░░░   71.3%   Qwen3-1.7B
-+ belly, dehydration, signal (held out)      ████████████████████░░░░░░░░   70.0%   Qwen3-1.7B
-cards batch 4: six more (held out)          ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
-TARGET                                      ██████████████████████░░░░░░   80.0%
+baseline (0.6B)                               ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
++ conditional prompt                          ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
++ Qwen3-1.7B                                  ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
++ scope gate, lay lexicon                     ███████████████████░░░░░░░░░   69.1%   1.7B
++ gate 0.29                                   ████████████████████░░░░░░░░   70.6%   1.7B
+I: routing as a hint (held out)               ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
+rubric: old pipeline regraded (held out)      ██████████████░░░░░░░░░░░░░░   50.0%   Qwen3-1.7B
+phase 1: EmbeddingGemma, cards (held out)     ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
+phase 2: card slot, redactions (held out)     █████████████████░░░░░░░░░░░   61.3%   Qwen3-1.7B
+phase 3: card answers, referral (held out)    ███████████████████░░░░░░░░░   66.3%   Qwen3-1.7B
+re-measured, WHO drug steps out (held out)    ███████████████████░░░░░░░░░   67.5%   Qwen3-1.7B
+forage note, location fix (held out)          ███████████████████░░░░░░░░░   68.8%   Qwen3-1.7B
+cards batch 3: six syllabus cards (held out)  ████████████████████░░░░░░░░   71.3%   Qwen3-1.7B
++ belly, dehydration, signal (held out)       ████████████████████░░░░░░░░   70.0%   Qwen3-1.7B
+cards batch 4: six more (held out)            ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
+TARGET                                        ████████████████████░░░░░░░░   70.0%
 ```
 
-**38.2% → 72.5%** (+34.3 points). Target is 80%.
+**38.2% → 72.5%** (+34.3 points). Target is 70%.
 
 > The rows are not all the same measurement. Rows before "rubric" were scored yes/no, all but the last on the tuning set. From "rubric" on, every row is the held-out set on the four-part rubric (safe first), which is stricter: the old pipeline scored 62.5% yes/no and 50.0% on the rubric. Compare within each group.
 
@@ -71,10 +71,11 @@ The score has two halves:
 
 ### Follow-up questions (conversation memory, 2026-09-26)
 
-Measured separately: a second question that only makes sense after the first.
-Held-out two-turn set, 13 conversations, run once: **46% → 81%** with memory
-(6.0 → 10.5), no unsafe answers either way. Single-question answers are byte for
-byte unchanged, so the 66.3% above stands. docs/results-memory.md.
+Measured separately: a second question that only makes sense after the first. Held-out two-turn set, 13 conversations, run once: **46% → 81%** with memory (6.0 → 10.5), no unsafe answers either way. Single-question answers are byte for byte unchanged. docs/results-memory.md.
+
+### Fresh questions, graded blind (2026-09-27)
+
+57 questions written after every change they judge (random manual passages, general syllabus topics, out of scope), pipeline of 2026-09-25 against today's, A/B shuffled: **61.4% → 67.5%**, 4 wins, 0 losses, 0 unsafe. The held-out set runs about 5 points above fresh questions. docs/results-breadth.md.
 
 ### Where the remaining points are
 
@@ -88,12 +89,12 @@ byte unchanged, so the 66.3% above stands. docs/results-memory.md.
 ## A-KR3 — response time
 
 ```
-(longer bar = slower; the target is to stay left of the 10s mark)
+(longer bar = slower; the target is to stay left of the 20s mark)
 
-target   10.0 s   ██████████████░░░░░░░░░░░░░░  <-- 10s
-mean     11.4 s   ████████████████░░░░░░░░░░░░
-median   11.0 s   ███████████████░░░░░░░░░░░░░
-p95      17.7 s   █████████████████████████░░░
+target   20.0 s   ██████████████░░░░░░░░░░░░░░  <-- 20s
+mean     11.4 s   ████████░░░░░░░░░░░░░░░░░░░░
+median   11.0 s   ████████░░░░░░░░░░░░░░░░░░░░
+p95      17.7 s   ████████████░░░░░░░░░░░░░░░░
 ```
 
 **30 of 68** queries exceed ten seconds. Desktop, 1.7B, measured 2026-09-20 before phases 1-3 and not re-measured since; phone figures below are current. The 0.6B was 4.3s on desktop.
@@ -119,7 +120,7 @@ twisted ankle (card)                 █░░░░░░░░░░░░░�
 black bears in this state            █████████░░░░░░░░░░░░░░░░░░░    8.3 s   (TTFT 7.6s)
 signal for rescue                    ████████████████░░░░░░░░░░░░   14.4 s   (TTFT 11.0s)
 nibble an unknown plant              █████████████████████░░░░░░░   19.0 s   (TTFT 12.1s)
-10s target                           ███████████░░░░░░░░░░░░░░░░░
+20s target                           ██████████████████████░░░░░░
 ```
 
 > The eighth question ("walk me through putting in an IV line") was referred on in 0.87 s. The mean here mixes card and model answers over a handful of questions, so it is not the A-KR3 figure. Peak memory is from the phase-1 phone run (2.9 GB PSS), inside the 3-4 GB budget.

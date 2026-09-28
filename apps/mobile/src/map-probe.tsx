@@ -1,8 +1,12 @@
 /**
- * The map screen. It began as a throwaway probe (does a PMTiles basemap render
- * from local storage, offline? It does: docs/results-map-research.md) and has
- * since grown the B-KR2 location zone, the topographic layers and the B-KR3
- * coverage warnings. The name stayed.
+ * The map: full screen, and as a small preview inside the chat.
+ *
+ * It began as a throwaway probe (does a PMTiles basemap render from local
+ * storage, offline? It does: docs/results-map-research.md) and has since grown
+ * the location zone, the topographic layers and the B-KR3 coverage warnings.
+ * The file name stayed. `FredMap` draws the map and its overlays; `MapScreen`
+ * puts it full screen with the carrier picker; `MapPreview` is the tappable
+ * thumbnail the chat shows when someone says they are lost (US-05).
  */
 import { Map, Camera, GeoJSONSource, Layer } from '@maplibre/maplibre-react-native';
 import { File, Paths } from 'expo-file-system';
@@ -11,7 +15,7 @@ import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre
 import { useEffect, useMemo, useState } from 'react';
 import { circleRing } from '@fred/geo';
 import type { CoveragePack } from '@fred/geo/coverage';
-import { loadCoverage, coverageNear, carrierName } from './coverage-layer.ts';
+import { loadCoverage, coverageNear, carrierName, type CoverageView } from './coverage-layer.ts';
 import { loadCarrier, saveCarrier, forgetCarrier, type CarrierChoice } from './carrier.ts';
 import type { LocationFix } from './location.ts';
 
@@ -94,8 +98,33 @@ const style = (uri: string, contoursUri: string | null): StyleSpecification => (
   ],
 });
 
-export function MapProbe(
-  { onClose, fix }: { onClose: () => void; fix: LocationFix | null },
+/**
+ * The state's coverage pack, the chosen carrier, and the zones near the user.
+ * The pack is loaded once per state; the zones are recomputed only when the
+ * position or the carrier changes (B-KR3, issue #58).
+ */
+function useCoverage(fix: LocationFix | null) {
+  const [pack, setPack] = useState<CoveragePack | null>(null);
+  const [carrier, setCarrier] = useState<CarrierChoice | null>(null);
+  const packState = fix?.state ?? null;
+  useEffect(() => {
+    if (packState === null) return;
+    let live = true;
+    void loadCoverage(packState).then((p) => { if (live) setPack(p); });
+    return () => { live = false; };
+  }, [packState]);
+  useEffect(() => { void loadCarrier().then(setCarrier); }, []);
+  const coverage = useMemo(() =>
+    fix === null || fix.state === null || pack === null || carrier === null ? null
+      : coverageNear(fix.latitude, fix.longitude, fix.state, pack, carrier.id),
+  [fix, pack, carrier]);
+  const reloadCarrier = (): void => { void loadCarrier().then(setCarrier); };
+  return { pack, carrier, coverage, reloadCarrier };
+}
+
+/** The map and every overlay: basemap, contours, coverage zones, the user's position. */
+function FredMap(
+  { fix, coverage, zoom }: { fix: LocationFix | null; coverage: CoverageView | null; zoom: number },
 ): React.JSX.Element {
   // No state means no map to choose; an absent file means that state has not
   // been downloaded. Both render the terrain-less background rather than
@@ -114,31 +143,8 @@ export function MapProbe(
   const ring = fix === null || fix.accuracyMeters === null
     ? [] : circleRing(fix.latitude, fix.longitude, fix.accuracyMeters);
 
-  // B-KR3 (issue #58): where your carrier reports nothing, and where no
-  // carrier does. The pack is loaded once per state; the zones are recomputed
-  // only when the position or the carrier changes.
-  const [pack, setPack] = useState<CoveragePack | null>(null);
-  const [carrier, setCarrier] = useState<CarrierChoice | null>(null);
-  const [picking, setPicking] = useState(false);
-  const packState = fix?.state ?? null;
-  useEffect(() => {
-    if (packState === null) return;
-    let live = true;
-    void loadCoverage(packState).then((p) => { if (live) setPack(p); });
-    return () => { live = false; };
-  }, [packState]);
-  useEffect(() => { void loadCarrier().then(setCarrier); }, []);
-  const coverage = useMemo(() =>
-    fix === null || fix.state === null || pack === null || carrier === null ? null
-      : coverageNear(fix.latitude, fix.longitude, fix.state, pack, carrier.id),
-  [fix, pack, carrier]);
-  const choose = (id: string | null | 'sim'): void => {
-    setPicking(false);
-    if (id === 'sim') forgetCarrier(); else saveCarrier(id);
-    void loadCarrier().then(setCarrier);
-  };
   return (
-    <View style={styles.root}>
+    <>
       <Map style={styles.map}
         mapStyle={haveMap && uri !== null ? style(uri, contoursUri) : EMPTY_STYLE}
         // TextureView, not the default GLSurfaceView: on the Nothing Phone (3)
@@ -151,7 +157,7 @@ export function MapProbe(
           center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
           // 11 shows the coverage zones around the user (~1.2 km cells, 30 km
           // searched); 13 showed three hexagons and no context.
-          zoom: fix === null ? 9 : 11,
+          zoom: fix === null ? 9 : zoom,
         }} />
         {/* Under the location ring in draw order, so the user's own zone
             stays readable on top of the shading. Unshaded means assumed
@@ -213,6 +219,23 @@ export function MapProbe(
             : `No map downloaded for ${fix.state}.`}
         </Text>
       )}
+    </>
+  );
+}
+
+export function MapScreen(
+  { onClose, fix }: { onClose: () => void; fix: LocationFix | null },
+): React.JSX.Element {
+  const { pack, carrier, coverage, reloadCarrier } = useCoverage(fix);
+  const [picking, setPicking] = useState(false);
+  const choose = (id: string | null | 'sim'): void => {
+    setPicking(false);
+    if (id === 'sim') forgetCarrier(); else saveCarrier(id);
+    reloadCarrier();
+  };
+  return (
+    <View style={styles.root}>
+      <FredMap fix={fix} coverage={coverage} zoom={11} />
       {fix !== null && (
         <Text style={styles.zoneNote}>
           {`within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`}
@@ -265,9 +288,31 @@ export function MapProbe(
         </View>
       )}
       <Pressable style={styles.close} onPress={onClose} hitSlop={12}>
-        <Text style={styles.closeText}>close probe</Text>
+        <Text style={styles.closeText}>Back to chat</Text>
       </Pressable>
     </View>
+  );
+}
+
+/**
+ * The map inside a chat reply. Tapping anywhere on it opens `MapScreen`: the
+ * preview itself takes no gestures, so scrolling the chat never pans the map.
+ */
+export function MapPreview(
+  { fix, onOpen }: { fix: LocationFix | null; onOpen: () => void },
+): React.JSX.Element {
+  const { coverage } = useCoverage(fix);
+  const caption = coverage !== null ? coverage.advice
+    : fix === null ? 'Finding your location…'
+    : `You are here, within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m.`;
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Open the map">
+      <View style={styles.preview} pointerEvents="none">
+        <FredMap fix={fix} coverage={coverage} zoom={12} />
+      </View>
+      <Text style={styles.previewCaption}>{caption}</Text>
+      <Text style={styles.previewOpen}>Tap to open the map</Text>
+    </Pressable>
   );
 }
 
@@ -276,6 +321,9 @@ const GAP = '#e8a04f';
 const NONE = '#e5484d';
 
 const styles = StyleSheet.create({
+  preview: { height: 190, borderRadius: 10, overflow: 'hidden', backgroundColor: '#0d1117' },
+  previewCaption: { color: '#d7e0dd', fontSize: 13, lineHeight: 18, marginTop: 8 },
+  previewOpen: { color: '#6ca', fontSize: 13, fontWeight: '600', marginTop: 4 },
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0d1117' },
   map: { flex: 1 },
   close: {

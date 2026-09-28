@@ -83,6 +83,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.SUFFICIENCY_PROMPT === 'numeric' ? { sufficiencyVariant: 'numeric' as const } : {}),
     // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
     ...(env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    // SHAPE=how|how-few: how-to questions answered in steps; how-few also loosens the sentence cap.
+    ...(env.SHAPE === 'how' || env.SHAPE === 'how-few' ? { shapeVariant: env.SHAPE } : {}),
     // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
     ...(env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
     // LOCATION=0 stops naming the hiker's state in the prompt (on by default).

@@ -56,6 +56,9 @@ for (const r of runs) {
   out.push(JSON.stringify({
     questionId: r.questionId, question: r.question, answer: r.answer,
     outcome: r.outcome, topScore: res.diagnostics.topScore, passages,
+    // What the model was actually given, after the card slot and compression,
+    // when the pipeline would have generated. `passages` is only the search's top.
+    ...(res.kind === 'answer' ? { prompt: res.prompt } : {}),
   }));
   process.stdout.write('.');
 }

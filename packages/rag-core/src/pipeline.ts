@@ -9,7 +9,7 @@
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
@@ -100,6 +100,8 @@ export interface AskOptions {
    * held-out failures answer about the topic instead.
    */
   readonly answerVariant?: AnswerVariant;
+  /** How the answer's shape is chosen (prompt.ts ShapeVariant). Default: from the passages alone. */
+  readonly shapeVariant?: ShapeVariant;
   readonly retrieval?: RetrievalOptions;
   /**
    * How to answer when a field card clearly matches (score at or above the
@@ -577,7 +579,7 @@ export async function ask(
   const place = opts.state !== null && opts.locationInPrompt !== false && REFERS_TO_LOCATION.test(query) &&
     blocks.some((b) => statePacks.has(b.chunk.packId))
     ? STATE_NAMES[opts.state] : undefined;
-  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place, earlier);
+  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place, earlier, opts.shapeVariant);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };

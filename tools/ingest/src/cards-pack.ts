@@ -18,7 +18,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { CardClarify, LicenseEntry } from '@fred/pack-format';
+import type { CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
 import { cardText, validateCards, type FieldCard, type PassageText } from './cards.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
@@ -107,6 +107,19 @@ for (const [id, entry] of Object.entries(clarifyFile)) {
   clarify[`core-fieldcards:${at}`] = { question: entry.question, choices: entry.choices };
 }
 
+// The manuals each card quotes, with the pages, for its citation in the app.
+// Taken from the same quotes validateCards has already checked word for word.
+const cardSources: Record<string, CardSource[]> = {};
+cards.forEach((c, at) => {
+  const bySource = new Map<string, Set<number>>();
+  for (const q of c.sources) {
+    const pages = bySource.get(q.source) ?? new Set<number>();
+    if (q.page !== null) pages.add(q.page);
+    bySource.set(q.source, pages);
+  }
+  cardSources[`core-fieldcards:${at}`] = [...bySource].map(([source, pages]) => ({ source, pages: [...pages].sort((a, b) => a - b) }));
+});
+
 const chunks: DraftChunk[] = cards.map((c) => ({
   text: cardText(c),
   section: c.title,
@@ -124,7 +137,7 @@ const vectors = await embedder.embed(embedInput);
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.4.0',
+  version: '0.5.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],
@@ -134,6 +147,7 @@ const { dir } = await writePack(PACKS, {
   licenses: [CARDS_LICENSE, WHO_BEC_LICENSE, ATP_SURVIVAL_LICENSE, ATP_FIRST_AID_LICENSE],
   embedding: embedder.spec,
   clarify,
+  cardSources,
 }, chunks, vectors);
 await embedder.dispose();
 console.log(`wrote ${dir}: ${cards.length} cards`);

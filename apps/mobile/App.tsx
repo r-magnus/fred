@@ -57,6 +57,15 @@ interface Turn {
   clarifyUsed?: boolean;
 }
 
+/**
+ * A field card's sources, as the reader would look them up: "ATP 3-50.21
+ * pp. 28, 29 · WHO BEC 2018 p. 94".
+ */
+function describeBasis(basis: NonNullable<Citation['basis']>): string {
+  return basis.map((b) => b.pages.length === 0 ? b.source
+    : `${b.source} ${b.pages.length === 1 ? 'p.' : 'pp.'} ${b.pages.join(', ')}`).join(' · ');
+}
+
 /** The provider has to sit above anything calling useSafeAreaInsets. */
 export default function App() {
   return (
@@ -422,7 +431,10 @@ function Screen() {
                   <>
                     <Text style={styles.body}>{t.offer.text}</Text>
                     <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
-                    <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
+                    <Text style={styles.source}>
+                      {t.offer.citation.source} — {t.offer.citation.section}
+                      {t.offer.citation.basis === undefined ? '' : `\n   from ${describeBasis(t.offer.citation.basis)}`}
+                    </Text>
                   </>
                 )}
               </View>
@@ -485,6 +497,7 @@ function Screen() {
                     ])).values()].map((c) => (
                       <Text key={c.chunkId} style={styles.source}>
                         {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
+                        {c.basis === undefined ? '' : `\n   from ${describeBasis(c.basis)}`}
                       </Text>
                     ))}
                   </View>

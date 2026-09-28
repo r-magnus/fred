@@ -7,6 +7,7 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
+import type { CardSource } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
@@ -216,6 +217,11 @@ export interface Citation {
   readonly page: number | null;
   readonly licenseId: string;
   readonly score: number;
+  /**
+   * For a field card: the manuals and pages its quotes come from, so the
+   * reader can check the card against its sources (manifest `cardSources`).
+   */
+  readonly basis?: readonly CardSource[];
 }
 
 export interface Diagnostics {
@@ -308,6 +314,11 @@ export async function ask(
   opts: AskOptions,
 ): Promise<AskResult> {
   const { backend, store, packs, memory } = deps;
+  // A card's citation carries the manuals its quotes come from.
+  const citeOf = (c: ScoredChunk, i: number): Citation => {
+    const basis = store.cardSourcesFor?.(c.chunk.id);
+    return basis === undefined ? toCitation(c, i) : { ...toCitation(c, i), basis };
+  };
   const retrievalOpts = opts.retrieval ?? DEFAULT_RETRIEVAL;
   const threshold = opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD;
 
@@ -428,7 +439,7 @@ export async function ask(
     // Fred must decline ("walk me through stitching a cut"), a safe
     // alternative (the cuts card: clean it and cover it). Only an answer
     // leaves it out; a pet still never gets a human card.
-    else if (topCard !== undefined && !ABOUT_A_PET.test(query)) offer = toOffer(topCard);
+    else if (topCard !== undefined && !ABOUT_A_PET.test(query)) offer = toOffer(topCard, citeOf(topCard, 0));
     // A prevention question takes the normal path, cards included: several
     // cards are prevention guidance ("staying warm on a cold night", "staying
     // healthy", "river crossing"), and hiding them cost three tuning answers.
@@ -531,7 +542,7 @@ export async function ask(
       ...baseDiag, candidates, topScore, sufficient: null,
       tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode,
     };
-    const common = { kind: 'answer' as const, citations: [toCitation(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
+    const common = { kind: 'answer' as const, citations: [citeOf(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
     if (cardMode === 'card-only') {
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
     }
@@ -621,7 +632,7 @@ export async function ask(
   return {
     kind: 'answer',
     stream: backend.generate(prompt, generateOpts),
-    citations: usable.map(toCitation),
+    citations: usable.map(citeOf),
     prompt,
     medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
     diagnostics: {
@@ -636,8 +647,8 @@ export async function ask(
   };
 }
 
-function toOffer(card: ScoredChunk): CardOffer {
-  return { title: card.chunk.section, text: renderCard(parseCard(card.chunk.text)), citation: toCitation(card, 0) };
+function toOffer(card: ScoredChunk, citation: Citation): CardOffer {
+  return { title: card.chunk.section, text: renderCard(parseCard(card.chunk.text)), citation };
 }
 
 /**

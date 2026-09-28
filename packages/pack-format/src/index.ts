@@ -150,6 +150,14 @@ export interface PackManifest {
    * answer shows a subset of the card's own steps (#50).
    */
   readonly clarify?: Readonly<Record<string, CardClarify>>;
+  /** Field-card packs only: the manuals and pages each card quotes, keyed by chunk id. */
+  readonly cardSources?: Readonly<Record<string, readonly CardSource[]>>;
+}
+
+/** A manual a field card quotes, and the pages quoted. */
+export interface CardSource {
+  readonly source: string;
+  readonly pages: readonly number[];
 }
 
 /** One question a field card asks when its steps depend on the situation. */

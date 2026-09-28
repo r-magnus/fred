@@ -1,0 +1,25 @@
+{
+ "grader": "Claude, blind (A/B shuffled, key opened after grades were saved)",
+ "scores": {
+  "hc-soaked-01": {
+   "base": 0,
+   "phr": 0.5
+  },
+  "fa-fracture-01": {
+   "base": 1,
+   "phr": 0.5
+  },
+  "uv-ingestion-01": {
+   "base": 1,
+   "phr": 0.5
+  },
+  "uv-moon-01": {
+   "base": 0,
+   "phr": 0
+  },
+  "br-shoulder-01": {
+   "phr": 0,
+   "base": 1
+  }
+ }
+}

@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type {
-  ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest, CardClarify,
+  ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest, CardClarify, CardSource,
 } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
 import { denseTopK, vectorRow } from '@fred/rag-core';
@@ -50,6 +50,10 @@ export class NodePackStore implements PackStore {
   clarifyFor(chunkId: string): CardClarify | undefined {
     // Chunk ids are "<packId>:<ordinal>", and pack ids contain no colon.
     return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.clarify?.[chunkId];
+  }
+
+  cardSourcesFor(chunkId: string): readonly CardSource[] | undefined {
+    return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.cardSources?.[chunkId];
   }
 
   async searchLexical(

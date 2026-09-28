@@ -4,6 +4,9 @@
  *
  *   RERANKER=~/models/bge-reranker-v2-m3-Q4_K_M.gguf node tools/eval/src/rerank-check.ts [pool]
  *
+ * Without RERANKER it reports the search alone, which is how a pack change
+ * (PACKS_DIR) is judged: the same questions, before and after.
+ *
  * For every answerable tuning and held-out question with a known source
  * passage (`cite.quote`), take the search's top `pool` (default 20), rerank
  * them, and report where the source passage lands before and after.
@@ -23,9 +26,8 @@ const questions = setsFor('all').flatMap((f) => loadGradedSet(f, (p) => readFile
   .filter((q) => q.expect === 'answer' && q.cite?.quote);
 const harness = await openHarness();
 const opts = askOptionsFromEnv();
-const llama = await getLlama();
-const model = await llama.loadModel({ modelPath });
-const ranker = await model.createRankingContext();
+const ranker = modelPath === '' ? null
+  : await (await (await getLlama()).loadModel({ modelPath })).createRankingContext();
 
 const before: (number | null)[] = [];
 const after: (number | null)[] = [];
@@ -39,6 +41,7 @@ for (const q of questions) {
   const key = norm(q.cite!.quote).slice(0, 60);
   const isRight = (text: string): boolean => norm(text).includes(key);
   before.push(cands.findIndex((c) => isRight(c.chunk.text)));
+  if (ranker === null) { after.push(before.at(-1)!); process.stdout.write('.'); continue; }
   const t0 = Date.now();
   const scores = await ranker.rankAll(q.question, cands.map((c) => c.chunk.text));
   ms += Date.now() - t0;
@@ -48,7 +51,7 @@ for (const q of questions) {
 }
 const at = (ranks: (number | null)[], k: number): string =>
   `${ranks.filter((r) => r !== null && r >= 0 && r < k).length}`;
-console.log(`\n${questions.length} questions, pool ${pool}, ${modelPath.split('/').pop()}, ${Math.round(ms / questions.length)} ms per question`);
+console.log(`\n${questions.length} questions, pool ${pool}, ${modelPath.split('/').pop() || 'search only'}, ${Math.round(ms / questions.length)} ms per question`);
 for (const k of [1, 2, 3, 4]) console.log(`right passage in top ${k}: search ${at(before, k)}  reranked ${at(after, k)}`);
 console.log(`in the pool at all: ${at(before, pool)}`);
 const moved = before.map((b, i) => [b, after[i]] as const);

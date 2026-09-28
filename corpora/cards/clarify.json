@@ -1,0 +1,153 @@
+{
+  "_comment": "Clarifying questions for field cards whose steps depend on one detail (#50). Each answer shows a subset of the card's own reviewed steps, in the listed order (1-based); the summary, don'ts and get-help line always show. `rev` pins the card revision the step numbers were written against: the build refuses a stale entry. `words` are phrases that mean the hiker already answered.",
+  "burns": {
+    "rev": "006b24ae6b0a",
+    "question": "What does the burned skin look like?",
+    "choices": [
+      {
+        "label": "Red, no blisters",
+        "words": [
+          "no blister",
+          "not blister",
+          "without blister",
+          "just red",
+          "only red",
+          "first degree",
+          "first-degree",
+          "sunburn"
+        ],
+        "steps": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "label": "Blistered",
+        "words": [
+          "blister",
+          "second degree",
+          "second-degree"
+        ],
+        "steps": [
+          1,
+          2,
+          4,
+          6
+        ]
+      },
+      {
+        "label": "White, leathery or charred",
+        "words": [
+          "charred",
+          "leathery",
+          "white",
+          "blackened",
+          "third degree",
+          "third-degree"
+        ],
+        "steps": [
+          1,
+          2,
+          5,
+          6
+        ]
+      }
+    ]
+  },
+  "heat-illness": {
+    "rev": "be02674128ac",
+    "question": "Are they sweating heavily, or is their skin hot and dry?",
+    "choices": [
+      {
+        "label": "Sweating heavily, clammy",
+        "words": [
+          "sweating a lot",
+          "sweating heavily",
+          "heavy sweating",
+          "sweaty",
+          "clammy",
+          "heat exhaustion"
+        ],
+        "steps": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "label": "Hot, dry skin or confused",
+        "words": [
+          "not sweating",
+          "stopped sweating",
+          "no sweat",
+          "dry skin",
+          "hot and dry",
+          "confused",
+          "confusion",
+          "talking nonsense",
+          "heat stroke",
+          "heatstroke",
+          "passed out",
+          "collapsed",
+          "seizure"
+        ],
+        "steps": [
+          4,
+          5,
+          6
+        ]
+      }
+    ]
+  },
+  "stings-bites": {
+    "rev": "2316ad0eed5a",
+    "question": "What got them?",
+    "choices": [
+      {
+        "label": "Bee or wasp",
+        "words": [
+          "bee",
+          "wasp",
+          "hornet",
+          "yellowjacket",
+          "yellow jacket",
+          "stinger"
+        ],
+        "steps": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "label": "Spider",
+        "words": [
+          "spider",
+          "black widow",
+          "brown recluse"
+        ],
+        "steps": [
+          5,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "label": "Fire ants",
+        "words": [
+          "fire ant",
+          "ants"
+        ],
+        "steps": [
+          6,
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  }
+}

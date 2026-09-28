@@ -24,7 +24,7 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, wantsMap, type CardOffer, type Citation } from '@fred/rag-core';
+import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
@@ -52,6 +52,9 @@ interface Turn {
   offerOpen?: boolean;
   /** "I'm lost", "where am I?", "no signal": a map is shown beside the reply (US-05). */
   map?: boolean;
+  /** A card's clarifying question (#50): buttons under the answer until one is used. */
+  clarify?: ClarifyView;
+  clarifyUsed?: boolean;
 }
 
 /** The provider has to sit above anything calling useSafeAreaInsets. */
@@ -193,6 +196,7 @@ function Screen() {
       }
       update(id, {
         citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore,
+        ...(res.clarify === undefined ? {} : { clarify: res.clarify }),
       });
       let text = '';
       for await (const tok of res.stream) {
@@ -212,6 +216,22 @@ function Screen() {
       setBusy(false);
     }
   }, [draft, state, busy, update, fix, locating, locate]);
+
+  /**
+   * A clarifying-question button (#50). The choice becomes the hiker's reply
+   * and the card's steps for it become Fred's, with no search and no model:
+   * the text was prepared with the question. Typing a new message instead
+   * simply moves on; only the newest answer keeps its buttons.
+   */
+  const choose = useCallback((from: Turn, label: string, text: string): void => {
+    const id = nextId.current++;
+    update(from.id, { clarifyUsed: true });
+    setTurns((ts) => [...ts, {
+      id, question: label, state: from.state, text, kind: 'answer',
+      citations: from.citations, medical: from.medical, candidateStates: [], done: true, stopped: false,
+    }]);
+  }, [update]);
+  const input = useRef<TextInput | null>(null);
 
   /**
    * Development hook: ask questions from the desktop while the phone is locked.
@@ -428,6 +448,29 @@ function Screen() {
                   </Text>
                 )}
 
+                {t.done && t.clarify !== undefined && !t.clarifyUsed && t.id === turns.at(-1)?.id && (
+                  <View style={styles.clarify}>
+                    <Text style={styles.clarifyQ}>
+                      {t.clarify.picked === null ? t.clarify.question : `Showing: ${t.clarify.picked}. Not right?`}
+                    </Text>
+                    <View style={styles.stateRow}>
+                      {t.clarify.choices.filter((c) => c.label !== t.clarify!.picked).map((c) => (
+                        <Pressable key={c.label} style={styles.stateButton} onPress={() => choose(t, c.label, c.text)}>
+                          <Text style={styles.stateButtonText}>{c.label}</Text>
+                        </Pressable>
+                      ))}
+                      {/* Can't tell: the whole card is the safe answer. */}
+                      <Pressable style={styles.stateButton}
+                        onPress={() => choose(t, t.clarify!.picked === null ? 'Not sure' : 'Show the whole card', t.clarify!.whole)}>
+                        <Text style={styles.stateButtonText}>{t.clarify.picked === null ? 'Not sure' : 'Whole card'}</Text>
+                      </Pressable>
+                      <Pressable style={styles.stateButton} onPress={() => input.current?.focus()}>
+                        <Text style={styles.clarifyOther}>Something else…</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                )}
+
                 {t.medical && t.done && <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>}
 
                 {t.done && t.citations.length > 0 && (
@@ -471,6 +514,7 @@ function Screen() {
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
         <View style={[styles.composer, { paddingBottom: insets.bottom + 12 }]}>
           <TextInput
+            ref={input}
             style={styles.input}
             value={draft}
             onChangeText={setDraft}
@@ -503,6 +547,9 @@ function Screen() {
 const styles = StyleSheet.create({
   offerTitle: { color: '#6ca', fontSize: 15, fontWeight: '600' },
   mapCard: { marginTop: 8 },
+  clarify: { marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d', paddingTop: 10 },
+  clarifyQ: { color: '#eaf2ef', fontSize: 14, fontWeight: '600' },
+  clarifyOther: { color: '#8b9a95', fontSize: 13, fontWeight: '600' },
   root: { flex: 1, backgroundColor: '#0e1113' },
   centre: { alignItems: 'center', justifyContent: 'center' },
   wordmark: { color: '#eaf2ef', fontSize: 40, fontWeight: '700', letterSpacing: 1 },

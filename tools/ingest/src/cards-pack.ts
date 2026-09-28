@@ -18,7 +18,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { LicenseEntry } from '@fred/pack-format';
+import type { CardClarify, LicenseEntry } from '@fred/pack-format';
 import { cardText, validateCards, type FieldCard, type PassageText } from './cards.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
@@ -87,6 +87,26 @@ const embedder = embedderName === 'embeddinggemma'
   ? await loadGgufEmbedder(EMBEDDING_GEMMA)
   : await loadOnnxEmbedder(`${process.env.HOME}/models/gte-small.onnx`, `${process.env.HOME}/models/gte-small-vocab.txt`, 'Supabase/gte-small');
 
+// Clarifying questions (#50), keyed by the chunk id each card will get. An
+// entry pinned to an older card revision is refused: its step numbers may no
+// longer point at the steps they were written for.
+const clarifyFile = JSON.parse(readFileSync('corpora/cards/clarify.json', 'utf8')) as
+  Record<string, CardClarify & { rev: string }>;
+const clarify: Record<string, CardClarify> = {};
+for (const [id, entry] of Object.entries(clarifyFile)) {
+  if (id.startsWith('_')) continue;
+  const at = cards.findIndex((c) => c.id === id);
+  if (at === -1) { console.log(`clarify: ${id} not in this build, skipped`); continue; }
+  const card = cards[at]!;
+  if (entry.rev !== revOf(card)) throw new Error(`clarify.json ${id} is for card revision ${entry.rev || '(none)'}, the card is ${revOf(card)}; re-check its step numbers`);
+  for (const ch of entry.choices) {
+    for (const n of ch.steps) {
+      if (!Number.isInteger(n) || n < 1 || n > card.steps.length) throw new Error(`clarify.json ${id} "${ch.label}": no step ${n}`);
+    }
+  }
+  clarify[`core-fieldcards:${at}`] = { question: entry.question, choices: entry.choices };
+}
+
 const chunks: DraftChunk[] = cards.map((c) => ({
   text: cardText(c),
   section: c.title,
@@ -104,7 +124,7 @@ const vectors = await embedder.embed(embedInput);
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.3.0',
+  version: '0.4.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],
@@ -113,6 +133,7 @@ const { dir } = await writePack(PACKS, {
   licenseId: CARDS_LICENSE.id,
   licenses: [CARDS_LICENSE, WHO_BEC_LICENSE, ATP_SURVIVAL_LICENSE, ATP_FIRST_AID_LICENSE],
   embedding: embedder.spec,
+  clarify,
 }, chunks, vectors);
 await embedder.dispose();
 console.log(`wrote ${dir}: ${cards.length} cards`);

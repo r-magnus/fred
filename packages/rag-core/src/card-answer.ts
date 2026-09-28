@@ -66,3 +66,40 @@ export function readPick(text: string, stepCount: number): number[] {
   }
   return [...picked].sort((a, b) => a - b);
 }
+
+/**
+ * A card's steps in a chosen order, for one answer to its clarifying question.
+ * The summary, don'ts and get-help line stay, as in `renderCard`.
+ */
+export function renderCardSteps(card: ParsedCard, steps1Based: readonly number[]): string {
+  const keep = steps1Based.map((n) => card.steps[n - 1]).filter((s): s is string => s !== undefined);
+  return [card.summary, ...keep.map((s, i) => `${i + 1}. ${s}`), ...card.rest].join('\n');
+}
+
+/** "not", "no", "n't" or "without" just before a phrase flips it: "no blisters" is not "blistered". */
+const NEGATION = /\b(?:no|not|never|without|isn'?t|aren'?t|wasn'?t|don'?t|doesn'?t|didn'?t)\s+(?:\w+\s+)?$/i;
+
+/**
+ * Which answer the message already gives, if exactly one. A phrase counts
+ * unless a negation sits just before it, so "the skin isn't blistered" does
+ * not pick "Blistered". Two or more answers named, or none, means ask.
+ */
+export function pickChoice(
+  choices: readonly { readonly label: string; readonly words: readonly string[] }[],
+  message: string,
+): number | null {
+  const text = message.toLowerCase();
+  const hits = choices.map((c) => c.words.some((w) => {
+    const phrase = w.toLowerCase();
+    let at = text.indexOf(phrase);
+    while (at !== -1) {
+      const before = text.slice(Math.max(0, at - 24), at);
+      const wordStart = at === 0 || /\W/.test(text[at - 1]!);
+      if (wordStart && (/^(?:no|not|without)\b/.test(phrase) || !NEGATION.test(before))) return true;
+      at = text.indexOf(phrase, at + 1);
+    }
+    return false;
+  }));
+  const picked = hits.flatMap((h, i) => (h ? [i] : []));
+  return picked.length === 1 ? picked[0]! : null;
+}

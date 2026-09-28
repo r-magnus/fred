@@ -112,14 +112,22 @@ export const HOLDOUT_SETS = [
  */
 export const BREADTH_SETS = ['tools/eval/data/holdout-breadth.json'] as const;
 
+/**
+ * Casual, first-person messages about field-card topics (2026-09-28), written
+ * and committed before the cards' plain-language phrasings were added, to
+ * judge them. The overlap test keeps any phrasing from copying one.
+ */
+export const COLLOQUIAL_SETS = ['tools/eval/data/holdout-colloquial.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
     case 'tuning': return GRADED_SETS;
     case 'holdout': return HOLDOUT_SETS;
     case 'breadth': return BREADTH_SETS;
+    case 'colloquial': return COLLOQUIAL_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | all, got "${name}"`);
   }
 }
 

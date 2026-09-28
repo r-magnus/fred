@@ -57,6 +57,15 @@ interface Turn {
   clarifyUsed?: boolean;
 }
 
+/**
+ * A field card's sources, as the reader would look them up: "ATP 3-50.21
+ * pp. 28, 29 · WHO BEC 2018 p. 94".
+ */
+function describeBasis(basis: NonNullable<Citation['basis']>): string {
+  return basis.map((b) => b.pages.length === 0 ? b.source
+    : `${b.source} ${b.pages.length === 1 ? 'p.' : 'pp.'} ${b.pages.join(', ')}`).join(' · ');
+}
+
 /** The provider has to sit above anything calling useSafeAreaInsets. */
 export default function App() {
   return (
@@ -423,6 +432,9 @@ function Screen() {
                     <Text style={styles.body}>{t.offer.text}</Text>
                     <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
                     <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
+                    {t.offer.citation.basis !== undefined && (
+                      <Text style={styles.sourceBasis}>from {describeBasis(t.offer.citation.basis)}</Text>
+                    )}
                   </>
                 )}
               </View>
@@ -483,9 +495,12 @@ function Screen() {
                     {[...new Map(t.citations.map((c) => [
                       `${c.source}|${c.page}|${c.section}`, c,
                     ])).values()].map((c) => (
-                      <Text key={c.chunkId} style={styles.source}>
-                        {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
-                      </Text>
+                      <View key={c.chunkId}>
+                        <Text style={styles.source}>
+                          {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
+                        </Text>
+                        {c.basis !== undefined && <Text style={styles.sourceBasis}>from {describeBasis(c.basis)}</Text>}
+                      </View>
                     ))}
                   </View>
                 )}
@@ -589,6 +604,7 @@ const styles = StyleSheet.create({
   sources: { marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d', paddingTop: 10 },
   sourcesTitle: { color: '#6ca', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
   source: { color: '#8b9a95', fontSize: 12, lineHeight: 18 },
+  sourceBasis: { color: '#6b7a76', fontSize: 12, lineHeight: 18, marginLeft: 12 },
 
   locNote: {
     color: '#e0c98a', fontSize: 13, backgroundColor: '#241f16',

@@ -440,7 +440,10 @@ test('a card with a clarifying question: whole card and the question, or the cas
     { label: 'Red', words: ['just red'], steps: [1, 2] },
     { label: 'Blistered', words: ['blister'], steps: [1, 3] },
   ] };
-  const withClarify = Object.assign(store, { clarifyFor: (id: string) => (id === 'core-fieldcards:0' ? clarify : undefined) });
+  const withClarify = Object.assign(store, {
+    clarifyFor: (id: string) => (id === 'core-fieldcards:0' ? clarify : undefined),
+    cardSourcesFor: (id: string) => (id === 'core-fieldcards:0' ? [{ source: 'ATP 3-50.21 Survival 2018', pages: [28] }] : undefined),
+  });
   const opts = {
     state: null, abstainThreshold: 0, cardAnswer: 'verbatim' as const,
     retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0 } },
@@ -455,6 +458,7 @@ test('a card with a clarifying question: whole card and the question, or the cas
   assert.equal(vague.kind, 'answer');
   if (vague.kind !== 'answer') return;
   assert.equal(vague.clarify?.picked, null);
+  assert.deepEqual(vague.citations[0]?.basis, [{ source: 'ATP 3-50.21 Survival 2018', pages: [28] }]);
   assert.equal(vague.clarify?.choices[1]?.text, "Stop it, then check the skin.\n1. Stop, drop and roll.\n2. Blistering burn: cool and cover.\nDon't use ice.");
   assert.match(await text(vague), /1\. Stop, drop and roll\.\n2\. Surface burn/);
 

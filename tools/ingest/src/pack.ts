@@ -10,7 +10,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type {
-  CardClarify, DomainTag, EmbeddingSpec, LicenseEntry, PackFileEntry, PackManifest, PackScope,
+  CardClarify, CardSource, DomainTag, EmbeddingSpec, LicenseEntry, PackFileEntry, PackManifest, PackScope,
 } from '@fred/pack-format';
 import { SCHEMA_VERSION } from '@fred/pack-format';
 import { quantizeInt8 } from '@fred/rag-core';
@@ -25,6 +25,8 @@ export const INGEST_VERSION = '0.2.0';
 export interface PackInput {
   /** Field-card packs: clarifying questions keyed by chunk id (#50). */
   readonly clarify?: Readonly<Record<string, CardClarify>>;
+  /** Field-card packs: the manuals and pages each card quotes, keyed by chunk id. */
+  readonly cardSources?: Readonly<Record<string, readonly CardSource[]>>;
   readonly id: string;
   readonly version: string;
   readonly displayName: string;
@@ -141,6 +143,7 @@ export async function writePack(
     builtAt: new Date().toISOString(),
     ingestVersion: INGEST_VERSION,
     ...(input.clarify === undefined ? {} : { clarify: input.clarify }),
+    ...(input.cardSources === undefined ? {} : { cardSources: input.cardSources }),
   };
   await writeFile(join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   return { dir, manifest };

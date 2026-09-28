@@ -12,7 +12,7 @@
 import { open, type DB } from '@op-engineering/op-sqlite';
 import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
-import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify } from '@fred/pack-format';
+import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify, CardSource } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import {
   vectorRow, denseTopK, decodeBase64, buildVocab, encode, meanPool, l2Normalize,
@@ -59,6 +59,10 @@ export class DevicePackStore implements PackStore {
   clarifyFor(chunkId: string): CardClarify | undefined {
     // Chunk ids are "<packId>:<ordinal>", and pack ids contain no colon.
     return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.clarify?.[chunkId];
+  }
+
+  cardSourcesFor(chunkId: string): readonly CardSource[] | undefined {
+    return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.cardSources?.[chunkId];
   }
 
   async searchLexical(

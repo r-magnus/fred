@@ -24,10 +24,10 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, type CardOffer, type Citation } from '@fred/rag-core';
+import { MEDICAL_DISCLAIMER, REFER_REPLY, isRefusal, wantsMap, type CardOffer, type Citation } from '@fred/rag-core';
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
-import { MapProbe } from './src/map-probe.tsx';
+import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
 
@@ -50,6 +50,8 @@ interface Turn {
   /** A field card offered folded (small talk, a decline); opened on tap. */
   offer?: CardOffer;
   offerOpen?: boolean;
+  /** "I'm lost", "where am I?", "no signal": a map is shown beside the reply (US-05). */
+  map?: boolean;
 }
 
 /** The provider has to sit above anything calling useSafeAreaInsets. */
@@ -75,8 +77,8 @@ function Screen() {
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
   const [recording, setRecording] = useState(isRecording());
-  // Throwaway: tap the wordmark to check the PMTiles basemap renders.
-  const [probe, setProbe] = useState(false);
+  // The full-screen map: opened from a map in the chat, or by tapping the wordmark.
+  const [mapOpen, setMapOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -149,10 +151,14 @@ function Screen() {
     const previous = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
       last.topScore !== undefined && last.question !== question
       ? { question: last.question, topScore: last.topScore } : undefined;
+    const map = wantsMap(question);
     setTurns((ts) => [...ts, {
       id, question, state: askState, text: '', kind: 'answer',
-      citations: [], medical: false, candidateStates: [], done: false, stopped: false,
+      citations: [], medical: false, candidateStates: [], done: false, stopped: false, map,
     }]);
+    // A map with no position is no use to someone who is lost: find one now,
+    // alongside the answer, instead of waiting to be asked.
+    if (map && fix === null && !locating) void locate();
     setDraft('');
     setBusy(true);
 
@@ -205,7 +211,7 @@ function Screen() {
       abort.current = null;
       setBusy(false);
     }
-  }, [draft, state, busy, update]);
+  }, [draft, state, busy, update, fix, locating, locate]);
 
   /**
    * Development hook: ask questions from the desktop while the phone is locked.
@@ -250,12 +256,15 @@ function Screen() {
     );
   }
 
-  if (probe) return <MapProbe onClose={() => setProbe(false)} fix={fix} />;
+  if (mapOpen) return <MapScreen onClose={() => setMapOpen(false)} fix={fix} />;
+  // Only the newest map in the chat is drawn live; older ones become a button,
+  // so a long conversation does not hold a map renderer per lost message.
+  const liveMap = turns.findLast((t) => t.map === true)?.id;
 
   return (
     <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => setProbe(true)} hitSlop={8}>
+        <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
           <Text style={styles.wordmarkSmall}>Fred</Text>
         </Pressable>
         {/* B-KR1. The accuracy is on screen rather than in a log because the
@@ -435,6 +444,18 @@ function Screen() {
                 )}
               </View>
             )}
+
+            {t.map === true && (
+              <View style={[styles.card, styles.mapCard]}>
+                {t.id === liveMap
+                  ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} />
+                  : (
+                    <Pressable onPress={() => setMapOpen(true)} hitSlop={8} accessibilityRole="button">
+                      <Text style={styles.offerTitle}>▸ Open the map</Text>
+                    </Pressable>
+                  )}
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -477,6 +498,7 @@ function Screen() {
 
 const styles = StyleSheet.create({
   offerTitle: { color: '#6ca', fontSize: 15, fontWeight: '600' },
+  mapCard: { marginTop: 8 },
   root: { flex: 1, backgroundColor: '#0e1113' },
   centre: { alignItems: 'center', justifyContent: 'center' },
   wordmark: { color: '#eaf2ef', fontSize: 40, fontWeight: '700', letterSpacing: 1 },

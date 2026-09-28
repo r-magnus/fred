@@ -331,18 +331,22 @@ flowchart TB
   vercel -. app download link .-> user(["User"])
 
   subgraph install["On-Install Data Downloads"]
-    sources["Public Data Sources<br/>WHO BEC · US Army ATP 3-50.21 / 4-02.11 · USFS FEIS"] -- download --> prep["Data Prep Scripts<br/>Node.js + TypeScript<br/>clean · chunk · index"]
+    sources["Public Data Sources<br/>WHO BEC · US Army ATP 4-02.11 / 3-50.21 · FM 21-76 · USFS FEIS · FCC BDC"] -- download --> prep["Data Prep Scripts<br/>Node.js + TypeScript<br/>clean · chunk · embed · pack"]
+    cards["Field Cards<br/>plain-language steps,<br/>quoted from the manuals"] --> prep
   end
 
   subgraph phone["On-Phone Processes"]
     ui["App Interface<br/>React Native + TypeScript"]
-    rag["RAG Engine<br/>source query to prompt"]
-    db[("Knowledge Database<br/>SQLite + FTS5")]
-    llm["Qwen3-0.6B Q4_K_M<br/>via llama.rn/ONNX"]
+    rag["RAG Engine<br/>intent · search · gate · prompt"]
+    emb["EmbeddingGemma-300M<br/>via llama.rn"]
+    db[("Knowledge Packs<br/>SQLite passages + INT8 vectors")]
+    llm["Qwen3-1.7B Q4_K_M<br/>via llama.rn"]
 
     ui -- question text --> rag
-    rag -- answer + source citations --> ui
-    rag -- keyword search --> db
+    rag -- answer, field card or decline + citations --> ui
+    rag -- question --> emb
+    emb -- meaning vector --> rag
+    rag -- vector search --> db
     db -- best-matching passages --> rag
     rag -- question + passages --> llm
     llm -- generated answer --> rag
@@ -359,9 +363,9 @@ For example, a user asks a flora corpus-relevant question:
 
 1. Query: "What does poison ivy look like, and how do I treat the rash?"
 2. Question text is sent to RAG core
-3. SQLite full text search finds top relevant passages & sources
-4. A compound prompt (RAG output and user query) is sent to the local LLM
-5. User receives an informed response, with sources (i.e. "I referenced USFS FEIS…")
+3. The question is turned into a meaning vector (EmbeddingGemma) and matched against every passage in the installed packs; nothing below the confidence gate is used
+4. If a field card clearly matches, it is shown word for word; otherwise a compound prompt (passages and user query) is sent to the local LLM
+5. User receives an informed response, with sources (i.e. "USFS FEIS — poison ivy", "WHO BEC")
 
 **Figure 2 — User Walkthrough**
 
@@ -370,12 +374,12 @@ sequenceDiagram
   actor User
   participant FE as React Native Frontend
   participant RAG as RAG Engine
-  participant DB as SQLite FTS5
-  participant LLM as Qwen3-0.6B (llama.rn/ONNX)
+  participant DB as Packs (SQLite + vectors)
+  participant LLM as Qwen3-1.7B (llama.rn)
 
   User->>FE: "What does poison ivy look like, and how do I treat the rash?"
   FE->>RAG: Send question text
-  RAG->>DB: Full-text search
+  RAG->>DB: Meaning search (EmbeddingGemma vector)
   DB-->>RAG: Top passages
   RAG->>LLM: Compound Prompt (instructions, passages, question)
   LLM-->>RAG: Streamed answer tokens
@@ -389,8 +393,8 @@ sequenceDiagram
 |---|---|---|---|
 | Frontend / UI | React Native | Android & iOS compatibility, plus sleek component-based design system. | Flutter/Dart; I have no experience with this technology. |
 | Backend & processing | Serverless LLM RAG core | This is the point of the project. | Pursue a different project. |
-| Data · model · DBMS | SQLite + FTS5 · Qwen3-0.6B Q4_K_M · WHO BEC · US Army ATP 3-50.21 & 4-02.11 · USFS FEIS | Classic SQL DBMS with full text search referencing compatibility, given to a lightweight and capable model, storing quality data. | GraphQL + knowledge graph; further research required. |
-| Languages · frameworks · APIs · hardware | TypeScript · Node.js · llama.rn (generation) · ONNX Runtime (embedding) | Generation runs through llama.rn; embedding moved to ONNX Runtime so ingest and device produce identical vectors. | Keep llama.rn for both; rejected — the two runtimes did not embed alike (`docs/results-m3.md`). |
+| Data · model · DBMS | SQLite packs with INT8 vectors · EmbeddingGemma-300M (search) · Qwen3-1.7B Q4_K_M (answers) · WHO BEC · US Army ATP 4-02.11 & 3-50.21 · FM 21-76 (signalling) · USFS FEIS (per state) · FCC BDC (coverage) · reviewed field cards | Searching by meaning finds passages for plainly worded questions that keyword search missed; Qwen3-1.7B is the smallest model that answered accurately; field cards give instant, reviewed steps for common emergencies. | Keyword search (SQLite FTS5) and Qwen3-0.6B, the original design: both measured lower (`docs/results-phase1.md`, `docs/METRICS.md`). A larger model (Qwen3-4B) is not yet measured; phone memory and speed are the limit. |
+| Languages · frameworks · APIs · hardware | TypeScript · Node.js · llama.rn (search and answers) · op-sqlite | One runtime on the phone for both models; the desktop harness runs the same pipeline code on node-llama-cpp, and every pack is checked for matching vectors at load. | ONNX Runtime for search, used before EmbeddingGemma (`docs/results-m3.md`). |
 | Hosting & deployment | Vercel for product page | Vercel links directly into GitHub, making development easy. | ngrok hosting. |
 | Auth · permissions · sensitive data | Authless experience, all data stays on-device. | Login processes add unneeded friction when all app information is stored locally, and meant to be used offline. | If needed, set up a simple server machine for auth purposes. Greater friction and overhead. |
 | User feedback | Run trial and focus groups with Fred. | This permits receiving real world user feedback while a proper feedback system on-app is pending. | On-app review system while online. |

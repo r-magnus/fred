@@ -370,8 +370,12 @@ function Screen() {
 
             {t.kind === 'abstain' && t.text !== REFER_REPLY && (
               <View style={styles.card}>
-                <Text style={styles.body}>I don&apos;t have reliable information on that.</Text>
-                {t.offer === undefined ? (
+                {/* "Where am I?" is not in the manuals, but the map below answers
+                    it, so saying "I don't know" first would contradict it. */}
+                <Text style={styles.body}>
+                  {t.map === true ? 'Here\u2019s where you are.' : 'I don\u2019t have reliable information on that.'}
+                </Text>
+                {t.map === true && t.offer === undefined ? null : t.offer === undefined ? (
                   <Text style={styles.hint}>
                     Fred only answers from the manuals he carries, and says nothing rather
                     than guessing.

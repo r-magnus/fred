@@ -1,0 +1,133 @@
+{
+ "grader": "Claude, blind (A/B shuffled, key opened after grades were saved)",
+ "scores": {
+  "ff-oak-01|few-tuning": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "ff-oak-02|few-tuning": {
+   "base": 1,
+   "variant": 0
+  },
+  "ff-lion-01|few-tuning": {
+   "variant": 1,
+   "base": 1
+  },
+  "ff-bear-01|few-tuning": {
+   "variant": 1,
+   "base": 1
+  },
+  "ff-bear-02|few-tuning": {
+   "variant": 0.5,
+   "base": 1
+  },
+  "ff-huckleberry-01|few-tuning": {
+   "variant": 0.5,
+   "base": 1
+  },
+  "ff-blackoak-01|few-tuning": {
+   "base": 1,
+   "variant": 0
+  },
+  "ff-or-bear-01|few-tuning": {
+   "base": 1,
+   "variant": 1
+  },
+  "ff-or-coyote-01|few-tuning": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-sling-01|shape-few-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-cook-01|shape-few-breadth": {
+   "base": 1,
+   "variant": 1
+  },
+  "br-azimuth-01|shape-few-breadth": {
+   "base": 0.5,
+   "variant": 0.5
+  },
+  "br-shellfish-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 0.5
+  },
+  "br-moon-01|shape-few-breadth": {
+   "base": 0,
+   "variant": 1
+  },
+  "br-rope-01|shape-few-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-bowdrill-01|shape-few-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-bugs-01|shape-few-breadth": {
+   "base": 0,
+   "variant": 0.5
+  },
+  "br-mirror-01|shape-few-breadth": {
+   "base": 0.5,
+   "variant": 0.5
+  },
+  "br-hawk-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-deer-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-moose-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-buttonbush-01|shape-few-breadth": {
+   "base": 1,
+   "variant": 1
+  },
+  "br-sycamore-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-thistle-01|shape-few-breadth": {
+   "variant": 1,
+   "base": 1
+  },
+  "br-tarragon-01|shape-few-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-catbird-01|shape-few-breadth": {
+   "base": 1,
+   "variant": 0
+  },
+  "br-sling-01|shape-how-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-azimuth-01|shape-how-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-rope-01|shape-how-breadth": {
+   "variant": 0.5,
+   "base": 0.5
+  },
+  "br-bowdrill-01|shape-how-breadth": {
+   "base": 0.5,
+   "variant": 0.5
+  },
+  "br-bugs-01|shape-how-breadth": {
+   "base": 0,
+   "variant": 0.5
+  },
+  "br-mirror-01|shape-how-breadth": {
+   "base": 0.5,
+   "variant": 0.5
+  }
+ }
+}

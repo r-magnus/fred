@@ -126,12 +126,30 @@ export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival 
  * else" is doing, it is holding this model to the task. Reverted to the measured
  * configuration; the truncation cost stands until it can be fixed without it.
  */
-function shapeInstruction(blocks: readonly ContextBlock[]): string {
+function shapeInstruction(blocks: readonly ContextBlock[], query: string, shape: ShapeVariant): string {
   const procedures = blocks.filter((b) => b.chunk.blockKind === 'procedure').length;
-  return procedures * 2 >= blocks.length
-    ? 'Reply with short numbered steps and nothing else.'
+  const steps = procedures * 2 >= blocks.length || (shape !== 'default' && ASKS_HOW.test(query));
+  if (steps) return 'Reply with short numbered steps and nothing else.';
+  return shape === 'how-few'
+    ? 'Reply with a few short sentences and nothing else.'
     : 'Reply with two or three short sentences and nothing else.';
 }
+
+/**
+ * A question asking how to do something. Under shape 'how' it is answered in
+ * steps even when the retrieved passages are not tagged as procedures: the tag
+ * comes from each passage's own layout, so the second half of a list split
+ * across two passages reads as prose, and "how does a bow drill work?" got two
+ * sentences with every step in hand (docs/results-thin-answers.md).
+ */
+const ASKS_HOW = /\b(?:how (?:do|does|can|should|would|to)\b|what (?:should|do|can) (?:i|we)\b|what to do\b|steps? (?:to|for)\b)/i;
+
+/**
+ * How the answer's shape is chosen. 'default' decides from the passages alone;
+ * 'how' also answers how-to questions in steps; 'how-few' adds a looser length
+ * for everything else ("a few" sentences, not "two or three").
+ */
+export type ShapeVariant = 'default' | 'how' | 'how-few';
 
 /** First-aid material is the only kind for which the emergency line is apt. */
 function isMedical(blocks: readonly ContextBlock[]): boolean {
@@ -199,8 +217,9 @@ export function buildQuerySuffix(
   blocks: readonly ContextBlock[],
   place?: string,
   earlier?: string,
+  shape: ShapeVariant = 'default',
 ): string {
-  const rules = [shapeInstruction(blocks)];
+  const rules = [shapeInstruction(blocks, query, shape)];
   // Fired unconditionally before, so it turned up on "what plants and animals are
   // near me?" and on a question about what mountain lions eat.
   if (isMedical(blocks)) {
@@ -242,10 +261,11 @@ export function buildPromptParts(
   variant: AnswerVariant = 'default',
   place?: string,
   earlier?: string,
+  shape: ShapeVariant = 'default',
 ): PromptParts {
   return {
     system: variant === 'lead' ? SYSTEM_PREFIX_LEAD : SYSTEM_PREFIX,
-    user: buildQuerySuffix(query, blocks, place, earlier).trimStart(),
+    user: buildQuerySuffix(query, blocks, place, earlier, shape).trimStart(),
   };
 }
 

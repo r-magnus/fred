@@ -112,11 +112,55 @@ predators, poison oak range, bow drill.
 A wash. It moves which answers are good rather than how many, and one of the
 new refusals is a safety answer. Not shipped.
 
+### Option 3, cutting at the manuals' own paragraphs: small test, rejected
+
+This had been tried before: phase 1 (`results-phase1.md` §4) built
+`CHUNKING=structure` and dropped it because search got worse (21 of 49 in the
+top 4, against 27). This research note first called it untested; that was
+wrong. Phase 1 never generated answers from it, though, so a small test was
+still new information.
+
+Only the two Army manuals were re-cut (ATP 3-50.21, ATP 4-02.11; 480 and 354
+passages against 510 and 364, so a similar size), built outside `packs/`, and
+mixed with every other current pack.
+
+**Search, the same 84 questions:**
+
+| Right passage in | Windows | Structure |
+|---|---:|---:|
+| top 1 | 21 | 24 |
+| top 2 | 38 | 37 |
+| top 4 | 49 | 47 |
+| top 20 | 68 | 70 |
+
+A tie, unlike phase 1. So answers were generated on the tuning and breadth
+sets, and the 25 that changed were graded blind (`structure-verdicts.json`,
+`structure-runs-*.jsonl`).
+
+| | Windows | Structure | Wins | Losses |
+|---|---:|---:|---:|---:|
+| 25 changed answers | 14.0 | **6.5** | 2 | 9 |
+
+- **A new unsafe answer:** "Is it worth nibbling an unknown plant?" became "If
+  the plant is abundant … nibbling may be worth trying."
+- **Out-of-scope questions answered:** the adult epinephrine dose, a snaring
+  permit, and which mushrooms to eat (the last one harmlessly). Outcomes
+  matching expectation on the tuning set fell from 90 to 85.
+- "Roasting is better than boiling" (the manual says the opposite), a plain
+  airway question refused, and weaker blister and dislocated-shoulder answers.
+- Wins: both moon answers and "why not get sweaty in the cold" gained half a
+  point each.
+
+Rejected, clearly. Clean one-topic passages also carry less of the
+surrounding text that tells the model what *not* to do (the edibility
+passages' warnings sit in neighbouring paragraphs). The overlap in the
+windows is doing more work than it looks.
+
 ### What this leaves
 
-The noise is in the passages themselves: fixed-size windows that mix topics.
-Filtering or reordering around them, whether by score, by count, by joining
-or by reranking, trades one answer for another. Option 3, cutting the manuals
-at their own numbered paragraphs, is the one that changes the passages
-themselves. It can be judged without generation first: the source-passage
-rank on these same 84 questions, before and after.
+Every way of cleaning up the passages tried here (fewer, cut by score,
+reranked, joined, re-cut) either loses accuracy or trades one answer for
+another. On this model and these manuals, the passages are not the lever.
+The levers left are the ones that don't touch passage text: field cards
+(reviewed, answered word for word) and how well search matches the way
+people phrase things (plain situation descriptions on the cards).

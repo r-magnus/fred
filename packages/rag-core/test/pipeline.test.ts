@@ -645,3 +645,35 @@ test('where both tips packs answer, NPS is read first and nothing else moves', (
   ]).map((c) => c.chunk.id);
   assert.deepEqual(order, ['card', 'nps', 'manual', 'wv']);
 });
+
+const tickPacks = [
+  { id: 'core-fieldcards', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-tips-wikivoyage', domains: ['outdoor-skills'] as const, scope: { kind: 'global' } as const },
+  { id: 'state-CO-wildlife', domains: ['wildlife'] as const, scope: { kind: 'us-state', state: 'CO' } as const },
+];
+const tickStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-fieldcards', [seed('tick dug into skin: grip it close with tweezers and pull straight out', { source: 'Fred field card', section: 'Removing a tick' })]);
+  store.addPack('core-tips-wikivoyage', [seed('tick prevention: tuck pants into socks, use repellent, check after the hike', {
+    source: 'Wikivoyage', section: 'Pests > Ticks', domain: 'outdoor-skills', licenseId: 'wikivoyage:Pests' })]);
+  store.addPack('state-CO-wildlife', []);
+  return store;
+};
+
+test('an emergency routed only to tips is searched again without them', async () => {
+  // "tick" is a tips word, so routing picks the tips pack alone; filtering it
+  // out left nothing and the tick card was lost (docs/results-tips.md).
+  const res = await ask('a tick dug into my armpit', { backend: saying('NOW'), store: tickStore(), packs: tickPacks }, tipsOpts);
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') assert.equal(res.citations[0]!.source, 'Fred field card');
+});
+
+test('a question about "this area" is not answered from general tips without a location', async () => {
+  const store = new FakePackStore();
+  store.addPack('core-fieldcards', []);
+  store.addPack('core-tips-wikivoyage', [seed('dangerous animals in this area snakes scorpions keep your distance', {
+    source: 'Wikivoyage', section: 'Arid region safety > Stay safe', domain: 'outdoor-skills', licenseId: 'wikivoyage:Arid_region_safety' })]);
+  store.addPack('state-CO-wildlife', []);
+  const res = await ask('are there dangerous animals in this area', { backend: saying('QUESTION'), store, packs: tickPacks }, tipsOpts);
+  assert.equal(res.kind, 'needs-location');
+});

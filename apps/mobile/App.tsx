@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Pressable,
+  ActivityIndicator, KeyboardAvoidingView, Linking, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -500,6 +500,13 @@ function Screen() {
                           {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
                         </Text>
                         {c.basis !== undefined && <Text style={styles.sourceBasis}>from {describeBasis(c.basis)}</Text>}
+                        {/* Required by CC BY-SA for Wikivoyage passages: article, authors,
+                            licence, and a link to the revision quoted (docs/licensing.md). */}
+                        {c.credit !== undefined && (
+                          <Text style={styles.sourceBasis} onPress={() => void Linking.openURL(c.credit!.url)}>
+                            {c.credit.text} <Text style={styles.sourceLink}>Open article</Text>
+                          </Text>
+                        )}
                       </View>
                     ))}
                   </View>
@@ -605,6 +612,7 @@ const styles = StyleSheet.create({
   sourcesTitle: { color: '#6ca', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
   source: { color: '#8b9a95', fontSize: 12, lineHeight: 18 },
   sourceBasis: { color: '#6b7a76', fontSize: 12, lineHeight: 18, marginLeft: 12 },
+  sourceLink: { color: '#6ca', textDecorationLine: 'underline' },
 
   locNote: {
     color: '#e0c98a', fontSize: 13, backgroundColor: '#241f16',

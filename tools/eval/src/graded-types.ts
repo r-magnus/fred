@@ -119,6 +119,14 @@ export const BREADTH_SETS = ['tools/eval/data/holdout-breadth.json'] as const;
  */
 export const COLLOQUIAL_SETS = ['tools/eval/data/holdout-colloquial.json'] as const;
 
+/**
+ * Everyday outdoor questions (2026-09-28, #96), written and committed before any
+ * National Park Service or Wikivoyage page was fetched, to judge the tips packs
+ * (docs/plan-tips.md). 28 everyday questions, 6 emergencies phrased near tip
+ * topics to catch tips crowding out first aid, and 6 Fred should still decline.
+ */
+export const EVERYDAY_SETS = ['tools/eval/data/holdout-everyday.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -126,8 +134,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'holdout': return HOLDOUT_SETS;
     case 'breadth': return BREADTH_SETS;
     case 'colloquial': return COLLOQUIAL_SETS;
+    case 'everyday': return EVERYDAY_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | all, got "${name}"`);
   }
 }
 

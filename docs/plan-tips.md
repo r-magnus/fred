@@ -1,5 +1,7 @@
 # Tips pack plan: everyday outdoor know-how (#96)
 
+**Outcome (2026-09-29): steps 1-7 and 9 done; ships. 10 answers better, 1 worse, graded blind; emergencies unchanged. See `results-tips.md`. Step 8 (phone) below.**
+
 Written 2026-09-28. Ryan chose the sources (National Park Service and
 Wikivoyage) after reviewing candidates; the Army hygiene and mountaineering
 manuals are a possible follow-up, not part of this plan.

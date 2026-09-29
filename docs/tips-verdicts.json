@@ -1,0 +1,65 @@
+{
+ "grader": "Claude, blind (A/B shuffled, key opened after grades were saved)",
+ "scores": {
+  "he-pee-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "he-period-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "he-campsite-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "he-bearfood-01": {
+   "before": 0,
+   "tips": 1
+  },
+  "he-rightofway-01": {
+   "before": 0,
+   "tips": 1
+  },
+  "he-poles-01": {
+   "before": 0,
+   "tips": 1
+  },
+  "he-essentials-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "he-lightning-01": {
+   "before": 0,
+   "tips": 0
+  },
+  "he-rain-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "he-ticks-01": {
+   "before": 1,
+   "tips": 1
+  },
+  "hs-movement-01": {
+   "before": 0.5,
+   "tips": 0
+  },
+  "hs-gps-battery-01": {
+   "before": 0.5,
+   "tips": 0.5
+  },
+  "hs-insects-01": {
+   "before": 0,
+   "tips": 0.5
+  },
+  "uv-moon-01": {
+   "before": 0.5,
+   "tips": 1
+  },
+  "uv-smoke-01": {
+   "before": 0,
+   "tips": 0
+  }
+ }
+}

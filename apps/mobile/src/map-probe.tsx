@@ -18,6 +18,7 @@ import type { CoveragePack } from '@fred/geo/coverage';
 import { loadCoverage, coverageNear, carrierName, type CoverageView } from './coverage-layer.ts';
 import { loadCarrier, saveCarrier, forgetCarrier, type CarrierChoice } from './carrier.ts';
 import type { LocationFix } from './location.ts';
+import { MapDownloads } from './map-downloads-panel.tsx';
 
 /**
  * Per state, selected the same way the flora packs are.
@@ -103,7 +104,7 @@ const style = (uri: string, contoursUri: string | null): StyleSpecification => (
  * The pack is loaded once per state; the zones are recomputed only when the
  * position or the carrier changes (B-KR3, issue #58).
  */
-function useCoverage(fix: LocationFix | null) {
+function useCoverage(fix: LocationFix | null, reload = 0) {
   const [pack, setPack] = useState<CoveragePack | null>(null);
   const [carrier, setCarrier] = useState<CarrierChoice | null>(null);
   const packState = fix?.state ?? null;
@@ -112,7 +113,7 @@ function useCoverage(fix: LocationFix | null) {
     let live = true;
     void loadCoverage(packState).then((p) => { if (live) setPack(p); });
     return () => { live = false; };
-  }, [packState]);
+  }, [packState, reload]);
   useEffect(() => { void loadCarrier().then(setCarrier); }, []);
   const coverage = useMemo(() =>
     fix === null || fix.state === null || pack === null || carrier === null ? null
@@ -228,10 +229,14 @@ function FredMap(
 }
 
 export function MapScreen(
-  { onClose, fix }: { onClose: () => void; fix: LocationFix | null },
+  { onClose, fix, onPacksChanged }: { onClose: () => void; fix: LocationFix | null; onPacksChanged: () => void },
 ): React.JSX.Element {
-  const { pack, carrier, coverage, reloadCarrier } = useCoverage(fix);
+  // Bumped after a download or removal, so the map and coverage re-read the disk.
+  const [files, setFiles] = useState(0);
+  const { pack, carrier, coverage, reloadCarrier } = useCoverage(fix, files);
   const [picking, setPicking] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const haveMap = fix?.state == null ? true : new File(Paths.document, mapFile(fix.state)).exists;
   const choose = (id: string | null | 'sim'): void => {
     setPicking(false);
     if (id === 'sim') forgetCarrier(); else saveCarrier(id);
@@ -239,7 +244,23 @@ export function MapScreen(
   };
   return (
     <View style={styles.root}>
-      <FredMap fix={fix} coverage={coverage} zoom={11} />
+      <FredMap key={files} fix={fix} coverage={coverage} zoom={11} />
+      {/* The map for where you are isn't on the phone: offer it right here. */}
+      {!haveMap && !managing && (
+        <Pressable style={styles.getMap} onPress={() => setManaging(true)}>
+          <Text style={styles.getMapText}>Download the {fix?.state} map</Text>
+        </Pressable>
+      )}
+      <Pressable style={styles.mapsChip} onPress={() => setManaging(true)} hitSlop={12}>
+        <Text style={styles.carrierText}>Offline maps</Text>
+      </Pressable>
+      {managing && (
+        <MapDownloads
+          here={fix?.state ?? null}
+          onClose={() => setManaging(false)}
+          onChanged={() => { setFiles((n) => n + 1); onPacksChanged(); }}
+        />
+      )}
       {fix !== null && (
         <Text style={styles.zoneNote}>
           {`within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`}
@@ -330,6 +351,17 @@ const styles = StyleSheet.create({
   previewOpen: { color: '#6ca', fontSize: 13, fontWeight: '600', marginTop: 4 },
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0d1117' },
   map: { flex: 1 },
+  mapsChip: {
+    position: 'absolute', top: 100, left: 16,
+    backgroundColor: '#161b1e', borderRadius: 12,
+    borderWidth: 1, borderColor: '#2a3a35',
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  getMap: {
+    position: 'absolute', top: 160, alignSelf: 'center',
+    backgroundColor: '#2f7d63', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10,
+  },
+  getMapText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   close: {
     position: 'absolute', top: 60, right: 16,
     backgroundColor: '#161b1e', borderRadius: 12,

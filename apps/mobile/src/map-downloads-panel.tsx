@@ -88,7 +88,11 @@ export function MapDownloads(
                   <View style={styles.bar}><View style={[styles.fill, { width: `${Math.round((progress.done / Math.max(1, progress.total)) * 100)}%` }]} /></View>
                 )}
                 {confirm === s && (
-                  <Text style={styles.confirm}>Download {size(left)}? Tap again to start.</Text>
+                  <Text style={styles.confirm}>
+                    {status === 'installed'
+                      ? 'Remove this map? Getting it back needs signal. Tap again to remove.'
+                      : `Download ${size(left)}? Tap again to start.`}
+                  </Text>
                 )}
               </View>
               {mine ? (
@@ -97,8 +101,13 @@ export function MapDownloads(
                 </Pressable>
               ) : status === 'installed' ? (
                 <Pressable disabled={busy !== null} hitSlop={8}
-                  onPress={() => { removeState(bundle); onChanged(); setTick((t) => t + 1); }}>
-                  <Text style={[styles.remove, busy !== null && styles.dim]}>Remove</Text>
+                  onPress={() => {
+                    // Asks first, like Download: a mis-tap out of signal can't be undone.
+                    if (confirm !== s) { setConfirm(s); return; }
+                    setConfirm(null);
+                    removeState(bundle); onChanged(); setTick((t) => t + 1);
+                  }}>
+                  <Text style={[styles.remove, busy !== null && styles.dim]}>{confirm === s ? 'Remove now' : 'Remove'}</Text>
                 </Pressable>
               ) : (
                 <Pressable disabled={busy !== null} hitSlop={8}

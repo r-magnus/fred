@@ -261,13 +261,14 @@ export function MapScreen(
           onChanged={() => { setFiles((n) => n + 1); onPacksChanged(); }}
         />
       )}
-      {fix !== null && (
+      {/* Hidden under the offline-maps panel, where they would cover its last rows. */}
+      {fix !== null && !managing && (
         <Text style={styles.zoneNote}>
           {`within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`}
           {fix.state === null ? '' : ` · ${fix.state}`}
         </Text>
       )}
-      {coverage !== null && (
+      {coverage !== null && !managing && (
         <View style={styles.covPanel}>
           <Text style={styles.covNote}>{coverage.advice}</Text>
           <View style={styles.legend}>

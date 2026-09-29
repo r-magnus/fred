@@ -26,6 +26,11 @@ export interface DraftChunk {
   readonly blockKind: BlockKind;
   /** Set by the corpus's provider-only rules after chunking. Absent means everyone. */
   readonly audience?: 'provider';
+  /**
+   * Overrides the pack's licenseId for this chunk. For sources credited per
+   * page, e.g. each Wikivoyage article at the revision it was taken from.
+   */
+  readonly licenseId?: string;
 }
 
 export interface ChunkOptions {

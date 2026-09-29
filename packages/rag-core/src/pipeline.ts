@@ -308,6 +308,21 @@ export type AskResult =
 
 const MEDICAL_DOMAINS = new Set(['first-aid-physical', 'first-aid-psychological']);
 
+/**
+ * Where both tips packs made the cut, the National Park Service passage is
+ * read before the Wikivoyage one (#96): Wikivoyage is volunteer-written and
+ * unreviewed. Only the tips swap places among themselves; every other passage
+ * keeps its position.
+ */
+export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
+  const rank = (c: ScoredChunk): number => (c.chunk.packId === 'core-tips-nps' ? 0 : 1);
+  const slots = cs.map((c, i) => (c.chunk.domain === 'outdoor-skills' ? i : -1)).filter((i) => i >= 0);
+  const tips = slots.map((i) => cs[i]!).sort((a, b) => rank(a) - rank(b));
+  const out = [...cs];
+  slots.forEach((i, k) => { out[i] = tips[k]!; });
+  return out;
+}
+
 export async function ask(
   query: string,
   deps: PipelineDeps,
@@ -416,6 +431,13 @@ export async function ask(
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
   if (opts.intent === true) {
     intent = await classifyIntent(query, backend, opts.signal);
+    // An emergency is answered from first aid, never from everyday tips (#96,
+    // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be
+    // answered from a passage on choosing boots.
+    if (intent === 'now') {
+      candidates = candidates.filter((c) => c.chunk.domain !== 'outdoor-skills');
+      topScore = best(candidates);
+    }
     // The leading card: the best field card, if it is first or within
     // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
     // ranked a manual passage first (0.289) and the bleeding card second
@@ -519,7 +541,7 @@ export async function ask(
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
   }
-  const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
+  const usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);

@@ -94,6 +94,22 @@ export const DOMAIN_LEXICON: Readonly<Record<DomainTag, readonly string[]>> = {
     'predator', 'nest', 'den', 'tracks', 'scat', 'encounter', 'aggressive',
     'rabies', 'lyme', 'bird', 'raptor', 'fish', 'amphibian', 'reptile', 'mammal',
   ],
+  // Everyday know-how (#96, docs/plan-tips.md). Base forms only: the matcher
+  // tries the word as written first, so adding "ticks" here took tick
+  // questions away from wildlife. Two kinds of word:
+  //  - ones only an everyday question uses (cathole, trowel, etiquette);
+  //  - camp words survival already carries, so tips are searched whenever
+  //    the survival manual is.
+  // Left out on purpose: words injury messages use as scenery ("twisted my
+  // ankle on the trail", "on a hike"), which would pull weight off the injury
+  // words; and emergency words, so a crisis keeps routing to first aid.
+  // Routing is a hint: a question matching nothing searches every pack.
+  'outdoor-skills': [
+    'cathole', 'trowel', 'poop', 'pee', 'toilet', 'bathroom', 'tampon', 'menstrual',
+    'tent', 'campground', 'campsite', 'campfire', 'firewood', 'canister', 'etiquette',
+    'layering', 'trekking', 'repellent', 'biodegradable', 'litter', 'itinerary',
+    'dish', 'dishes', 'soap', 'stove', 'tarp', 'sleeping', 'bivouac', 'tick',
+  ],
 };
 
 /** Flat lookup of every domain term, for weighting during keyword extraction. */

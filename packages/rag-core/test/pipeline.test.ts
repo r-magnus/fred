@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
-import { ask, maxTokensForPressure, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
-import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL } from '../src/retrieve.ts';
+import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
+import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
 import { SYSTEM_PREFIX } from '../src/prompt.ts';
@@ -600,4 +600,48 @@ test('with intent off, nothing changes', async () => {
   const res = await ask('my friend is bleeding badly from his leg', { backend: saying('NOW'), store: intentStore(), packs: clinicalPacks }, { ...intentOpts, intent: false });
   assert.equal(res.diagnostics.intent, undefined);
   assert.equal(res.kind, 'abstain');
+});
+
+// Tips packs (#96, docs/plan-tips.md).
+const tipsPacks = [
+  { id: 'core-firstaid', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-tips-nps', domains: ['outdoor-skills'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-tips-wikivoyage', domains: ['outdoor-skills'] as const, scope: { kind: 'global' } as const },
+];
+const tipsStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('cannot walk after a fall: splint it, cool it, raise it and get help')]);
+  // Shares more words with the question than the first-aid passage does.
+  store.addPack('core-tips-wikivoyage', [seed('stepped in a hole on the trail now walk in boots with ankle support', {
+    source: 'Wikivoyage', section: 'Hiking > Footwear', domain: 'outdoor-skills', licenseId: 'wikivoyage:Hiking' })]);
+  store.addPack('core-tips-nps', []);
+  return store;
+};
+const tipsOpts = { state: null, abstainThreshold: 0, fallbackThreshold: 0, intent: true } as const;
+// No routing vocabulary, so every pack is searched and only the guard keeps
+// tips out. (With "ankle" or "swelling" in it, routing alone would.)
+const ANKLE = 'stepped in a hole on the trail and now i cannot walk';
+
+test('an emergency is never answered from tips', async () => {
+  const res = await ask(ANKLE, { backend: saying('NOW'), store: tipsStore(), packs: tipsPacks }, tipsOpts);
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') assert.ok(res.citations.every((c) => c.source !== 'Wikivoyage'), 'a tip reached an emergency answer');
+});
+
+test('the same words asked as a question may use tips', async () => {
+  const res = await ask(ANKLE, { backend: saying('QUESTION'), store: tipsStore(), packs: tipsPacks }, tipsOpts);
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') assert.ok(res.citations.some((c) => c.source === 'Wikivoyage'), 'fixture: the tip should be searchable');
+});
+
+test('where both tips packs answer, NPS is read first and nothing else moves', () => {
+  const chunk = (packId: string, domain: string, id: string) =>
+    ({ chunk: { packId, domain, id }, score: 0.5, cosine: 0.5, cosineRaw: 0.5, sLex: 0 }) as unknown as ScoredChunk;
+  const order = tipsInTrustOrder([
+    chunk('core-fieldcards', 'first-aid-physical', 'card'),
+    chunk('core-tips-wikivoyage', 'outdoor-skills', 'wv'),
+    chunk('core-survival', 'survival', 'manual'),
+    chunk('core-tips-nps', 'outdoor-skills', 'nps'),
+  ]).map((c) => c.chunk.id);
+  assert.deepEqual(order, ['card', 'nps', 'manual', 'wv']);
 });

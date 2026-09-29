@@ -22,6 +22,9 @@ export const DOMAIN_TAGS = [
   'survival',
   'plants',
   'wildlife',
+  // Everyday know-how (#96): toilets, campsites, food storage, layering, trail
+  // etiquette. Added without a schema bump: packs that predate it stay valid.
+  'outdoor-skills',
 ] as const;
 export type DomainTag = (typeof DOMAIN_TAGS)[number];
 

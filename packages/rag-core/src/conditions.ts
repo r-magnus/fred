@@ -60,8 +60,13 @@ const FALL = /\b(?:fell|fallen|falls?|tumbled|slid|slipped) (?:off|down|from|ove
 
 const BELLY = /\b(?:stabbed|impaled|gored)\b.*\b(?:belly|stomach|abdomen|gut|guts|side)\b|\b(?:belly|stomach|abdomen|abdominal) (?:wound|stab|puncture|gash|cut)\b|\bguts? (?:are |is )?(?:out|showing|hanging)\b/i;
 
-const BURN = /\bburn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\bboiling water\b|\bgrabbed the (?:hot )?(?:stove|pan|pot)\b|\btouched the hot\b/i;
-const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes|fingers|nose|ears|cheeks|feet)\b[^.]*\b(?:white|waxy|frozen|wooden)\b/i;
+/**
+ * A burn, said with or without the word: "my son brushed his arm on the camp
+ * stove grate" and "splashed hot coffee all over my wrist" never say "burn"
+ * (confirmation chat set).
+ */
+const BURN = /\bburn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
+const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 
 export const CONDITIONS: readonly Condition[] = [
@@ -127,6 +132,20 @@ export function violatedCondition(answer: string, active: readonly Condition[]):
   const sentences = answer.split(/(?<=[.!?])\s+|\n+/);
   return active.find((c) => c.forbidden !== undefined &&
     sentences.some((s) => c.forbidden!.test(s) && !NEGATED.test(s)));
+}
+
+/**
+ * The condition said most recently, and whether the last message said it:
+ * the one a follow-up is most likely about.
+ */
+export function latestCondition(messages: readonly string[]): { condition: Condition; inLast: boolean } | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const now = conditionsIn(messages.slice(0, i + 1));
+    const before = conditionsIn(messages.slice(0, i));
+    const added = now.find((c) => !before.some((b) => b.id === c.id));
+    if (added !== undefined) return { condition: added, inLast: i === messages.length - 1 };
+  }
+  return undefined;
 }
 
 /** The first active condition a card must not follow, if any. */

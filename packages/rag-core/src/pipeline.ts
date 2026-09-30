@@ -10,11 +10,11 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
-import { currentThread, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, conditionsIn, violatedCondition, type Condition } from './conditions.ts';
+import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
+import { blockingCondition, conditionsIn, latestCondition, violatedCondition, type Condition } from './conditions.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
@@ -531,6 +531,18 @@ export async function ask(
     const chunk = (await fieldCards(store, packId)).get(title);
     return chunk === undefined ? undefined : { chunk, cosineRaw: 0, cosine: 0, sLex: 0, score: 0 };
   };
+  // The card of the condition a follow-up is about: the latest one said,
+  // when this message leans on the ones before it, points at someone with a
+  // pronoun, or its own search reached that card at all.
+  const conditionCardFor = async (q: string): Promise<ScoredChunk | undefined> => {
+    const lc = latestCondition([...(opts.history ?? []), q]);
+    if (lc === undefined || lc.inLast) return undefined;
+    const card = await cardByTitle(lc.condition.card);
+    if (card === undefined) return undefined;
+    const about = leansBack(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
+      candidates.some((c) => c.chunk.id === card.chunk.id);
+    return about ? card : undefined;
+  };
   const tipsPackIds = new Set(packs.filter((p) => p.domains.includes('outdoor-skills')).map((p) => p.id));
   const threshold = opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD;
 
@@ -696,6 +708,13 @@ export async function ask(
       intent = 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
+    // A message that says something happened to someone (a condition,
+    // conditions.ts) is not small talk either: "my son brushed his arm on the
+    // camp stove grate" was CHAT and got "Got it" (confirmation chat set).
+    if (guardsOn && intent === 'chat' && conditionsIn([query]).length > 0 && !petIsPatient(query)) {
+      intent = 'now';
+      if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
     // An emergency is answered from first aid, never from everyday tips (#96,
     // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be
     // answered from a passage on choosing boots. The search is run again as if
@@ -811,6 +830,29 @@ export async function ask(
         // The model's request for it ("lost and dark, phone dead") reached
         // the lost card at only 0.119 (phone chats, 2026-09-30).
         forcedCard = agreedCard = threadCard;
+      } else {
+        // An emergency whose message itself says what happened opens that
+        // condition's card when nothing else leads: "my fingertips went hard
+        // and waxy on the summit push" found the frostbite card at 0.092
+        // (confirmation chat set). The trigger phrases are reviewed; the
+        // model has no part in it.
+        const said = conditionsIn([query])[0];
+        const card = said === undefined ? undefined : await cardByTitle(said.card);
+        if (card !== undefined) forcedCard = agreedCard = card;
+      }
+    }
+    // A short question with nothing of its own takes its thread's card too:
+    // "we lost the trail a while ago" / "sun is setting" / "what now" was read
+    // as a question and declined (confirmation chat set).
+    else if (guardsOn && topCard === undefined && intent === 'question' && !ABOUT_A_PET.test(query)) {
+      const said = conditionsIn([query])[0];
+      if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR && query.trim().split(/\s+/).length <= THREAD_CARD_WORDS) {
+        forcedCard = agreedCard = threadCard;
+      } else if (said !== undefined && topScore < effectiveThreshold) {
+        // "splashed hot coffee all over my wrist" was read as a question and
+        // declined; the message says what happened, and that card answers it.
+        const card = await cardByTitle(said.card);
+        if (card !== undefined) forcedCard = agreedCard = card;
       }
     }
     // Otherwise the card is offered, folded, wherever Fred would say nothing
@@ -877,6 +919,16 @@ export async function ask(
       kind: 'chat', reply: offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: offer ?? null,
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
+  }
+
+  // A follow-up about a condition already in the conversation that would
+  // otherwise be declined gets the condition's card: "should i prop my leg up
+  // on my pack" after a snakebite, "should i massage her legs hard" for a
+  // cold child (confirmation chat set). The card is the reviewed answer for
+  // what is going on; a decline is a dead end in the middle of it.
+  const followed = guardsOn && !petPatient && u?.intent !== 'out' ? await conditionCardFor(query) : undefined;
+  if (forcedCard === undefined && followed !== undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
+    forcedCard = agreedCard = followed;
   }
 
   if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
@@ -1135,8 +1187,13 @@ export async function ask(
   // full before it is shown, and one that gives advice the condition's card
   // says not to give is replaced by that card (conditions.ts). Streaming is
   // given up only then.
-  const watched = active.filter((c) => c.forbidden !== undefined);
+  const watched = active.filter((c) => c.forbidden !== undefined || followed !== undefined);
   const guardCard = async (text: string): Promise<string> => {
+    // A refusal in the middle of a condition is a dead end too.
+    if (isRefusal(text) && followed !== undefined) {
+      answerGuard.replacedBy = 'refusal';
+      return renderCard(parseCard(followed.chunk.text));
+    }
     const by = violatedCondition(text, watched);
     if (by === undefined) return text;
     const card = await cardByTitle(by.card);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockingCondition, conditionsIn, violatedCondition } from '../src/conditions.ts';
+import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from '../src/triage.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
@@ -81,4 +81,17 @@ test('a named plant is not an unnamed one', () => {
 test('drowsy after a head injury is a danger sign; sleepy alone is not', () => {
   assert.ok(dangerSign(['my boy fell off a big rock and smacked his head', 'he can barely keep his eyes open']));
   assert.ok(!dangerSign(['long day, i am sleepy']));
+});
+
+test('a burn said without the word', () => {
+  assert.deepEqual(ids(['my son brushed his arm on the camp stove grate']), ['burn']);
+  assert.deepEqual(ids(['splashed hot coffee all over my wrist']), ['burn']);
+  assert.deepEqual(ids(['my fingertips went hard and waxy on the summit push']), ['frostbite']);
+});
+
+test('the latest condition, and whether the last message said it', () => {
+  assert.equal(latestCondition(['stepped right on a rattler and it tagged my calf', 'should i prop my leg up on my pack'])?.condition.id, 'snakebite');
+  assert.equal(latestCondition(['stepped right on a rattler and it tagged my calf', 'should i prop my leg up on my pack'])?.inLast, false);
+  assert.equal(latestCondition(['a snake struck my buddy'])?.inLast, true);
+  assert.equal(latestCondition(['how do i purify water']), undefined);
 });

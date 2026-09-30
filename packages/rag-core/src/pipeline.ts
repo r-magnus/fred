@@ -208,7 +208,10 @@ export const INTENT_CARD_NEAR_TOP = 0.85;
 /**
  * The understanding step's search is kept only if its best passage is among
  * the UNDERSTOOD_OWN_TOPK best for the hiker's own words, scoring at least
- * UNDERSTOOD_OWN_FLOOR (#98). Set on the tuning sets only.
+ * UNDERSTOOD_OWN_FLOOR (#98). Set on the tuning sets only: every answerable
+ * tuning conversation the step admitted scored 0.32 or more; a practice "moose
+ * charging" matched the bear card at 0.196. The two out-of-scope admits scored
+ * 0.40 and 0.29, so no floor separates scope, and none is claimed to.
  */
 export const UNDERSTOOD_OWN_FLOOR = 0.2;
 const UNDERSTOOD_OWN_TOPK = 20;
@@ -746,6 +749,12 @@ export async function ask(
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);
+  // The same holds for the understanding step's search: "what's the magnetic
+  // declination where I'm standing?" after "how can I find north?" was read as
+  // a navigation request and repeated the finding-north card word for word
+  // (convo-oos, #98 calibration). Outside an emergency, the model answers from
+  // the passages with the conversation in view, and can say they don't cover it.
+  if (understood?.used === true && forcedCard === undefined) clear = undefined;
   // Showing a card word for word claims it answers the question, so for a
   // follow-up the card must also clearly match the new message on its own.
   // Matched on the joined search alone, "can I stitch it closed?" after a cut

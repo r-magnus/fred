@@ -82,6 +82,10 @@ Measured separately: a second question that only makes sense after the first. He
 
 40 questions written before any tips page was fetched (28 everyday, 6 emergencies near tip topics, 6 to decline). With the National Park Service and Wikivoyage tips packs, everyday questions answered go **4 → 12 of 28**. Across all five question sets 15 of 277 answers changed: 10 better, 1 worse, 0 unsafe; every emergency answered exactly as before. Held-out, breadth and colloquial scores unchanged. docs/results-tips.md.
 
+### Conversations and casual emergencies, graded blind (2026-09-29, #98)
+
+45 sealed conversations of 1-3 messages written before any code ("i'm lost and scared" / "pls help", "uhh dude there's a bear in front of me", and traps in the same styles). With the understanding step: answered when it should **13 → 17 of 28** (California 11 → 16), dead ends where Fred should help **16 → 3**, out-of-scope answers unchanged (1 of 15), no unsafe answers after one fix (a restated fall opened the shock card below the gate). Every other set unchanged except +1 colloquial and +3 conversation answers; held-out unchanged, so A-KR2 stays 72.5%. The step adds 3.8 s (desktop median) when it runs, over the 2.5 s limit; nothing when it doesn't. docs/results-understand.md.
+
 ### Where the remaining points are
 
 | Lost | Why | What would fix it |

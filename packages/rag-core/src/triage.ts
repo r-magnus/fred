@@ -73,3 +73,32 @@ const ASKS = /\?|(?:^|[.,;!]\s*|\b(?:but|so|and|ok|okay|also|then|unrelated|btw)
 export function asksSomething(message: string): boolean {
   return ASKS.test(message);
 }
+
+/**
+ * Asking whether something unnamed is safe to eat: "these little red berries
+ * look tasty" / "can i eat them". Answered from a species page, the model
+ * said red baneberry "can be eaten" (sealed chat set, #98 round 2). The field
+ * card's rule is the answer: only eat what you can positively identify.
+ */
+const EAT = /\b(?:eat|edible|eatable)\b/i;
+const UNNAMED = /\b(?:these|this|them|those|that|it)\b|\b(?:wild )?(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?)\b/i;
+export function asksToEatUnknown(message: string): boolean {
+  return EAT.test(message) && UNNAMED.test(message) && asksSomething(message);
+}
+
+/**
+ * A pet is the one hurt or sick. Veterinary care is outside Fred's scope, and
+ * the human cards are wrong for an animal: "a snake struck my dog" was
+ * answered with the human snakebite steps and "his face is swelling" with the
+ * anaphylaxis card (sealed chat set). "my dog and i are lost" is not about
+ * the dog's health and does not count.
+ */
+const PET = '(?:my|our|the)\\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)s?';
+const HARM = '(?:bit|bitten|struck|stung|attacked|swelling|swollen|bleeding|limping|ate|eaten|drank|hurt|injured|sick|vomit\\w*|poison\\w*|throwing up|collapsed)';
+const PET_PATIENT = new RegExp(`\\b${HARM}\\b[^.?!]{0,30}\\b${PET}\\b|\\b${PET}\\b(?:'s)?[^.?!]{0,40}\\b(?:${HARM}|face|paw|leg|mouth|nose)\\b`, 'i');
+const PERSON = /\b(?:i|i'm|me|my (?!dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)\w+|friend|buddy|wife|husband|son|daughter|kid|child|dad|mom|he's my|someone|person|guy)\b/i;
+const PRONOUN = /\b(?:he|she|it|his|her|its|him)\b/i;
+export function petIsPatient(message: string, previous?: string): boolean {
+  if (PET_PATIENT.test(message)) return true;
+  return previous !== undefined && PET_PATIENT.test(previous) && PRONOUN.test(message) && !PERSON.test(message);
+}

@@ -14,8 +14,8 @@ import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSuffici
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, conditionsIn, type Condition } from './conditions.ts';
-import { asksSomething, dangerSign } from './triage.ts';
+import { blockingCondition, conditionsIn, violatedCondition, type Condition } from './conditions.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -302,6 +302,13 @@ function fieldCards(store: PackStore, packId: string): Promise<Map<string, Chunk
  * own.
  */
 const THREAD_CARD_MARGIN = 0.5;
+/**
+ * "Nothing of its own" means a short message ("what do i do", "what now").
+ * "it left. my daughter grabbed the stove and her palm is red and hurting"
+ * also scored under AGREED_CARD_FLOOR, and the thread it continued (a bear in
+ * camp) opened the bear card for a burn (sealed chat set).
+ */
+const THREAD_CARD_WORDS = 5;
 const THREAD_CARD_MIN = 0.05;
 function clearlyLeadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
   const [first, second] = [...candidates].sort((a, b) => b.score - a.score);
@@ -391,6 +398,12 @@ export interface Diagnostics {
   readonly blocked?: { readonly card: string; readonly condition: string };
   /** Round 2: a below-gate emergency card opened because two searches agreed on it. */
   readonly agreedCard?: string;
+  /**
+   * Round 2: set while a condition is active and the answer is model-written.
+   * `replacedBy` is filled in once the stream has been read, when the answer
+   * gave advice the condition's card says not to give and the card was shown.
+   */
+  readonly answerGuard?: { readonly replacedBy?: string };
   /** Time before the decision, split into model calls and embedding (ms). */
   readonly timing?: { readonly modelMs: number; readonly embedMs: number; readonly totalMs: number };
   /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
@@ -787,7 +800,7 @@ export async function ask(
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
           requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id) {
         forcedCard = agreedCard = own;
-      } else if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR) {
+      } else if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR && query.trim().split(/\s+/).length <= THREAD_CARD_WORDS) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
         // im lost" / "phone at 15%" / "its getting dark" / "what do i do".
@@ -813,6 +826,15 @@ export async function ask(
     // The price is that "how do I avoid snakebite?" can still get the
     // treatment card (docs/results-intent-probe.md).
   }
+
+  // Round 2: whether something unnamed is safe to eat is answered by the
+  // wild-plants card, never from a species page (triage.ts).
+  if (guardsOn && forcedCard === undefined && intent !== 'now' && asksToEatUnknown(query)) {
+    forcedCard = await cardByTitle('Eating wild plants and berries');
+  }
+  // Round 2: a pet that is hurt or sick is outside Fred's scope, and the
+  // human cards are wrong for it (triage.ts).
+  const petPatient = guardsOn && petIsPatient(query, opts.history?.at(-1));
 
   // A card must never be shown, open or folded, after a condition it is not
   // for (conditions.ts). A folded offer becomes the condition's own card.
@@ -841,6 +863,10 @@ export async function ask(
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
   };
+
+  if (petPatient) {
+    return { kind: 'abstain', reason: 'out-of-scope', nearest: [], diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 } };
+  }
 
   if (intent === 'chat') {
     return {
@@ -1101,9 +1127,29 @@ export async function ask(
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };
 
+  // Round 2: while a condition is active, a model-written answer is read in
+  // full before it is shown, and one that gives advice the condition's card
+  // says not to give is replaced by that card (conditions.ts). Streaming is
+  // given up only then.
+  const watched = active.filter((c) => c.forbidden !== undefined);
+  const guardCard = async (text: string): Promise<string> => {
+    const by = violatedCondition(text, watched);
+    if (by === undefined) return text;
+    const card = await cardByTitle(by.card);
+    if (card === undefined) return text;
+    answerGuard.replacedBy = by.id;
+    return renderCard(parseCard(card.chunk.text));
+  };
+  const answerGuard: { replacedBy?: string } = {};
+  const stream = watched.length === 0 ? backend.generate(prompt, generateOpts) : (async function* () {
+    let text = '';
+    for await (const tok of backend.generate(prompt, generateOpts)) text += tok;
+    yield await guardCard(text);
+  })();
+
   return {
     kind: 'answer',
-    stream: backend.generate(prompt, generateOpts),
+    stream,
     citations: usable.map(citeOf),
     prompt,
     medical: usable.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
@@ -1115,6 +1161,7 @@ export async function ask(
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,
+      ...(watched.length === 0 ? {} : { answerGuard }),
     },
   };
 }

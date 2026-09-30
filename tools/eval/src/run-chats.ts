@@ -15,7 +15,7 @@
  * expectation. The outcome check is only the kind of reply; key points and
  * the chat's unsafe list are graded blind afterwards (score-chats.ts).
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { ask, isRefusal, CONDITION_HISTORY } from '@fred/rag-core';
 import { openHarness } from './harness.ts';
 import { askOptionsFromEnv } from './retrieval-env.ts';
@@ -53,6 +53,8 @@ const generate = process.env.GENERATE !== '0';
 const harness = await openHarness();
 const askOptions = askOptionsFromEnv();
 
+// Each turn is written as it finishes, so a run that is stopped keeps what it did.
+writeFileSync(outPath, '');
 const records: object[] = [];
 let misses = 0;
 let turnsRun = 0;
@@ -90,7 +92,7 @@ for (const set of sets) {
         if (!fits) misses++;
         turnsRun++;
         const offer = (r.kind === 'abstain' || r.kind === 'chat') && r.offer != null ? r.offer.title : undefined;
-        records.push({
+        const rec = {
           set, chatId: c.id, kind: c.kind, wording: w, turn: i, question: q, expect: turn.expect, outcome, fits,
           answer: text.trim(),
           ...(r.kind === 'chat' ? { reply: r.reply } : {}),
@@ -103,9 +105,12 @@ for (const set of sets) {
           ...(d.conditions === undefined ? {} : { conditions: d.conditions }),
           ...(d.blocked === undefined ? {} : { blocked: d.blocked }),
           ...(d.agreedCard === undefined ? {} : { agreedCard: d.agreedCard }),
+          ...(d.answerGuard?.replacedBy === undefined ? {} : { guardedBy: d.answerGuard.replacedBy }),
           keyPoints: turn.keyPoints ?? [], unsafe: c.unsafe,
           decideMs, timing: d.timing ?? null,
-        });
+        };
+        records.push(rec);
+        appendFileSync(outPath, JSON.stringify(rec) + '\n');
         const where = r.kind === 'answer' ? ` ${d.cardAnswer ? 'card' : 'gen'}=${r.citations[0]?.section ?? ''}` : offer === undefined ? '' : ` offer=${offer}`;
         console.log(`${fits ? 'ok  ' : 'MISS'} ${c.id}${w > 0 ? "'" : ''}#${i + 1} ${turn.expect.padEnd(11)} ${outcome.padEnd(9)} U=${d.topScore.toFixed(3)} ${d.intent ?? ''}${where}  "${q}"`);
         asked.push({ q, kind: r.kind === 'answer' && !refused ? 'answer' : r.kind, topScore: d.topScore });
@@ -113,6 +118,5 @@ for (const set of sets) {
     }
   }
 }
-writeFileSync(outPath, records.map((r) => JSON.stringify(r)).join('\n') + '\n');
 console.log(`\nwrote ${records.length} turns to ${outPath}; outcome misses ${misses}/${turnsRun}`);
 await harness.close();

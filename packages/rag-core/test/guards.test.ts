@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockingCondition, conditionsIn } from '../src/conditions.ts';
-import { asksSomething, dangerSign } from '../src/triage.ts';
+import { blockingCondition, conditionsIn, violatedCondition } from '../src/conditions.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from '../src/triage.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
 
@@ -19,7 +19,7 @@ test('a snake with no bite, or another biter, is not a snakebite', () => {
 test('a fall is from height or down a slope, not into water', () => {
   assert.deepEqual(ids(['my dad slipped and tumbled down a rocky slope']), ['fall']);
   assert.deepEqual(ids(['my friend fell off a ledge']), ['fall']);
-  assert.deepEqual(ids(['my friend fell in the lake and cant stop shaking']), []);
+  assert.deepEqual(ids(['my friend fell in the lake and cant stop shaking']), ['hypothermia']);
 });
 
 test('the sprain card must not follow a snakebite; the shock card must not follow a fall', () => {
@@ -46,4 +46,28 @@ test('a message that asks something', () => {
   for (const m of ['how much water', 'should i follow it down', "ok she's feeling better. unrelated but what's this plant with yellow flowers everywhere",
     'is it safe to touch cholla', 'any tips', 'what helps']) assert.ok(asksSomething(m), m);
   for (const m of ["we're about 2 miles from the car", 'ok found the trail thank god', 'phone at 15%', 'the view up here is amazing']) assert.ok(!asksSomething(m), m);
+});
+
+test('a model-written answer that gives advice the condition card forbids is caught; saying not to is fine', () => {
+  const snake = conditionsIn(['my friend got bit by a snake']);
+  assert.equal(violatedCondition('1. Do not wrap the ankle tightly with ice.\n2. Apply cold compresses intermittently to reduce swelling.', snake)?.id, 'snakebite');
+  assert.equal(violatedCondition('1. Do not wrap it tight with ice.\n2. Keep him still and get help.', snake), undefined);
+  const burn = conditionsIn(['seared my forearm on the camp stove']);
+  assert.equal(violatedCondition('If the blister is larger than a nickel, drain it with a sterile object.', burn)?.id, 'burn');
+  assert.equal(violatedCondition('Do not pop the blister. Cover it with a clean dressing.', burn), undefined);
+});
+
+test('asking whether something unnamed is safe to eat', () => {
+  assert.ok(asksToEatUnknown('can i eat them'));
+  assert.ok(asksToEatUnknown('are these berries edible'));
+  assert.ok(!asksToEatUnknown('how do i cook rice on a stove'));
+  assert.ok(!asksToEatUnknown('my kid ate some berries'));
+});
+
+test('a pet that is hurt is the patient; a pet along for the hike is not', () => {
+  assert.ok(petIsPatient('a snake struck my dog'));
+  assert.ok(petIsPatient('his face is swelling', 'a snake struck my dog'));
+  assert.ok(petIsPatient('my dog is limping'));
+  assert.ok(!petIsPatient('my dog and i are lost'));
+  assert.ok(!petIsPatient('my friend got stung and his face is swelling', 'a bee stung my dog'));
 });

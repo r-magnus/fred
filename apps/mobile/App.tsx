@@ -219,6 +219,9 @@ function Screen() {
         ? { kind: 'abstain', done: true }
         : { done: true, stopped: ctrl.signal.aborted });
     } catch (e) {
+      // Logged too, so a harness waiting on the log sees the question end and
+      // where it failed ("Exception in HostFunction" alone does not say).
+      console.log(`[fred] error ${e instanceof Error ? `${e.message} ${JSON.stringify(e.stack ?? '')}` : String(e)}`);
       update(id, { kind: 'error', text: e instanceof Error ? e.message : String(e), done: true });
     } finally {
       abort.current = null;

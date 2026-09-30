@@ -1,6 +1,6 @@
 {
   "_comment": "Source of truth for docs/METRICS.md. Edit this, then run: node tools/eval/src/metrics.ts. Never hand-edit METRICS.md — it is generated.",
-  "updated": "2026-09-27",
+  "updated": "2026-09-29",
   "config": {
     "model": "Qwen3-1.7B-Q4_K_M",
     "embedder": "EmbeddingGemma-300M (GGUF Q8), meaning-only search of the whole question",
@@ -26,7 +26,7 @@
         "Non-functional"
       ],
       "grade": "A",
-      "note": "First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. CA and OR are on the phone; the other 48 wait for it to be connected."
+      "note": "First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. Plus two everyday-tips packs (2026-09-29, #96): National Park Service articles and Wikivoyage travel topics, 384 passages, 1 MB. CA and OR are on the phone; the other 48 wait for it to be connected."
     },
     {
       "id": "A-KR2",
@@ -43,7 +43,7 @@
         "<30"
       ],
       "grade": "B",
-      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating (\"not food for people\"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers \"can I pack a wound in someone's belly?\" with the whole card rather than \"no\" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.",
+      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating (\"not food for people\"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers \"can I pack a wound in someone's belly?\" with the whole card rather than \"no\" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.",
       "secondary": {
         "value": 67.5,
         "label": "fresh breadth set, graded blind"
@@ -221,6 +221,11 @@
       "label": "cards batch 4: six more (held out)",
       "overall": 72.5,
       "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "+ tips packs, NPS and Wikivoyage",
+      "overall": 72.5,
+      "model": "Qwen3-1.7B"
     }
   ],
   "akr2Breakdown": {
@@ -341,6 +346,18 @@
       "version": "0.1.0",
       "chunks": 27,
       "source": "Fred field cards, every quote checked against the manuals, reviewed"
+    },
+    {
+      "pack": "core-tips-nps",
+      "version": "1.0.0",
+      "chunks": 169,
+      "source": "US National Park Service, 28 articles (public domain)"
+    },
+    {
+      "pack": "core-tips-wikivoyage",
+      "version": "1.0.0",
+      "chunks": 215,
+      "source": "Wikivoyage, 12 outdoor topics (CC BY-SA 4.0, credited per passage)"
     },
     {
       "pack": "state-XX-flora-fauna",
@@ -497,6 +514,10 @@
     {
       "title": "Fresh questions, graded blind (2026-09-27)",
       "text": "57 questions written after every change they judge (random manual passages, general syllabus topics, out of scope), pipeline of 2026-09-25 against today's, A/B shuffled: **61.4% → 67.5%**, 4 wins, 0 losses, 0 unsafe. The held-out set runs about 5 points above fresh questions. docs/results-breadth.md."
+    },
+    {
+      "title": "Everyday outdoor questions, graded blind (2026-09-29)",
+      "text": "40 questions written before any tips page was fetched (28 everyday, 6 emergencies near tip topics, 6 to decline). With the National Park Service and Wikivoyage tips packs, everyday questions answered go **4 → 12 of 28**. Across all five question sets 15 of 277 answers changed: 10 better, 1 worse, 0 unsafe; every emergency answered exactly as before. Held-out, breadth and colloquial scores unchanged. docs/results-tips.md."
     }
   ]
 }

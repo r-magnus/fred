@@ -68,7 +68,7 @@ Both go in `docs/licensing.md` and `tools/ingest/src/licenses.ts`.
    if it can't be fixed, the pack doesn't ship and the result is written up.
 8. **Phone.** Stage the packs, ask a few everyday and emergency questions on
    the device, and check the credit lines.
-9. **Write up** in `docs/results-tips.md` and `docs/METRICS.md`.
+9. **Write up** (done 2026-09-29) in `docs/results-tips.md` and `docs/METRICS.md`.
 
 ## Done when
 

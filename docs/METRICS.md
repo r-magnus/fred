@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-27**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-09-29**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -27,8 +27,8 @@ akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 8
 | `RC-KR2` | User population | 2026-12-02 | — | ⚪ not started |
 | `RC-KR3` | Product page and promo | 2026-12-09 | — | ⚪ not started |
 
-- `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
-- `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
+- `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. Plus two everyday-tips packs (2026-09-29, #96): National Park Service articles and Wikivoyage travel topics, 384 passages, 1 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
+- `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
 - `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Inside the <20 s target (proposal v1.2); the phone mean predates phase 3 and should be re-measured.
 - `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened. Proposal v1.2 also asks that the location be served to the LLM: today Fred's prompt gets the state only (see B-KR2).
 - `B-KR2` — Redefined in proposal v1.2: the user's location should shape Fred's answers. Planned (#77): when signal comes up, Fred says how far and which way the nearest reported coverage is, and prompts the user to open the map. Today the prompt names the user's state and picks the state's plant and animal pack. The map already shows the coverage zones and the nearest coverage, but Fred's answers don't use them.
@@ -55,6 +55,7 @@ forage note, location fix (held out)          ███████████�
 cards batch 3: six syllabus cards (held out)  ████████████████████░░░░░░░░   71.3%   Qwen3-1.7B
 + belly, dehydration, signal (held out)       ████████████████████░░░░░░░░   70.0%   Qwen3-1.7B
 cards batch 4: six more (held out)            ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
++ tips packs, NPS and Wikivoyage              ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
 TARGET                                        ████████████████████░░░░░░░░   70.0%
 ```
 
@@ -76,6 +77,10 @@ Measured separately: a second question that only makes sense after the first. He
 ### Fresh questions, graded blind (2026-09-27)
 
 57 questions written after every change they judge (random manual passages, general syllabus topics, out of scope), pipeline of 2026-09-25 against today's, A/B shuffled: **61.4% → 67.5%**, 4 wins, 0 losses, 0 unsafe. The held-out set runs about 5 points above fresh questions. docs/results-breadth.md.
+
+### Everyday outdoor questions, graded blind (2026-09-29)
+
+40 questions written before any tips page was fetched (28 everyday, 6 emergencies near tip topics, 6 to decline). With the National Park Service and Wikivoyage tips packs, everyday questions answered go **4 → 12 of 28**. Across all five question sets 15 of 277 answers changed: 10 better, 1 worse, 0 unsafe; every emergency answered exactly as before. Held-out, breadth and colloquial scores unchanged. docs/results-tips.md.
 
 ### Where the remaining points are
 
@@ -165,9 +170,11 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 | `core-survival` | 1.4.0 | 510 | US Army ATP 3-50.21 (2018), berry rules and taste test removed |
 | `core-signaling` | 1.0.0 | 18 | US Army FM 21-76 (1992), ch.19 Signaling Techniques |
 | `core-fieldcards` | 0.1.0 | 27 | Fred field cards, every quote checked against the manuals, reviewed |
+| `core-tips-nps` | 1.0.0 | 169 | US National Park Service, 28 articles (public domain) |
+| `core-tips-wikivoyage` | 1.0.0 | 215 | Wikivoyage, 12 outdoor topics (CC BY-SA 4.0, credited per passage) |
 | `state-XX-flora-fauna` | 1.1.0 | 177,963 | USFS FEIS, 50 states, EmbeddingGemma, 403 MB |
 
-**179,484 chunks** across 6 pack types.
+**179,868 chunks** across 8 pack types.
 
 ---
 

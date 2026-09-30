@@ -723,7 +723,7 @@
      "expect": "not-urgent"
     },
     {
-     "q": "how do i get the spines out",
+     "q": "whats the trick for pulling the spines",
      "expect": "not-urgent"
     }
    ],
@@ -762,7 +762,7 @@
      "expect": "not-urgent"
     },
     {
-     "q": "how do i keep them off",
+     "q": "whats the best repellent trick",
      "expect": "not-chat"
     }
    ],
@@ -1026,7 +1026,7 @@
      ]
     },
     {
-     "q": "it left. my daughter burned her hand on the stove",
+     "q": "it left. my daughter grabbed the stove and her palm is red and hurting",
      "expect": "answer",
      "keyPoints": [
       "cool with cool running water",

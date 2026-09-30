@@ -539,7 +539,9 @@ export async function ask(
     if (lc === undefined || lc.inLast) return undefined;
     const card = await cardByTitle(lc.condition.card);
     if (card === undefined) return undefined;
-    const about = leansBack(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
+    // A question in the middle of a condition is about it too: "should i
+    // prop my leg up on my pack" after the hiker's own snakebite.
+    const about = leansBack(q) || asksSomething(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
       candidates.some((c) => c.chunk.id === card.chunk.id);
     return about ? card : undefined;
   };

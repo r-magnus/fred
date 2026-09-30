@@ -78,7 +78,10 @@ export const CONDITIONS: readonly Condition[] = [
   // Burns: "Don't use ice or ice water", "Don't put butter, grease, ointments
   // or home remedies on a burn"; a blistering burn is covered, not opened.
   { id: 'burn', label: 'burn', card: 'Burns', said: (ms) => ms.some((m) => BURN.test(m)),
-    forbidden: /\bice\b|\bbutter\b|\bgrease\b|\bointments?\b|\btoothpaste\b|\b(?:pop|drain|puncture|lance|burst)\w*\b[^.]*\bblisters?\b|\bblisters?\b[^.]*\b(?:pop|drain|puncture|lance|burst)\w*/i },
+    // Any opening of a blister counts, whatever the answer calls it: "drain
+    // them with a sterile needle", of the "bubbles" on a burned arm
+    // (confirmation chat set).
+    forbidden: /\bice\b|\bbutter\b|\bgrease\b|\bointments?\b|\btoothpaste\b|\b(?:pop|popping|drain|draining|puncture|puncturing|lance|lancing|burst|bursting|prick|pricking)\b|\bneedle\b/i },
   // Frostbite: "Don't rub or massage it", "Don't hold it near a fire to thaw it."
   { id: 'frostbite', label: 'frostbite', card: 'Frostbite and frostnip', said: (ms) => ms.some((m) => FROSTBITE.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\b(?:by|near|over|next to|in front of) (?:a|the) fire\b/i },

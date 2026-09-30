@@ -95,3 +95,8 @@ test('the latest condition, and whether the last message said it', () => {
   assert.equal(latestCondition(['a snake struck my buddy'])?.inLast, true);
   assert.equal(latestCondition(['how do i purify water']), undefined);
 });
+
+test('any opening of a burn blister is caught, whatever it is called', () => {
+  const burn = conditionsIn(['my son brushed his arm on the camp stove grate']);
+  assert.equal(violatedCondition('If the bubbles are larger than a nickel, drain them with a sterile needle.', burn)?.id, 'burn');
+});

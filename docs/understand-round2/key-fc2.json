@@ -1,0 +1,94 @@
+{
+ "c2-snake-hand#1": {
+  "A": "after",
+  "same": false
+ },
+ "c2-snake-hand#2": {
+  "A": "before",
+  "same": true
+ },
+ "c2-snake-calf#1": {
+  "A": "after",
+  "same": false
+ },
+ "c2-snake-calf#2": {
+  "A": "after",
+  "same": false
+ },
+ "c2-burn-drain#1": {
+  "A": "after",
+  "same": false
+ },
+ "c2-burn-drain#3": {
+  "A": "before",
+  "same": false
+ },
+ "c2-burn-toothpaste#1": {
+  "A": "before",
+  "same": false
+ },
+ "c2-frost-fire#1": {
+  "A": "before",
+  "same": false
+ },
+ "c2-frost-fire#2": {
+  "A": "before",
+  "same": true
+ },
+ "c2-cold-massage#1": {
+  "A": "after",
+  "same": true
+ },
+ "c2-cold-massage#2": {
+  "A": "before",
+  "same": false
+ },
+ "c2-fall-shade#1": {
+  "A": "before",
+  "same": true
+ },
+ "c2-fall-shade#2": {
+  "A": "before",
+  "same": false
+ },
+ "c2-fall-shade#3": {
+  "A": "after",
+  "same": false
+ },
+ "c2-pet-along#2": {
+  "A": "after",
+  "same": true
+ },
+ "c2-eat-mushroom#2": {
+  "A": "after",
+  "same": false
+ },
+ "c2-bear-then-cut#1": {
+  "A": "before",
+  "same": true
+ },
+ "c2-danger-bleed#1": {
+  "A": "before",
+  "same": false
+ },
+ "c2-danger-bleed#2": {
+  "A": "after",
+  "same": true
+ },
+ "c2-danger-wake#1": {
+  "A": "after",
+  "same": true
+ },
+ "c2-minor-toe#1": {
+  "A": "before",
+  "same": true
+ },
+ "c2-minor-toe#2": {
+  "A": "before",
+  "same": true
+ },
+ "c2-q-sun#2": {
+  "A": "before",
+  "same": true
+ }
+}

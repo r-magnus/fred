@@ -218,14 +218,24 @@ const UNDERSTOOD_OWN_TOPK = 20;
 
 type UnderstoodDiag = NonNullable<Diagnostics['understood']>;
 
-/** The same backend, adding the wall time spent in each kind of call to `spent`. */
+/**
+ * The same backend for one question, adding the wall time spent in each kind
+ * of call to `spent`, and embedding each text once. A widened retry, the
+ * emergency re-search and the understanding step's searches embed text
+ * already embedded; on the phone each embedding costs ~0.7 s (a fresh llama.rn
+ * context per text, device-pack.ts), and a question the step ran on spent up
+ * to 4.2 s embedding (2026-09-30 phone check).
+ */
 function timeCalls(b: InferenceBackend, spent: { modelMs: number; embedMs: number }): InferenceBackend {
+  const vectors = new Map<string, Promise<Float32Array>>();
   return {
     embeddingSpec: () => b.embeddingSpec(),
     countTokens: (texts) => b.countTokens(texts),
     async embed(text) {
       const t = Date.now();
-      try { return await b.embed(text); } finally { spent.embedMs += Date.now() - t; }
+      let v = vectors.get(text);
+      if (v === undefined) { v = b.embed(text); vectors.set(text, v); }
+      try { return await v; } finally { spent.embedMs += Date.now() - t; }
     },
     generate(prompt, opts) {
       const inner = b.generate(prompt, opts);

@@ -24,7 +24,7 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, UNDERSTAND_HISTORY, isRefusal, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
+import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
@@ -169,12 +169,13 @@ function Screen() {
       last.topScore !== undefined && last.question !== question
       ? { question: last.question, topScore: last.topScore } : undefined;
     // The hiker's recent messages, answered or not, for the understanding step
-    // (#98): "i'm lost and scared" then "help". Only this conversation's last
-    // few, so a message hours later is not read against an old one.
+    // and the record of conditions (#98): "i'm lost and scared" then "help",
+    // or a snakebite a few messages back. Only this conversation's last few,
+    // so a message hours later is not read against an old one.
     const now = Date.now();
     const history = turnsRef.current
       .filter((t) => now - t.askedAt <= HISTORY_WINDOW_MS)
-      .slice(-UNDERSTAND_HISTORY)
+      .slice(-CONDITION_HISTORY)
       .map((t) => t.question);
     const map = wantsMap(question);
     setTurns((ts) => [...ts, {
@@ -212,7 +213,7 @@ function Screen() {
         // know what it is, and knows it is not for a hiker to attempt.
         update(id, {
           kind: 'abstain', done: true,
-          text: res.reason === 'provider-only' ? REFER_REPLY : res.reason === 'safety-net' ? SAFETY_NET_REPLY : '',
+          text: res.reason === 'provider-only' ? REFER_REPLY : res.reason === 'safety-net' ? SAFETY_NET_REPLY : res.reason === 'watch' ? WATCH_REPLY : '',
           ...(res.offer === undefined ? {} : { offer: res.offer }),
         });
         return;
@@ -408,13 +409,13 @@ function Screen() {
               </View>
             )}
 
-            {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY) && (
+            {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
                 <Text style={styles.body}>{t.text}</Text>
               </View>
             )}
 
-            {t.kind === 'abstain' && t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && (
+            {t.kind === 'abstain' && t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY && (
               <View style={styles.card}>
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}

@@ -62,6 +62,24 @@ export const SAFETY_NET_REPLY =
   "3. Don't make a big decision straight away. Give yourself a little time to get over the shock, then look at your situation.\n" +
   "Tell me what's happening, and whether anyone is hurt.";
 
+/**
+ * What Fred says when something is wrong but no danger sign is present and
+ * nothing in the manuals matched (#98 round 2, docs/plan-understand-2.md).
+ * Fixed text from reviewed field cards: the warning signs from the get-help
+ * lines of stings-bites (trouble breathing, a swollen face or throat),
+ * bleeding-severe, head-injury (worsening confusion, passing out) and
+ * heart-stroke (chest pain); the phone or radio line from signal-rescue. It
+ * ends on a question so the conversation keeps going.
+ */
+export const WATCH_REPLY =
+  "I don't have steps for that exact problem in my manuals.\n" +
+  "Get help right away if any of these appear: trouble breathing, a swollen face or throat, bleeding that won't stop, " +
+  "chest pain, or confusion or passing out. A phone with signal or a radio is the quickest way to get help.\n" +
+  "Tell me more about what's happening and I'll look again.";
+
+/** Asked when a card was held back because it must not follow a condition (conditions.ts). */
+export const CONDITION_CLARIFY = (label: string): string => `Is this about the ${label}?`;
+
 /** True when a generated answer is really the model declining. */
 export function isRefusal(text: string): boolean {
   const t = text.trim().toLowerCase().replace(/[.!]+$/, '');

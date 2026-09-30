@@ -7,13 +7,15 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import type { CardSource } from '@fred/pack-format';
+import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
+import { blockingCondition, conditionsIn, type Condition } from './conditions.ts';
+import { asksSomething, dangerSign } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -160,7 +162,9 @@ export interface AskOptions {
   readonly previousInPrompt?: boolean;
   /**
    * The hiker's earlier messages in this conversation, oldest first, answered
-   * or not. Read only by the understanding step (#98).
+   * or not (up to CONDITION_HISTORY). The understanding step reads only the
+   * current topic's thread of them; the record of conditions reads them all
+   * (#98).
    */
   readonly history?: readonly string[];
   /**
@@ -172,6 +176,15 @@ export interface AskOptions {
   readonly understand?: boolean;
   /** Overrides UNDERSTOOD_OWN_FLOOR, for calibration on the tuning sets. */
   readonly understandOwnFloor?: number;
+  /**
+   * Round 2 of #98 (docs/plan-understand-2.md): the record of conditions and
+   * the cards that must not follow them, the question rule, danger signs for
+   * the get-help-now reply, and two searches agreeing. Needs `understand`.
+   * Default on; off only to measure what it changes.
+   */
+  readonly guards?: boolean;
+  /** Overrides UNDERSTOOD_OWN_TOP, for calibration on the tuning sets. */
+  readonly understandOwnTop?: number;
   /**
    * Decide what the hiker wants as well as what they are talking about
    * (intent.ts, docs/results-intent-probe.md): an emergency opens the top field
@@ -215,6 +228,25 @@ export const INTENT_CARD_NEAR_TOP = 0.85;
  */
 export const UNDERSTOOD_OWN_FLOOR = 0.2;
 const UNDERSTOOD_OWN_TOPK = 20;
+/**
+ * Round 2: the request's passage is also kept when it ranks this high for the
+ * hiker's own words, whatever its score. Scores shift from one message to the
+ * next; ranks are steadier (research-conversation-safety.md). "i think it's a
+ * bear" after rustling outside the tent found the bear card through the
+ * request (0.396), but the hiker's own words reached it at 0.189, under the
+ * floor, and Fred showed the safety net three times (phone, 2026-09-30).
+ */
+export const UNDERSTOOD_OWN_TOP = 5;
+/**
+ * The agreement rule still wants the hiker's own search to reach the card at
+ * all, and the request's search to lead with it clearly: "my wife's feeling
+ * dizzy" led both with the head-injury card, at 0.147 and 0.173, on the word
+ * "dizzy" alone, and opened it (phone chats). The burns card that rule is for
+ * reached 0.225 through the request. A message whose own search stays under
+ * AGREED_CARD_FLOOR has nothing of its own to agree with.
+ */
+const AGREED_CARD_FLOOR = 0.1;
+const AGREED_REQUEST_FLOOR = 0.2;
 
 type UnderstoodDiag = NonNullable<Diagnostics['understood']>;
 
@@ -248,6 +280,35 @@ function timeCalls(b: InferenceBackend, spent: { modelMs: number; embedMs: numbe
 }
 
 /** The best field card, if it leads the search closely enough to answer an emergency. */
+/** Every field card by title, read once per store. Cards are few (under 100). */
+const cardCache = new WeakMap<PackStore, Promise<Map<string, ChunkRecord>>>();
+function fieldCards(store: PackStore, packId: string): Promise<Map<string, ChunkRecord>> {
+  let got = cardCache.get(store);
+  if (got === undefined) {
+    got = store.getChunks(Array.from({ length: 200 }, (_, i) => `${packId}:${i}`))
+      .then((cs) => new Map(cs.map((c) => [c.section, c] as const)));
+    cardCache.set(store, got);
+  }
+  return got;
+}
+
+/**
+ * A card that leads a search by a wide margin, however low the scores: first,
+ * and nothing else within THREAD_CARD_MARGIN of it. Scores of a long joined
+ * thread are low and fragile: "i think im lost / phone at 15% / its getting
+ * dark / what do i do" reached the lost card at 0.071, with nothing else above
+ * 0.000; without "phone at 15%" it scored 0.248. Used only for the thread's
+ * own words, only in an emergency, and only for a message with nothing of its
+ * own.
+ */
+const THREAD_CARD_MARGIN = 0.5;
+const THREAD_CARD_MIN = 0.05;
+function clearlyLeadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
+  const [first, second] = [...candidates].sort((a, b) => b.score - a.score);
+  if (first === undefined || !isCard(first) || first.score < THREAD_CARD_MIN) return undefined;
+  return second === undefined || second.score <= THREAD_CARD_MARGIN * first.score ? first : undefined;
+}
+
 function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
   const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
   const card = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
@@ -320,8 +381,16 @@ export interface Diagnostics {
     readonly topScore?: number;
     /** That passage scored against the hiker's own words; undefined when not among them. */
     readonly ownScore?: number;
+    /** Its rank (0-based) among the hiker's own words' results; undefined when not among them. */
+    readonly ownRank?: number;
     readonly used: boolean;
   };
+  /** Round 2: the conditions the conversation established (conditions.ts). */
+  readonly conditions?: readonly string[];
+  /** Round 2: a card that was not shown because it must not follow a condition. */
+  readonly blocked?: { readonly card: string; readonly condition: string };
+  /** Round 2: a below-gate emergency card opened because two searches agreed on it. */
+  readonly agreedCard?: string;
   /** Time before the decision, split into model calls and embedding (ms). */
   readonly timing?: { readonly modelMs: number; readonly embedMs: number; readonly totalMs: number };
   /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
@@ -386,12 +455,14 @@ export type AskResult =
    * judged the passages insufficient, or the question is a clinical procedure
    * (the best match is provider-only material), which the app answers with
    * REFER_REPLY rather than "I don't know". 'safety-net': an emergency found
-   * nothing, and the app shows SAFETY_NET_REPLY instead of a dead end.
+   * nothing, and the app shows SAFETY_NET_REPLY instead of a dead end; with
+   * guards on, only when a danger sign is present. 'watch': something is
+   * wrong but no danger sign and nothing matched: the app shows WATCH_REPLY.
    * 'out-of-scope': the understanding step read it as outside Fred's scope.
    */
   | {
       readonly kind: 'abstain';
-      readonly reason: 'low-score' | 'insufficient' | 'provider-only' | 'safety-net' | 'out-of-scope';
+      readonly reason: 'low-score' | 'insufficient' | 'provider-only' | 'safety-net' | 'watch' | 'out-of-scope';
       readonly nearest: readonly Citation[];
       /** The field card that led the search, when one did: shown folded under the decline. */
       readonly offer?: CardOffer;
@@ -437,6 +508,13 @@ export async function ask(
     };
   };
   const retrievalOpts = opts.retrieval ?? DEFAULT_RETRIEVAL;
+  // A field card by its title: a condition's own card (conditions.ts).
+  const cardByTitle = async (title: string): Promise<ScoredChunk | undefined> => {
+    const packId = retrievalOpts.reserve?.packId;
+    if (packId === undefined) return undefined;
+    const chunk = (await fieldCards(store, packId)).get(title);
+    return chunk === undefined ? undefined : { chunk, cosineRaw: 0, cosine: 0, sLex: 0, score: 0 };
+  };
   const tipsPackIds = new Set(packs.filter((p) => p.domains.includes('outdoor-skills')).map((p) => p.id));
   const threshold = opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD;
 
@@ -571,8 +649,18 @@ export async function ask(
   // Only the earlier messages this one continues (understand.ts, currentThread).
   const history = currentThread(query, opts.history ?? []);
   const understandOn = opts.understand !== false;
+  const guardsOn = understandOn && opts.guards !== false;
+  // What has happened in the conversation: every earlier message the app
+  // passed, not just this topic's thread. A snakebite two messages ago is
+  // still a snakebite (conditions.ts).
+  const active: readonly Condition[] = guardsOn ? conditionsIn([...(opts.history ?? []), query]) : [];
   let understood: UnderstoodDiag | undefined;
   let u: Understood | undefined;
+  // The request's search's leading card, for the agreement rule below.
+  let requestCard: ScoredChunk | undefined;
+  let agreedCard: ScoredChunk | undefined;
+  // The leading card of the hiker's own thread, searched as one text.
+  let threadCard: ScoredChunk | undefined;
   if (opts.intent === true) {
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
@@ -583,6 +671,15 @@ export async function ask(
     if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
     intent = u === undefined ? await classifyIntent(query, backend, opts.signal)
       : u.intent === 'out' ? 'question' : u.intent;
+    // A message that asks something is never small talk, whatever the model
+    // says. Round 1's understanding step called "how much water" and "should
+    // i follow it down" CHAT, and Fred answered "Got it" (phone, 2026-09-30).
+    // A danger sign does not overrule CHAT: "he was bleeding badly yesterday
+    // but he's fine now" is small talk.
+    if (guardsOn && intent === 'chat' && asksSomething(query)) {
+      intent = 'question';
+      if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
     // An emergency is answered from first aid, never from everyday tips (#96,
     // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be
     // answered from a passage on choosing boots. The search is run again as if
@@ -635,16 +732,28 @@ export async function ask(
       // question sound like a manual. Search the hiker's own messages over
       // every pack the request could reach, and look for the same passage.
       let ownScore: number | undefined;
-      if (clears) {
+      let ownRank: number | undefined;
+      // With guards on, the hiker's own thread is searched whenever there is
+      // one: its leading card is used below when the message has nothing of
+      // its own ("what do i do").
+      if (clears || (guardsOn && history.length > 0)) {
         const own = [...history.slice(-UNDERSTAND_HISTORY), query].join(' ');
         const kwO = extractKeywords(own);
         const ids = [...new Set([...routedR.packIds, ...pool.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
         const domains = [...new Set([...routedR.domains, ...pool.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
         const candO = await retrieve(kwO, ids, store, backend, { ...retrievalOpts, topK: UNDERSTOOD_OWN_TOPK }, domains, own);
-        ownScore = candO.find((c) => c.chunk.id === topR.chunk.id)?.score;
+        const ranked = [...candO].sort((a, b) => b.score - a.score);
+        const at = topR === undefined ? -1 : ranked.findIndex((c) => c.chunk.id === topR.chunk.id);
+        if (at >= 0) { ownScore = ranked[at]!.score; ownRank = at; }
+        threadCard = leadingCard(candO, isCard) ?? clearlyLeadingCard(candO, isCard);
       }
-      const used = clears && ownScore !== undefined && ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR);
-      understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), used };
+      // Kept when it clears the own-words floor or, with guards on, ranks
+      // near the top for the hiker's own words.
+      const used = clears && ownScore !== undefined && (
+        ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
+        (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
+      requestCard = leadingCard(candR, isCard);
+      understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), ...(ownRank === undefined ? {} : { ownRank }), used };
       if (used) {
         keywords = kwR;
         routed = routedR;
@@ -667,6 +776,26 @@ export async function ask(
     // closed" on the tuning set. And a pet is never the patient: veterinary
     // care is out of scope, and "my dog cut his paw" opened the human card.
     if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
+    // Round 2: two searches agreeing beat one score. An emergency whose card
+    // leads the hiker's own search, but under the card floor, opens it when
+    // the understanding step's request, searched on its own, puts the same
+    // card first. "ok it left. my kid just burned her hand on the stove": the
+    // burns card led at 0.139, under 0.15, and the request found it too
+    // (phone, 2026-09-30); Fred showed the safety net.
+    else if (guardsOn && topCard === undefined && intent === 'now' && !ABOUT_A_PET.test(query)) {
+      const own = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+      if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
+          requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id) {
+        forcedCard = agreedCard = own;
+      } else if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR) {
+        // A message with nothing of its own ("what do i do") takes the card
+        // its thread leads with, searched in the hiker's own words: "i think
+        // im lost" / "phone at 15%" / "its getting dark" / "what do i do".
+        // The model's request for it ("lost and dark, phone dead") reached
+        // the lost card at only 0.119 (phone chats, 2026-09-30).
+        forcedCard = agreedCard = threadCard;
+      }
+    }
     // Otherwise the card is offered, folded, wherever Fred would say nothing
     // useful: beside small talk, and beside a decline. On the breadth set
     // (docs/results-breadth.md) the right card led the search for "I just
@@ -685,6 +814,18 @@ export async function ask(
     // treatment card (docs/results-intent-probe.md).
   }
 
+  // A card must never be shown, open or folded, after a condition it is not
+  // for (conditions.ts). A folded offer becomes the condition's own card.
+  let blocked: { card: string; condition: string } | undefined;
+  if (offer !== undefined) {
+    const by = blockingCondition(offer.title, active);
+    const instead = by === undefined ? undefined : await cardByTitle(by.card);
+    if (by !== undefined) {
+      blocked = { card: offer.title, condition: by.id };
+      offer = instead === undefined ? undefined : toOffer(instead, citeOf(instead, 0));
+    }
+  }
+
   const baseDiag = {
     ...(intent === undefined ? {} : { intent }),
     keywords,
@@ -693,6 +834,9 @@ export async function ask(
     memoryPressure: pressure,
     ...(widenedTopScore === undefined ? {} : { widenedTopScore }),
     ...(understood === undefined ? {} : { understood }),
+    ...(active.length === 0 ? {} : { conditions: active.map((c) => c.id) }),
+    ...(agreedCard === undefined ? {} : { agreedCard: agreedCard.chunk.section }),
+    ...(blocked === undefined ? {} : { blocked }),
     timing: { ...spent, totalMs: Date.now() - startedAt },
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
@@ -721,9 +865,15 @@ export async function ask(
     // reviewed cards (SAFETY_NET_REPLY), not model-written, so it cannot
     // invent advice; the card that led, if any, is offered under it. Not for
     // a pet: "call emergency services" is the wrong reply to a dog.
+    // With guards on, the get-help-now reply needs a danger sign in the
+    // hiker's words (triage.ts): downhill knee pain, a burn blister and "is it
+    // safe to touch cholla" got it in round 1. Without one, Fred says it has
+    // no steps for that, names the signs that would make it urgent, and asks
+    // (WATCH_REPLY): still no dead end, and no alarm over a sore knee.
     if (understandOn && intent === 'now' && !ABOUT_A_PET.test(query)) {
+      const danger = !guardsOn || dangerSign([...history, query]);
       return {
-        kind: 'abstain', reason: 'safety-net', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
+        kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
         ...(offer === undefined ? {} : { offer }),
       };
     }
@@ -787,7 +937,7 @@ export async function ask(
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
   }
-  const usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
+  let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);
@@ -806,6 +956,54 @@ export async function ask(
   if (followUp?.used === true && clear !== undefined &&
       clearCard(standalone, retrievalOpts.reserve)?.chunk.id !== clear.chunk.id) {
     clear = undefined;
+  }
+  // Round 2: a card that must not follow a condition is never shown
+  // (conditions.ts). "its on his ankle and swelling" after a snakebite opened
+  // the sprain card (ice, wrap, raise) on the phone. Fred shows the
+  // condition's own card and asks, so a separate injury is a tap away.
+  if (clear !== undefined) {
+    const by = blockingCondition(clear.chunk.section, active);
+    if (by !== undefined) {
+      blocked = { card: clear.chunk.section, condition: by.id };
+      const instead = await cardByTitle(by.card);
+      if (instead !== undefined && cardMode === 'verbatim') {
+        const mine = parseCard(instead.chunk.text);
+        const theirs = parseCard(clear.chunk.text);
+        const whole = renderCard(mine);
+        return {
+          kind: 'answer',
+          stream: once(whole),
+          citations: [citeOf(instead, 0)],
+          prompt: buildPromptParts(query, [{ chunk: instead.chunk, text: instead.chunk.text }], opts.answerVariant),
+          medical: MEDICAL_DOMAINS.has(instead.chunk.domain),
+          clarify: {
+            question: CONDITION_CLARIFY(by.label),
+            choices: [
+              { label: `Yes, the ${by.label}`, text: whole },
+              { label: 'No, something else', text: renderCard(theirs) },
+            ],
+            picked: null,
+            whole,
+          },
+          diagnostics: {
+            ...baseDiag, blocked, candidates, topScore, sufficient: null,
+            tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode,
+          },
+        };
+      }
+      clear = undefined;
+    }
+  }
+  // A model-written answer never reads a card that must not follow a
+  // condition, and in the condition's thread it reads the condition's card.
+  if (active.length > 0) {
+    usable = usable.filter((c) => !isCard(c) || blockingCondition(c.chunk.section, active) === undefined);
+    if (history.length > 0) {
+      for (const c of active) {
+        const card = await cardByTitle(c.card);
+        if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
+      }
+    }
   }
   if (cardMode !== 'off' && clear !== undefined) {
     const card = clear;

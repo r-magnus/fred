@@ -766,7 +766,7 @@ test('a request that finds what the hiker never said is not used', async () => {
 });
 
 test('an emergency that finds nothing gets the safety net, not a dead end', async () => {
-  const res = await ask('something huge is staring at us from the rocks', { backend: understanding('NOW | large animal staring from the rocks', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
+  const res = await ask('a mountain lion is staring at us from the rocks', { backend: understanding('NOW | large animal staring from the rocks', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
   assert.equal(res.kind, 'abstain');
   if (res.kind === 'abstain') assert.equal(res.reason, 'safety-net');
 });
@@ -811,4 +811,54 @@ test('possessives and "there" do not tie a new statement to the last topic', () 
   assert.deepEqual(currentThread("there's a bear in front of me", earlier), []);
   assert.deepEqual(currentThread("he's kind of out of it", [...earlier, 'my hiking partner tripped and hit his head on a rock']),
     ['my hiking partner tripped and hit his head on a rock']);
+});
+
+// Round 2 of #98 (docs/plan-understand-2.md).
+const guardStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [
+    seed('Twisted or sprained ankle, or a strained muscle\nTreat it with RICE.\n1. Ice the ankle swelling.\n2. Wrap the ankle.', { source: 'Fred field card', section: 'Twisted or sprained ankle, or a strained muscle' }),
+    seed('Snakebite\nKeep them still and get help.\n1. Keep them still.\nDon\'t put ice on it.', { source: 'Fred field card', section: 'Snakebite' }),
+  ]);
+  return store;
+};
+const guardOpts = { state: null, abstainThreshold: 0.3, fallbackThreshold: 0.3, intent: true,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.2 } } } as const;
+
+test('a card is never shown after a condition it must not follow; the condition card leads, with a question', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling after snakebite', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, history: ['how do i tell if a snake is venomous', 'my friend just got bit by one'] });
+  assert.deepEqual(res.diagnostics.conditions, ['snakebite']);
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') {
+    assert.equal(res.citations[0]!.section, 'Snakebite');
+    assert.equal(res.clarify?.question, 'Is this about the snakebite?');
+    assert.equal(res.diagnostics.blocked?.card, 'Twisted or sprained ankle, or a strained muscle');
+  }
+});
+
+test('the same card with no condition is shown as before', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, history: ['i rolled my ankle on a rock'] });
+  assert.equal(res.diagnostics.conditions, undefined);
+  if (res.kind === 'answer') assert.equal(res.citations[0]!.section, 'Twisted or sprained ankle, or a strained muscle');
+});
+
+test('with guards off, the block is off', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling after snakebite', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, guards: false, history: ['how do i tell if a snake is venomous', 'my friend just got bit by one'] });
+  assert.equal(res.diagnostics.blocked, undefined);
+});
+
+test('something wrong with no danger sign gets the watch reply, not the get-help-now one', async () => {
+  const res = await ask('my knee is killing me going downhill', { backend: understanding('NOW | knee pain downhill', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'watch');
+});
+
+test('a question is never small talk, even when the understanding step says CHAT', async () => {
+  const res = await ask('how much water', { backend: understanding('CHAT | how much water for a day hike', 'CHAT'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['what should i bring for a day hike'] });
+  assert.notEqual(res.kind, 'chat');
 });

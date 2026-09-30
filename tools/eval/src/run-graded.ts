@@ -28,11 +28,16 @@ console.log(describeSet(questions));
 const harness = await openHarness();
 const { backend, store, packs } = harness;
 const askOptions = askOptionsFromEnv();
+// STATE=CA asks every question that sets no state of its own as if the hiker
+// were in California, as the phone does once it has a location. The sets were
+// run with no state until #96's phone check, which hid routing that only
+// fails with a state set.
+const defaultState = process.env.STATE ?? null;
 const runs: GradedRun[] = [];
 
 for (const [i, q] of questions.entries()) {
   const t0 = Date.now();
-  const res = await ask(q.question, { backend, store, packs }, { ...askOptions, state: q.state });
+  const res = await ask(q.question, { backend, store, packs }, { ...askOptions, state: q.state ?? defaultState });
 
   let answer = '';
   // GENERATE=0 records retrieval and the gate's decision without spending a
@@ -59,6 +64,7 @@ for (const [i, q] of questions.entries()) {
     ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
     ...((res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? { offer: res.offer.title } : {}),
     ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
+    ...(d.widenedTopScore !== undefined ? { widenedTopScore: d.widenedTopScore } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);

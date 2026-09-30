@@ -35,10 +35,10 @@ const PACKS = process.env.PACKS_OUT ?? 'packs';
  */
 const CARDS_LICENSE: LicenseEntry = {
   id: 'fred-field-cards',
-  license: 'Derived work: CC-BY-NC-SA-3.0-IGO (from WHO BEC) and public domain (US Army ATP 3-50.21, ATP 4-02.11)',
-  sourceTitle: 'Fred field cards, written from WHO BEC 2018, ATP 3-50.21 and ATP 4-02.11',
+  license: 'Derived work: CC-BY-NC-SA-3.0-IGO (from WHO BEC) and public domain (US Army ATP 3-50.21, ATP 4-02.11; US National Park Service)',
+  sourceTitle: 'Fred field cards, written from WHO BEC 2018, ATP 3-50.21, ATP 4-02.11 and National Park Service pages',
   sourceUrl: 'corpora/cards/cards.json',
-  attribution: 'Adapted from WHO/ICRC Basic Emergency Care (2018), CC BY-NC-SA 3.0 IGO, and US Army ATP 3-50.21 (2018) and ATP 4-02.11 (2026).',
+  attribution: 'Adapted from WHO/ICRC Basic Emergency Care (2018), CC BY-NC-SA 3.0 IGO, and US Army ATP 3-50.21 (2018) and ATP 4-02.11 (2026), and US National Park Service pages (public domain).',
   nonCommercial: true,
 };
 
@@ -137,7 +137,7 @@ const vectors = await embedder.embed(embedInput);
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.5.0',
+  version: '0.6.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],

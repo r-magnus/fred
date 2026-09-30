@@ -97,6 +97,28 @@ test('the same query answers once the state is known', async () => {
   assert.equal(res.medical, false);
 });
 
+test('a weak state-pack search is retried across the unscoped packs', async () => {
+  // With California set, "how do I keep bears out of my food" searched the
+  // state species pack alone and declined, though a tips page answers it. The
+  // state pack here says nothing about food; the survival manual does.
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Control severe bleeding with firm direct pressure on the wound.')]);
+  store.addPack('core-survival', [
+    seed('Hang your food bag from a high branch away from camp so a bear cannot reach your food.', { domain: 'survival', source: 'FM 21-76', licenseId: 'fm-21-76' }),
+  ]);
+  store.addPack('state-CO-wildlife', [
+    seed('Ursus americanus ranges across Front Range foothills and aspen parkland.', { domain: 'wildlife', source: 'FEIS', licenseId: 'feis' }),
+  ]);
+  const q = 'How do I hang my food so a bear cannot reach it at camp?';
+  const narrow = await ask(q, { backend: new FakeBackend(), store, packs: PACKS }, { state: 'CO', abstainThreshold: 0 });
+  const res = await ask(q, { backend: new FakeBackend(), store, packs: PACKS }, { state: 'CO' });
+  assert.ok(narrow.diagnostics.topScore < DEFAULT_ABSTAIN_THRESHOLD,
+    'fixture: the routed search alone should fall under the gate');
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  assert.equal(res.citations[0]!.source, 'FM 21-76');
+});
+
 test('a pack from another state is never searched', async () => {
   // The hiker is in Ohio and only Colorado's pack is installed. Asking "which
   // state are you in?" would be asking what Fred already knows, and its state

@@ -127,6 +127,12 @@ export interface AskOptions {
    * generation, only on questions that would otherwise be declined.
    */
   readonly secondSearch?: boolean;
+  /**
+   * When the routed search scores under the gate, search again across every
+   * unscoped pack and keep it if it clears the gate. Default on; off only to
+   * measure what it changes.
+   */
+  readonly widenWeakSearch?: boolean;
   /** Name the hiker's state when the question points at it and a state pack is answered from. Default on. */
   readonly locationInPrompt?: boolean;
   /**
@@ -242,6 +248,8 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
+  readonly widenedTopScore?: number;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** What the hiker wants, when intent is on. */
@@ -419,6 +427,37 @@ export async function ask(
   }
   const earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
 
+  // Routing is a hint, and a weak routed search is not evidence that Fred has
+  // nothing: search again across every unscoped pack, and keep that only if it
+  // clears the same gate. Routing picks packs by vocabulary, and some words
+  // point only at state packs: with California set, "there's a bear in front of
+  // me" and "how do I keep bears out of my food" searched the California
+  // species pack alone (bear biology, U=0.16) and declined, while the NPS
+  // food-storage page scores 0.59. Widening up front instead would reach the
+  // manuals on every species question, and ATP 3-50.21's plants chapter once
+  // outranked the species reviews for "what plants and animals are near me?".
+  let widenedTopScore: number | undefined;
+  const widenOn = opts.widenWeakSearch !== false;
+  const widen = async (
+    kw: readonly Keyword[], r: RouteResult, pool: readonly RoutablePack[], text: string,
+  ): Promise<{ routed: RouteResult; candidates: ScoredChunk[]; top: number } | undefined> => {
+    const extra = pool.filter((p) => p.scope.kind !== 'us-state' && !r.packIds.includes(p.id));
+    if (!widenOn || extra.length === 0) return undefined;
+    const packIds = [...r.packIds, ...extra.map((p) => p.id)];
+    const domains = [...new Set([...r.domains, ...extra.flatMap((p) => p.domains)])];
+    const cs = await retrieve(kw, packIds, store, backend, retrievalOpts, domains, text);
+    widenedTopScore = best(cs);
+    return { routed: { ...r, packIds, domains, reason: `${r.reason}; widened after a weak routed search` }, candidates: cs, top: widenedTopScore };
+  };
+  if (topScore < effectiveThreshold) {
+    const w = await widen(keywords, routed, packs, searchText);
+    if (w !== undefined && w.top >= effectiveThreshold) {
+      routed = w.routed;
+      candidates = w.candidates;
+      topScore = w.top;
+    }
+  }
+
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
     let rewrite = '';
@@ -460,6 +499,14 @@ export async function ask(
       effectiveThreshold = routed.fallback ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD) : threshold;
       candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searchText);
       topScore = best(candidates);
+      if (topScore < effectiveThreshold) {
+        const w = await widen(keywords, routed, noTips, searchText);
+        if (w !== undefined && w.top >= effectiveThreshold) {
+          routed = w.routed;
+          candidates = w.candidates;
+          topScore = w.top;
+        }
+      }
     }
     // The leading card: the best field card, if it is first or within
     // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
@@ -498,6 +545,7 @@ export async function ask(
     route: routed,
     maxTokens,
     memoryPressure: pressure,
+    ...(widenedTopScore === undefined ? {} : { widenedTopScore }),
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
   };

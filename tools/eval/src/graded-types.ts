@@ -162,6 +162,8 @@ export interface GradedRun {
   readonly cardAnswer?: string;
   /** The manual-wording restatement and its score, when a second search ran (SECOND_SEARCH). */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** Top score of the widened retry, when the routed search fell under the gate. */
+  readonly widenedTopScore?: number;
   /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
   readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }

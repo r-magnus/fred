@@ -81,7 +81,13 @@ export function asksSomething(message: string): boolean {
  * card's rule is the answer: only eat what you can positively identify.
  */
 const EAT = /\b(?:eat|edible|eatable)\b/i;
-const UNNAMED = /\b(?:these|this|them|those|that|it)\b|\b(?:wild )?(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?)\b/i;
+/**
+ * The thing to eat is unnamed: "eat them", "are these edible", or generic
+ * berries, mushrooms or wild plants. A stray "it" is not enough: "did people
+ * ever eat California brome, or is it just cattle feed?" names its plant
+ * (tuning set, ff-forage-03).
+ */
+const UNNAMED = /\beat (?:these|this|them|those|that|it|one|some)\b|\b(?:are|is) (?:these|this|those|they|it|that) (?:\w+ )?(?:edible|safe to eat|ok to eat|okay to eat|good to eat)\b|(?:^|\s)(?:wild )?(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?)\b/i;
 export function asksToEatUnknown(message: string): boolean {
   return EAT.test(message) && UNNAMED.test(message) && asksSomething(message);
 }

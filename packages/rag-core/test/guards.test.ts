@@ -71,3 +71,9 @@ test('a pet that is hurt is the patient; a pet along for the hike is not', () =>
   assert.ok(!petIsPatient('my dog and i are lost'));
   assert.ok(!petIsPatient('my friend got stung and his face is swelling', 'a bee stung my dog'));
 });
+
+test('a named plant is not an unnamed one', () => {
+  assert.ok(!asksToEatUnknown('Did people ever eat California brome, or is it just cattle feed?'));
+  assert.ok(asksToEatUnknown('I found some mushrooms. Which ones can I eat?'));
+  assert.ok(asksToEatUnknown('are these safe to eat'));
+});

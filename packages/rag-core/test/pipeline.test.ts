@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
 import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
-import { readUnderstood } from '../src/understand.ts';
+import { currentThread, readUnderstood } from '../src/understand.ts';
 import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
@@ -790,4 +790,17 @@ test('with understanding off, nothing changes', async () => {
   assert.equal(on.diagnostics.understood, undefined);
   assert.equal(on.kind, without.kind);
   assert.ok(on.kind !== 'abstain' || on.reason === 'low-score');
+});
+
+test('a new statement starts its own topic; a message that points back continues it', () => {
+  // The 2026-09-30 phone sequence: the CPR question must not follow the hiker.
+  const phone = ["Someone isn't breathing, what do I do?", "no idea where we are anymore and i'm freaking out"];
+  assert.deepEqual(currentThread("no idea where we are anymore and i'm freaking out", phone.slice(0, 1)), []);
+  assert.deepEqual(currentThread('what do we do', phone), ["no idea where we are anymore and i'm freaking out"]);
+  assert.deepEqual(currentThread('sliced my thumb open whittling', [...phone, 'what do we do']), []);
+  assert.deepEqual(currentThread("it's dripping everywhere", [...phone, 'what do we do', 'sliced my thumb open whittling']), ['sliced my thumb open whittling']);
+  // A chain of short or pointing-back messages runs back to the one that started it.
+  assert.deepEqual(currentThread('what do i do', ['we stopped for lunch by the creek', 'my friend fell off a ledge', "he's not moving"]),
+    ['my friend fell off a ledge', "he's not moving"]);
+  assert.deepEqual(currentThread('pls help', []), []);
 });

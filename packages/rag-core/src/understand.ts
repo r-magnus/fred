@@ -34,6 +34,43 @@ export interface Understood {
 /** At most this many earlier messages are shown, oldest first. */
 export const UNDERSTAND_HISTORY = 3;
 
+/**
+ * Words that point back at something said before: "it keeps pouring out",
+ * "he's acting confused", "what about for a kid?", "what now".
+ */
+const POINTS_BACK = /\b(?:it|its|it's|that|this|those|these|he|he's|she|she's|him|her|his|they|they're|them|their|there|same)\b|^\s*(?:and|also|but|so|then|now|ok|okay|what about|what if)\b|\bwhat (?:now|next)\b|\bhelp\b|\bwhat (?:do|should|can) (?:i|we) do\b/i;
+
+/**
+ * A message leans on the ones before it when it is very short or points back.
+ * Five words was too many: "sliced my thumb open whittling" is five.
+ */
+export function leansBack(message: string): boolean {
+  return message.trim().split(/\s+/).length <= 3 || POINTS_BACK.test(message);
+}
+
+/**
+ * The earlier messages that belong to this one's topic, oldest first.
+ *
+ * On the phone every message of the last half hour came along, and the model
+ * held on to the first topic: after "someone isn't breathing", both "no idea
+ * where we are anymore and i'm freaking out" and "sliced my thumb open
+ * whittling" were restated as "person not breathing" and answered with the CPR
+ * card, and the old question, being among the hiker's own words, passed the
+ * check meant to stop that (2026-09-30 phone check, #98). A full statement
+ * starts its own topic, so the thread runs back only while each message leans
+ * on the one before, and stops at the message that started it.
+ */
+export function currentThread(message: string, history: readonly string[]): string[] {
+  const earlier = history.filter((h) => h.trim() !== '');
+  if (!leansBack(message)) return [];
+  const thread: string[] = [];
+  for (let i = earlier.length - 1; i >= 0 && thread.length < UNDERSTAND_HISTORY; i--) {
+    thread.unshift(earlier[i]!);
+    if (!leansBack(earlier[i]!)) break;
+  }
+  return thread;
+}
+
 const SYSTEM = `You help a first-aid and survival helper for hikers understand what a hiker needs. You get the hiker's recent messages, oldest first. Understand the LAST message; the earlier ones fill in what it leaves out.
 
 Reply with one line: a WORD, then " | ", then a short plain search request saying what the hiker needs. The request keeps the hiker's key words (body parts, symptoms, animals, places) and uses the earlier messages to fill in what the last one leaves out. Do not add advice. Do not invent details that were not said.

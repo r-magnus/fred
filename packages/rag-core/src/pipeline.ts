@@ -13,7 +13,7 @@ import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
-import { understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
+import { currentThread, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -532,7 +532,8 @@ export async function ask(
   let offer: CardOffer | undefined;
   const reserve = retrievalOpts.reserve;
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
-  const history = (opts.history ?? []).filter((h) => h.trim() !== '');
+  // Only the earlier messages this one continues (understand.ts, currentThread).
+  const history = currentThread(query, opts.history ?? []);
   const understandOn = opts.understand !== false;
   let understood: UnderstoodDiag | undefined;
   let u: Understood | undefined;

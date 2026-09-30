@@ -587,8 +587,12 @@ export async function ask(
         if (w !== undefined && w.top > best(candR)) { routedR = w.routed; candR = w.candidates; }
       }
       const topR = candR.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-      const clears = topR !== undefined && (topR.score >= effectiveThreshold ||
-        (intent === 'now' && leadingCard(candR, isCard) !== undefined));
+      // The request's result must clear the normal gate. An emergency's
+      // below-gate card rule (INTENT_CARD_FLOOR) was measured on the hiker's
+      // own words; stacked on the model's restatement it opened the shock card,
+      // which says to move them into shade, for "my friend fell off a ledge /
+      // he's not moving" (0.270, sealed set, graded unsafe).
+      const clears = topR !== undefined && topR.score >= effectiveThreshold;
       // What the request found must also match what the hiker actually said.
       // The request is the model's words; phase 3 showed the model makes any
       // question sound like a manual. Search the hiker's own messages over

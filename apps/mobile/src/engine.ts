@@ -33,12 +33,15 @@ export interface Engine {
   /**
    * `signal` aborts generation; see US-07. `previous` is the question just
    * answered and its search score, for a follow-up (docs/plan-memory.md).
+   * `history` is the hiker's earlier messages, answered or not, oldest first,
+   * for the understanding step (#98).
    */
   ask(
     question: string,
     state: string | null,
     signal?: AbortSignal,
     previous?: { readonly question: string; readonly topScore: number },
+    history?: readonly string[],
   ): Promise<AskResult>;
   /** States with a flora-fauna pack installed, for the location picker. */
   availableStates(): readonly string[];
@@ -131,7 +134,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     });
 
     return {
-      ask: async (question, state, signal, previous) => {
+      ask: async (question, state, signal, previous, history) => {
         const t0 = Date.now();
         const res = await ask(question, { backend, store, packs }, {
           state,
@@ -140,6 +143,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           intent: true,
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
+          ...(history === undefined || history.length === 0 ? {} : { history }),
         });
         return timed(res, t0);
       },
@@ -176,8 +180,12 @@ function timed(res: AskResult, t0: number): AskResult {
   // What intent decided, and the card offered folded beside a decline or chat.
   const intent = res.diagnostics.intent === undefined ? '' : ` intent=${res.diagnostics.intent}`;
   const offered = (res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? ` offer=${JSON.stringify(res.offer.title)}` : '';
+  // The understanding step (#98): whether it ran, and whether its search was kept.
+  const u = res.diagnostics.understood;
+  const understood = u === undefined ? '' : ` understood=${u.used ? 'used' : 'unused'}${verbose ? `(${JSON.stringify(u.request)})` : ''}`;
+  const reason = res.kind === 'abstain' ? ` reason=${res.reason}` : '';
   if (res.kind !== 'answer') {
-    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${offered} top=${top}`);
+    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${reason}${offered} top=${top}`);
     return res;
   }
   const inner = res.stream;
@@ -193,7 +201,7 @@ function timed(res: AskResult, t0: number): AskResult {
     }
     const end = Date.now();
     if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
-    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent} top=${top}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent}${understood} top=${top}`);
   }
   return { ...res, stream: stream() };
 }

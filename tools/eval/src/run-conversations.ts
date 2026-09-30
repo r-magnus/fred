@@ -92,7 +92,7 @@ for (const [i, c] of conversations.entries()) {
   const res = await ask(t2.question, harness, {
     ...askOptions,
     state: t2.state,
-    ...(memoryOn ? { previous: { question: t1.question, topScore: first.diagnostics.topScore } } : {}),
+    ...(memoryOn ? { previous: { question: t1.question, topScore: first.diagnostics.topScore }, history: [t1.question] } : {}),
   });
   let answer = '';
   if (res.kind === 'answer') for await (const tok of res.stream) answer += tok;
@@ -113,6 +113,7 @@ for (const [i, c] of conversations.entries()) {
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
     topScore: d.topScore,
     followUp: d.followUp ?? null,
+    ...(d.understood === undefined ? {} : { understood: d.understood }),
     cardAnswer: card2,
     cardRepeat: card2 !== null && card2 === card1,
     citations: res.kind === 'answer'

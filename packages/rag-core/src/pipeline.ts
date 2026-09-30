@@ -13,6 +13,7 @@ import { extractKeywords, type Keyword } from './lexicon.ts';
 import { buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
+import { understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -158,6 +159,20 @@ export interface AskOptions {
   /** Show the model the earlier question when the joined search wins. Default on. */
   readonly previousInPrompt?: boolean;
   /**
+   * The hiker's earlier messages in this conversation, oldest first, answered
+   * or not. Read only by the understanding step (#98).
+   */
+  readonly history?: readonly string[];
+  /**
+   * The understanding step (#98, docs/plan-understand.md): when a weak search
+   * follows earlier messages, or an emergency finds nothing, ask the model for
+   * the intent and a search request in plain words. Needs `intent`. Default
+   * on; off only to measure what it changes.
+   */
+  readonly understand?: boolean;
+  /** Overrides UNDERSTOOD_OWN_FLOOR, for calibration on the tuning sets. */
+  readonly understandOwnFloor?: number;
+  /**
    * Decide what the hiker wants as well as what they are talking about
    * (intent.ts, docs/results-intent-probe.md): an emergency opens the top field
    * card even under the gate, and where Fred would otherwise say nothing
@@ -189,6 +204,23 @@ const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|ho
 
 /** The best card counts as leading when it scores at least this share of the top result. */
 export const INTENT_CARD_NEAR_TOP = 0.85;
+
+/**
+ * The understanding step's search is kept only if its best passage is among
+ * the UNDERSTOOD_OWN_TOPK best for the hiker's own words, scoring at least
+ * UNDERSTOOD_OWN_FLOOR (#98). Set on the tuning sets only.
+ */
+export const UNDERSTOOD_OWN_FLOOR = 0.2;
+const UNDERSTOOD_OWN_TOPK = 20;
+
+type UnderstoodDiag = NonNullable<Diagnostics['understood']>;
+
+/** The best field card, if it leads the search closely enough to answer an emergency. */
+function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
+  const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
+  const card = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  return card !== undefined && card.score >= INTENT_CARD_FLOOR && card.score >= INTENT_CARD_NEAR_TOP * top ? card : undefined;
+}
 
 /**
  * A card below the reserved-slot bar still counts as a clear match when it
@@ -248,6 +280,16 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** The understanding step, when it ran: what it read, and whether its search was kept. */
+  readonly understood?: {
+    readonly intent: Understood['intent'];
+    readonly request: string;
+    /** Best score of the request's own search. */
+    readonly topScore?: number;
+    /** That passage scored against the hiker's own words; undefined when not among them. */
+    readonly ownScore?: number;
+    readonly used: boolean;
+  };
   /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
   readonly widenedTopScore?: number;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
@@ -309,11 +351,13 @@ export type AskResult =
    * Fred declines. `reason` says why: nothing cleared the threshold, the model
    * judged the passages insufficient, or the question is a clinical procedure
    * (the best match is provider-only material), which the app answers with
-   * REFER_REPLY rather than "I don't know".
+   * REFER_REPLY rather than "I don't know". 'safety-net': an emergency found
+   * nothing, and the app shows SAFETY_NET_REPLY instead of a dead end.
+   * 'out-of-scope': the understanding step read it as outside Fred's scope.
    */
   | {
       readonly kind: 'abstain';
-      readonly reason: 'low-score' | 'insufficient' | 'provider-only';
+      readonly reason: 'low-score' | 'insufficient' | 'provider-only' | 'safety-net' | 'out-of-scope';
       readonly nearest: readonly Citation[];
       /** The field card that led the search, when one did: shown folded under the decline. */
       readonly offer?: CardOffer;
@@ -425,7 +469,7 @@ export async function ask(
       topScore = joinedTop;
     }
   }
-  const earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
+  let earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
 
   // Routing is a hint, and a weak routed search is not evidence that Fred has
   // nothing: search again across every unscoped pack, and keep that only if it
@@ -485,8 +529,20 @@ export async function ask(
   let offer: CardOffer | undefined;
   const reserve = retrievalOpts.reserve;
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
+  const history = (opts.history ?? []).filter((h) => h.trim() !== '');
+  const understandOn = opts.understand !== false;
+  let understood: UnderstoodDiag | undefined;
+  let u: Understood | undefined;
   if (opts.intent === true) {
-    intent = await classifyIntent(query, backend, opts.signal);
+    // A weak search that follows earlier messages is read in its conversation.
+    // The understanding call also gives the intent, so it replaces the intent
+    // check rather than adding to it.
+    if (understandOn && topScore < effectiveThreshold && history.length > 0) {
+      u = await understandMessage(query, history, backend, opts.signal);
+    }
+    if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
+    intent = u === undefined ? await classifyIntent(query, backend, opts.signal)
+      : u.intent === 'out' ? 'question' : u.intent;
     // An emergency is answered from first aid, never from everyday tips (#96,
     // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be
     // answered from a passage on choosing boots. The search is run again as if
@@ -508,14 +564,60 @@ export async function ask(
         }
       }
     }
+    // An emergency that found nothing, and no card to fall back on, is read
+    // again in plain words: "uhh dude there's a bear in front of me".
+    const noTipsPool = (): readonly RoutablePack[] => packs.filter((p) => !tipsPackIds.has(p.id));
+    if (understandOn && u === undefined && intent === 'now' && topScore < effectiveThreshold &&
+        leadingCard(candidates, isCard) === undefined && !ABOUT_A_PET.test(query)) {
+      u = await understandMessage(query, history, backend, opts.signal);
+      if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
+      if (u?.intent === 'out') intent = 'question';
+    }
+    if (u !== undefined && u.intent !== 'out' && u.intent !== 'chat') {
+      // Search the request. An emergency keeps to first aid, as above.
+      const pool = intent === 'now' ? noTipsPool() : packs;
+      const kwR = extractKeywords(u.request);
+      let routedR = route(kwR, pool, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
+      let candR = await retrieve(kwR, routedR.packIds, store, backend, retrievalOpts, routedR.domains, u.request);
+      if (best(candR) < effectiveThreshold) {
+        const w = await widen(kwR, routedR, pool, u.request);
+        if (w !== undefined && w.top > best(candR)) { routedR = w.routed; candR = w.candidates; }
+      }
+      const topR = candR.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+      const clears = topR !== undefined && (topR.score >= effectiveThreshold ||
+        (intent === 'now' && leadingCard(candR, isCard) !== undefined));
+      // What the request found must also match what the hiker actually said.
+      // The request is the model's words; phase 3 showed the model makes any
+      // question sound like a manual. Search the hiker's own messages over
+      // every pack the request could reach, and look for the same passage.
+      let ownScore: number | undefined;
+      if (clears) {
+        const own = [...history.slice(-UNDERSTAND_HISTORY), query].join(' ');
+        const kwO = extractKeywords(own);
+        const ids = [...new Set([...routedR.packIds, ...pool.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
+        const domains = [...new Set([...routedR.domains, ...pool.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
+        const candO = await retrieve(kwO, ids, store, backend, { ...retrievalOpts, topK: UNDERSTOOD_OWN_TOPK }, domains, own);
+        ownScore = candO.find((c) => c.chunk.id === topR.chunk.id)?.score;
+      }
+      const used = clears && ownScore !== undefined && ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR);
+      understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), used };
+      if (used) {
+        keywords = kwR;
+        routed = routedR;
+        candidates = candR;
+        topScore = best(candR);
+        searchText = u.request;
+        // The model that answers sees the hiker's own messages, never the request.
+        earlier = history.slice(-UNDERSTAND_HISTORY).join(' / ');
+      }
+    } else if (u !== undefined) {
+      understood = { intent: u.intent, request: u.request, used: false };
+    }
     // The leading card: the best field card, if it is first or within
     // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
     // ranked a manual passage first (0.289) and the bleeding card second
     // (0.256); for an emergency the card is the safer answer.
-    const cardsHere = candidates.filter(isCard);
-    const bestCard = cardsHere.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-    const topCard = bestCard !== undefined && bestCard.score >= INTENT_CARD_FLOOR &&
-      bestCard.score >= INTENT_CARD_NEAR_TOP * best(candidates) ? bestCard : undefined;
+    const topCard = leadingCard(candidates, isCard);
     // Only an emergency forces a card open under the gate. Forcing it for any
     // question too opened the cuts card for "talk me through stitching a cut
     // closed" on the tuning set. And a pet is never the patient: veterinary
@@ -546,6 +648,7 @@ export async function ask(
     maxTokens,
     memoryPressure: pressure,
     ...(widenedTopScore === undefined ? {} : { widenedTopScore }),
+    ...(understood === undefined ? {} : { understood }),
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
   };
@@ -566,6 +669,19 @@ export async function ask(
       tokensAfter: 0,
       contextReduction: 0,
     };
+    if (u?.intent === 'out') {
+      return { kind: 'abstain', reason: 'out-of-scope', nearest: [], diagnostics: weak };
+    }
+    // Someone in trouble never gets a dead end. The reply is fixed text from
+    // reviewed cards (SAFETY_NET_REPLY), not model-written, so it cannot
+    // invent advice; the card that led, if any, is offered under it. Not for
+    // a pet: "call emergency services" is the wrong reply to a dog.
+    if (understandOn && intent === 'now' && !ABOUT_A_PET.test(query)) {
+      return {
+        kind: 'abstain', reason: 'safety-net', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
+        ...(offer === undefined ? {} : { offer }),
+      };
+    }
     // Asking for a location is now a post-retrieval decision, made on evidence
     // rather than on which domain a word happens to be tagged with. It fires
     // only when the unscoped packs were searched and had nothing worth saying,

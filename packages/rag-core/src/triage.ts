@@ -52,6 +52,15 @@ const THINGS = /\b(?:tent|tarp|shelter|bridge|snow ?cave|roof|wall|chair|table|s
 const ANIMAL = /\b(?:bears?|grizzl(?:y|ies)|mountain lions?|cougars?|pumas?|moose|bison|buffalo|wolf|wolves)\b/i;
 const CLOSE = /\b(?:charg(?:e|es|ed|ing)|attack(?:s|ed|ing)?|coming (?:at|toward|towards|straight)|stalking|following|staring|in front of|right (?:there|here|next to)|outside (?:the|our|my) tent|in (?:our|the) camp|into (?:our|the) camp|getting into|sniffing|rustling|close|near)\b/i;
 
+/**
+ * Drowsiness or vomiting after a knock to the head (head-injury card:
+ * "drowsiness", "nausea or vomiting"; WMS: a changed mental state after a head
+ * injury means getting out fast). Read across the thread: "my boy fell off a
+ * big rock and smacked his head" / "he can barely keep his eyes open".
+ */
+const HEAD = /\b(?:hit|smacked|bumped|banged|cracked|knocked) (?:his|her|my|their|the) head\b|\bhead (?:injury|wound|knock)\b|\bconcuss/i;
+const DROWSY = /\bsleepy\b|\bdrowsy\b|\b(?:keep|keeping) (?:his|her|their|my) eyes open\b|\bstay awake\b|\bvomit|\bthrowing up\b|\bthrew up\b/i;
+
 /** A snakebite is urgent by itself: "Get medical help right away" (snakebite card). */
 
 /** True when the hiker's messages (the current thread, oldest first) show a danger sign. */
@@ -59,6 +68,7 @@ export function dangerSign(messages: readonly string[]): boolean {
   if (messages.some((m) => SIGNS.some((s) => s.test(m)) || (COLLAPSED.test(m) && !THINGS.test(m)))) return true;
   const all = messages.join(' / ');
   if (ANIMAL.test(all) && CLOSE.test(all)) return true;
+  if (HEAD.test(all) && DROWSY.test(all)) return true;
   return conditionsIn(messages).some((c) => c.id === 'snakebite');
 }
 

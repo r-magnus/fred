@@ -303,10 +303,13 @@ function fieldCards(store: PackStore, packId: string): Promise<Map<string, Chunk
  */
 const THREAD_CARD_MARGIN = 0.5;
 /**
- * "Nothing of its own" means a short message ("what do i do", "what now").
- * "it left. my daughter grabbed the stove and her palm is red and hurting"
- * also scored under AGREED_CARD_FLOOR, and the thread it continued (a bear in
- * camp) opened the bear card for a burn (sealed chat set).
+ * "Nothing of its own" means a short message ("what do i do", "what now") or
+ * one that asks about the thread ("should we just give him water and let him
+ * rest", after heat stroke). A statement of something new does not take the
+ * thread's card: "it left. my daughter grabbed the stove and her palm is red
+ * and hurting" also scored under AGREED_CARD_FLOOR, and the thread it followed
+ * (a bear in camp) opened the bear card for a burn (sealed chat set). Five
+ * words alone was too blunt: it lost the heat-stroke follow-up.
  */
 const THREAD_CARD_WORDS = 5;
 const THREAD_CARD_MIN = 0.05;
@@ -800,7 +803,8 @@ export async function ask(
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
           requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id) {
         forcedCard = agreedCard = own;
-      } else if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR && query.trim().split(/\s+/).length <= THREAD_CARD_WORDS) {
+      } else if (threadCard !== undefined && topScore < AGREED_CARD_FLOOR &&
+          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
         // im lost" / "phone at 15%" / "its getting dark" / "what do i do".

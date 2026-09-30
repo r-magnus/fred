@@ -77,3 +77,8 @@ test('a named plant is not an unnamed one', () => {
   assert.ok(asksToEatUnknown('I found some mushrooms. Which ones can I eat?'));
   assert.ok(asksToEatUnknown('are these safe to eat'));
 });
+
+test('drowsy after a head injury is a danger sign; sleepy alone is not', () => {
+  assert.ok(dangerSign(['my boy fell off a big rock and smacked his head', 'he can barely keep his eyes open']));
+  assert.ok(!dangerSign(['long day, i am sleepy']));
+});

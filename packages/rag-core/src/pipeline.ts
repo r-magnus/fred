@@ -218,6 +218,25 @@ const UNDERSTOOD_OWN_TOPK = 20;
 
 type UnderstoodDiag = NonNullable<Diagnostics['understood']>;
 
+/** The same backend, adding the wall time spent in each kind of call to `spent`. */
+function timeCalls(b: InferenceBackend, spent: { modelMs: number; embedMs: number }): InferenceBackend {
+  return {
+    embeddingSpec: () => b.embeddingSpec(),
+    countTokens: (texts) => b.countTokens(texts),
+    async embed(text) {
+      const t = Date.now();
+      try { return await b.embed(text); } finally { spent.embedMs += Date.now() - t; }
+    },
+    generate(prompt, opts) {
+      const inner = b.generate(prompt, opts);
+      return (async function* () {
+        const t = Date.now();
+        try { yield* inner; } finally { spent.modelMs += Date.now() - t; }
+      })();
+    },
+  };
+}
+
 /** The best field card, if it leads the search closely enough to answer an emergency. */
 function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
   const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
@@ -293,6 +312,8 @@ export interface Diagnostics {
     readonly ownScore?: number;
     readonly used: boolean;
   };
+  /** Time before the decision, split into model calls and embedding (ms). */
+  readonly timing?: { readonly modelMs: number; readonly embedMs: number; readonly totalMs: number };
   /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
   readonly widenedTopScore?: number;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
@@ -389,7 +410,12 @@ export async function ask(
   deps: PipelineDeps,
   opts: AskOptions,
 ): Promise<AskResult> {
-  const { backend, store, packs, memory } = deps;
+  const { store, packs, memory } = deps;
+  // Where the time before the decision goes: model calls (intent, the
+  // understanding step, a card's pick) and turning text into vectors (#98).
+  const spent = { modelMs: 0, embedMs: 0 };
+  const startedAt = Date.now();
+  const backend = timeCalls(deps.backend, spent);
   // A card's citation carries the manuals its quotes come from.
   const citeOf = (c: ScoredChunk, i: number): Citation => {
     const basis = store.cardSourcesFor?.(c.chunk.id);
@@ -657,6 +683,7 @@ export async function ask(
     memoryPressure: pressure,
     ...(widenedTopScore === undefined ? {} : { widenedTopScore }),
     ...(understood === undefined ? {} : { understood }),
+    timing: { ...spent, totalMs: Date.now() - startedAt },
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
   };

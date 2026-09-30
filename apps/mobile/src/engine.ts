@@ -184,8 +184,10 @@ function timed(res: AskResult, t0: number): AskResult {
   const u = res.diagnostics.understood;
   const understood = u === undefined ? '' : ` understood=${u.used ? 'used' : 'unused'}${verbose ? `(${JSON.stringify(u.request)})` : ''}`;
   const reason = res.kind === 'abstain' ? ` reason=${res.reason}` : '';
+  const tm = res.diagnostics.timing;
+  const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {
-    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${reason}${offered} top=${top}`);
+    console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${reason}${offered}${timing} top=${top}`);
     return res;
   }
   const inner = res.stream;
@@ -201,7 +203,7 @@ function timed(res: AskResult, t0: number): AskResult {
     }
     const end = Date.now();
     if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
-    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent}${understood} top=${top}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent}${understood}${timing} top=${top}`);
   }
   return { ...res, stream: stream() };
 }

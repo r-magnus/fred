@@ -804,3 +804,11 @@ test('a new statement starts its own topic; a message that points back continues
     ['my friend fell off a ledge', "he's not moving"]);
   assert.deepEqual(currentThread('pls help', []), []);
 });
+
+test('possessives and "there" do not tie a new statement to the last topic', () => {
+  const earlier = ['flat tire on the forest road', 'how do i change it'];
+  assert.deepEqual(currentThread('my hiking partner tripped and hit his head on a rock', earlier), []);
+  assert.deepEqual(currentThread("there's a bear in front of me", earlier), []);
+  assert.deepEqual(currentThread("he's kind of out of it", [...earlier, 'my hiking partner tripped and hit his head on a rock']),
+    ['my hiking partner tripped and hit his head on a rock']);
+});

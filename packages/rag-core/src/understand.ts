@@ -36,9 +36,13 @@ export const UNDERSTAND_HISTORY = 3;
 
 /**
  * Words that point back at something said before: "it keeps pouring out",
- * "he's acting confused", "what about for a kid?", "what now".
+ * "he's acting confused", "what about for a kid?", "what now". Only words
+ * that stand in for something already said: possessives, "there" and "this"
+ * open new statements too ("hit his head on a rock", "there's a bear in
+ * front of me", "is this plant safe"), and "his head" tied a head injury to
+ * a flat tire on the phone.
  */
-const POINTS_BACK = /\b(?:it|its|it's|that|this|those|these|he|he's|she|she's|him|her|his|they|they're|them|their|there|same)\b|^\s*(?:and|also|but|so|then|now|ok|okay|what about|what if)\b|\bwhat (?:now|next)\b|\bhelp\b|\bwhat (?:do|should|can) (?:i|we) do\b/i;
+const POINTS_BACK = /\b(?:it|it's|he|he's|she|she's|him|they|they're|them|same)\b|^\s*(?:and|also|but|so|then|now|ok|okay|what about|what if)\b|\bwhat (?:now|next)\b|\bhelp\b|\bwhat (?:do|should|can) (?:i|we) do\b/i;
 
 /**
  * A message leans on the ones before it when it is very short or points back.

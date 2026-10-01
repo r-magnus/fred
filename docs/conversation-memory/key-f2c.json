@@ -1,0 +1,98 @@
+{
+ "l2-diabetic-friend#6": {
+  "A": "after",
+  "same": true
+ },
+ "l2-diabetic-friend#7": {
+  "A": "before",
+  "same": true
+ },
+ "l2-diabetic-friend#9": {
+  "A": "after",
+  "same": true
+ },
+ "l2-altitude-dizzy#3": {
+  "A": "after",
+  "same": false
+ },
+ "l2-altitude-dizzy#5": {
+  "A": "after",
+  "same": false
+ },
+ "l2-statements#3": {
+  "A": "before",
+  "same": true
+ },
+ "l2-statements#4": {
+  "A": "before",
+  "same": true
+ },
+ "l2-statements#5": {
+  "A": "before",
+  "same": true
+ },
+ "l2-statements#6": {
+  "A": "before",
+  "same": true
+ },
+ "l2-statements#7": {
+  "A": "after",
+  "same": true
+ },
+ "l2-statements#8": {
+  "A": "before",
+  "same": true
+ },
+ "l2-numb-fingers#3": {
+  "A": "before",
+  "same": true
+ },
+ "l2-numb-fingers#4": {
+  "A": "before",
+  "same": true
+ },
+ "l2-numb-fingers#5": {
+  "A": "after",
+  "same": true
+ },
+ "l2-tourniquet#2": {
+  "A": "after",
+  "same": true
+ },
+ "l2-tourniquet#3": {
+  "A": "after",
+  "same": true
+ },
+ "l2-tourniquet#4": {
+  "A": "before",
+  "same": true
+ },
+ "l2-tourniquet#5": {
+  "A": "before",
+  "same": true
+ },
+ "l2-pet-and-person#4": {
+  "A": "after",
+  "same": true
+ },
+ "l2-berries-thread#3": {
+  "A": "after",
+  "same": false
+ },
+ "l2-burn-then-other#2": {
+  "A": "before",
+  "same": true
+ },
+ "l2-burn-then-other#3": {
+  "A": "before",
+  "same": false
+ },
+ "l2-burn-then-other#4": {
+  "A": "before",
+  "same": false
+ },
+ "l2-burn-then-other#5": {
+  "A": "before",
+  "same": true
+ }
+}

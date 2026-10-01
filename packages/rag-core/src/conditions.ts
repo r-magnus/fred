@@ -37,6 +37,13 @@ export interface Condition {
    * model-written answer. A sentence that says not to do it is fine.
    */
   readonly forbidden?: RegExp;
+  /**
+   * A condition read from a setting or a fact plus a symptom (altitude, heat,
+   * low blood sugar): it explains the symptom, so its card leads over a card
+   * that only shares the symptom's words ("my buddy has a headache" at 10,500
+   * ft opened the head-injury card; #101).
+   */
+  readonly explains?: boolean;
 }
 
 const SNAKE = /\b(?:snakes?|rattlers?|rattlesnakes?|copperheads?|cottonmouths?|vipers?|adders?|water moccasins?)\b/i;
@@ -66,7 +73,7 @@ const BELLY = /\b(?:stabbed|impaled|gored)\b.*\b(?:belly|stomach|abdomen|gut|gut
  * (confirmation chat set).
  */
 const BURN = /\bburn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
-const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden)\b/i;
+const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden|pale)\b|\b(?:white|waxy|pale)\b[^.]*\b(?:toes?|fingers?|fingertips?)\b|\bcan'?t feel (?:my|his|her|their) (?:toes?|fingers?|fingertips?|feet|hands?)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 
 /**
@@ -84,6 +91,12 @@ const inSetting = (setting: RegExp, sign: RegExp) => (ms: readonly string[]): bo
   const first = ms.findIndex((m) => setting.test(m));
   return first >= 0 && ms.slice(first).some((m) => sign.test(m));
 };
+
+/** Low blood sugar (#101): a diabetic, then shaky or sweaty or strange. "he's diabetic btw" ... "and sweaty, and he's not making much sense" opened the heat card. */
+const DIABETIC = /\bdiabet\w*|\btype (?:1|one|2|two)\b|\binsulin\b|\bblood sugar\b/i;
+const LOW_SUGAR_SIGN = /\bshak(?:y|ing)\b|\bsweat(?:y|ing)\b|\bconfused\b|\bacting (?:really |kind of |kinda )?(?:strange|weird|odd|off|funny)\b|\bnot making (?:much |any )?sense\b|\bout of it\b|\bpale\b|\bdizzy\b/i;
+/** Heavy bleeding (#101): the tourniquet stays on. "If bleeding has stopped, remove the tourniquet immediately" (model-written, sealed long set). */
+const HEAVY_BLEEDING = /\btourniquet\b|\bblood (?:is )?(?:everywhere|spurting|pouring|gushing|pumping)\b|\bbleeding (?:a lot|badly|heavily|like crazy)\b|\bwon'?t stop bleeding\b|\bblood won'?t stop\b|\bsoak(?:ed|ing) (?:through|thru)\b/i;
 
 /**
  * Lost (#101): "i think i took a wrong fork", "we lost the trail", "i think im
@@ -111,10 +124,15 @@ export const CONDITIONS: readonly Condition[] = [
   { id: 'lost', label: 'being lost', card: 'Lost: should I stay or keep moving?', said: (ms) => ms.some((m) => LOST.test(m)) },
   // Altitude illness: "go down to lower altitude right away", "Don't wait at
   // the same height". No forbidden advice: what goes wrong is missing the card.
-  { id: 'altitude', label: 'altitude', card: 'Altitude illness', said: inSetting(HIGH, ALTITUDE_SIGN) },
+  { id: 'altitude', label: 'altitude', card: 'Altitude illness', said: inSetting(HIGH, ALTITUDE_SIGN), explains: true },
   // Heat illness in heat: "Don't give alcohol or caffeine."
   { id: 'heat', label: 'heat', card: 'Heat exhaustion and heat stroke', said: inSetting(HOT, HEAT_SIGN),
-    forbidden: /\balcohol\b|\bcaffeine\b/i },
+    forbidden: /\balcohol\b|\bcaffeine\b/i, explains: true },
+  // Low blood sugar: "If they are unconscious or can't swallow, give nothing by mouth."
+  { id: 'low-sugar', label: 'low blood sugar', card: 'Low blood sugar', said: inSetting(DIABETIC, LOW_SUGAR_SIGN), explains: true },
+  // Heavy bleeding: "Don't loosen or remove a tourniquet once it's on."
+  { id: 'bleeding', label: 'bleeding', card: 'Heavy bleeding from a wound', said: (ms) => ms.some((m) => HEAVY_BLEEDING.test(m)),
+    forbidden: /\b(?:remove|loosen|take off|release|undo|untie)\w*\b[^.]*\btourniquet\b|\btourniquet\b[^.]*\b(?:remove|loosen|take it off|release)\w*/i },
   // Hypothermia: "handle them gently", "Don't give alcohol".
   { id: 'hypothermia', label: 'cold', card: 'Hypothermia: shivering, confused, too cold', said: (ms) => ms.some((m) => HYPOTHERMIA.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\balcohol\b|\bhot (?:bath|shower)\b/i },

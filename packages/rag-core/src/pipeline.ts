@@ -16,7 +16,7 @@ import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from './triage.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -312,7 +312,7 @@ const THREAD_CARD_MARGIN = 0.5;
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
-const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|dizzy|nause\w*|headache|throwing up|vomit\w*|hurts?|pain\w*|bleeding|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|getting (?:cold|dark|worse)|freezing|soaked|can'?t (?:walk|stand|breathe|feel))\b/i;
+const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|shaky|dizzy|nause\w*|headache|throwing up|threw up|vomit\w*|hurts?|pain\w*|bleeding|blood|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|sweat\w*|breathing|soak\w*|bent|broken|tick|bonk\w*|hit (?:his|her|my|their) head|fell|tripped|landed on|stung|bit|bitten|cut|sliced|gash\w*|burn\w*|scald\w*|splinter|puffy|hives|sick|pale|out of it|confused|getting (?:cold|dark|worse)|freezing|can'?t (?:walk|stand|breathe|feel|move))\b/i;
 /** Words of a symptom getting better or worse, for an update on the card just shown (#101). */
 const SYMPTOM_UPDATE = /\b(?:swell\w*|swollen|bigger|puffy|puffing|redder|worse|still bleeding|bleeding again|hurts? (?:more|worse)|throbbing|pounding|numb\w*|tingl\w*|blister\w*|bubbles?|itch\w*|spreading|getting (?:worse|bigger|redder|darker))\b/i;
 /**
@@ -706,7 +706,20 @@ export async function ask(
   const active: readonly Condition[] = guardsOn ? conditionsFor(record, query) : [];
   /** Conditions this message itself sets (with the setting said earlier, for altitude and heat). */
   const setHere: readonly Condition[] = record.conditions.filter((r) => r.at === here && !r.resolved).map((r) => r.condition);
-  const lastShown = guardsOn && opts.lastCard !== undefined ? await cardByTitle(opts.lastCard) : undefined;
+  /**
+   * A card that belongs to a condition in the record that does not bear on
+   * this message (someone else's, or over) is not carried over to it: "my
+   * wife just cut her finger opening a can" after the hiker's own burn got
+   * the burns card through the conversation (sealed long set, #101).
+   */
+  const ownCard = (c: ScoredChunk | undefined): ScoredChunk | undefined =>
+    c !== undefined && record.conditions.some((r) => r.condition.card === c.chunk.section) &&
+    !active.some((a) => a.card === c.chunk.section) ? undefined : c;
+  const lastShown = ownCard(guardsOn && opts.lastCard !== undefined ? await cardByTitle(opts.lastCard) : undefined);
+  // A condition that explains this message's symptom (altitude, heat, low
+  // blood sugar): its card leads over a card that only shares the words.
+  const explaining = setHere.find((c) => c.explains === true);
+  const explainCard = explaining === undefined ? undefined : await cardByTitle(explaining.card);
   let understood: UnderstoodDiag | undefined;
   let u: Understood | undefined;
   // The request's search's leading card, for the agreement rule below.
@@ -736,7 +749,7 @@ export async function ask(
     // A message that says something happened to someone (a condition,
     // conditions.ts) is not small talk either: "my son brushed his arm on the
     // camp stove grate" was CHAT and got "Got it" (confirmation chat set).
-    if (guardsOn && intent === 'chat' && setHere.length > 0 && !petIsPatient(query)) {
+    if (guardsOn && intent === 'chat' && setHere.length > 0 && !saysResolved(query) && !petIsPatient(query)) {
       intent = 'now';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
@@ -835,7 +848,8 @@ export async function ask(
     // question too opened the cuts card for "talk me through stitching a cut
     // closed" on the tuning set. And a pet is never the patient: veterinary
     // care is out of scope, and "my dog cut his paw" opened the human card.
-    if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
+    if (guardsOn && explainCard !== undefined && intent !== 'prevent' && !ABOUT_A_PET.test(query)) forcedCard = agreedCard = explainCard;
+    else if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
     // #101: a message that says what happened opens that condition's card when
     // it leads, even read as a question: "i think im lost" led with the lost
     // card at 0.252 and only offered it, folded under "I don't have reliable
@@ -850,7 +864,7 @@ export async function ask(
     else if (guardsOn && topCard === undefined && intent === 'now' && !ABOUT_A_PET.test(query)) {
       const own = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
-          requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id) {
+          requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id && ownCard(own) !== undefined) {
         forcedCard = agreedCard = own;
       } else if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
@@ -862,7 +876,7 @@ export async function ask(
         // #101: the card just shown comes first. "what do i do" right after the
         // anaphylaxis card took the stings card its thread's words led with
         // (phone, 2026-09-30).
-        forcedCard = agreedCard = lastShown ?? threadCard;
+        forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else {
         // An emergency whose message itself says what happened opens that
         // condition's card when nothing else leads: "my fingertips went hard
@@ -881,7 +895,7 @@ export async function ask(
       const said = setHere[0];
       if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
-        forcedCard = agreedCard = lastShown ?? threadCard;
+        forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
         // "splashed hot coffee all over my wrist" was read as a question and
         // declined; the message says what happened, and that card answers it.
@@ -909,7 +923,7 @@ export async function ask(
 
   // Round 2: whether something unnamed is safe to eat is answered by the
   // wild-plants card, never from a species page (triage.ts).
-  if (guardsOn && forcedCard === undefined && intent !== 'now' && asksToEatUnknown(query)) {
+  if (guardsOn && forcedCard === undefined && ((intent !== 'now' && asksToEatUnknown(query)) || eatingUnknownInThread(query, opts.history ?? []))) {
     forcedCard = await cardByTitle('Eating wild plants and berries');
   }
   // Round 2: a pet that is hurt or sick is outside Fred's scope, and the

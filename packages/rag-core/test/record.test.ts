@@ -29,3 +29,13 @@ test('altitude and heat come from the setting and a symptom, in any order of mes
   assert.deepEqual(conditionsIn(['doing the canyon loop today, it\'s like 105 out', 'my son is complaining he\'s dizzy']).map((c) => c.id), ['heat']);
   assert.deepEqual(conditionsIn(['my son is complaining he\'s dizzy']), []);
 });
+
+test('low blood sugar from a diabetic and a later sign; bleeding; pale fingers', () => {
+  assert.deepEqual(conditionsIn(["he's diabetic btw", 'heading back down now', "and sweaty, and he's not making much sense"]).map((c) => c.id), ['low-sugar']);
+  assert.ok(conditionsIn(['i tied a belt tight above it as a tourniquet']).some((c) => c.id === 'bleeding'));
+  assert.ok(conditionsIn(['cant feel my fingertips and theyre pale after that swim']).some((c) => c.id === 'frostbite'));
+});
+
+test('a message can close what it sets', () => {
+  assert.deepEqual(ids(['my friend was bleeding badly yesterday but he is fine now']), []);
+});

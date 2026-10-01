@@ -144,6 +144,11 @@ export const NOT_AFTER: Readonly<Record<string, readonly string[]>> = {
   // Dehydration: "Sip small amounts of water often". Low blood sugar gives
   // sugar by mouth. Belly wound: "Don't give them food or water."
   'Dehydration': ['belly-wound'],
+  // Seizure: "Keep them from getting hurt while it happens". After cold
+  // exposure, shaking is shivering: "i still can't stop shaking" on a cold
+  // night opened the seizure card (phone, 2026-09-30). The hypothermia card
+  // leads, the seizure card a tap away ("No, something else").
+  'Seizure': ['hypothermia'],
   'Low blood sugar': ['belly-wound'],
 };
 

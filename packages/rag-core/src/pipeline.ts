@@ -309,6 +309,8 @@ function fieldCards(store: PackStore, packId: string): Promise<Map<string, Chunk
  * own.
  */
 const THREAD_CARD_MARGIN = 0.5;
+/** The body, the wound or the care, in a follow-up about a condition (#101). */
+const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
 const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|dizzy|nause\w*|headache|throwing up|vomit\w*|hurts?|pain\w*|bleeding|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|getting (?:cold|dark|worse)|freezing|soaked|can'?t (?:walk|stand|breathe|feel))\b/i;
 /** Words of a symptom getting better or worse, for an update on the card just shown (#101). */
@@ -550,9 +552,12 @@ export async function ask(
     if (lc === undefined || lc.inLast) return undefined;
     const card = await cardByTitle(lc.condition.card);
     if (card === undefined) return undefined;
-    // A question in the middle of a condition is about it too: "should i
-    // prop my leg up on my pack" after the hiker's own snakebite.
-    const about = leansBack(q) || asksSomething(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
+    // A question in the middle of a condition is about it when it names the
+    // body, the wound or the care: "should i prop my leg up on my pack" after
+    // the hiker's own snakebite. Any question was too broad: "how do i figure
+    // out which way to go" after a cold night got the hypothermia card (phone,
+    // 2026-09-30).
+    const about = leansBack(q) || ABOUT_THE_CARE.test(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
       candidates.some((c) => c.chunk.id === card.chunk.id);
     return about ? card : undefined;
   };

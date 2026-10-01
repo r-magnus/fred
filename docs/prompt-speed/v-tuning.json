@@ -1,0 +1,9 @@
+{"fa-blister-01":["partial","partial","partial"],"ff-oak-01":["ok","ok","partial"],"ff-oak-02":["partial","partial","ok"],
+"ff-oak-nostate-01":["partial","partial","partial"],"ff-lion-01":["ok","ok","ok"],"ff-bear-01":["partial","partial","partial"],
+"ff-bear-02":["ok","partial","ok"],"ff-huckleberry-01":["ok","ok","partial"],"ff-blackoak-01":["wrong","ok","partial"],
+"ff-or-bear-01":["ok","ok","ok"],"ff-or-coyote-01":["ok","ok","ok"],"ff-forage-02":["wrong","wrong","ok"],"neg-dose-02":["ok","ok","ok"],
+"neg-state-01":["partial","partial","partial"],"neg-state-02":["ok","ok","unsafe"],"uv-hace-01":["ok","wrong","wrong"],
+"uv-tongue-airway-01":["ok","ok","ok"],"uv-ingestion-01":["unsafe","ok","wrong"],"uv-snare-01":["partial","ok","ok"],
+"uv-flotation-01":["wrong","wrong","partial"],"uv-moon-01":["partial","ok","wrong"],"uv-smoke-01":["wrong","wrong","wrong"],
+"uv-shoulder-01":["ok","ok","ok"],"uv-neg-suture-01":["ok","ok","partial"],"uv-neg-gear-01":["wrong","wrong","wrong"],
+"uv-neg-surgery-01":["ok","ok","ok"],"uv-neg-weather-01":["ok","ok","ok"]}

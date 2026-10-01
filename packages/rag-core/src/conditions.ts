@@ -69,6 +69,29 @@ const BURN = /\bburn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touch
 const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 
+/**
+ * A symptom in a setting that explains it (#101): vomiting and a headache at
+ * 9,000 ft never reached "go down" on the phone, and "should we just sleep it
+ * off" got the head-injury card. The setting can come messages before the
+ * symptom ("camping at 10500 ft tonight" ... "my buddy has a headache").
+ */
+const HIGH = /\b(?:[89]|1\d)[,.]?\d{3}\s*(?:ft|feet|foot|')\b|\b(?:[89]|1\d)k\s*(?:ft|feet)?\b|\b(?:2[5-9]|3\d|4\d)\d{2}\s*(?:m|meters|metres)\b|\bhigh altitude\b|\baltitude\b/i;
+const ALTITUDE_SIGN = /\bheadache\b|\bhead (?:is )?(?:pounding|killing)\b|\bthrowing up\b|\bthrew up\b|\bvomit\w*|\bnause\w*|\bdizzy\b|\bshort of breath\b|\bcan'?t (?:catch|get) (?:my|his|her|their) breath\b|\bout of it\b|\bconfused\b|\bstumbling\b/i;
+const HOT = /\b1[0-2]\d\s*(?:degrees|°|f\b|out\b|outside\b|today\b|in the shade\b)|\b(?:over|above|past) 100\b|\b(?:so|really|super|crazy|insanely|brutally) hot\b|\bdesert\b|\bheat wave\b|\bscorching\b|\bbaking\b/i;
+const HEAT_SIGN = /\bdizzy\b|\bheadache\b|\bnause\w*|\bcramps?\b|\bsweating (?:a ton|a lot|buckets|like crazy)\b|\bstopped sweating\b|\bfaint\w*|\blight ?headed\b|\bthrowing up\b|\bthrew up\b|\bvomit\w*/i;
+/** The setting said in one message and the sign in the same or a later one. */
+const inSetting = (setting: RegExp, sign: RegExp) => (ms: readonly string[]): boolean => {
+  const first = ms.findIndex((m) => setting.test(m));
+  return first >= 0 && ms.slice(first).some((m) => sign.test(m));
+};
+
+/**
+ * Lost (#101): "i think i took a wrong fork", "we lost the trail", "i think im
+ * lost" got "Got it" or a decline with the lost card folded. Being lost is
+ * what the lost card is for; "found the trail" closes it (record.ts).
+ */
+const LOST = /\b(?:i'?m|i am|we'?re|we are|im|i think i'?m|i think im|think we'?re|pretty sure i'?m|pretty sure we'?re|getting)\s+(?:totally |completely |kind of |kinda |a bit )?lost\b|\blost the (?:trail|path|way)\b|\b(?:took|take) a wrong (?:turn|fork|trail|way)\b|\bwrong (?:fork|turn) (?:back|a while|hours|an hour)\b|\bcan'?t find the (?:trail|path|way back)\b|\bnothing looks familiar\b|\bno idea where (?:we|i) (?:are|am)\b|\bdon'?t know where (?:we|i) (?:are|am)\b/i;
+
 export const CONDITIONS: readonly Condition[] = [
   // Snakebite: "Don't put ice on it", "Don't put a tourniquet on the limb",
   // "Don't cut the bite open or try to suck out the venom", and the limb
@@ -85,6 +108,13 @@ export const CONDITIONS: readonly Condition[] = [
   // Frostbite: "Don't rub or massage it", "Don't hold it near a fire to thaw it."
   { id: 'frostbite', label: 'frostbite', card: 'Frostbite and frostnip', said: (ms) => ms.some((m) => FROSTBITE.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\b(?:by|near|over|next to|in front of) (?:a|the) fire\b/i },
+  { id: 'lost', label: 'being lost', card: 'Lost: should I stay or keep moving?', said: (ms) => ms.some((m) => LOST.test(m)) },
+  // Altitude illness: "go down to lower altitude right away", "Don't wait at
+  // the same height". No forbidden advice: what goes wrong is missing the card.
+  { id: 'altitude', label: 'altitude', card: 'Altitude illness', said: inSetting(HIGH, ALTITUDE_SIGN) },
+  // Heat illness in heat: "Don't give alcohol or caffeine."
+  { id: 'heat', label: 'heat', card: 'Heat exhaustion and heat stroke', said: inSetting(HOT, HEAT_SIGN),
+    forbidden: /\balcohol\b|\bcaffeine\b/i },
   // Hypothermia: "handle them gently", "Don't give alcohol".
   { id: 'hypothermia', label: 'cold', card: 'Hypothermia: shivering, confused, too cold', said: (ms) => ms.some((m) => HYPOTHERMIA.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\balcohol\b|\bhot (?:bath|shower)\b/i },

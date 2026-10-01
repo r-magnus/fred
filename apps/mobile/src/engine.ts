@@ -34,7 +34,8 @@ export interface Engine {
    * `signal` aborts generation; see US-07. `previous` is the question just
    * answered and its search score, for a follow-up (docs/plan-memory.md).
    * `history` is the hiker's earlier messages, answered or not, oldest first,
-   * for the understanding step (#98).
+   * for the understanding step (#98). `lastCard` is the field card Fred just
+   * showed, by title (#101).
    */
   ask(
     question: string,
@@ -42,6 +43,7 @@ export interface Engine {
     signal?: AbortSignal,
     previous?: { readonly question: string; readonly topScore: number },
     history?: readonly string[],
+    lastCard?: string,
   ): Promise<AskResult>;
   /** States with a flora-fauna pack installed, for the location picker. */
   availableStates(): readonly string[];
@@ -134,7 +136,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     });
 
     return {
-      ask: async (question, state, signal, previous, history) => {
+      ask: async (question, state, signal, previous, history, lastCard) => {
         const t0 = Date.now();
         const res = await ask(question, { backend, store, packs }, {
           state,
@@ -144,6 +146,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),
+          ...(lastCard === undefined ? {} : { lastCard }),
         });
         return timed(res, t0);
       },

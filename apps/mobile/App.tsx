@@ -177,6 +177,10 @@ function Screen() {
       .filter((t) => now - t.askedAt <= HISTORY_WINDOW_MS)
       .slice(-CONDITION_HISTORY)
       .map((t) => t.question);
+    // The card Fred just showed, when its last reply was a field card (#101):
+    // a follow-up with nothing of its own stays on it.
+    const shown = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
+      last.citations[0]?.source === 'Fred field card' ? last.citations[0].section : undefined;
     const map = wantsMap(question);
     setTurns((ts) => [...ts, {
       id, question, askedAt: now, state: askState, text: '', kind: 'answer',
@@ -191,7 +195,7 @@ function Screen() {
     const ctrl = new AbortController();
     abort.current = ctrl;
     try {
-      const res = await eng.ask(question, askState, ctrl.signal, previous, history);
+      const res = await eng.ask(question, askState, ctrl.signal, previous, history, shown);
       if (res.kind === 'needs-location') {
         update(id, {
           kind: 'needs-location', done: true,

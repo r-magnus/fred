@@ -562,6 +562,10 @@ export async function ask(
     // Never for a medicine or a procedure: "what blood type can I give them?"
     // after heavy bleeding got the bleeding card (conversation set, #101).
     if (MEDICINE_OR_PROCEDURE.test(q)) return undefined;
+    // A situation (being lost) is not what a question about the body is
+    // about, even one that points back: "I have a bad blister on my heel...
+    // what should I do about it?" (conversation set).
+    if (lc.condition.situation === true && ABOUT_THE_CARE.test(q)) return undefined;
     const about = leansBack(q) || (lc.condition.situation !== true && ABOUT_THE_CARE.test(q)) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
       candidates.some((c) => c.chunk.id === card.chunk.id);
     return about ? card : undefined;
@@ -1152,8 +1156,12 @@ export async function ask(
     // Only the condition this message is about (conditionCardFor): "i have a
     // bad blister on my heel" after being lost was written from the lost card
     // first (conversation set, #101).
-    if (history.length > 0 && followed !== undefined && !usable.some((x) => x.chunk.id === followed.chunk.id)) {
-      usable = [followed, ...usable];
+    // The condition this message sets belongs there too: "they fell off a
+    // rock, so should I still tilt their head back?" needs the spine card in
+    // front of the model (conversation set).
+    const here = await Promise.all(setHere.filter((c) => c.situation !== true).map((c) => cardByTitle(c.card)));
+    for (const card of [...here, history.length > 0 ? followed : undefined]) {
+      if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
     }
   }
   if (cardMode !== 'off' && clear !== undefined) {

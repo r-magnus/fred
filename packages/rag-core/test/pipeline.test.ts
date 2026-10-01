@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
 import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
+import { currentThread, readUnderstood } from '../src/understand.ts';
 import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
@@ -698,4 +699,166 @@ test('a question about "this area" is not answered from general tips without a l
   store.addPack('state-CO-wildlife', []);
   const res = await ask('are there dangerous animals in this area', { backend: saying('QUESTION'), store, packs: tickPacks }, tipsOpts);
   assert.equal(res.kind, 'needs-location');
+});
+
+// Understanding the conversation (#98, docs/plan-understand.md).
+test('readUnderstood reads the word and the request, and keeps an invented word', () => {
+  assert.deepEqual(readUnderstood('NOW | lost and scared, what to do'), { intent: 'now', request: 'lost and scared, what to do' });
+  assert.deepEqual(readUnderstood('OUT | pet dog ate chocolate'), { intent: 'out', request: '' });
+  // Qwen3-1.7B put the key word where the label goes.
+  assert.deepEqual(readUnderstood('THROAT | closing up after eating a trail snack'), { intent: undefined, request: 'throat closing up after eating a trail snack' });
+  assert.equal(readUnderstood('NOW |'), undefined);
+  assert.equal(readUnderstood(''), undefined);
+});
+
+const understandStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Control severe bleeding with firm direct pressure on the wound.')]);
+  store.addPack('core-fieldcards', [seed('lost and scared in the backcountry: stop, stay put, stay warm and signal for searchers', { source: 'Fred field card', section: 'Lost', domain: 'survival' })]);
+  return store;
+};
+const understandPacks = [
+  { id: 'core-firstaid', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-fieldcards', domains: ['first-aid-physical', 'survival'] as const, scope: { kind: 'global' } as const },
+];
+/** Answers the intent check with `word` and the understanding step with `line`. */
+const understanding = (line: string, word = 'QUESTION'): FakeBackend => {
+  const b = new FakeBackend();
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) {
+    if (p.user.startsWith('Messages:')) { yield line; return; }
+    if (p.user.endsWith('->')) { yield word; return; }
+    yield* gen(p, o);
+  };
+  return b;
+};
+const uOpts = { state: null, abstainThreshold: 0.3, fallbackThreshold: 0.3, intent: true, understandOwnFloor: 0.1,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.9 } } } as const;
+
+test('a message that means nothing alone is read with the ones before it', async () => {
+  const res = await ask('pls help', { backend: understanding('NOW | lost and scared in the backcountry, what to do'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['i am lost and scared in the backcountry'] });
+  assert.equal(res.diagnostics.understood?.used, true, JSON.stringify(res.diagnostics.understood));
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') assert.equal(res.citations[0]!.source, 'Fred field card');
+});
+
+test('the same message with no history is not rewritten', async () => {
+  const res = await ask('pls help', { backend: understanding('NOW | lost and scared in the backcountry, what to do', 'QUESTION'), store: understandStore(), packs: understandPacks }, uOpts);
+  assert.equal(res.diagnostics.understood, undefined);
+  assert.equal(res.kind, 'abstain');
+});
+
+test('out of scope is declined', async () => {
+  const res = await ask('how do i fix it', { backend: understanding('OUT | horse lost a shoe'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['our horse threw a shoe'] });
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'out-of-scope');
+});
+
+test('a request that finds what the hiker never said is not used', async () => {
+  // Phase 3's failure: the model makes anything sound like a manual. The
+  // request finds the bleeding passage; the hiker's own words don't.
+  const res = await ask('what now', { backend: understanding('QUESTION | control severe bleeding with firm direct pressure on the wound'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['bitcoin crashed overnight'] });
+  assert.equal(res.diagnostics.understood?.used, false, JSON.stringify(res.diagnostics.understood));
+  assert.notEqual(res.kind, 'answer');
+});
+
+test('an emergency that finds nothing gets the safety net, not a dead end', async () => {
+  const res = await ask('a mountain lion is staring at us from the rocks', { backend: understanding('NOW | large animal staring from the rocks', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'safety-net');
+});
+
+test('a pet in trouble gets no safety net', async () => {
+  const res = await ask('my dog is staring at the rocks and shaking', { backend: understanding('NOW | dog shaking', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
+  assert.ok(res.kind !== 'abstain' || res.reason !== 'safety-net');
+});
+
+test('an invented word takes its intent from the intent check on the request', async () => {
+  const res = await ask('pls help', { backend: understanding('LOST | scared in the backcountry, what to do', 'NOW'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['i am lost and scared in the backcountry'] });
+  assert.equal(res.diagnostics.understood?.intent, 'now');
+  assert.equal(res.kind, 'answer');
+});
+
+test('with understanding off, nothing changes', async () => {
+  const d = { store: understandStore(), packs: understandPacks };
+  const on = await ask('pls help', { ...d, backend: understanding('NOW | lost and scared in the backcountry, what to do') }, { ...uOpts, understand: false, history: ['i am lost and scared in the backcountry'] });
+  const without = await ask('pls help', { ...d, backend: understanding('NOW | lost and scared in the backcountry, what to do') }, { ...uOpts, understand: false });
+  assert.equal(on.diagnostics.understood, undefined);
+  assert.equal(on.kind, without.kind);
+  assert.ok(on.kind !== 'abstain' || on.reason === 'low-score');
+});
+
+test('a new statement starts its own topic; a message that points back continues it', () => {
+  // The 2026-09-30 phone sequence: the CPR question must not follow the hiker.
+  const phone = ["Someone isn't breathing, what do I do?", "no idea where we are anymore and i'm freaking out"];
+  assert.deepEqual(currentThread("no idea where we are anymore and i'm freaking out", phone.slice(0, 1)), []);
+  assert.deepEqual(currentThread('what do we do', phone), ["no idea where we are anymore and i'm freaking out"]);
+  assert.deepEqual(currentThread('sliced my thumb open whittling', [...phone, 'what do we do']), []);
+  assert.deepEqual(currentThread("it's dripping everywhere", [...phone, 'what do we do', 'sliced my thumb open whittling']), ['sliced my thumb open whittling']);
+  // A chain of short or pointing-back messages runs back to the one that started it.
+  assert.deepEqual(currentThread('what do i do', ['we stopped for lunch by the creek', 'my friend fell off a ledge', "he's not moving"]),
+    ['my friend fell off a ledge', "he's not moving"]);
+  assert.deepEqual(currentThread('pls help', []), []);
+});
+
+test('possessives and "there" do not tie a new statement to the last topic', () => {
+  const earlier = ['flat tire on the forest road', 'how do i change it'];
+  assert.deepEqual(currentThread('my hiking partner tripped and hit his head on a rock', earlier), []);
+  assert.deepEqual(currentThread("there's a bear in front of me", earlier), []);
+  assert.deepEqual(currentThread("he's kind of out of it", [...earlier, 'my hiking partner tripped and hit his head on a rock']),
+    ['my hiking partner tripped and hit his head on a rock']);
+});
+
+// Round 2 of #98 (docs/plan-understand-2.md).
+const guardStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [
+    seed('Twisted or sprained ankle, or a strained muscle\nTreat it with RICE.\n1. Ice the ankle swelling.\n2. Wrap the ankle.', { source: 'Fred field card', section: 'Twisted or sprained ankle, or a strained muscle' }),
+    seed('Snakebite\nKeep them still and get help.\n1. Keep them still.\nDon\'t put ice on it.', { source: 'Fred field card', section: 'Snakebite' }),
+  ]);
+  return store;
+};
+const guardOpts = { state: null, abstainThreshold: 0.3, fallbackThreshold: 0.3, intent: true,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.2 } } } as const;
+
+test('a card is never shown after a condition it must not follow; the condition card leads, with a question', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling after snakebite', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, history: ['how do i tell if a snake is venomous', 'my friend just got bit by one'] });
+  assert.deepEqual(res.diagnostics.conditions, ['snakebite']);
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') {
+    assert.equal(res.citations[0]!.section, 'Snakebite');
+    assert.equal(res.clarify?.question, 'Is this about the snakebite?');
+    assert.equal(res.diagnostics.blocked?.card, 'Twisted or sprained ankle, or a strained muscle');
+  }
+});
+
+test('the same card with no condition is shown as before', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, history: ['i rolled my ankle on a rock'] });
+  assert.equal(res.diagnostics.conditions, undefined);
+  if (res.kind === 'answer') assert.equal(res.citations[0]!.section, 'Twisted or sprained ankle, or a strained muscle');
+});
+
+test('with guards off, the block is off', async () => {
+  const res = await ask('its on his ankle and swelling', { backend: understanding('NOW | ankle swelling after snakebite', 'NOW'), store: guardStore(), packs: clinicalPacks },
+    { ...guardOpts, guards: false, history: ['how do i tell if a snake is venomous', 'my friend just got bit by one'] });
+  assert.equal(res.diagnostics.blocked, undefined);
+});
+
+test('something wrong with no danger sign gets the watch reply, not the get-help-now one', async () => {
+  const res = await ask('my knee is killing me going downhill', { backend: understanding('NOW | knee pain downhill', 'NOW'), store: understandStore(), packs: understandPacks }, uOpts);
+  assert.equal(res.kind, 'abstain');
+  if (res.kind === 'abstain') assert.equal(res.reason, 'watch');
+});
+
+test('a question is never small talk, even when the understanding step says CHAT', async () => {
+  const res = await ask('how much water', { backend: understanding('CHAT | how much water for a day hike', 'CHAT'), store: understandStore(), packs: understandPacks },
+    { ...uOpts, history: ['what should i bring for a day hike'] });
+  assert.notEqual(res.kind, 'chat');
 });

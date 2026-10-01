@@ -164,6 +164,8 @@ export interface GradedRun {
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** Top score of the widened retry, when the routed search fell under the gate. */
   readonly widenedTopScore?: number;
+  /** The understanding step, when it ran (#98). */
+  readonly understood?: { readonly intent?: string | undefined; readonly request: string; readonly topScore?: number; readonly ownScore?: number; readonly used: boolean };
   /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
   readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }

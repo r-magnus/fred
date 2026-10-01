@@ -1,0 +1,410 @@
+{
+ "ct-snake-ankle#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-snake-ankle#3": {
+  "A": "before",
+  "same": false
+ },
+ "ct-snake-ankle'#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-snake-ankle'#3": {
+  "A": "after",
+  "same": false
+ },
+ "ct-snake-leg#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-snake-leg#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-snake-leg'#1": {
+  "A": "before",
+  "same": false
+ },
+ "ct-snake-venom-q#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-snake-venom-q#2": {
+  "A": "before",
+  "same": true
+ },
+ "ct-snake-venom-q#3": {
+  "A": "after",
+  "same": false
+ },
+ "ct-fall-legs#1": {
+  "A": "before",
+  "same": false
+ },
+ "ct-fall-legs#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-fall-legs#3": {
+  "A": "before",
+  "same": false
+ },
+ "ct-burn-ice#1": {
+  "A": "after",
+  "same": false
+ },
+ "ct-burn-ice#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-burn-ice'#1": {
+  "A": "after",
+  "same": false
+ },
+ "ct-burn-ice'#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-burn-butter#1": {
+  "A": "before",
+  "same": false
+ },
+ "ct-burn-butter#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-burn-blister#1": {
+  "A": "after",
+  "same": false
+ },
+ "ct-burn-blister#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-burn-blister#3": {
+  "A": "before",
+  "same": false
+ },
+ "ct-hypo-rub#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-hypo-rub#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-hypo-rub#3": {
+  "A": "after",
+  "same": true
+ },
+ "ct-hypo-rub'#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-hypo-rub'#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-hypo-rub'#3": {
+  "A": "before",
+  "same": true
+ },
+ "ct-frostbite-rub#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-frostbite-rub#2": {
+  "A": "before",
+  "same": true
+ },
+ "ct-head-sleep#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-head-sleep#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-head-sleep#3": {
+  "A": "before",
+  "same": false
+ },
+ "ct-head-sleep'#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-head-sleep'#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-head-sleep'#3": {
+  "A": "after",
+  "same": false
+ },
+ "ct-heat-water#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-heat-water#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-heat-water'#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-heat-water'#2": {
+  "A": "after",
+  "same": false
+ },
+ "ct-tick-burn#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-tick-burn#2": {
+  "A": "after",
+  "same": true
+ },
+ "ct-sprain-real#1": {
+  "A": "before",
+  "same": true
+ },
+ "ct-bleed-belt#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-bleed-belt#2": {
+  "A": "after",
+  "same": true
+ },
+ "ct-bleed-belt#3": {
+  "A": "after",
+  "same": true
+ },
+ "ct-snake-then-own-ankle#1": {
+  "A": "after",
+  "same": true
+ },
+ "ct-snake-then-own-ankle#2": {
+  "A": "before",
+  "same": false
+ },
+ "ct-snake-then-own-ankle#3": {
+  "A": "before",
+  "same": false
+ },
+ "dg-allergy#1": {
+  "A": "after",
+  "same": true
+ },
+ "dg-allergy#2": {
+  "A": "after",
+  "same": true
+ },
+ "dg-allergy'#1": {
+  "A": "after",
+  "same": true
+ },
+ "dg-allergy'#2": {
+  "A": "before",
+  "same": true
+ },
+ "dg-chest#1": {
+  "A": "after",
+  "same": false
+ },
+ "dg-chest#2": {
+  "A": "after",
+  "same": true
+ },
+ "dg-not-breathing#1": {
+  "A": "after",
+  "same": false
+ },
+ "dg-not-breathing#2": {
+  "A": "before",
+  "same": true
+ },
+ "dg-not-breathing'#2": {
+  "A": "before",
+  "same": true
+ },
+ "dg-diabetic#1": {
+  "A": "before",
+  "same": false
+ },
+ "dg-diabetic#2": {
+  "A": "after",
+  "same": true
+ },
+ "dg-altitude#1": {
+  "A": "before",
+  "same": true
+ },
+ "dg-soak#2": {
+  "A": "after",
+  "same": false
+ },
+ "nu-heel-blister#1": {
+  "A": "after",
+  "same": true
+ },
+ "nu-heel-blister#2": {
+  "A": "before",
+  "same": true
+ },
+ "nu-cholla'#3": {
+  "A": "before",
+  "same": true
+ },
+ "nu-mosquitoes#1": {
+  "A": "after",
+  "same": true
+ },
+ "nu-mosquitoes#2": {
+  "A": "before",
+  "same": true
+ },
+ "qn-water#2": {
+  "A": "before",
+  "same": false
+ },
+ "qn-creek#1": {
+  "A": "after",
+  "same": true
+ },
+ "qn-creek#3": {
+  "A": "before",
+  "same": false
+ },
+ "qn-creek'#1": {
+  "A": "after",
+  "same": true
+ },
+ "qn-creek'#3": {
+  "A": "after",
+  "same": false
+ },
+ "qn-bear-food#2": {
+  "A": "before",
+  "same": true
+ },
+ "qn-wet-fire#2": {
+  "A": "after",
+  "same": true
+ },
+ "qn-north#2": {
+  "A": "after",
+  "same": true
+ },
+ "qn-dusk#2": {
+  "A": "after",
+  "same": true
+ },
+ "qn-stream#2": {
+  "A": "after",
+  "same": false
+ },
+ "qn-berries#2": {
+  "A": "before",
+  "same": false
+ },
+ "sw-cpr-cut#1": {
+  "A": "before",
+  "same": true
+ },
+ "sw-cpr-cut'#1": {
+  "A": "before",
+  "same": true
+ },
+ "sw-bear-burn#1": {
+  "A": "after",
+  "same": true
+ },
+ "sw-bear-burn#2": {
+  "A": "after",
+  "same": false
+ },
+ "sw-lost-knee#1": {
+  "A": "after",
+  "same": true
+ },
+ "sw-water-dog#1": {
+  "A": "after",
+  "same": true
+ },
+ "oos-dog-snake#1": {
+  "A": "before",
+  "same": false
+ },
+ "oos-dog-snake#2": {
+  "A": "after",
+  "same": false
+ },
+ "oos-ibuprofen#1": {
+  "A": "after",
+  "same": true
+ },
+ "lg-lake-heat#2": {
+  "A": "after",
+  "same": true
+ },
+ "lg-lake-heat#3": {
+  "A": "after",
+  "same": true
+ },
+ "lg-lake-heat#4": {
+  "A": "before",
+  "same": true
+ },
+ "lg-lake-heat#5": {
+  "A": "after",
+  "same": false
+ },
+ "lg-camp-bear#2": {
+  "A": "after",
+  "same": true
+ },
+ "lg-camp-bear#4": {
+  "A": "before",
+  "same": false
+ },
+ "lg-camp-bear#5": {
+  "A": "before",
+  "same": true
+ },
+ "lg-camp-bear'#2": {
+  "A": "after",
+  "same": true
+ },
+ "lg-camp-bear'#5": {
+  "A": "after",
+  "same": true
+ },
+ "lg-lost-cold#3": {
+  "A": "after",
+  "same": true
+ },
+ "lg-mixed#1": {
+  "A": "after",
+  "same": true
+ },
+ "lg-mixed#2": {
+  "A": "before",
+  "same": true
+ },
+ "lg-mixed#3": {
+  "A": "before",
+  "same": false
+ },
+ "lg-mixed#4": {
+  "A": "before",
+  "same": false
+ },
+ "lg-mixed#5": {
+  "A": "before",
+  "same": true
+ }
+}

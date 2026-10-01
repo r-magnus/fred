@@ -47,6 +47,39 @@ export const CHAT_REPLY_WITH_OFFER = "Got it. In case you need it, here's what t
 export const REFER_REPLY =
   "That's a procedure for trained medical providers, so I won't walk you through it. Call emergency services or get the person to medical care as fast as you can.";
 
+/**
+ * What Fred says when someone is in trouble and nothing in the manuals
+ * matched (#98, docs/plan-understand.md). Fixed text, never generated, so it
+ * cannot invent advice. Each line comes from a reviewed field card: the radio
+ * or phone line from signal-rescue, the injury check and "don't make a big
+ * decision straight away" from lost-stay-or-move, "call emergency services"
+ * from REFER_REPLY. It ends on a question so the conversation keeps going.
+ */
+export const SAFETY_NET_REPLY =
+  "I couldn't find that exact situation in my manuals. What matters most right now:\n" +
+  "1. If you have a phone with signal or a radio, use it first: call emergency services.\n" +
+  "2. Check yourself and anyone with you for injuries.\n" +
+  "3. Don't make a big decision straight away. Give yourself a little time to get over the shock, then look at your situation.\n" +
+  "Tell me what's happening, and whether anyone is hurt.";
+
+/**
+ * What Fred says when something is wrong but no danger sign is present and
+ * nothing in the manuals matched (#98 round 2, docs/plan-understand-2.md).
+ * Fixed text from reviewed field cards: the warning signs from the get-help
+ * lines of stings-bites (trouble breathing, a swollen face or throat),
+ * bleeding-severe, head-injury (worsening confusion, passing out) and
+ * heart-stroke (chest pain); the phone or radio line from signal-rescue. It
+ * ends on a question so the conversation keeps going.
+ */
+export const WATCH_REPLY =
+  "I don't have steps for that exact problem in my manuals.\n" +
+  "Get help right away if any of these appear: trouble breathing, a swollen face or throat, bleeding that won't stop, " +
+  "chest pain, or confusion or passing out. A phone with signal or a radio is the quickest way to get help.\n" +
+  "Tell me more about what's happening and I'll look again.";
+
+/** Asked when a card was held back because it must not follow a condition (conditions.ts). */
+export const CONDITION_CLARIFY = (label: string): string => `Is this about the ${label}?`;
+
 /** True when a generated answer is really the model declining. */
 export function isRefusal(text: string): boolean {
   const t = text.trim().toLowerCase().replace(/[.!]+$/, '');

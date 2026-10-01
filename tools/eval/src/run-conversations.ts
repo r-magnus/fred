@@ -72,6 +72,9 @@ const conversations: Conversation[] = setNames.flatMap((n) => {
   return (JSON.parse(read(file)) as { conversations: Conversation[] }).conversations;
 });
 
+// CONVO_IDS=a,b runs only those conversations, e.g. the ones a sweep saw change.
+const onlyIds = process.env.CONVO_IDS?.split(',');
+if (onlyIds !== undefined) conversations.splice(0, conversations.length, ...conversations.filter((c) => onlyIds.includes(c.id)));
 const memoryOn = process.env.MEMORY !== '0';
 const outPath = process.argv[2] ?? 'docs/convo-runs.jsonl';
 console.log(`${conversations.length} conversations (${setNames.join(', ')}), memory ${memoryOn ? 'on' : 'off'}`
@@ -92,10 +95,11 @@ for (const [i, c] of conversations.entries()) {
   const res = await ask(t2.question, harness, {
     ...askOptions,
     state: t2.state,
-    ...(memoryOn ? { previous: { question: t1.question, topScore: first.diagnostics.topScore } } : {}),
+    ...(memoryOn ? { previous: { question: t1.question, topScore: first.diagnostics.topScore }, history: [t1.question] } : {}),
   });
   let answer = '';
-  if (res.kind === 'answer') for await (const tok of res.stream) answer += tok;
+  // GENERATE=0 records the decision only, for a quick sweep (as run-graded.ts).
+  if (res.kind === 'answer' && process.env.GENERATE !== '0') for await (const tok of res.stream) answer += tok;
   const d = res.diagnostics;
   const sheet = c.sheet === undefined ? undefined : sheets.get(c.sheet);
   if (c.sheet !== undefined && sheet === undefined) throw new Error(`${c.id}: no answer sheet ${c.sheet}`);
@@ -113,6 +117,7 @@ for (const [i, c] of conversations.entries()) {
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
     topScore: d.topScore,
     followUp: d.followUp ?? null,
+    ...(d.understood === undefined ? {} : { understood: d.understood }),
     cardAnswer: card2,
     cardRepeat: card2 !== null && card2 === card1,
     citations: res.kind === 'answer'

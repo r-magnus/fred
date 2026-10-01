@@ -91,6 +91,14 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
     // WIDEN=0 keeps a weak routed search instead of retrying it across every unscoped pack (on by default).
     ...(env.WIDEN === '0' ? { widenWeakSearch: false } : {}),
+    // UNDERSTAND=0 turns off the understanding step and the safety net (#98; on by default).
+    ...(env.UNDERSTAND === '0' ? { understand: false } : {}),
+    // GUARDS=0 turns off round 2 of #98 (conditions, question rule, danger signs, agreement).
+    ...(env.GUARDS === '0' ? { guards: false } : {}),
+    // UNDERSTAND_TOP=3 sets the own-words rank rule, for calibration on tuning sets only.
+    ...(env.UNDERSTAND_TOP !== undefined ? { understandOwnTop: Number(env.UNDERSTAND_TOP) } : {}),
+    // UNDERSTAND_FLOOR=0.15 sets the own-words floor, for calibration on tuning sets only.
+    ...(env.UNDERSTAND_FLOOR !== undefined ? { understandOwnFloor: Number(env.UNDERSTAND_FLOOR) } : {}),
     // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
     ...(env.LOCATION === '0' ? { locationInPrompt: false } : {}),
     // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.

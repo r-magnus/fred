@@ -309,6 +309,8 @@ function fieldCards(store: PackStore, packId: string): Promise<Map<string, Chunk
  * own.
  */
 const THREAD_CARD_MARGIN = 0.5;
+/** A question about medicine or a clinical procedure: never answered by a condition's card (#101). */
+const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\w*|\bstaple\w*|\b(?:ibuprofen|advil|tylenol|acetaminophen|aspirin|benadryl|antibiotics?|painkillers?|morphine|meds?|medication|medicine|pills?|dose|dosage|mg|milligrams?)\b|\bhow (?:many|much) (?:\w+ )?(?:can|should) (?:i|he|she|they|we) (?:take|give)\b/i;
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
@@ -557,7 +559,10 @@ export async function ask(
     // the hiker's own snakebite. Any question was too broad: "how do i figure
     // out which way to go" after a cold night got the hypothermia card (phone,
     // 2026-09-30).
-    const about = leansBack(q) || ABOUT_THE_CARE.test(q) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
+    // Never for a medicine or a procedure: "what blood type can I give them?"
+    // after heavy bleeding got the bleeding card (conversation set, #101).
+    if (MEDICINE_OR_PROCEDURE.test(q)) return undefined;
+    const about = leansBack(q) || (lc.condition.situation !== true && ABOUT_THE_CARE.test(q)) || /\b(?:he|she|it|his|her|him|they|them|its|it's)\b/i.test(q) ||
       candidates.some((c) => c.chunk.id === card.chunk.id);
     return about ? card : undefined;
   };
@@ -866,7 +871,7 @@ export async function ask(
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
           requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id && ownCard(own) !== undefined) {
         forcedCard = agreedCard = own;
-      } else if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR &&
+      } else if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
@@ -893,7 +898,7 @@ export async function ask(
     // as a question and declined (confirmation chat set).
     else if (guardsOn && topCard === undefined && intent === 'question' && !ABOUT_A_PET.test(query)) {
       const said = setHere[0];
-      if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR &&
+      if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
@@ -1144,11 +1149,11 @@ export async function ask(
   // condition, and in the condition's thread it reads the condition's card.
   if (active.length > 0) {
     usable = usable.filter((c) => !isCard(c) || blockingCondition(c.chunk.section, active) === undefined);
-    if (history.length > 0) {
-      for (const c of active) {
-        const card = await cardByTitle(c.card);
-        if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
-      }
+    // Only the condition this message is about (conditionCardFor): "i have a
+    // bad blister on my heel" after being lost was written from the lost card
+    // first (conversation set, #101).
+    if (history.length > 0 && followed !== undefined && !usable.some((x) => x.chunk.id === followed.chunk.id)) {
+      usable = [followed, ...usable];
     }
   }
   if (cardMode !== 'off' && clear !== undefined) {

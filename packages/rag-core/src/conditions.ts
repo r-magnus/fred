@@ -44,6 +44,11 @@ export interface Condition {
    * ft opened the head-injury card; #101).
    */
   readonly explains?: boolean;
+  /**
+   * A situation, not an injury (being lost): a follow-up naming the body
+   * ("i have a bad blister on my heel") is not about it (#101).
+   */
+  readonly situation?: boolean;
 }
 
 const SNAKE = /\b(?:snakes?|rattlers?|rattlesnakes?|copperheads?|cottonmouths?|vipers?|adders?|water moccasins?)\b/i;
@@ -121,7 +126,7 @@ export const CONDITIONS: readonly Condition[] = [
   // Frostbite: "Don't rub or massage it", "Don't hold it near a fire to thaw it."
   { id: 'frostbite', label: 'frostbite', card: 'Frostbite and frostnip', said: (ms) => ms.some((m) => FROSTBITE.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\b(?:by|near|over|next to|in front of) (?:a|the) fire\b/i },
-  { id: 'lost', label: 'being lost', card: 'Lost: should I stay or keep moving?', said: (ms) => ms.some((m) => LOST.test(m)) },
+  { id: 'lost', label: 'being lost', card: 'Lost: should I stay or keep moving?', said: (ms) => ms.some((m) => LOST.test(m)), situation: true },
   // Altitude illness: "go down to lower altitude right away", "Don't wait at
   // the same height". No forbidden advice: what goes wrong is missing the card.
   { id: 'altitude', label: 'altitude', card: 'Altitude illness', said: inSetting(HIGH, ALTITUDE_SIGN), explains: true },

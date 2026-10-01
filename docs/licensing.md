@@ -82,6 +82,21 @@ OpenStreetMap-derived tiles require attribution and carry share-alike obligation
 the derived database. Display the attribution in the map view, not buried in an
 About screen.
 
+## Published map bundles (2026-09-28)
+
+The 52 state bundles (basemap, contours, coverage, plant and animal pack) are
+published for the app to download at https://github.com/r-magnus/fred-maps, a
+**public** repository, separate from this private one. Each source's licence
+was re-checked before publishing and is recorded in that repo's `NOTICE.md`:
+ODbL for the OpenStreetMap basemap (credit "© OpenStreetMap contributors",
+same licence for the extracts); USGS 3DEP (public domain), Natural Resources
+Canada (Open Government Licence – Canada) and Copernicus GLO-30 (free and open
+licence, fixed notice for derived products) for the contours; public FCC data
+for coverage (no Location Fabric data, which CostQuest licenses); USDA public
+information for the FEIS text (no photos); and EmbeddingGemma vectors, in
+which Google claims no rights. **No WHO material is in the bundles**, so the
+NonCommercial constraint does not reach them.
+
 ## How this register relates to LICENSE.md
 
 `LICENSE.md` (added 2026-09-22) places the project's **original** work under a

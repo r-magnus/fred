@@ -99,6 +99,11 @@ function Screen() {
   const scroller = useRef<ScrollView | null>(null);
   const nextId = useRef(1);
 
+  // Bumped to reload the engine after a state's packs are downloaded or
+  // removed on the map screen, so a new plant and animal guide is searched
+  // without restarting the app. Deferred until the map closes.
+  const [engineGen, setEngineGen] = useState(0);
+  const packsChanged = useRef(false);
   useEffect(() => {
     let live = true;
     void loadEngine((p) => { if (live) setLoad(p); })
@@ -107,8 +112,9 @@ function Screen() {
     return () => {
       live = false;
       void engine.current?.release();
+      engine.current = null;
     };
-  }, []);
+  }, [engineGen]);
 
   /**
    * A cached fix costs nothing and prompts for nothing — getLastKnownPositionAsync
@@ -285,7 +291,18 @@ function Screen() {
     );
   }
 
-  if (mapOpen) return <MapScreen onClose={() => setMapOpen(false)} fix={fix} />;
+  if (mapOpen) {
+    return (
+      <MapScreen
+        fix={fix}
+        onPacksChanged={() => { packsChanged.current = true; }}
+        onClose={() => {
+          setMapOpen(false);
+          if (packsChanged.current) { packsChanged.current = false; setEngineGen((g) => g + 1); }
+        }}
+      />
+    );
+  }
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;

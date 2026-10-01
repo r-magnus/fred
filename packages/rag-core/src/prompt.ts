@@ -77,6 +77,9 @@ export const WATCH_REPLY =
   "chest pain, or confusion or passing out. A phone with signal or a radio is the quickest way to get help.\n" +
   "Tell me more about what's happening and I'll look again.";
 
+/** Said when a checked answer switches to the condition's card part way through (#103). */
+export const CONDITION_INSTEAD = (label: string): string => `Use this instead, for the ${label}:`;
+
 /** Asked when a card was held back because it must not follow a condition (conditions.ts). */
 export const CONDITION_CLARIFY = (label: string): string => `Is this about the ${label}?`;
 

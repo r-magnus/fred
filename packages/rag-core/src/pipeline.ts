@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -1295,11 +1295,25 @@ export async function ask(
     }
     if (!streaming) yield await guardCard(head);
   })();
-  const stream = watched.length > 0 ? (async function* () {
-    let text = '';
-    for await (const tok of backend.generate(prompt, generateOpts)) text += tok;
-    yield await guardCard(text);
-  })() : followed !== undefined ? refusalOnly : backend.generate(prompt, generateOpts);
+  // #103: checked sentence by sentence, so the first words come with the
+  // first sentence instead of the whole answer (19 s on the phone, #101).
+  const stream = watched.length > 0
+    ? streamChecked(backend.generate(prompt, generateOpts), {
+      violates: (sentence) => violatedCondition(sentence, watched),
+      holdsFirst: (sentence) => followed !== undefined && isRefusal(sentence),
+      replace: async (by, shownAlready) => {
+        const card = await cardByTitle(by.card);
+        if (card === undefined) return undefined;
+        answerGuard.replacedBy = by.id;
+        const text = renderCard(parseCard(card.chunk.text));
+        // What came before passed the check but may be off for the condition
+        // ("apply athletic tape" before a burn blister's forbidden draining),
+        // so the switch is said plainly (#103).
+        return shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${text}` : text;
+      },
+      whole: guardCard,
+    })
+    : followed !== undefined ? refusalOnly : backend.generate(prompt, generateOpts);
 
   return {
     kind: 'answer',
@@ -1318,6 +1332,61 @@ export async function ask(
       ...(watched.length === 0 ? {} : { answerGuard }),
     },
   };
+}
+
+/**
+ * The end of the first complete sentence or line in `text`, or -1. A full
+ * stop after a digit is a list number ("1. Keep them still"), not an end.
+ */
+function sentenceEnd(text: string): number {
+  const m = /(?<!\d)[.!?](?=\s)|\n/.exec(text);
+  return m === null ? -1 : m.index + 1;
+}
+
+/**
+ * Stream a model-written answer while checking it sentence by sentence (#103).
+ * Each complete sentence that `violates` passes is shown at once. At the first
+ * that fails, it and everything after are dropped (generation stops) and
+ * `replace` supplies what to show instead: the condition's card, after what
+ * was already shown. A first sentence `holdsFirst` keeps back (a refusal that
+ * may be the whole answer) is decided by `whole` on the full text, as before.
+ */
+export async function* streamChecked(
+  tokens: AsyncIterable<string>,
+  check: {
+    readonly violates: (sentence: string) => Condition | undefined;
+    readonly holdsFirst: (sentence: string) => boolean;
+    readonly replace: (by: Condition, shownAlready: boolean) => Promise<string | undefined>;
+    readonly whole: (text: string) => Promise<string>;
+  },
+): AsyncGenerator<string> {
+  let buf = '';
+  let shown = false;
+  let held = '';
+  for await (const tok of tokens) {
+    buf += tok;
+    for (let cut = sentenceEnd(buf); cut > 0; cut = sentenceEnd(buf)) {
+      const sentence = buf.slice(0, cut);
+      buf = buf.slice(cut);
+      const by = check.violates(sentence);
+      if (by !== undefined) {
+        const instead = await check.replace(by, shown || held !== '');
+        if (instead !== undefined) {
+          if (held !== '') yield held;
+          yield instead;
+          return;
+        }
+      }
+      if (!shown && held === '' && check.holdsFirst(sentence)) { held = sentence; continue; }
+      if (held !== '') { yield held; held = ''; }
+      yield sentence;
+      shown = true;
+    }
+  }
+  if (!shown) { yield await check.whole(held + buf); return; }
+  const by = buf.trim() === '' ? undefined : check.violates(buf);
+  const instead = by === undefined ? undefined : await check.replace(by, true);
+  yield instead ?? buf;
 }
 
 function toOffer(card: ScoredChunk, citation: Citation): CardOffer {

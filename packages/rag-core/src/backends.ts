@@ -14,6 +14,14 @@ export interface GenerateOptions {
   readonly temperature?: number;
   readonly stop?: readonly string[];
   readonly signal?: AbortSignal;
+  /**
+   * A short call whose system prompt is the same every time (#101): the
+   * intent check, the understanding step. A backend may run each lane in a
+   * context of its own so the fixed prompt stays read between messages
+   * instead of being read from scratch after every answer. Ignoring it is
+   * correct, only slower.
+   */
+  readonly lane?: 'intent' | 'understand';
 }
 
 export interface InferenceBackend {

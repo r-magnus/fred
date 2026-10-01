@@ -17,6 +17,10 @@ n=$(grep -c . "$Q")
 # #30) is not, so say which build to install instead of failing obscurely.
 flags=$("$ADB" shell dumpsys package $PKG)
 grep -q 'DEBUGGABLE' <<<"$flags" || { echo "installed $PKG is not debuggable; install a field-test build: tools/eval/build-apk.sh --field-test && tools/eval/install-apk.sh" >&2; exit 1; }
+# Stop the running app before filling its inbox: a live instance checks the
+# inbox every two seconds and took the first question just before it was
+# killed, so that question was never answered (2026-09-30, twice).
+"$ADB" shell am force-stop $PKG
 "$ADB" push "$Q" /data/local/tmp/fred-ask.txt >/dev/null
 "$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
 # The default 256 KB buffer holds seconds of this phone's lowmemorykiller

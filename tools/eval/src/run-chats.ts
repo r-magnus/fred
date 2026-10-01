@@ -64,6 +64,7 @@ for (const set of sets) {
     const wordings: (readonly string[])[] = [c.turns.map((t) => t.q), ...(c.variant === undefined ? [] : [c.variant])];
     for (const [w, qs] of wordings.entries()) {
       const asked: { q: string; kind: string; topScore: number }[] = [];
+      let lastCard: string | undefined;
       for (const [i, q] of qs.entries()) {
         const turn = c.turns[i]!;
         const last = asked.at(-1);
@@ -74,6 +75,7 @@ for (const set of sets) {
           ...askOptions, state: defaultState,
           ...(previous === undefined ? {} : { previous }),
           ...(history.length === 0 ? {} : { history }),
+          ...(lastCard === undefined ? {} : { lastCard }),
         });
         const decideMs = Date.now() - t0;
         let text = '';
@@ -114,6 +116,8 @@ for (const set of sets) {
         const where = r.kind === 'answer' ? ` ${d.cardAnswer ? 'card' : 'gen'}=${r.citations[0]?.section ?? ''}` : offer === undefined ? '' : ` offer=${offer}`;
         console.log(`${fits ? 'ok  ' : 'MISS'} ${c.id}${w > 0 ? "'" : ''}#${i + 1} ${turn.expect.padEnd(11)} ${outcome.padEnd(9)} U=${d.topScore.toFixed(3)} ${d.intent ?? ''}${where}  "${q}"`);
         asked.push({ q, kind: r.kind === 'answer' && !refused ? 'answer' : r.kind, topScore: d.topScore });
+        // As App.tsx: the card shown, when the reply was a field card.
+        lastCard = r.kind === 'answer' && !refused && r.citations[0]?.source === 'Fred field card' ? r.citations[0].section : undefined;
       }
     }
   }

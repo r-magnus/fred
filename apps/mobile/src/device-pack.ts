@@ -327,6 +327,23 @@ export async function createDeviceBackend(
     // context and needs retesting on CPU before it means anything.
   });
 
+  // One small context per lane (#101): the intent check and the understanding
+  // step send the same system prompt every time, but in the one shared context
+  // the answer that follows overwrites it, so llama.rn read ~300 tokens of
+  // intent prompt from scratch on every message (2.4 s on this phone). In a
+  // context of their own, only the hiker's new words are read. The model file
+  // is memory-mapped, so a second context costs its KV cache (~120 MB at
+  // 1024 tokens), not another copy of the weights.
+  const lanes = new Map<string, Promise<LlamaContext>>();
+  const laneContext = (lane: string): Promise<LlamaContext> => {
+    let ctx = lanes.get(lane);
+    if (ctx === undefined) {
+      ctx = initLlama({ model: opts.modelPath, n_ctx: 1024, n_batch: 512, n_threads: N_THREADS, n_gpu_layers: 0 });
+      lanes.set(lane, ctx);
+    }
+    return ctx;
+  };
+
   let embed: (text: string) => Promise<Float32Array>;
   let releaseEmbedder: () => Promise<void>;
   if (opts.embedder.kind === 'onnx') {
@@ -413,9 +430,10 @@ export async function createDeviceBackend(
       // while it waits its turn, stopping would end someone else's.
       let running = false;
       let cancelled = false;
+      let ctx: LlamaContext = gen;
       const onAbort = (): void => {
         cancelled = true;
-        if (running) void gen.stopCompletion();
+        if (running) void ctx.stopCompletion();
       };
       stream.onAbandon = onAbort;
       if (genOpts.signal !== undefined) {
@@ -426,9 +444,10 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
+        if (genOpts.lane !== undefined) ctx = await laneContext(genOpts.lane);
         running = true;
         try {
-          await gen.completion(
+          await ctx.completion(
               {
                 // Chat turns, not a raw string. Without the template the model gets
                 // no end-of-turn signal and generates until the context fills.
@@ -469,6 +488,7 @@ export async function createDeviceBackend(
       return stream.iterate();
     },
     async release() {
+      for (const ctx of lanes.values()) await (await ctx).release();
       await gen.release();
       await releaseEmbedder();
     },

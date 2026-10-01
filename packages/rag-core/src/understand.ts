@@ -138,7 +138,7 @@ export async function understandMessage(
   let out = '';
   for await (const tok of backend.generate(
     { system: SYSTEM, user: `Messages: ${shown}` },
-    signal ? { maxTokens: 40, temperature: 0, signal, stop: ['\n'] } : { maxTokens: 40, temperature: 0, stop: ['\n'] },
+    signal ? { maxTokens: 40, temperature: 0, signal, stop: ['\n'], lane: 'understand' } : { maxTokens: 40, temperature: 0, stop: ['\n'], lane: 'understand' },
   )) out += tok;
   return readUnderstood(out);
 }

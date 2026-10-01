@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, petIsPatient } from '../src/triage.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
 
@@ -99,4 +99,14 @@ test('the latest condition, and whether the last message said it', () => {
 test('any opening of a burn blister is caught, whatever it is called', () => {
   const burn = conditionsIn(['my son brushed his arm on the camp stove grate']);
   assert.equal(violatedCondition('If the bubbles are larger than a nickel, drain them with a sterile needle.', burn)?.id, 'burn');
+});
+
+test('eating something unnamed, across the thread', () => {
+  assert.ok(eatingUnknownInThread('are these blue ones safe', ['my daughter wants to pick berries']));
+  assert.ok(eatingUnknownInThread('she already ate a couple', ['my daughter wants to pick berries', 'are these blue ones safe']));
+  assert.ok(!eatingUnknownInThread('is it safe to cross here', ['nice day for a hike']));
+});
+
+test('a dog with a tick is a pet patient', () => {
+  assert.ok(petIsPatient('my dog has a tick, how do i get it off'));
 });

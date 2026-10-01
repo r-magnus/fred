@@ -103,6 +103,17 @@ export function asksToEatUnknown(message: string): boolean {
 }
 
 /**
+ * The same, across the thread (#101): "my daughter wants to pick berries" /
+ * "are these blue ones safe", or "she already ate a couple". The plant was
+ * said one message back; the question or the eating is in this one.
+ */
+const FORAGE = /\b(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?|seeds|nuts|fruit)\b/i;
+const EAT_OR_SAFE = /\b(?:eat|ate|eaten|edible|tried (?:one|some|a few|it)|tasted|swallowed|snack on|safe)\b/i;
+export function eatingUnknownInThread(message: string, earlier: readonly string[]): boolean {
+  return EAT_OR_SAFE.test(message) && !FORAGE.test(message) && earlier.slice(-2).some((m) => FORAGE.test(m)) && !/\b(?:my|our|the) (?:dog|cat|pet|horse)\b/i.test(message);
+}
+
+/**
  * A pet is the one hurt or sick. Veterinary care is outside Fred's scope, and
  * the human cards are wrong for an animal: "a snake struck my dog" was
  * answered with the human snakebite steps and "his face is swelling" with the
@@ -110,7 +121,7 @@ export function asksToEatUnknown(message: string): boolean {
  * the dog's health and does not count.
  */
 const PET = '(?:my|our|the)\\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)s?';
-const HARM = '(?:bit|bitten|struck|stung|attacked|swelling|swollen|bleeding|limping|ate|eaten|drank|hurt|injured|sick|vomit\\w*|poison\\w*|throwing up|collapsed)';
+const HARM = '(?:bit|bitten|struck|stung|attacked|swelling|swollen|bleeding|limping|ate|eaten|drank|hurt|injured|sick|vomit\\w*|poison\\w*|throwing up|collapsed|has (?:a )?(?:ticks?|burrs?|thorns?|splinters?|fleas|foxtails?)|panting|overheat\\w*)';
 const PET_PATIENT = new RegExp(`\\b${HARM}\\b[^.?!]{0,30}\\b${PET}\\b|\\b${PET}\\b(?:'s)?[^.?!]{0,40}\\b(?:${HARM}|face|paw|leg|mouth|nose)\\b`, 'i');
 const PERSON = /\b(?:i|i'm|me|my (?!dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)\w+|friend|buddy|wife|husband|son|daughter|kid|child|dad|mom|he's my|someone|person|guy)\b/i;
 const PRONOUN = /\b(?:he|she|it|his|her|its|him)\b/i;

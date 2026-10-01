@@ -73,7 +73,7 @@ async function askModel(message: string, backend: InferenceBackend, signal?: Abo
   let out = '';
   for await (const tok of backend.generate(
     { system: SYSTEM, user: `"${message}" ->` },
-    signal ? { maxTokens: 4, temperature: 0, signal } : { maxTokens: 4, temperature: 0 },
+    signal ? { maxTokens: 4, temperature: 0, signal, lane: 'intent' } : { maxTokens: 4, temperature: 0, lane: 'intent' },
   )) {
     out += tok;
     if (/NOW|QUESTION|PREVENT|CHAT/i.test(out)) break;

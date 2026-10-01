@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -1251,7 +1251,7 @@ export async function ask(
   // full before it is shown, and one that gives advice the condition's card
   // says not to give is replaced by that card (conditions.ts). Streaming is
   // given up only then.
-  const watched = active.filter((c) => c.forbidden !== undefined || followed !== undefined);
+  const watched = active.filter((c) => c.forbidden !== undefined);
   const guardCard = async (text: string): Promise<string> => {
     // A refusal in the middle of a condition is a dead end too.
     if (isRefusal(text) && followed !== undefined) {
@@ -1266,11 +1266,27 @@ export async function ask(
     return renderCard(parseCard(card.chunk.text));
   };
   const answerGuard: { replacedBy?: string } = {};
-  const stream = watched.length === 0 ? backend.generate(prompt, generateOpts) : (async function* () {
+  // Only advice a condition forbids needs the whole answer read first. A
+  // refusal in the middle of a condition is caught from its first words, so
+  // everything else still streams: holding every answer in a "lost" chat
+  // took the first words to 27.7 s on the phone (#101).
+  const refusalOnly = (async function* () {
+    const refusal = NO_ANSWER_REPLY.toLowerCase();
+    let head = '';
+    let streaming = false;
+    for await (const tok of backend.generate(prompt, generateOpts)) {
+      if (streaming) { yield tok; continue; }
+      head += tok;
+      const h = head.trimStart().toLowerCase();
+      if (!refusal.startsWith(h.slice(0, refusal.length)) || h.length > refusal.length + 4) { streaming = true; yield head; }
+    }
+    if (!streaming) yield await guardCard(head);
+  })();
+  const stream = watched.length > 0 ? (async function* () {
     let text = '';
     for await (const tok of backend.generate(prompt, generateOpts)) text += tok;
     yield await guardCard(text);
-  })();
+  })() : followed !== undefined ? refusalOnly : backend.generate(prompt, generateOpts);
 
   return {
     kind: 'answer',

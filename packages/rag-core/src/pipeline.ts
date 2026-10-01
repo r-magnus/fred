@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -1306,7 +1306,10 @@ export async function ask(
         if (card === undefined) return undefined;
         answerGuard.replacedBy = by.id;
         const text = renderCard(parseCard(card.chunk.text));
-        return shownAlready ? `\n\n${text}` : text;
+        // What came before passed the check but may be off for the condition
+        // ("apply athletic tape" before a burn blister's forbidden draining),
+        // so the switch is said plainly (#103).
+        return shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${text}` : text;
       },
       whole: guardCard,
     })

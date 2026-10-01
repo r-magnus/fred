@@ -12,7 +12,7 @@
 import { open, type DB } from '@op-engineering/op-sqlite';
 import type { Directory } from 'expo-file-system';
 import { File } from 'expo-file-system';
-import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify, CardSource } from '@fred/pack-format';
+import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import {
   vectorRow, denseTopK, decodeBase64, buildVocab, encode, meanPool, l2Normalize,
@@ -63,6 +63,14 @@ export class DevicePackStore implements PackStore {
 
   cardSourcesFor(chunkId: string): readonly CardSource[] | undefined {
     return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.cardSources?.[chunkId];
+  }
+
+  licenseFor(licenseId: string): LicenseEntry | undefined {
+    for (const { manifest } of this.packs.values()) {
+      const hit = manifest.licenses.find((l) => l.id === licenseId);
+      if (hit !== undefined) return hit;
+    }
+    return undefined;
   }
 
   async searchLexical(
@@ -257,6 +265,9 @@ class TokenStream {
   private failure: unknown = null;
   private wake: (() => void) | null = null;
 
+  /** Called if the reader stops before the end (a `break` out of for-await). */
+  onAbandon: (() => void) | null = null;
+
   push(token: string): void {
     this.queue.push(token);
     this.wake?.();
@@ -267,12 +278,16 @@ class TokenStream {
     this.wake?.();
   }
   async *iterate(): AsyncIterable<string> {
-    for (;;) {
-      while (this.queue.length > 0) yield this.queue.shift() as string;
-      if (this.failure !== null) throw this.failure;
-      if (this.done) return;
-      await new Promise<void>((resolve) => { this.wake = resolve; });
-      this.wake = null;
+    try {
+      for (;;) {
+        while (this.queue.length > 0) yield this.queue.shift() as string;
+        if (this.failure !== null) throw this.failure;
+        if (this.done) return;
+        await new Promise<void>((resolve) => { this.wake = resolve; });
+        this.wake = null;
+      }
+    } finally {
+      if (!this.done) this.onAbandon?.();
     }
   }
 }
@@ -357,6 +372,19 @@ export async function createDeviceBackend(
     releaseEmbedder = async () => {};
   }
 
+  // One call into the generation context at a time. llama.rn throws
+  // "Exception in HostFunction: <unknown>" when a completion starts while the
+  // last one is still decoding, and a reader that stops early leaves it
+  // decoding: the intent check breaks out as soon as it reads its word, so the
+  // answer that followed failed whenever it started within those few tokens.
+  // node-llama-cpp queues on its own, which is why the desktop never saw it.
+  let idle: Promise<unknown> = Promise.resolve();
+  const exclusive = <T,>(run: () => Promise<T>): Promise<T> => {
+    const p = idle.then(run, run);
+    idle = p.catch(() => undefined);
+    return p;
+  };
+
   const info = gen as unknown as Record<string, unknown>;
   // "gpu: true" here means a GPU device exists, not that layers are on it; the
   // devices list is what would reveal an offload if n_gpu_layers regressed.
@@ -367,9 +395,11 @@ export async function createDeviceBackend(
     async countTokens(texts: readonly string[]): Promise<number[]> {
       // Exact, via llama.rn's tokenizer. Batched by the interface so this costs
       // one bridge crossing per string rather than one per compression pass.
-      const out: number[] = [];
-      for (const t of texts) out.push((await gen.tokenize(t)).tokens.length);
-      return out;
+      return exclusive(async () => {
+        const out: number[] = [];
+        for (const t of texts) out.push((await gen.tokenize(t)).tokens.length);
+        return out;
+      });
     },
     generate(prompt: PromptParts, genOpts: GenerateOptions): AsyncIterable<string> {
       const stream = new TokenStream();
@@ -378,45 +408,60 @@ export async function createDeviceBackend(
       // thing, or who is watching their battery, needs a way out. llama.rn's
       // stopCompletion() ends the native decode loop; without it, aborting would
       // only stop the JS consumer while the phone kept generating and burning
-      // power, which is the opposite of what the story asks for.
-      const onAbort = (): void => { void gen.stopCompletion(); };
+      // power, which is the opposite of what the story asks for. A reader that
+      // stops early is the same case. Only this call's own decode is stopped:
+      // while it waits its turn, stopping would end someone else's.
+      let running = false;
+      let cancelled = false;
+      const onAbort = (): void => {
+        cancelled = true;
+        if (running) void gen.stopCompletion();
+      };
+      stream.onAbandon = onAbort;
       if (genOpts.signal !== undefined) {
         if (genOpts.signal.aborted) onAbort();
         else genOpts.signal.addEventListener('abort', onAbort, { once: true });
       }
       const detach = (): void => genOpts.signal?.removeEventListener('abort', onAbort);
 
-      void gen
-        .completion(
-          {
-            // Chat turns, not a raw string. Without the template the model gets
-            // no end-of-turn signal and generates until the context fills.
-            messages: [
-              { role: 'system', content: prompt.system },
-              { role: 'user', content: prompt.user },
-            ],
-            jinja: true,
-            // llama.rn defaults enable_thinking to TRUE. On Qwen3 that spends the
-            // whole budget inside <think> before any visible text — measured at
-            // 3.1x latency on desktop and an empty answer under a token cap
-            // (docs/optimizations.md).
-            enable_thinking: false,
-            // reasoning_format is deliberately NOT set. With 'none' the response
-            // parser truncated the start of the answer ("INATION: 1,2" for what
-            // should read "EXAMINATION"), so the leading tokens were being eaten.
-            n_predict: genOpts.maxTokens,
-            // penalty_repeat defaults to 1.0, which is DISABLED. Without it the
-            // model degenerated into repeating "and the man." indefinitely.
-            penalty_repeat: 1.15,
-            // Greedy. node-llama-cpp defaults to greedy on desktop and produced
-            // clean answers that terminated in ~300 characters; sampling at 0.3
-            // on device rambled to the 1024-token cap without emitting EOS.
-            // Determinism is also worth more than variety for first-aid guidance.
-            temperature: 0,
-            stop: [...(genOpts.stop ?? [])],
-          },
-          (tok) => stream.push(tok.token),
-        )
+      void exclusive(async () => {
+        if (cancelled) return;
+        running = true;
+        try {
+          await gen.completion(
+              {
+                // Chat turns, not a raw string. Without the template the model gets
+                // no end-of-turn signal and generates until the context fills.
+                messages: [
+                  { role: 'system', content: prompt.system },
+                  { role: 'user', content: prompt.user },
+                ],
+                jinja: true,
+                // llama.rn defaults enable_thinking to TRUE. On Qwen3 that spends the
+                // whole budget inside <think> before any visible text — measured at
+                // 3.1x latency on desktop and an empty answer under a token cap
+                // (docs/optimizations.md).
+                enable_thinking: false,
+                // reasoning_format is deliberately NOT set. With 'none' the response
+                // parser truncated the start of the answer ("INATION: 1,2" for what
+                // should read "EXAMINATION"), so the leading tokens were being eaten.
+                n_predict: genOpts.maxTokens,
+                // penalty_repeat defaults to 1.0, which is DISABLED. Without it the
+                // model degenerated into repeating "and the man." indefinitely.
+                penalty_repeat: 1.15,
+                // Greedy. node-llama-cpp defaults to greedy on desktop and produced
+                // clean answers that terminated in ~300 characters; sampling at 0.3
+                // on device rambled to the 1024-token cap without emitting EOS.
+                // Determinism is also worth more than variety for first-aid guidance.
+                temperature: 0,
+                stop: [...(genOpts.stop ?? [])],
+              },
+              (tok) => stream.push(tok.token),
+          );
+        } finally {
+          running = false;
+        }
+      })
         // A stopped completion resolves normally with what it produced, so the
         // partial answer is kept rather than thrown away.
         .then(() => { detach(); stream.finish(); })

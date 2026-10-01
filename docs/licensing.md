@@ -17,6 +17,8 @@ for the project report.**
 | `usfws` | US Fish & Wildlife Service species data | Public domain (US Gov work) | ✅ Yes |
 | `osm` | OpenStreetMap via Geofabrik extracts | ODbL 1.0 | ✅ With attribution + share-alike |
 | `census-cb` | US Census Bureau TIGER/Line cartographic boundaries, 1:20,000,000 state outlines — used in `packages/geo` to turn a GPS fix into a state code offline, via the redistributed `us-states.json` from PublicaMundi/MappingAPI | Public domain (US Gov work) | ✅ Yes |
+| `nps` | National Park Service articles on nps.gov (28 national pages: hiking and camping safety, food storage, bears, wildlife distance, lightning, the *I Didn't Know That! Leave No Trace* series) — used in `core-tips-nps` (#96) | Public domain (US Gov work; [nps.gov disclaimer](https://www.nps.gov/aboutus/disclaimer.htm)). Credit "National Park Service". Photos and captions not ingested. | ✅ Yes |
+| `wikivoyage:<Article>` | Wikivoyage travel topics (12 articles: Wilderness backpacking, Hiking, Camping, Wild camping, Leave-no-trace camping, Camping food, Outdoor cooking, Cold weather, Hot weather, Arid region safety, Pests, Orienteering) — used in `core-tips-wikivoyage` (#96). One licence entry per article, pinned to the revision fetched | CC BY-SA 4.0. Every use credits the article, "Wikivoyage contributors", the licence and a link. Share-alike: the pack is released under CC BY-SA 4.0. Text only. | ✅ With attribution + share-alike |
 
 ## Two constraints to act on
 
@@ -122,3 +124,35 @@ root can read as covering everything in the tree:
 (`Copyright (c) 2015-present 650 Industries, Inc.`). It covers the scaffolding
 under `apps/mobile`, not Fred, and is retained because MIT asks that the notice
 travel with the code.
+
+## Tips packs (2026-09-29, #96)
+
+Everyday outdoor know-how, in two packs so the licences never mix
+(`docs/plan-tips.md`, `tools/ingest/src/tips-pack.ts`).
+
+**NPS and the Leave No Trace Center.** The *I Didn't Know That! Leave No Trace*
+articles were "developed in collaboration with" the Leave No Trace Center for
+Outdoor Ethics, and each carries the line "Leave No Trace 7 Principles © 1999
+by the Leave No Trace Center for Outdoor Ethics". The Center's terms forbid
+rewording the principles without its review. So the principle statements are
+dropped (the section that lists them, and any line carrying the copyright
+notice), and what ships is NPS's own explanatory prose, which the site treats
+as public domain unless marked otherwise. This is a judgement, recorded here so
+it can be revisited: if the Center's contribution to the prose ever matters,
+the eight series articles can be removed from the pack without touching the
+other twenty.
+
+**Wikivoyage and share-alike.** CC BY-SA 4.0 allows commercial use. Its two
+conditions are attribution, carried per chunk (each chunk's `licenseId` names
+its article, and the licence entry holds the revision link and credit line),
+and share-alike, which reaches the Wikivoyage pack itself and nothing else, the
+same way ODbL reaches only the map archives. Whether an answer Fred writes from
+a passage is an adaptation is unsettled; crediting the article on every such
+answer covers it either way.
+
+**Wikivoyage is volunteer-written and unreviewed**, which is a trust question
+rather than a licence one. Only prevention and how-to sections are kept:
+treatment of injury and illness, dangerous animals, rescue, storm advice and
+tick-borne disease are dropped at ingest, and those topics stay with the
+manuals, NPS and the field cards. At answer time, tips never reach an
+emergency answer, and NPS is read before Wikivoyage.

@@ -126,5 +126,13 @@
   "by": "Claude (self-review)",
   "change": "New card, batch 4 (syllabus topic).",
   "why": "WHO BEC gives recognition only; no drugs (aspirin) given; call-for-help and CPR lines flagged unsourced. Every quote checked word for word; no serious conflict to escalate."
+ },
+ {
+  "id": "bear-encounter",
+  "rev": "5d732a3dad74",
+  "date": "2026-09-29",
+  "by": "Claude (self-review)",
+  "change": "New card: a bear close by, charging or attacking (#96).",
+  "why": "'there's a bear in front of me what do i do' was declined: no manual covers it, and the NPS page that does sits in a tips pack an emergency does not read. Written from NPS 'Staying Safe Around Bears' (public domain); black-bear and grizzly attack responses kept species-named inside each step. Every quote checked word for word; no serious conflict to escalate."
  }
 ]

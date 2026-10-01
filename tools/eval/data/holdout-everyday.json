@@ -1,0 +1,643 @@
+[
+  {
+    "id": "he-poop-01",
+    "question": "ok real talk, how do i poop in the woods",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Dig a small hole (a cathole) about 6-8 inches deep and cover it afterwards",
+      "Go well away from water, trails and camp (about 200 feet / 70 steps)",
+      "Pack out toilet paper, or use none, rather than leaving it"
+    ],
+    "redFlags": [
+      "Leave toilet paper on the ground",
+      "Go near a stream or lake"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-pee-01",
+    "question": "where am i supposed to pee when we're camping",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Well away from water sources and camp (about 200 feet)",
+      "Away from the trail; in some places urinating on rock or bare ground rather than plants is advised"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-period-01",
+    "question": "got my period on a 3 day backpacking trip, what do i do with used pads and tampons",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Pack them out in a sealed bag",
+      "Don't bury them or leave them"
+    ],
+    "redFlags": [
+      "Bury tampons or pads"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-campsite-01",
+    "question": "how do i pick a good spot to pitch the tent",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Use an established site or durable ground (rock, gravel, dry grass) rather than fragile plants",
+      "Camp well back from lakes and streams (about 200 feet)",
+      "Avoid hazards: low spots that collect water, and dead trees or branches overhead"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-bearfood-01",
+    "question": "how do i keep bears out of my food overnight",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Store food in a bear canister/locker or hang it, as local rules require",
+      "Keep food, cooking and scented items (toothpaste, trash) away from where you sleep"
+    ],
+    "redFlags": [
+      "Keep food in the tent"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-dishes-01",
+    "question": "whats the right way to wash dishes when backpacking",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Wash well away from streams and lakes (about 200 feet), not in them",
+      "Use little or no soap; strain out food scraps and pack them out, scatter the dishwater"
+    ],
+    "redFlags": [
+      "Wash dishes with soap directly in a stream or lake"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-layers-01",
+    "question": "how should i dress for a cold hike, i always end up sweaty then freezing",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Dress in layers: a base layer that wicks moisture, an insulating layer, and a wind/waterproof shell",
+      "Take layers off before you sweat and add them when you stop",
+      "Avoid cotton, which stays wet and cold"
+    ],
+    "redFlags": [
+      "Cotton base layer"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-sleepwarm-01",
+    "question": "i froze all night in my sleeping bag, how do i sleep warmer",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Insulate from the ground with a sleeping pad; the ground steals heat",
+      "Sleep in dry clothes, not the damp ones you hiked in",
+      "Eat something and stay hydrated before bed; wear a hat"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-blister-01",
+    "question": "new boots, long hike this weekend, how do i not get destroyed by blisters",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Break new boots in on shorter walks first",
+      "Wear well-fitting moisture-wicking socks (not cotton) and keep feet dry",
+      "Stop and cover hot spots with tape or moleskin before they become blisters"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-water-01",
+    "question": "how much water should i bring on a day hike",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "survival"
+    ],
+    "keyPoints": [
+      "It depends on heat, effort and length: bring more than you think and drink regularly",
+      "Know where refills are, and treat water from natural sources before drinking"
+    ],
+    "redFlags": [
+      "Drink untreated stream water"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-fire-01",
+    "question": "we're allowed a campfire tonight, anything i should know",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "survival"
+    ],
+    "keyPoints": [
+      "Check current fire restrictions; use an existing fire ring and keep the fire small",
+      "Burn only dead and down wood, never cut live trees",
+      "Put it out completely: drown, stir, and feel that it's cold before leaving"
+    ],
+    "redFlags": [
+      "Leave a fire smouldering or unattended"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-rightofway-01",
+    "question": "who's supposed to step aside on a narrow trail, the people going up or down",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Hikers going uphill generally have the right of way",
+      "Everyone yields to horses/pack stock; bikes yield to hikers"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-horses-01",
+    "question": "a group on horses is coming toward us on the trail what do we do",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Step off the trail, usually on the downhill side, and let them pass",
+      "Stay calm and visible, speak to the riders, no sudden movements"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-packing-01",
+    "question": "how do i pack my backpack so it doesnt kill my shoulders",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Put heavy items in the middle, close to your back",
+      "Keep often-needed items (water, snacks, rain jacket) where you can reach them",
+      "Adjust the hip belt so the hips carry most of the weight"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-poles-01",
+    "question": "are trekking poles actually worth it",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "They take strain off knees, especially going downhill",
+      "They help balance on rough ground and stream crossings"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-downhill-01",
+    "question": "my knees hurt so bad on the way down every hike, any tricks",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Take shorter steps and keep knees slightly bent",
+      "Trekking poles help take load off the knees on descents",
+      "Go slowly; don't run or lock the knees"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-essentials-01",
+    "question": "what should always be in my pack even for a short hike",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "The ten essentials: navigation, light, sun protection, first aid, knife, fire starter, shelter, extra food, extra water, extra clothes"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-tellsomeone-01",
+    "question": "going solo this weekend, anything i should do before i leave",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Tell someone where you're going and when you'll be back (leave an itinerary)",
+      "Check the weather and conditions, and carry the essentials"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-lightning-01",
+    "question": "afternoon storms keep rolling in on our mountain trip, how do we plan around that",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "survival"
+    ],
+    "keyPoints": [
+      "Start early and be off peaks, ridges and exposed high ground before storms build in the afternoon",
+      "If you hear thunder, head down and away from summits and lone tall trees"
+    ],
+    "redFlags": [
+      "Shelter under a lone tall tree"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-rain-01",
+    "question": "how do i keep my sleeping bag dry if it rains all day",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Line the pack with a waterproof bag (pack liner or trash bag) and keep the bag inside it",
+      "A pack cover alone isn't enough; keep wet gear separate from dry sleeping clothes"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-ticks-01",
+    "question": "ticks are everywhere where we hike, how do i keep them off",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "wildlife"
+    ],
+    "keyPoints": [
+      "Wear long pants tucked into socks and use repellent",
+      "Check your whole body after the hike and remove any tick promptly"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-hiketime-01",
+    "question": "how long will a 10 mile hike with 3000 feet of climbing take me",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Allow extra time for climbing on top of distance (e.g. roughly 2 mph plus about an hour per 1,000 feet)",
+      "Set a turnaround time and stick to it"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-wildlifedist-01",
+    "question": "how close can i get to elk for a good photo",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "wildlife"
+    ],
+    "keyPoints": [
+      "Keep a safe distance (NPS: at least 25 yards from most animals, 100 yards from bears and wolves)",
+      "Use a zoom lens; if the animal changes its behaviour you're too close; never feed wildlife"
+    ],
+    "redFlags": [
+      "Approach or feed the animal"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-applecore-01",
+    "question": "can i just toss my apple core into the bushes, it's biodegradable right",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "No: pack it out; food scraps take a long time to break down and teach animals to seek human food"
+    ],
+    "redFlags": [
+      "Throwing food scraps away is fine"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-cooktent-01",
+    "question": "it's pouring, can we just cook inside the tent",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Don't cook inside a tent: carbon monoxide can kill and the tent can catch fire",
+      "Cook outside or under a tarp/vestibule with good airflow, away from the tent body"
+    ],
+    "redFlags": [
+      "Cooking inside a closed tent is fine"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-heat-01",
+    "question": "hiking in the desert next week, any tips for the heat",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "survival"
+    ],
+    "keyPoints": [
+      "Hike early or late and rest in shade in the heat of the day",
+      "Carry plenty of water and salty snacks, and drink regularly",
+      "Wear sun protection: hat, light long sleeves, sunscreen"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-coldvalley-01",
+    "question": "we camped by the creek at the bottom of the valley and it was freezing, why",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Cold air sinks and collects in valley bottoms at night",
+      "Camping a little higher on a bench or slope is usually warmer (and keeps you back from the water)"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-feet-01",
+    "question": "my feet are always soaked and wrinkly by the end of the day",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills",
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Change into dry socks, and let feet air out at breaks",
+      "Wear moisture-wicking (wool/synthetic) socks, not cotton"
+    ],
+    "provenance": "independent",
+    "pack": "core-tips"
+  },
+  {
+    "id": "he-em-ankle-01",
+    "question": "stepped in a hole on the trail, my ankle is swelling up fast and i cant put any weight on it",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Stop and don't walk on it; support/splint it if it may be broken",
+      "Cool it, compress it and raise it",
+      "Get help or evacuate if they can't bear weight"
+    ],
+    "redFlags": [
+      "Walk it off"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "he-em-hypo-01",
+    "question": "my buddy's shivering like crazy and slurring his words after we got soaked in the rain",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Get him out of the wind and wet clothes into dry insulation, off the ground",
+      "Warm sweet drinks if he's alert; warm the core, handle gently",
+      "Get help"
+    ],
+    "redFlags": [
+      "Give alcohol",
+      "Rub or massage the limbs"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "he-em-co-01",
+    "question": "we were cooking in the tent and now my girlfriend has a pounding headache and feels dizzy",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Get her into fresh air immediately and turn off the stove",
+      "This could be carbon monoxide poisoning: get medical help, especially if she gets worse or confused"
+    ],
+    "redFlags": [
+      "Stay in the tent and rest"
+    ],
+    "provenance": "independent",
+    "pack": "core-firstaid"
+  },
+  {
+    "id": "he-em-heat-01",
+    "question": "my friend stopped sweating, his skin is really hot and he's confused on this hike",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "This is heat stroke: an emergency",
+      "Cool him immediately (shade, water on skin, fanning, cold packs at neck/armpits/groin)",
+      "Get emergency help"
+    ],
+    "redFlags": [
+      "Wait to see if it passes"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "he-em-sting-01",
+    "question": "got stung by a bee and now my throat feels tight and my lips are swelling",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Possible anaphylaxis: use an epinephrine auto-injector if available",
+      "Get emergency help immediately"
+    ],
+    "redFlags": [
+      "Just take it easy and wait"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "he-em-lightning-01",
+    "question": "lightning hit right near us and my friend is on the ground not breathing",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "It's safe to touch them",
+      "Start CPR and get emergency help"
+    ],
+    "redFlags": [
+      "Don't touch a lightning victim"
+    ],
+    "provenance": "independent",
+    "pack": "core-fieldcards"
+  },
+  {
+    "id": "he-neg-01",
+    "question": "what's the best tent under $200",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "he-neg-02",
+    "question": "which national park should i visit in october",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "he-neg-03",
+    "question": "can you recommend a good trail near me",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "he-neg-04",
+    "question": "how much does a bear canister cost",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "he-neg-05",
+    "question": "what's the weather going to be like tomorrow",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "he-neg-06",
+    "question": "is it worth getting an ultralight backpack or is that a scam",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  }
+]

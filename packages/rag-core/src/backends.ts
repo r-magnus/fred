@@ -5,7 +5,7 @@
  * them with node-llama-cpp + better-sqlite3. Same pipeline code runs in both, so
  * the numbers in the evaluation describe the system that actually ships.
  */
-import type { CardClarify, CardSource, ChunkRecord, DomainTag, EmbeddingSpec } from '@fred/pack-format';
+import type { CardClarify, CardSource, LicenseEntry, ChunkRecord, DomainTag, EmbeddingSpec } from '@fred/pack-format';
 import type { PromptParts } from './prompt.ts';
 
 export interface GenerateOptions {
@@ -63,6 +63,9 @@ export interface PackStore {
 
   /** The manuals a field card quotes (manifest `cardSources`). Optional, like clarifyFor. */
   cardSourcesFor?(chunkId: string): readonly CardSource[] | undefined;
+
+  /** A licence entry by id, from the pack manifests. Optional, like clarifyFor. */
+  licenseFor?(licenseId: string): LicenseEntry | undefined;
 
   /**
    * Stage 1. FTS5 MATCH across the given packs, most-relevant first.

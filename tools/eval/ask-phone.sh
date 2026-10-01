@@ -19,13 +19,16 @@ flags=$("$ADB" shell dumpsys package $PKG)
 grep -q 'DEBUGGABLE' <<<"$flags" || { echo "installed $PKG is not debuggable; install a field-test build: tools/eval/build-apk.sh --field-test && tools/eval/install-apk.sh" >&2; exit 1; }
 "$ADB" push "$Q" /data/local/tmp/fred-ask.txt >/dev/null
 "$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
+# The default 256 KB buffer holds seconds of this phone's lowmemorykiller
+# chatter (~10 lines/s), so the answer lines scroll out before they are read.
+"$ADB" logcat -G 16M
 "$ADB" logcat -c
 "$ADB" shell am force-stop $PKG
 "$ADB" shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
-# One "[fred] answer|abstain|needs-location|chat" line per question.
+# One "[fred] answer|abstain|needs-location|chat|error" line per question.
 deadline=$((SECONDS + 120 * n + 60))
 while [ $SECONDS -lt $deadline ]; do
-  done_n=$("$ADB" logcat -d -s ReactNativeJS | grep -cE '\[fred\] (answer|abstain|needs-location|chat) ' || true)
+  done_n=$("$ADB" logcat -d -s ReactNativeJS | grep -cE '\[fred\] (answer|abstain|needs-location|chat|error) ' || true)
   [ "$done_n" -ge "$n" ] && break
   sleep 5
 done

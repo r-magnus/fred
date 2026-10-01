@@ -89,6 +89,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.SHAPE === 'how' || env.SHAPE === 'how-few' ? { shapeVariant: env.SHAPE } : {}),
     // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
     ...(env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
+    // WIDEN=0 keeps a weak routed search instead of retrying it across every unscoped pack (on by default).
+    ...(env.WIDEN === '0' ? { widenWeakSearch: false } : {}),
     // LOCATION=0 stops naming the hiker's state in the prompt (on by default).
     ...(env.LOCATION === '0' ? { locationInPrompt: false } : {}),
     // CARD_ANSWER=off|card-only|pick overrides the default verbatim card answers.

@@ -4069,5 +4069,174 @@
         "quote": "Do not give fluids or morphine to unconscious persons."
       }
     ]
+  },
+  {
+    "id": "bear-encounter",
+    "title": "A bear close by, charging or attacking",
+    "domain": "wildlife",
+    "medical": false,
+    "askedAs": [
+      "there's a bear in front of me what do i do",
+      "a bear is on the trail ahead of us",
+      "what do I do if I see a bear",
+      "a bear is charging at me",
+      "should I play dead if a bear attacks",
+      "a bear is following me",
+      "bear in camp what do we do"
+    ],
+    "summary": "Don't run. Stay calm, talk to it in a low voice, and back away slowly sideways. If it attacks: fight back against a black bear, play dead against a grizzly.",
+    "steps": [
+      "Stay calm. Most bears do not want to attack you and most encounters end without anyone getting hurt.",
+      "Talk to the bear calmly in a low voice so it knows you are a person. Stand your ground and slowly wave your arms.",
+      "Pick up small children right away. Stay together as a group and make yourselves look as big as you can.",
+      "If the bear isn't moving, move away slowly and sideways so you can keep watching it. Leave it a way out.",
+      "If the bear follows, stop and hold your ground. A bear may charge and turn away at the last second.",
+      "If you carry bear spray, it is made for exactly this: an aggressive, charging or attacking bear.",
+      "If a black bear attacks: don't play dead. Get to a car or building if you can; if not, fight back, aiming at its face and muzzle.",
+      "If a grizzly (brown bear) attacks: leave your pack on and play dead. Lie flat on your stomach, hands clasped behind your neck, legs spread. Stay still until it leaves. If the attack keeps going, fight back hard at its face.",
+      "If any bear attacks you in your tent, or follows you and then attacks, fight back. Don't play dead."
+    ],
+    "dont": [
+      "Don't run. Bears run as fast as a racehorse and will chase you.",
+      "Don't scream or make sudden movements. Never make high-pitched sounds.",
+      "Don't climb a tree. Black bears and grizzlies both climb.",
+      "Don't drop your pack or let the bear get your food.",
+      "Never get between a mother bear and her cubs."
+    ],
+    "getHelp": "If anyone is hurt, treat their wounds and get medical help. Report the encounter to a park ranger as soon as you can.",
+    "reviewerNote": "From the NPS 'Staying Safe Around Bears' page. Black-bear and grizzly attacks call for opposite responses (fight back vs play dead), so both are stated with the species in the step itself; the tent/stalking rule is given last because it overrides both. California and most of the eastern US have only black bears; the card does not guess the species for the hiker. 'Bears may bluff' kept so a charge that stops is not read as an attack.",
+    "sources": [
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Stay calm and remember that most bears do not want to attack you; they usually just want to be left alone."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Most bear encounters end without injury."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Identify yourself by talking calmly so the bear knows you are a human and not a prey animal. Remain still; stand your ground but slowly wave your arms."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Continue to talk to the bear in low tones"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Pick up small children immediately."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Make yourselves look as large as possible"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If the bear is stationary, move away slowly and sideways"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Always leave the bear an escape route."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "but if the bear follows, stop and hold your ground."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Bears may bluff their way out of an encounter by charging and then turning away at the last second."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "It is used defensively to stop an aggressive, charging, or attacking bear."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If you are attacked by a black bear, DO NOT PLAY DEAD . Try to escape to a secure place such as a car or building."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Concentrate your kicks and blows on the bear's face and muzzle."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If you are attacked by a brown/grizzly bear, leave your pack on and PLAY DEAD ."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Spread your legs to make it harder for the bear to turn you over. Remain still until the bear leaves the area."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "However, if the attack persists, fight back vigorously. Use whatever you have at hand to hit the bear in the face."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Bears can run as fast as a racehorse both uphill and down. Like dogs, they will chase"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "A scream or sudden movement may trigger an attack. Never imitate bear sounds or make a high-pitched squeal."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Both grizzlies and black bears can climb trees."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Do NOT drop your pack as it can provide protection for your back and prevent a bear from accessing your food."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "never place yourself between a mother and her cub"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Help protect others by reporting all bear incidents to a park ranger immediately."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Lay ﬂat on your stomach with your hands clasped behind your neck."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If any bear attacks you in your tent, or stalks you and then attacks, do NOT play dead—ﬁght back!"
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If escape is not possible, try to ﬁght back using any object available."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "If anyone is hurt, treat their wounds and get medical help.",
+        "why": "Points to the wound cards; NPS covers the encounter, not injuries afterwards."
+      }
+    ]
   }
 ]

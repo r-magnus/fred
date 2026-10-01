@@ -127,6 +127,12 @@ export interface AskOptions {
    * generation, only on questions that would otherwise be declined.
    */
   readonly secondSearch?: boolean;
+  /**
+   * When the routed search scores under the gate, search again across every
+   * unscoped pack and keep it if it clears the gate. Default on; off only to
+   * measure what it changes.
+   */
+  readonly widenWeakSearch?: boolean;
   /** Name the hiker's state when the question points at it and a state pack is answered from. Default on. */
   readonly locationInPrompt?: boolean;
   /**
@@ -222,6 +228,12 @@ export interface Citation {
    * reader can check the card against its sources (manifest `cardSources`).
    */
   readonly basis?: readonly CardSource[];
+  /**
+   * For sources credited per page (a licence id with a colon, e.g.
+   * "wikivoyage:Hiking"): the credit line the licence requires and a link to
+   * the page at the revision quoted (#96, docs/licensing.md).
+   */
+  readonly credit?: { readonly text: string; readonly url: string };
 }
 
 export interface Diagnostics {
@@ -236,6 +248,8 @@ export interface Diagnostics {
   readonly memoryPressure: number;
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
+  /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
+  readonly widenedTopScore?: number;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** What the hiker wants, when intent is on. */
@@ -308,6 +322,21 @@ export type AskResult =
 
 const MEDICAL_DOMAINS = new Set(['first-aid-physical', 'first-aid-psychological']);
 
+/**
+ * Where both tips packs made the cut, the National Park Service passage is
+ * read before the Wikivoyage one (#96): Wikivoyage is volunteer-written and
+ * unreviewed. Only the tips swap places among themselves; every other passage
+ * keeps its position.
+ */
+export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
+  const rank = (c: ScoredChunk): number => (c.chunk.packId === 'core-tips-nps' ? 0 : 1);
+  const slots = cs.map((c, i) => (c.chunk.domain === 'outdoor-skills' ? i : -1)).filter((i) => i >= 0);
+  const tips = slots.map((i) => cs[i]!).sort((a, b) => rank(a) - rank(b));
+  const out = [...cs];
+  slots.forEach((i, k) => { out[i] = tips[k]!; });
+  return out;
+}
+
 export async function ask(
   query: string,
   deps: PipelineDeps,
@@ -317,9 +346,15 @@ export async function ask(
   // A card's citation carries the manuals its quotes come from.
   const citeOf = (c: ScoredChunk, i: number): Citation => {
     const basis = store.cardSourcesFor?.(c.chunk.id);
-    return basis === undefined ? toCitation(c, i) : { ...toCitation(c, i), basis };
+    const lic = c.chunk.licenseId.includes(':') ? store.licenseFor?.(c.chunk.licenseId) : undefined;
+    return {
+      ...toCitation(c, i),
+      ...(basis === undefined ? {} : { basis }),
+      ...(lic === undefined ? {} : { credit: { text: lic.attribution, url: lic.sourceUrl } }),
+    };
   };
   const retrievalOpts = opts.retrieval ?? DEFAULT_RETRIEVAL;
+  const tipsPackIds = new Set(packs.filter((p) => p.domains.includes('outdoor-skills')).map((p) => p.id));
   const threshold = opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD;
 
   const pressure = memory?.pressure() ?? 0;
@@ -330,11 +365,14 @@ export async function ask(
     state: opts.state,
     ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
   });
-  const effectiveThreshold = routed.fallback
+  let effectiveThreshold = routed.fallback
     ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD)
     : threshold;
 
 
+  // The text the adopted search was run on: the question, or it joined to the
+  // previous one, or restated (below).
+  let searchText = query;
   let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
   // The best score, not the first chunk's: a reserved field card goes first
   // and may score below the top manual passage (retrieve.ts).
@@ -383,10 +421,42 @@ export async function ask(
       keywords = keywordsJ;
       routed = routedJ;
       candidates = candidatesJ;
+      searchText = joined;
       topScore = joinedTop;
     }
   }
   const earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
+
+  // Routing is a hint, and a weak routed search is not evidence that Fred has
+  // nothing: search again across every unscoped pack, and keep that only if it
+  // clears the same gate. Routing picks packs by vocabulary, and some words
+  // point only at state packs: with California set, "there's a bear in front of
+  // me" and "how do I keep bears out of my food" searched the California
+  // species pack alone (bear biology, U=0.16) and declined, while the NPS
+  // food-storage page scores 0.59. Widening up front instead would reach the
+  // manuals on every species question, and ATP 3-50.21's plants chapter once
+  // outranked the species reviews for "what plants and animals are near me?".
+  let widenedTopScore: number | undefined;
+  const widenOn = opts.widenWeakSearch !== false;
+  const widen = async (
+    kw: readonly Keyword[], r: RouteResult, pool: readonly RoutablePack[], text: string,
+  ): Promise<{ routed: RouteResult; candidates: ScoredChunk[]; top: number } | undefined> => {
+    const extra = pool.filter((p) => p.scope.kind !== 'us-state' && !r.packIds.includes(p.id));
+    if (!widenOn || extra.length === 0) return undefined;
+    const packIds = [...r.packIds, ...extra.map((p) => p.id)];
+    const domains = [...new Set([...r.domains, ...extra.flatMap((p) => p.domains)])];
+    const cs = await retrieve(kw, packIds, store, backend, retrievalOpts, domains, text);
+    widenedTopScore = best(cs);
+    return { routed: { ...r, packIds, domains, reason: `${r.reason}; widened after a weak routed search` }, candidates: cs, top: widenedTopScore };
+  };
+  if (topScore < effectiveThreshold) {
+    const w = await widen(keywords, routed, packs, searchText);
+    if (w !== undefined && w.top >= effectiveThreshold) {
+      routed = w.routed;
+      candidates = w.candidates;
+      topScore = w.top;
+    }
+  }
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
@@ -404,6 +474,7 @@ export async function ask(
       keywords = keywords2;
       routed = routed2;
       candidates = candidates2;
+      searchText = rewrite;
       topScore = secondSearch.topScore;
     }
   }
@@ -416,6 +487,27 @@ export async function ask(
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
   if (opts.intent === true) {
     intent = await classifyIntent(query, backend, opts.signal);
+    // An emergency is answered from first aid, never from everyday tips (#96,
+    // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be
+    // answered from a passage on choosing boots. The search is run again as if
+    // the tips packs were not installed, rather than filtering what came back:
+    // "tick dug into my armpit" routed to the tips alone ("tick" is a tips
+    // word too), filtering left nothing, and the tick card was lost.
+    if (intent === 'now' && routed.packIds.some((id) => tipsPackIds.has(id))) {
+      const noTips = packs.filter((p) => !tipsPackIds.has(p.id));
+      routed = route(keywords, noTips, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
+      effectiveThreshold = routed.fallback ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD) : threshold;
+      candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searchText);
+      topScore = best(candidates);
+      if (topScore < effectiveThreshold) {
+        const w = await widen(keywords, routed, noTips, searchText);
+        if (w !== undefined && w.top >= effectiveThreshold) {
+          routed = w.routed;
+          candidates = w.candidates;
+          topScore = w.top;
+        }
+      }
+    }
     // The leading card: the best field card, if it is first or within
     // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
     // ranked a manual passage first (0.289) and the bleeding card second
@@ -453,6 +545,7 @@ export async function ask(
     route: routed,
     maxTokens,
     memoryPressure: pressure,
+    ...(widenedTopScore === undefined ? {} : { widenedTopScore }),
     ...(secondSearch === undefined ? {} : { secondSearch }),
     ...(followUp === undefined ? {} : { followUp }),
   };
@@ -489,6 +582,20 @@ export async function ask(
     };
   }
 
+  // Tips are general advice, not local knowledge (#96). "Are there dangerous
+  // animals in this area?" with no location was answered from a desert-safety
+  // passage; the state pack that could say which animals was skipped. When
+  // the question points at where the hiker is and the best passage is a tip,
+  // ask for the location instead.
+  const leader = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  if (forcedCard === undefined && opts.state === null && routed.skippedStatePacks.length > 0 &&
+    leader?.chunk.domain === 'outdoor-skills' && REFERS_TO_LOCATION.test(query)) {
+    return {
+      kind: 'needs-location', candidatePacks: routed.skippedStatePacks,
+      diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
+    };
+  }
+
   // Clinical procedures (IV lines, needle decompression, dose tables) are
   // marked provider-only at ingest. When one is the best manual match and no
   // field card matched, the question is asking to be walked through it, and
@@ -519,7 +626,7 @@ export async function ask(
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
   }
-  const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
+  const usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);

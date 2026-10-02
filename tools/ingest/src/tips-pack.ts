@@ -90,7 +90,7 @@ const WIKIVOYAGE_DROP_OWN = new Set(['ticks']);
 const decode = (s: string): string =>
   s.replace(/&nbsp;|&#160;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&#39;|&rsquo;|&lsquo;|&#8217;|&#8216;/g, "'").replace(/&quot;|&ldquo;|&rdquo;|&#8220;|&#8221;/g, '"')
-    .replace(/&mdash;|&#8212;/g, '—').replace(/&ndash;|&#8211;/g, '–').replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
+    .replace(/&deg;/g, '°').replace(/&mdash;|&#8212;/g, '—').replace(/&ndash;|&#8211;/g, '–').replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
 
 /** Markup to text, keeping paragraph and list-item breaks. */
 function text(html: string): string {

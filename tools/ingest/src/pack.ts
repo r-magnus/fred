@@ -84,7 +84,7 @@ function writeChunkDb(dbPath: string, packId: string, chunks: readonly DraftChun
   `);
   db.exec('BEGIN');
   chunks.forEach((c, i) => {
-    insert.run(i, `${packId}:${i}`, packId, c.text, c.context ?? null, c.section, input.source, c.page, c.domain, c.licenseId ?? input.licenseId, c.blockKind, c.audience ?? null);
+    insert.run(i, `${packId}:${i}`, packId, c.text, c.context ?? null, c.section, c.source ?? input.source, c.page, c.domain, c.licenseId ?? input.licenseId, c.blockKind, c.audience ?? null);
   });
   db.exec('COMMIT');
   db.exec("INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild')");

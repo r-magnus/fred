@@ -135,6 +135,14 @@ export const EVERYDAY_SETS = ['tools/eval/data/holdout-everyday.json'] as const;
  */
 export const HEALTH_SETS = ['tools/eval/data/holdout-health.json'] as const;
 
+/**
+ * Health confirmation set (2026-10-02, #51), written and committed after the
+ * health set's misses were seen (which makes that set tuning) and before the
+ * exposure links that answer them were written: different situations on the
+ * same topics, never tuned on.
+ */
+export const HEALTH_CONFIRM_SETS = ['tools/eval/data/confirm-health.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -144,8 +152,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'colloquial': return COLLOQUIAL_SETS;
     case 'everyday': return EVERYDAY_SETS;
     case 'health': return HEALTH_SETS;
+    case 'health-confirm': return HEALTH_CONFIRM_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | all, got "${name}"`);
   }
 }
 

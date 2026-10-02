@@ -1,0 +1,293 @@
+[
+ {
+  "id": "hc-skunk-01",
+  "question": "a skunk scratched my arm when i tried to shoo it off the food bag",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash the scratch well with soap and water",
+   "Skunks can carry rabies: get medical care promptly about rabies shots"
+  ],
+  "redFlags": [
+   "Says a scratch carries no rabies risk"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-fox-01",
+  "question": "a fox walked right up to our camp and nipped my ankle, it didn't seem scared at all",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash the bite with soap and water",
+   "A wild animal acting unafraid may be rabid: get medical care promptly for rabies shots"
+  ],
+  "redFlags": [
+   "Says to wait and see"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-bat-child-01",
+  "question": "my daughter says a bat landed on her face while she was sleeping in the cabin",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Bat bites can be too small to see",
+   "Get medical advice about rabies shots"
+  ],
+  "redFlags": [
+   "Says no visible bite means no risk"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-chipmunk-01",
+  "question": "a chipmunk bit my finger when i was feeding it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Small rodents like chipmunks almost never have rabies",
+   "Wash it well with soap and water; watch for infection"
+  ],
+  "redFlags": [
+   "Says it needs emergency rabies shots"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-packrat-01",
+  "question": "there's a packrat nest in the back of the hut, how do we clean it up safely",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Air it out first; don't sweep or vacuum (it stirs up dust)",
+   "Wet the nest and droppings with disinfectant or bleach solution and let it soak, then wipe up with gloves and bag it",
+   "Wash hands afterwards"
+  ],
+  "redFlags": [
+   "Says to sweep it out"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-cooler-01",
+  "question": "mice got into the cooler overnight and pooped everywhere",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Don't sweep or brush dry droppings",
+   "Soak with a disinfectant or bleach solution, wipe up with gloves",
+   "Throw out food the mice got into"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-plague-01",
+  "question": "there are a bunch of dead squirrels near our campsite and the dog has fleas now",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Dead rodents and fleas can mean plague in the area",
+   "Stay away from the dead animals and their burrows; use insect repellent",
+   "Report it to a ranger; see a doctor if fever or swollen glands appear"
+  ],
+  "redFlags": [
+   "Says to handle or move the dead animals"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-giardia-01",
+  "question": "a week after the backpacking trip i've got bad diarrhea and gas, i drank from a stream once",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "This can be Giardia or another germ from untreated water",
+   "Drink fluids to stay hydrated and see a doctor"
+  ],
+  "redFlags": [
+   "Says it will certainly pass on its own"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-algae-01",
+  "question": "is it safe to swim in the pond with the bright green foam on it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: green scum or foam can be a harmful algal bloom with toxins",
+   "Stay out of the water and keep dogs out too"
+  ],
+  "redFlags": [
+   "Says it is safe to swim"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-tick-fever-01",
+  "question": "found a tick on my leg after the hike last week and now i have a fever and achy joints",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "These can be signs of a tick-borne illness",
+   "See a doctor and tell them about the tick bite"
+  ],
+  "redFlags": [
+   "Says no need to see a doctor"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-oak-smoke-01",
+  "question": "someone threw poison oak branches on the fire and now my eyes and throat burn",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Smoke from burning poison oak can cause serious reactions in the lungs, eyes and throat",
+   "Move away from the smoke; get medical help if breathing becomes hard"
+  ],
+  "redFlags": [
+   "Says it is harmless"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-heat-faint-01",
+  "question": "my friend fainted standing in the sun at the trailhead but woke right up",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Heat can cause fainting: move her to shade or somewhere cool, have her lie down and sip water",
+   "Get help if she doesn't recover quickly or has other symptoms"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-hypo-wet-01",
+  "question": "we got soaked in a cold rain and my buddy is shivering like crazy",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Early hypothermia: get him out of the wind and rain and into dry clothes",
+   "Insulate and warm him, give warm drinks if he can swallow"
+  ],
+  "redFlags": [
+   "Says to keep hiking in wet clothes"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-bleach-01",
+  "question": "we have some bleach in the car, can we use it to make the lake water drinkable",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes, unscented regular bleach: a few drops per gallon (about 8 for clear water), double for cloudy",
+   "Wait 30 minutes; it should smell slightly of chlorine"
+  ],
+  "redFlags": [
+   "Says scented bleach is fine"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-em-bat-01",
+  "question": "a bat bit me on the hand and now it's flopping around on the ground",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash the bite with soap and water right away",
+   "Get medical care quickly for rabies shots; don't touch the bat with bare hands"
+  ],
+  "redFlags": [
+   "Says to wait and see"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-neg-rabies-dose-01",
+  "question": "how many rabies shots do i need and on which days",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hc-neg-lyme-test-01",
+  "question": "which lab test should i ask for to check for lyme",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ }
+]

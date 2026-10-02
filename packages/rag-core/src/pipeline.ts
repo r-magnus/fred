@@ -1249,6 +1249,33 @@ export async function ask(
     };
   }
 
+  // #109: a specific follow-up about the card this conversation is on (the
+  // condition it is about, or the card just shown) is answered from that
+  // card's lines when they answer it: "should we kill the snake to bring it to
+  // the hospital" after a snakebite was written from four manual passages
+  // (13-25 s on the phone) though the snakebite card says not to. No line
+  // picked: the passages, as before.
+  const onCard = followed ?? lastShown;
+  if (guardsOn && opts.lead !== false && onCard !== undefined && asksSpecifically(query) && !petPatient && cardMode === 'verbatim') {
+    const parsedOn = parseCard(onCard.chunk.text);
+    const lines = cardLines(parsedOn);
+    const pickPrompt = buildLinePickParts(query, history.slice(-UNDERSTAND_HISTORY), parsedOn);
+    let raw = '';
+    for await (const tok of backend.generate(pickPrompt, opts.signal ? { maxTokens: 12, temperature: 0, signal: opts.signal } : { maxTokens: 12, temperature: 0 })) raw += tok;
+    const picked = readLinePick(raw, lines.length);
+    if (picked.length > 0) {
+      return {
+        kind: 'answer',
+        stream: once(picked.map((i) => lines[i]!).join('\n')),
+        citations: [citeOf(onCard, 0)],
+        prompt: pickPrompt,
+        medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),
+        card: toOffer(onCard, citeOf(onCard, 0)),
+        diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode },
+      };
+    }
+  }
+
   // Stage 3 — compress before prefill.
   const compressed = await compressContext(
     opts.joinNeighbours === true ? joinNeighbours(usable.map((c) => c.chunk)) : usable.map((c) => c.chunk),

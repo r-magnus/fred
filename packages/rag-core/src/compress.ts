@@ -22,6 +22,13 @@ export interface CompressionOptions {
   /** Never remove more than this fraction. Paper: 0.40. */
   readonly maxReduction: number;
   /**
+   * The first this-many passages (the best matches) are kept whole; only the
+   * rest are trimmed. Trimming every passage lost the answer's own source on
+   * some questions (results-phase1.md); the best passage is where it usually
+   * is (#108).
+   */
+  readonly keepWhole?: number;
+  /**
    * Exact token counts for every sentence, in one call.
    *
    * Batched because llama.rn tokenizes across a native bridge; a per-sentence
@@ -264,7 +271,8 @@ export async function compressContext(
       const density = domainTermDensity(text);
       // The opening sentence usually carries the topic; keep it pinned so a
       // surviving fragment never loses its subject.
-      const droppable = !atomic && sentenceIndex > 0 && sentences.length > 1 && !PROHIBITION.test(text);
+      const droppable = !atomic && sentenceIndex > 0 && sentences.length > 1 && !PROHIBITION.test(text) &&
+        chunkIndex >= (opts.keepWhole ?? 0);
       scored.push({
         chunkIndex,
         sentenceIndex,

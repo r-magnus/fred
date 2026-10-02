@@ -48,11 +48,13 @@ export function describeRetrieval(r: RetrievalOptions): string {
  * COMPRESS=1 turns trimming back on at the paper's 20-40% bounds. Unset (or 0)
  * keeps the shipping default, which hands passages to the model whole.
  */
-export function compressionFromEnv(): { minReduction: number; maxReduction: number } | undefined {
+export function compressionFromEnv(): { minReduction: number; maxReduction: number; keepWhole?: number } | undefined {
   const raw = process.env.COMPRESS;
   if (raw === undefined || raw === '0') return undefined;
   if (raw === '1') return { ...DEFAULT_COMPRESSION };
-  throw new Error(`COMPRESS must be 0 or 1, got ${raw}`);
+  // COMPRESS=keep1: trim, but keep the best passage whole (#108).
+  if (raw === 'keep1') return { ...DEFAULT_COMPRESSION, keepWhole: 1 };
+  throw new Error(`COMPRESS must be 0, 1 or keep1, got ${raw}`);
 }
 
 /**

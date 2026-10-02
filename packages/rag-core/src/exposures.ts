@@ -68,7 +68,7 @@ export const EXPOSURE_LINKS: readonly ExposureLink[] = [
     // increase toxin levels." CDC: the toxins make people and animals sick by
     // touch, spray or swallowing.
     guard: {
-      label: 'an algal bloom',
+      label: 'algal bloom',
       // A warning says the treatment fails; "if no toxins are detected" does not.
       negated: /\b(?:don'?t|do not|never|won'?t|will not|doesn'?t|does not|cannot|can'?t|isn'?t|is not|not (?:remove|safe|make|kill|work))\b/i,
       forbidden: /\b(?:boil\w*|filter\w*|purif\w*|tablets?|bleach|iodine|chlorin\w*|disinfect\w*|test\w*)\b|\bdrink\w*\b[^.]*\b(?:cautious\w*|safe)\b/i,

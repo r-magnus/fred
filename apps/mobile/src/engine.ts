@@ -10,7 +10,7 @@
  * ask(); nothing here knows about components, which keeps the pipeline testable
  * from the eval harness and the app alike.
  */
-import { Directory, Paths } from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
 import { ask, verifyEmbedderParity, type AskResult, type RoutablePack } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
@@ -96,7 +96,12 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
         ? { kind: 'onnx', modelPath: `${BASE_PATH}/${files.model}`, vocabPath: `${BASE_PATH}/${files.vocab}` }
         : { kind: 'gguf', modelPath: `${BASE_PATH}/${files.model}` },
       spec: manifests[0]!.embedding,
+      // Field test only: a `devhooks-gpu` file beside `devhooks` (written by
+      // adb run-as on a debuggable build) offloads the generator to the GPU,
+      // to re-test the offload results-m3.md turned off.
+      ...(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-gpu').exists ? { gpuLayers: 99 } : {}),
     });
+    console.log(`[fred] generator ${JSON.stringify(backend.genInfo)}`);
 
     onPhase({ phase: 'verifying' });
     // Every pack carries the same probe sentence, so embed it once, not once

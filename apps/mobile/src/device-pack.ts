@@ -207,6 +207,11 @@ export interface DeviceBackendOptions {
     | { readonly kind: 'onnx'; readonly modelPath: string; readonly vocabPath: string }
     | { readonly kind: 'gguf'; readonly modelPath: string };
   readonly spec: EmbeddingSpec;
+  /**
+   * Layers to offload to the GPU for the generator and its lanes. 0 (CPU only)
+   * unless a field test asks for more: see the n_gpu_layers note below.
+   */
+  readonly gpuLayers?: number;
 }
 
 /** The encoder file each supported pack encoder needs on the device. */
@@ -320,7 +325,7 @@ export async function createDeviceBackend(
     // from a prompt byte-identical to one CPU llama.cpp answers correctly on the
     // same phone. CPU-only was also faster end to end: 4.8 s vs 12.1 s for the
     // bleeding query (docs/results-m3.md).
-    n_gpu_layers: 0,
+    n_gpu_layers: opts.gpuLayers ?? 0,
     // flash_attn is left at llama.cpp's default (auto). Forcing it off was
     // coherent but slower (8.3 s). KV cache quantization (PocketRAG §3.4.3) is
     // not set: its "word salad" result in M3 was measured on the GPU-offloaded
@@ -338,7 +343,7 @@ export async function createDeviceBackend(
   const laneContext = (lane: string): Promise<LlamaContext> => {
     let ctx = lanes.get(lane);
     if (ctx === undefined) {
-      ctx = initLlama({ model: opts.modelPath, n_ctx: 1024, n_batch: 512, n_threads: N_THREADS, n_gpu_layers: 0 });
+      ctx = initLlama({ model: opts.modelPath, n_ctx: 1024, n_batch: 512, n_threads: N_THREADS, n_gpu_layers: opts.gpuLayers ?? 0 });
       lanes.set(lane, ctx);
     }
     return ctx;

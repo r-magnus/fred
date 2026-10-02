@@ -17,3 +17,4 @@ export * from './map-intent.ts';
 export * from './join.ts';
 export * from './conditions.ts';
 export * from './triage.ts';
+export * from './type-out.ts';

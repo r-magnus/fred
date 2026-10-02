@@ -24,7 +24,10 @@ import {
   ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
+import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
+
+/** One piece of fixed text as a stream, for typeOut. */
+async function* oneShot(text: string): AsyncIterable<string> { yield text; }
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
@@ -235,7 +238,9 @@ function Screen() {
         ...(res.card === undefined ? {} : { offer: res.card }),
       });
       let text = '';
-      for await (const tok of res.stream) {
+      // Fixed text (a card, its matched lines) is shown a few words at a
+      // time like a written answer; model tokens pass through as they come.
+      for await (const tok of typeOut(res.stream, { signal: ctrl.signal })) {
         text += tok;
         update(id, { text });
       }
@@ -266,9 +271,15 @@ function Screen() {
     const id = nextId.current++;
     update(from.id, { clarifyUsed: true });
     setTurns((ts) => [...ts, {
-      id, question: label, askedAt: Date.now(), state: from.state, text, kind: 'answer',
-      citations: from.citations, medical: from.medical, candidateStates: [], done: true, stopped: false,
+      id, question: label, askedAt: Date.now(), state: from.state, text: '', kind: 'answer',
+      citations: from.citations, medical: from.medical, candidateStates: [], done: false, stopped: false,
     }]);
+    // Shown a few words at a time, like any other answer.
+    void (async () => {
+      let shown = '';
+      for await (const w of typeOut(oneShot(text))) { shown += w; update(id, { text: shown }); }
+      update(id, { done: true });
+    })();
   }, [update]);
   const input = useRef<TextInput | null>(null);
 

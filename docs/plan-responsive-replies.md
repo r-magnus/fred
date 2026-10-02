@@ -8,19 +8,21 @@ reply does not answer the question.
 
 ## The design
 
-- **A direct answer first, from the card only.** When Fred would show a card
-  for a message that asks something, the model writes one or two sentences
-  answering that question from the card's text alone (a short call: the card
-  is ~350 tokens), and the card follows **folded** ("▸ What to do: Snakebite"),
-  its reviewed text a tap away.
+- **The card lines that answer it, first.** When Fred would show a card for a
+  message that asks something specific, the model picks which of the card's
+  lines answer that question (line numbers only, a short call), Fred shows
+  those lines in the card's own words, and the whole card follows **folded**
+  ("▸ What to do: Snakebite"), a tap away. *Revised 2026-10-02 after a try-out
+  on seen chats:* the first version had the model write one or two sentences
+  from the card, and it inverted it ("No. Do not take off her ring" for a sting
+  on a swelling hand; "Yes, she can walk on it" against the sprain card's
+  "rest"), as card-only rewriting did in `results-phase3.md`. Picked lines
+  cannot invert the card; the risk left is picking a line that does not answer,
+  with the whole card one tap below.
 - **Emergencies stay as they are.** A first report of something happening
   ("a snake struck my buddy") still opens the card at once: speed matters
   most there, and the card is the answer.
-- **Checked like any model-written text:** the answer is streamed through the
-  sentence check (#103) against the card's own condition and every active
-  one; a forbidden sentence is replaced by the open card. If the card does not
-  answer the question, the model says what the card covers instead of
-  guessing, and the card is shown open.
+- **No line answers it:** the card itself, open, as today.
 - `LEAD=0` turns it off.
 
 ## The test, written first

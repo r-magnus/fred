@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildLeadParts, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -19,7 +19,7 @@ import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
-import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
+import { buildLinePickParts, buildPickParts, cardLines, parseCard, pickChoice, readLinePick, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 
 /**
@@ -320,9 +320,6 @@ const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
-/** #109: the short answer from a card: one or two sentences. */
-const LEAD_TOKENS = 80;
-
 /**
  * A question that asks something specific a card can answer in a sentence:
  * yes or no ("can i put ice on it", "should we run to the car"), or how long,
@@ -1204,29 +1201,26 @@ export async function ask(
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
     }
     // #109: a specific question about the card's subject ("can i put ice on
-    // it", "how long should i ice it") gets a direct answer from the card's
-    // text alone, checked sentence by sentence, with the card folded beneath.
-    // How-to questions and first reports keep the card open: its steps are
-    // the answer, and in an emergency speed matters most.
+    // it", "how long should i ice it") gets the card lines that answer it, in
+    // the card's own words, with the whole card folded beneath. The model only
+    // picks line numbers: a rewritten answer inverted the card (results-
+    // phase3.md; "No. Do not take off her ring", #109 try-out). No line picked:
+    // the card itself, open, as before. How-to questions and first reports keep
+    // the card open: its steps are the answer, and in an emergency speed matters.
     if (cardMode === 'verbatim' && guardsOn && opts.lead !== false && asksSpecifically(query) && !petPatient) {
-      const own = CONDITIONS.find((c) => c.card === card.chunk.section && c.forbidden !== undefined);
-      const checks = [...active.filter((c) => c.forbidden !== undefined), ...(own === undefined || active.includes(own) ? [] : [own])];
-      const whole = renderCard(parsed);
-      const leadPrompt = buildLeadParts(query, history.slice(-UNDERSTAND_HISTORY), parsed);
-      return {
-        ...common,
-        prompt: leadPrompt,
-        card: toOffer(card, citeOf(card, 0)),
-        stream: streamChecked(backend.generate(leadPrompt, opts.signal ? { maxTokens: LEAD_TOKENS, temperature: 0, signal: opts.signal } : { maxTokens: LEAD_TOKENS, temperature: 0 }), {
-          violates: (sentence) => violatedCondition(sentence, checks),
-          holdsFirst: () => false,
-          // A forbidden sentence: the card itself, open.
-          replace: async (by, shownAlready) => (shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${whole}` : whole),
-          // Nothing complete was shown: a refusal or "the card doesn't say"
-          // gets the card itself.
-          whole: async (text) => (text.trim() === '' || isRefusal(text) ? whole : text),
-        }),
-      };
+      const lines = cardLines(parsed);
+      const pickPrompt = buildLinePickParts(query, history.slice(-UNDERSTAND_HISTORY), parsed);
+      let raw = '';
+      for await (const tok of backend.generate(pickPrompt, opts.signal ? { maxTokens: 12, temperature: 0, signal: opts.signal } : { maxTokens: 12, temperature: 0 })) raw += tok;
+      const picked = readLinePick(raw, lines.length);
+      if (picked.length > 0) {
+        return {
+          ...common,
+          prompt: pickPrompt,
+          card: toOffer(card, citeOf(card, 0)),
+          stream: once(picked.map((i) => lines[i]!).join('\n')),
+        };
+      }
     }
     if (cardMode === 'verbatim') {
       const ask = store.clarifyFor?.(card.chunk.id);

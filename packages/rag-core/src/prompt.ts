@@ -77,23 +77,6 @@ export const WATCH_REPLY =
   "chest pain, or confusion or passing out. A phone with signal or a radio is the quickest way to get help.\n" +
   "Tell me more about what's happening and I'll look again.";
 
-/**
- * #109: answer a specific question from one field card, in a sentence or two.
- * Only the card: it is reviewed text, and the answer must not add to it. The
- * hiker's earlier messages give the "it" and "he" their meaning.
- */
-export function buildLeadParts(question: string, earlier: readonly string[], card: { title: string; summary: string; steps: readonly string[]; rest: readonly string[] }): PromptParts {
-  return {
-    system: 'You answer a hiker\'s question using only the first-aid or survival card below. ' +
-      'Reply in one or two short sentences that answer exactly what was asked. If it is a yes or no question, start with Yes or No. ' +
-      'Use only what the card says, in plain words. Do not add advice, numbers or steps that are not in the card. ' +
-      'If the card does not answer the question, say in one sentence what the card covers instead.',
-    user: `CARD: ${card.title}\n${card.summary}\n${card.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n${card.rest.join('\n')}\n\n` +
-      (earlier.length === 0 ? '' : `EARLIER MESSAGES: ${earlier.join(' / ')}\n`) +
-      `QUESTION: ${question}`,
-  };
-}
-
 /** Said when a checked answer switches to the condition's card part way through (#103). */
 export const CONDITION_INSTEAD = (label: string): string => `Use this instead, for the ${label}:`;
 

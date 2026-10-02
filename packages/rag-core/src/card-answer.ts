@@ -68,6 +68,33 @@ export function readPick(text: string, stepCount: number): number[] {
 }
 
 /**
+ * #109: every line of a card a question could be answered by, in order: its
+ * steps, then its don'ts, get-help line and notes. A reply made of some of
+ * these lines is the card's own reviewed wording, so it cannot invert it.
+ */
+export function cardLines(card: ParsedCard): string[] {
+  return [...card.steps, ...card.rest];
+}
+
+/** Ask the model which lines of the card answer the question. Numbers only. */
+export function buildLinePickParts(query: string, earlier: readonly string[], card: ParsedCard): PromptParts {
+  const lines = cardLines(card);
+  return {
+    system: 'You pick which lines of a first-aid or survival card answer a hiker\'s question. Reply with line numbers only.',
+    user: `CARD: ${card.title}\n${lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}\n\n` +
+      (earlier.length === 0 ? '' : `EARLIER MESSAGES: ${earlier.join(' / ')}\n`) +
+      `QUESTION: ${query}\n\n` +
+      'Which lines answer exactly this question? Reply with at most 3 line numbers separated by commas. If no line answers it, reply 0.\n\nLINES:',
+  };
+}
+
+/** The picked lines (0-based, card order), or empty for "none" or nothing readable. At most 3. */
+export function readLinePick(text: string, lineCount: number): number[] {
+  if (/^\s*0\b/.test(text)) return [];
+  return readPick(text, lineCount).slice(0, 3);
+}
+
+/**
  * A card's steps in a chosen order, for one answer to its clarifying question.
  * The summary, don'ts and get-help line stay, as in `renderCard`.
  */

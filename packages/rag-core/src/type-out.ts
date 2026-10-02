@@ -9,14 +9,14 @@
  *
  * In an emergency the whole card matters more than the effect, so a piece is
  * always fully shown within `maxMs` however long it is (a 150-word card at the
- * default takes 1.5 s), and a stop shows the rest at once: a card cut off
+ * default takes 2.5 s), and a stop shows the rest at once: a card cut off
  * before its don'ts would be worse than no effect.
  */
 
 export interface TypeOutOptions {
-  /** Time per word for short text. Default 30 ms. */
+  /** Time per word for short text. Default 50 ms (Ryan, 2026-10-02: a little slower than 30). */
   readonly perWordMs?: number;
-  /** Longest a single piece of text takes to appear. Default 1500 ms. */
+  /** Longest a single piece of text takes to appear. Default 2500 ms. */
   readonly maxMs?: number;
   /** How often the shown text grows. Default 33 ms (about 30 times a second). */
   readonly tickMs?: number;
@@ -39,8 +39,8 @@ const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(
  * frame shows more words at once instead of falling behind.
  */
 export async function* typeOut(stream: AsyncIterable<string>, opts: TypeOutOptions = {}): AsyncIterable<string> {
-  const perWordMs = opts.perWordMs ?? 30;
-  const maxMs = opts.maxMs ?? 1500;
+  const perWordMs = opts.perWordMs ?? 50;
+  const maxMs = opts.maxMs ?? 2500;
   const tickMs = opts.tickMs ?? 33;
   const sleep = opts.sleep ?? wait;
   const now = opts.now ?? Date.now;

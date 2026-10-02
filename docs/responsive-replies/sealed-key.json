@@ -1,0 +1,54 @@
+{
+ "cq-snake-ice#2": {
+  "A": "after",
+  "same": false
+ },
+ "cq-snake-suck#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-snake-catch#2": {
+  "A": "after",
+  "same": false
+ },
+ "cq-tick-twist#2": {
+  "A": "after",
+  "same": false
+ },
+ "cq-tick-after#2": {
+  "A": "after",
+  "same": false
+ },
+ "cq-frost-rub#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-frost-temp#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-hypo-drink#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-sprain-ice#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-sprain-boot#2": {
+  "A": "after",
+  "same": false
+ },
+ "cq-bleed-tq#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-heat-water#2": {
+  "A": "before",
+  "same": false
+ },
+ "cq-bear-run#2": {
+  "A": "before",
+  "same": false
+ }
+}

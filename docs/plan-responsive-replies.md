@@ -9,8 +9,9 @@ reply does not answer the question.
 ## The design
 
 - **The card lines that answer it, first.** When Fred would show a card for a
-  message that asks something specific, the model picks which of the card's
-  lines answer that question (line numbers only, a short call), Fred shows
+  message that asks something specific, the card lines that answer that
+  question are found (by the search model, after the generator failed at
+  picking them; `results-responsive-replies.md`), Fred shows
   those lines in the card's own words, and the whole card follows **folded**
   ("▸ What to do: Snakebite"), a tap away. *Revised 2026-10-02 after a try-out
   on seen chats:* the first version had the model write one or two sentences

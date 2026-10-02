@@ -1,0 +1,11 @@
+{"br-shelter-01":["ok","ok"],"br-water-01":["ok","ok"],"fa-head-01":["ok","partial"],"sv-lost-01":["ok","ok"],
+"hf-woundpack-01":["partial","partial"],"hf-cpr-infant-01":["ok","ok"],
+"ct-fall-legs#3|should we raise his legs up":["partial","ok"],
+"ct-burn-ice#2|can i put ice on it":["partial","ok"],"ct-burn-ice#2|is ice ok for it":["partial","ok"],
+"ct-hypo-rub#3|should i rub his arms and legs to warm him up":["partial","partial"],
+"ct-hypo-rub#3|do i massage his arms and legs to get him warm":["ok","partial"],
+"ct-frostbite-rub#2|should i rub them with snow":["ok","ok"],
+"ct-heat-water#2|should we just give him water and let him rest":["ok","ok"],
+"ct-heat-water#2|can we just have him drink and chill out":["ok","ok"],
+"qn-dusk#2|is it safer to keep going or stop":["ok","ok"],"qn-berries#2|can i eat them":["ok","ok"],
+"l2-numb-fingers#4|should i hold them near the stove":["ok","ok"],"oo-antivenom-01":["partial","partial"]}

@@ -231,6 +231,8 @@ function Screen() {
       update(id, {
         citations: res.citations, medical: res.medical, topScore: res.diagnostics.topScore,
         ...(res.clarify === undefined ? {} : { clarify: res.clarify }),
+        // #109: a short answer from a card, with the card folded beneath it.
+        ...(res.card === undefined ? {} : { offer: res.card }),
       });
       let text = '';
       for await (const tok of res.stream) {

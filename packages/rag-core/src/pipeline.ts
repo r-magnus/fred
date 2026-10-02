@@ -10,11 +10,11 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildLeadParts, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, violatedCondition, type Condition } from './conditions.ts';
+import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
@@ -187,6 +187,12 @@ export interface AskOptions {
   /** Overrides UNDERSTOOD_OWN_TOP, for calibration on the tuning sets. */
   readonly understandOwnTop?: number;
   /**
+   * #109: a specific question answered from a card gets a short direct answer
+   * from the card, with the card folded beneath. Default on; off only to
+   * measure what it changes.
+   */
+  readonly lead?: boolean;
+  /**
    * #101: the field card Fred showed for the message just before this one,
    * by title, when its reply was a card. A follow-up with nothing of its own
    * stays on it.
@@ -314,6 +320,21 @@ const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
+/** #109: the short answer from a card: one or two sentences. */
+const LEAD_TOKENS = 80;
+
+/**
+ * A question that asks something specific a card can answer in a sentence:
+ * yes or no ("can i put ice on it", "should we run to the car"), or how long,
+ * how much, where, which ("how long should i ice it"). Not a how-to ("how do
+ * i stop the bleeding") or "what do i do": there the card's steps are the
+ * answer.
+ */
+const SPECIFIC = /^\W*(?:ok(?:ay)?,?\s+|so,?\s+|and\s+|but\s+)?(?:should|shall|can|could|may|is|are|do|does|did|would|will|was|must)\b(?!.*\bwhat (?:do|should) (?:i|we) do\b)|\bhow (?:long|much|many|far|tight|warm|hot|cold|often|soon|deep)\b|\bwhere (?:exactly |do |should |can )?(?:i|we|you)?\b|\bwhich (?:way|side|one)\b|\bwhat (?:temperature|should (?:i|we) (?:watch|look) for)\b|\bwould\b.*\bhelp\b/i;
+export function asksSpecifically(message: string): boolean {
+  return SPECIFIC.test(message) && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
+}
+
 const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|shaky|dizzy|nause\w*|headache|throwing up|threw up|vomit\w*|hurts?|pain\w*|bleeding|blood|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|sweat\w*|breathing|soak\w*|bent|broken|tick|bonk\w*|hit (?:his|her|my|their) head|fell|tripped|landed on|stung|bit|bitten|cut|sliced|gash\w*|burn\w*|scald\w*|splinter|puffy|hives|sick|pale|out of it|confused|getting (?:cold|dark|worse)|freezing|can'?t (?:walk|stand|breathe|feel|move))\b/i;
 /** Words of a symptom getting better or worse, for an update on the card just shown (#101). */
 const SYMPTOM_UPDATE = /\b(?:swell\w*|swollen|bigger|puffy|puffing|redder|worse|still bleeding|bleeding again|hurts? (?:more|worse)|throbbing|pounding|numb\w*|tingl\w*|blister\w*|bubbles?|itch\w*|spreading|getting (?:worse|bigger|redder|darker))\b/i;
@@ -466,6 +487,11 @@ export type AskResult =
        * already said which (the answer then shows only that case).
        */
       readonly clarify?: ClarifyView;
+      /**
+       * #109: the field card the answer was written from, shown folded beneath
+       * a short direct answer. Undefined when the card itself is the answer.
+       */
+      readonly card?: CardOffer;
       readonly diagnostics: Diagnostics;
     }
   /** Small talk: a short fixed reply, with the matching card offered if any. */
@@ -1176,6 +1202,31 @@ export async function ask(
     const common = { kind: 'answer' as const, citations: [citeOf(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
     if (cardMode === 'card-only') {
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
+    }
+    // #109: a specific question about the card's subject ("can i put ice on
+    // it", "how long should i ice it") gets a direct answer from the card's
+    // text alone, checked sentence by sentence, with the card folded beneath.
+    // How-to questions and first reports keep the card open: its steps are
+    // the answer, and in an emergency speed matters most.
+    if (cardMode === 'verbatim' && guardsOn && opts.lead !== false && asksSpecifically(query) && !petPatient) {
+      const own = CONDITIONS.find((c) => c.card === card.chunk.section && c.forbidden !== undefined);
+      const checks = [...active.filter((c) => c.forbidden !== undefined), ...(own === undefined || active.includes(own) ? [] : [own])];
+      const whole = renderCard(parsed);
+      const leadPrompt = buildLeadParts(query, history.slice(-UNDERSTAND_HISTORY), parsed);
+      return {
+        ...common,
+        prompt: leadPrompt,
+        card: toOffer(card, citeOf(card, 0)),
+        stream: streamChecked(backend.generate(leadPrompt, opts.signal ? { maxTokens: LEAD_TOKENS, temperature: 0, signal: opts.signal } : { maxTokens: LEAD_TOKENS, temperature: 0 }), {
+          violates: (sentence) => violatedCondition(sentence, checks),
+          holdsFirst: () => false,
+          // A forbidden sentence: the card itself, open.
+          replace: async (by, shownAlready) => (shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${whole}` : whole),
+          // Nothing complete was shown: a refusal or "the card doesn't say"
+          // gets the card itself.
+          whole: async (text) => (text.trim() === '' || isRefusal(text) ? whole : text),
+        }),
+      };
     }
     if (cardMode === 'verbatim') {
       const ask = store.clarifyFor?.(card.chunk.id);

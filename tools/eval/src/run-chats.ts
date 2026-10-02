@@ -93,7 +93,8 @@ for (const set of sets) {
         const fits = outcomeFits(turn.expect, outcome);
         if (!fits) misses++;
         turnsRun++;
-        const offer = (r.kind === 'abstain' || r.kind === 'chat') && r.offer != null ? r.offer.title : undefined;
+        const offer = (r.kind === 'abstain' || r.kind === 'chat') && r.offer != null ? r.offer.title
+          : r.kind === 'answer' && r.card !== undefined ? r.card.title : undefined;
         const rec = {
           set, chatId: c.id, kind: c.kind, wording: w, turn: i, question: q, expect: turn.expect, outcome, fits,
           answer: text.trim(),

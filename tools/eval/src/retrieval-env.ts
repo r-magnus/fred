@@ -93,6 +93,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.WIDEN === '0' ? { widenWeakSearch: false } : {}),
     // UNDERSTAND=0 turns off the understanding step and the safety net (#98; on by default).
     ...(env.UNDERSTAND === '0' ? { understand: false } : {}),
+    // LEAD=0 shows the card itself for a specific question (#109; on by default).
+    ...(env.LEAD === '0' ? { lead: false } : {}),
     // GUARDS=0 turns off round 2 of #98 (conditions, question rule, danger signs, agreement).
     ...(env.GUARDS === '0' ? { guards: false } : {}),
     // UNDERSTAND_TOP=3 sets the own-words rank rule, for calibration on tuning sets only.

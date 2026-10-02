@@ -862,3 +862,51 @@ test('a question is never small talk, even when the understanding step says CHAT
     { ...uOpts, history: ['what should i bring for a day hike'] });
   assert.notEqual(res.kind, 'chat');
 });
+
+// #109: a specific question answered from a card.
+const leadBackend = (lead: string): FakeBackend => {
+  const b = new FakeBackend();
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) {
+    if (p.user.startsWith('CARD:')) { for (const w of lead.split(/(?<= )/)) yield w; return; }
+    if (p.user.startsWith('Messages:')) { yield 'NOW | snakebite, ice'; return; }
+    if (p.user.endsWith('->')) { yield 'QUESTION'; return; }
+    yield* gen(p, o);
+  };
+  return b;
+};
+const leadStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed("Snakebite\nKeep them still and get help.\n1. Keep them still.\nDon't put ice on it.", { source: 'Fred field card', section: 'Snakebite' })]);
+  return store;
+};
+const readAll = async (s: AsyncIterable<string>): Promise<string> => { let t = ''; for await (const x of s) t += x; return t; };
+const leadOpts = { state: null, abstainThreshold: 0.05, fallbackThreshold: 0.05, intent: true,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.05 } } } as const;
+
+test('a specific question about a card gets a short answer with the card folded', async () => {
+  const res = await ask('can i put ice on the snakebite', { backend: leadBackend("No. Don't put ice on a snakebite; keep him still. "), store: leadStore(), packs: clinicalPacks },
+    { ...leadOpts, history: ['a snake bit my friend'] });
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') {
+    assert.equal(res.card?.title, 'Snakebite');
+    assert.match(await readAll(res.stream), /^No\./);
+  }
+});
+
+test('a short answer that gives forbidden advice is replaced by the open card', async () => {
+  const res = await ask('can i put ice on the snakebite', { backend: leadBackend('Yes, put ice on it to slow the swelling. '), store: leadStore(), packs: clinicalPacks },
+    { ...leadOpts, history: ['a snake bit my friend'] });
+  if (res.kind === 'answer') {
+    const text = await readAll(res.stream);
+    assert.ok(!/put ice on it to slow/.test(text), text);
+    assert.match(text, /Keep them still and get help/);
+  } else assert.fail(res.kind);
+});
+
+test('with LEAD off, the card itself is the answer', async () => {
+  const res = await ask('can i put ice on the snakebite', { backend: leadBackend('No. '), store: leadStore(), packs: clinicalPacks },
+    { ...leadOpts, lead: false, history: ['a snake bit my friend'] });
+  if (res.kind === 'answer') assert.equal(res.card, undefined);
+});

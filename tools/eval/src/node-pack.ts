@@ -12,7 +12,7 @@ import type {
   ChunkRecord, DomainTag, BlockKind, EmbeddingSpec, PackManifest, CardClarify, CardSource, LicenseEntry,
 } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions } from '@fred/rag-core';
-import { denseTopK, vectorRow } from '@fred/rag-core';
+import { decodeBase64, denseTopK, splitRows, vectorRow } from '@fred/rag-core';
 import { getLlama, LlamaChatSession, type LlamaContext, type LlamaModel } from 'node-llama-cpp';
 
 interface LoadedPack {
@@ -54,6 +54,12 @@ export class NodePackStore implements PackStore {
 
   cardSourcesFor(chunkId: string): readonly CardSource[] | undefined {
     return this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')))?.manifest.cardSources?.[chunkId];
+  }
+
+  cardLineVectorsFor(chunkId: string): readonly Int8Array[] | undefined {
+    const p = this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')));
+    const b64 = p?.manifest.cardLines?.[chunkId];
+    return b64 === undefined || p === undefined ? undefined : splitRows(decodeBase64(b64), p.dim);
   }
 
   licenseFor(licenseId: string): LicenseEntry | undefined {

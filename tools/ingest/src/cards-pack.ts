@@ -19,6 +19,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type { CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
+import { cardLines, parseCard, quantizeInt8 } from '@fred/rag-core';
 import { cardText, validateCards, type FieldCard, type PassageText } from './cards.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
@@ -135,9 +136,22 @@ const embedInput = cards.map((c, i) => {
 });
 const vectors = await embedder.embed(embedInput);
 
+// Each card line on its own (#109), parsed as the app parses the card so the
+// rows line up with what it shows; a specific question is matched to them.
+const cardLineVectors: Record<string, string> = {};
+for (const [at, c] of cards.entries()) {
+  const lines = cardLines(parseCard(chunks[at]!.text));
+  const lineVecs = await embedder.embed(lines.map((l) =>
+    embedder.spec.documentTemplate === undefined ? l : documentText(EMBEDDING_GEMMA, c.title, l)));
+  cardLineVectors[`core-fieldcards:${at}`] = Buffer.concat(lineVecs.map((v) => {
+    const q = quantizeInt8(v).vec;
+    return Buffer.from(q.buffer, q.byteOffset, q.byteLength);
+  })).toString('base64');
+}
+
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.6.0',
+  version: '0.7.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],
@@ -148,6 +162,7 @@ const { dir } = await writePack(PACKS, {
   embedding: embedder.spec,
   clarify,
   cardSources,
+  cardLines: cardLineVectors,
 }, chunks, vectors);
 await embedder.dispose();
 console.log(`wrote ${dir}: ${cards.length} cards`);

@@ -59,7 +59,9 @@ const records: object[] = [];
 let misses = 0;
 let turnsRun = 0;
 for (const set of sets) {
-  const chats = (JSON.parse(readFileSync(set, 'utf8')) as { chats: Chat[] }).chats;
+  const all = (JSON.parse(readFileSync(set, 'utf8')) as { chats: Chat[] }).chats;
+  // CHAT_IDS=a,b runs only those chats, e.g. the ones a decision sweep saw change.
+  const chats = process.env.CHAT_IDS === undefined ? all : all.filter((c) => process.env.CHAT_IDS!.split(',').includes(c.id));
   for (const c of chats) {
     const wordings: (readonly string[])[] = [c.turns.map((t) => t.q), ...(c.variant === undefined ? [] : [c.variant])];
     for (const [w, qs] of wordings.entries()) {
@@ -79,7 +81,7 @@ for (const set of sets) {
         });
         const decideMs = Date.now() - t0;
         let text = '';
-        if (r.kind === 'answer' && generate) for await (const tok of r.stream) text += tok;
+        if (r.kind === 'answer' && (generate || r.card !== undefined)) for await (const tok of r.stream) text += tok;
         const refused = r.kind === 'answer' && generate && isRefusal(text);
         const outcome: Outcome =
           r.kind === 'answer' ? (refused ? 'decline' : 'answer')
@@ -93,7 +95,8 @@ for (const set of sets) {
         const fits = outcomeFits(turn.expect, outcome);
         if (!fits) misses++;
         turnsRun++;
-        const offer = (r.kind === 'abstain' || r.kind === 'chat') && r.offer != null ? r.offer.title : undefined;
+        const offer = (r.kind === 'abstain' || r.kind === 'chat') && r.offer != null ? r.offer.title
+          : r.kind === 'answer' && r.card !== undefined ? r.card.title : undefined;
         const rec = {
           set, chatId: c.id, kind: c.kind, wording: w, turn: i, question: q, expect: turn.expect, outcome, fits,
           answer: text.trim(),

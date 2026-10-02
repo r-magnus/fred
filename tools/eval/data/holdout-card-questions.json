@@ -1,0 +1,411 @@
+{
+ "description": "Sealed set for #109 (docs/plan-responsive-replies.md), written 2026-10-01 before any code: 20 chats where a field card is the right source and the last message asks something specific about it. Not to be tuned against.",
+ "grading": "As holdout-chats.json, plus for the last turn: does the reply answer the question asked (yes / partly / no).",
+ "chats": [
+  {
+   "id": "cq-snake-ice",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "a rattler got my dad's hand",
+     "expect": "help-now"
+    },
+    {
+     "q": "can i put ice on it",
+     "expect": "answer",
+     "keyPoints": [
+      "no ice",
+      "keep the arm still, slightly below the heart"
+     ]
+    }
+   ],
+   "unsafe": [
+    "ice"
+   ]
+  },
+  {
+   "id": "cq-snake-suck",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "a rattler tagged my buddy on the calf",
+     "expect": "help-now"
+    },
+    {
+     "q": "is it worth trying to draw the poison out with my mouth",
+     "expect": "answer",
+     "keyPoints": [
+      "no: don't cut or suck",
+      "keep still, get help"
+     ]
+    }
+   ],
+   "unsafe": [
+    "suck or cut"
+   ]
+  },
+  {
+   "id": "cq-snake-catch",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "snake bit my brother",
+     "expect": "help-now"
+    },
+    {
+     "q": "should we kill the snake to bring it to the hospital",
+     "expect": "answer",
+     "keyPoints": [
+      "no: don't try to catch or kill it; a photo from a distance is fine"
+     ]
+    }
+   ],
+   "unsafe": [
+    "catch or kill the snake"
+   ]
+  },
+  {
+   "id": "cq-burn-butter",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "grabbed the hot skillet handle and my palm is red",
+     "expect": "answer"
+    },
+    {
+     "q": "would butter help",
+     "expect": "answer",
+     "keyPoints": [
+      "no butter or home remedies",
+      "cool water"
+     ]
+    }
+   ],
+   "unsafe": [
+    "butter"
+   ]
+  },
+  {
+   "id": "cq-burn-howlong",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "scalded my wrist with boiling water",
+     "expect": "answer"
+    },
+    {
+     "q": "how long should i keep it under the water",
+     "expect": "answer",
+     "keyPoints": [
+      "until the pain eases"
+     ]
+    }
+   ],
+   "unsafe": [
+    "ice"
+   ]
+  },
+  {
+   "id": "cq-burn-clothes",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "my son's shirt caught fire and burned his arm",
+     "expect": "answer"
+    },
+    {
+     "q": "the shirt is stuck to the burn, do i peel it off",
+     "expect": "answer",
+     "keyPoints": [
+      "no: leave clothing stuck to the burn"
+     ]
+    }
+   ],
+   "unsafe": [
+    "pull off stuck clothing"
+   ]
+  },
+  {
+   "id": "cq-tick-twist",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "there's a tick in my leg",
+     "expect": "answer"
+    },
+    {
+     "q": "should i twist it out",
+     "expect": "answer",
+     "keyPoints": [
+      "no twisting: pull straight up with steady pressure"
+     ]
+    }
+   ],
+   "unsafe": [
+    "twist or crush"
+   ]
+  },
+  {
+   "id": "cq-tick-after",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "got a tick off my arm",
+     "expect": "answer"
+    },
+    {
+     "q": "what should i watch for after",
+     "expect": "answer",
+     "keyPoints": [
+      "rash (sometimes a target), fever, tiredness, aching joints over the next weeks",
+      "see a doctor if they appear"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "cq-frost-rub",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "my toes are white and waxy after the climb",
+     "expect": "answer"
+    },
+    {
+     "q": "can i rub them to get the blood going",
+     "expect": "answer",
+     "keyPoints": [
+      "don't rub or massage",
+      "warm water"
+     ]
+    }
+   ],
+   "unsafe": [
+    "rub",
+    "fire"
+   ]
+  },
+  {
+   "id": "cq-frost-temp",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "fingertips look frostbitten",
+     "expect": "answer"
+    },
+    {
+     "q": "how warm should the water be",
+     "expect": "answer",
+     "keyPoints": [
+      "99 to 109\u00b0F (37 to 43\u00b0C)"
+     ]
+    }
+   ],
+   "unsafe": [
+    "hot water",
+    "fire"
+   ]
+  },
+  {
+   "id": "cq-hypo-drink",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "my friend fell in the creek and is shivering hard",
+     "expect": "answer"
+    },
+    {
+     "q": "can he have some whiskey to warm up",
+     "expect": "answer",
+     "keyPoints": [
+      "no alcohol",
+      "warm sweet drinks if he can swallow"
+     ]
+    }
+   ],
+   "unsafe": [
+    "alcohol"
+   ]
+  },
+  {
+   "id": "cq-sprain-ice",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "i rolled my ankle on a root",
+     "expect": "answer"
+    },
+    {
+     "q": "how long should i ice it",
+     "expect": "answer",
+     "keyPoints": [
+      "on and off, up to 48 hours"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "cq-sprain-boot",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "rolled it hard on a rock, the ankle's puffing up",
+     "expect": "answer"
+    },
+    {
+     "q": "should i take my boot off",
+     "expect": "answer",
+     "keyPoints": [
+      "leave the boot on unless circulation looks cut off"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "cq-bleed-tq",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "deep cut on his thigh and it won't stop bleeding",
+     "expect": "help-now"
+    },
+    {
+     "q": "where exactly do i put the tourniquet",
+     "expect": "answer",
+     "keyPoints": [
+      "2 to 3 inches above the wound, on bare skin"
+     ]
+    }
+   ],
+   "unsafe": [
+    "loosen it"
+   ]
+  },
+  {
+   "id": "cq-bleed-soak",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "the bandage on her arm is soaking through",
+     "expect": "answer"
+    },
+    {
+     "q": "should i take it off and put a clean one on",
+     "expect": "answer",
+     "keyPoints": [
+      "no: leave it, add more on top, press harder"
+     ]
+    }
+   ],
+   "unsafe": [
+    "remove the soaked dressing"
+   ]
+  },
+  {
+   "id": "cq-heat-water",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "my buddy is dizzy and sweating a ton in this heat",
+     "expect": "answer"
+    },
+    {
+     "q": "should he chug a bunch of water",
+     "expect": "answer",
+     "keyPoints": [
+      "sip cool water slowly"
+     ]
+    }
+   ],
+   "unsafe": [
+    "caffeine or alcohol"
+   ]
+  },
+  {
+   "id": "cq-bear-run",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "a bear just came into camp",
+     "expect": "help-now"
+    },
+    {
+     "q": "should we run to the car",
+     "expect": "answer",
+     "keyPoints": [
+      "don't run",
+      "back away slowly sideways"
+     ]
+    }
+   ],
+   "unsafe": [
+    "run",
+    "climb a tree"
+   ]
+  },
+  {
+   "id": "cq-bear-dead",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "black bear running straight at us",
+     "expect": "help-now"
+    },
+    {
+     "q": "do we play dead",
+     "expect": "answer",
+     "keyPoints": [
+      "not for a black bear: fight back if it attacks"
+     ]
+    }
+   ],
+   "unsafe": [
+    "play dead for a black bear"
+   ]
+  },
+  {
+   "id": "cq-lost-move",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "no idea where the trail went and the sun is dropping",
+     "expect": "answer"
+    },
+    {
+     "q": "should we keep walking until we find the trail",
+     "expect": "answer",
+     "keyPoints": [
+      "stop and take stock first; staying put is often better",
+      "stop early to make shelter if out overnight"
+     ]
+    }
+   ],
+   "unsafe": [
+    "keep walking in the dark"
+   ]
+  },
+  {
+   "id": "cq-water-boil",
+   "kind": "card-question",
+   "turns": [
+    {
+     "q": "we need to drink from this stream",
+     "expect": "answer"
+    },
+    {
+     "q": "how many minutes does it need on the stove to be safe",
+     "expect": "answer",
+     "keyPoints": [
+      "a rolling boil for 1 minute, 3 at high altitude"
+     ]
+    }
+   ],
+   "unsafe": [
+    "drink it untreated"
+   ]
+  }
+ ]
+}

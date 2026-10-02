@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
 import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
 import { currentThread, readUnderstood } from '../src/understand.ts';
-import { assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
+import { applyQueryTemplate, assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
+import { quantizeInt8 } from '../src/score.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
 import { SYSTEM_PREFIX } from '../src/prompt.ts';
@@ -861,4 +862,57 @@ test('a question is never small talk, even when the understanding step says CHAT
   const res = await ask('how much water', { backend: understanding('CHAT | how much water for a day hike', 'CHAT'), store: understandStore(), packs: understandPacks },
     { ...uOpts, history: ['what should i bring for a day hike'] });
   assert.notEqual(res.kind, 'chat');
+});
+
+// #109: a specific question answered from a card's own lines.
+const leadBackend = (): FakeBackend => {
+  const b = new FakeBackend();
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) {
+    if (p.user.startsWith('Messages:')) { yield 'NOW | snakebite, ice'; return; }
+    if (p.user.endsWith('->')) { yield 'QUESTION'; return; }
+    yield* gen(p, o);
+  };
+  return b;
+};
+const leadOpts = { state: null, abstainThreshold: 0.05, fallbackThreshold: 0.05, intent: true,
+  retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 0.05 } } } as const;
+const ICE_Q = 'can i put ice on the snakebite';
+/** The card's two lines: `close` marks the ones pointing the way the question does. */
+const leadStore = async (b: FakeBackend, close: readonly boolean[]) => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed("Snakebite\nKeep them still and get help.\n1. Keep them still.\nDon't put ice on it.", { source: 'Fred field card', section: 'Snakebite' })]);
+  const q = await b.embed(applyQueryTemplate(b.embeddingSpec().queryTemplate, ICE_Q));
+  const rows = close.map((c) => quantizeInt8(q.map((x) => (c ? x : -x))).vec);
+  return Object.assign(store, { cardLineVectorsFor: () => rows });
+};
+
+test('a specific question about a card gets the card lines that answer it, the card folded', async () => {
+  const b = leadBackend();
+  const res = await ask(ICE_Q, { backend: b, store: await leadStore(b, [false, true]), packs: clinicalPacks },
+    { ...leadOpts, history: ['a snake bit my friend'] });
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') {
+    assert.equal(res.card?.title, 'Snakebite');
+    assert.equal(await readAll(res.stream), "Keep them still and get help.\nDon't put ice on it.");
+  }
+});
+
+test('no line close enough: the card itself, open', async () => {
+  const b = leadBackend();
+  const res = await ask(ICE_Q, { backend: b, store: await leadStore(b, [false, false]), packs: clinicalPacks },
+    { ...leadOpts, history: ['a snake bit my friend'] });
+  if (res.kind === 'answer') {
+    assert.equal(res.card, undefined);
+    assert.match(await readAll(res.stream), /1\. Keep them still/);
+  } else assert.fail(res.kind);
+});
+
+const readAll = async (s: AsyncIterable<string>): Promise<string> => { let t = ''; for await (const x of s) t += x; return t; };
+test('with LEAD off, the card itself is the answer', async () => {
+  const b = leadBackend();
+  const res = await ask(ICE_Q, { backend: b, store: await leadStore(b, [false, true]), packs: clinicalPacks },
+    { ...leadOpts, lead: false, history: ['a snake bit my friend'] });
+  if (res.kind === 'answer') assert.equal(res.card, undefined);
 });

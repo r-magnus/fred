@@ -11,15 +11,15 @@ import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
-import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
+import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, violatedCondition, type Condition } from './conditions.ts';
+import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
-import { buildPickParts, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
+import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 
 /**
@@ -187,6 +187,12 @@ export interface AskOptions {
   /** Overrides UNDERSTOOD_OWN_TOP, for calibration on the tuning sets. */
   readonly understandOwnTop?: number;
   /**
+   * #109: a specific question answered from a card gets a short direct answer
+   * from the card, with the card folded beneath. Default on; off only to
+   * measure what it changes.
+   */
+  readonly lead?: boolean;
+  /**
    * #101: the field card Fred showed for the message just before this one,
    * by title, when its reply was a card. A follow-up with nothing of its own
    * stays on it.
@@ -314,6 +320,36 @@ const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
+/**
+ * A question that asks something specific a card can answer in a sentence:
+ * yes or no ("can i put ice on it", "should we run to the car"), or how long,
+ * how much, where, which ("how long should i ice it"). Not a how-to ("how do
+ * i stop the bleeding") or "what do i do": there the card's steps are the
+ * answer.
+ */
+const LEAD_IN = String.raw`^\W*(?:(?:ok(?:ay)?|so|and|but),?\s+)*`;
+// A yes/no opener, but not "can't feel my fingertips" or "don't know which way":
+// those are statements.
+const YES_NO = new RegExp(LEAD_IN + String.raw`(?:should|shall|can|could|may|is|are|do|does|did|would|will|was|must)\b(?!['’]?t\b)(?!.*\bwhat (?:do|should) (?:i|we) do\b)`, 'i');
+const WH = String.raw`(?:how (?:long|much|many|far|tight|warm|hot|cold|often|soon|deep)\b|where (?:exactly |do |should |can )?(?:i|we|you)?\b|which (?:way|side|one)\b|what (?:temperature|should (?:i|we) (?:watch|look) for)\b)`;
+/** How long, where, which...: at the start of the message, or anywhere in one that ends in a question mark. */
+const WH_START = new RegExp(LEAD_IN + WH, 'i');
+const WH_ANY = new RegExp(String.raw`\b` + WH, 'i');
+const WOULD_HELP = /\bwould\b.*\bhelp\b/i;
+/**
+ * The question as the search embeds it. The embedding wrapper keeps each text's
+ * vector for the turn, so when retrieval searched these exact words this costs
+ * nothing more.
+ */
+function queryVector(backend: InferenceBackend, query: string): Promise<Float32Array> {
+  return backend.embed(applyQueryTemplate(backend.embeddingSpec().queryTemplate, query));
+}
+
+export function asksSpecifically(message: string): boolean {
+  const specific = YES_NO.test(message) || WH_START.test(message) || (/\?\s*$/.test(message) && WH_ANY.test(message)) || WOULD_HELP.test(message);
+  return specific && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
+}
+
 const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|shaky|dizzy|nause\w*|headache|throwing up|threw up|vomit\w*|hurts?|pain\w*|bleeding|blood|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|sweat\w*|breathing|soak\w*|bent|broken|tick|bonk\w*|hit (?:his|her|my|their) head|fell|tripped|landed on|stung|bit|bitten|cut|sliced|gash\w*|burn\w*|scald\w*|splinter|puffy|hives|sick|pale|out of it|confused|getting (?:cold|dark|worse)|freezing|can'?t (?:walk|stand|breathe|feel|move))\b/i;
 /** Words of a symptom getting better or worse, for an update on the card just shown (#101). */
 const SYMPTOM_UPDATE = /\b(?:swell\w*|swollen|bigger|puffy|puffing|redder|worse|still bleeding|bleeding again|hurts? (?:more|worse)|throbbing|pounding|numb\w*|tingl\w*|blister\w*|bubbles?|itch\w*|spreading|getting (?:worse|bigger|redder|darker))\b/i;
@@ -466,6 +502,11 @@ export type AskResult =
        * already said which (the answer then shows only that case).
        */
       readonly clarify?: ClarifyView;
+      /**
+       * #109: the field card the answer was written from, shown folded beneath
+       * a short direct answer. Undefined when the card itself is the answer.
+       */
+      readonly card?: CardOffer;
       readonly diagnostics: Diagnostics;
     }
   /** Small talk: a short fixed reply, with the matching card offered if any. */
@@ -1177,6 +1218,28 @@ export async function ask(
     if (cardMode === 'card-only') {
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
     }
+    // #109: a specific question about the card's subject ("can i put ice on
+    // it", "how long should i ice it") gets the card's summary and the lines
+    // that answer it, in the card's own words, with the whole card folded
+    // beneath. The lines are matched to the question by the search model, as
+    // passages are; nothing is written. A rewritten answer inverted the card
+    // ("No. Do not take off her ring", #109 try-out; results-phase3.md), and
+    // the 1.7B model asked to pick line numbers found no line for "can i put
+    // ice on it" beside "Don't put ice on it". The summary leads because the
+    // lines alone miss the point a card opens with ("rest" for a sprain). No
+    // line close enough: the card itself, open, as before. How-to questions
+    // and first reports keep the card open: its steps are the answer.
+    if (cardMode === 'verbatim' && guardsOn && opts.lead !== false && asksSpecifically(query) && !petPatient) {
+      const lines = cardLines(parsed);
+      const picked = matchCardLines(await queryVector(backend, query), parsed, store.cardLineVectorsFor?.(card.chunk.id));
+      if (picked.length > 0) {
+        return {
+          ...common,
+          card: toOffer(card, citeOf(card, 0)),
+          stream: once([parsed.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
+        };
+      }
+    }
     if (cardMode === 'verbatim') {
       const ask = store.clarifyFor?.(card.chunk.id);
       if (ask === undefined) return { ...common, stream: once(renderCard(parsed)) };
@@ -1202,6 +1265,30 @@ export async function ask(
         yield renderCard(parsed, readPick(pick, parsed.steps.length));
       })(),
     };
+  }
+
+  // #109: a specific follow-up about the card this conversation is on (the
+  // condition it is about, or the card just shown) gets that card's summary
+  // and matching lines when a line is close enough: "should we kill the snake
+  // to bring it to the hospital" after a snakebite was written from four manual
+  // passages (13-25 s on the phone) though the snakebite card says not to. No
+  // line close enough: the passages, as before.
+  const onCard = followed ?? lastShown;
+  if (guardsOn && opts.lead !== false && onCard !== undefined && asksSpecifically(query) && !petPatient && cardMode === 'verbatim') {
+    const parsedOn = parseCard(onCard.chunk.text);
+    const lines = cardLines(parsedOn);
+    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id));
+    if (picked.length > 0) {
+      return {
+        kind: 'answer',
+        stream: once([parsedOn.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
+        citations: [citeOf(onCard, 0)],
+        prompt: { system: '', user: '' },
+        medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),
+        card: toOffer(onCard, citeOf(onCard, 0)),
+        diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode },
+      };
+    }
   }
 
   // Stage 3 — compress before prefill.

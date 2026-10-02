@@ -10,6 +10,7 @@
  * a one-line summary, numbered steps, then the don'ts, the get-help line and
  * any notes, one per line. The parse below relies on that layout.
  */
+import { cosineInt8 } from './score.ts';
 import type { PromptParts } from './prompt.ts';
 
 export interface ParsedCard {
@@ -65,6 +66,40 @@ export function readPick(text: string, stepCount: number): number[] {
     if (n >= 1 && n <= stepCount) picked.add(n - 1);
   }
   return [...picked].sort((a, b) => a - b);
+}
+
+/**
+ * #109: every line of a card a question could be answered by, in order: its
+ * steps, then its don'ts, get-help line and notes. A reply made of some of
+ * these lines is the card's own reviewed wording, so it cannot invert it.
+ */
+export function cardLines(card: ParsedCard): string[] {
+  return [...card.steps, ...card.rest];
+}
+
+/**
+ * #109: the lowest similarity at which a card line counts as answering a
+ * question. Set on seen chats (2026-10-02): the line that answers scored
+ * 0.39-0.55 ("Don't put ice on it" 0.54 for "can i put ice on it"); a card
+ * with no such line topped out at 0.28-0.36 ("can she walk on it" 0.30, a
+ * soaked dressing 0.36). Under it the card is shown whole, as before.
+ */
+export const LINE_FLOOR = 0.37;
+
+/** Lines this close to the best one are shown with it. */
+const LINE_BAND = 0.08;
+
+/**
+ * The card lines (0-based, card order) that answer a question: the best one if
+ * it reaches LINE_FLOOR, and the next if it is nearly as close. Empty when no
+ * line does, or the vectors do not match the card (a pack built from other text).
+ */
+export function matchCardLines(queryVec: Float32Array, card: ParsedCard, rows: readonly Int8Array[] | undefined): number[] {
+  if (rows === undefined || rows.length !== cardLines(card).length) return [];
+  const sims = rows.map((r, i) => [cosineInt8(queryVec, r), i] as const).sort((x, y) => y[0] - x[0]);
+  const best = sims[0];
+  if (best === undefined || best[0] < LINE_FLOOR) return [];
+  return sims.slice(0, 2).filter(([d]) => d >= Math.max(LINE_FLOOR, best[0] - LINE_BAND)).map(([, i]) => i).sort((x, y) => x - y);
 }
 
 /**

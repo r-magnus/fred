@@ -21,9 +21,10 @@ import { askOptionsFromEnv } from './retrieval-env.ts';
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
+// EVAL_IDS=a,b runs only those questions, e.g. the ones a decision sweep saw change.
 const questions: GradedQuestion[] = setsFor(process.env.EVAL_SET).flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
-);
+).filter((q) => process.env.EVAL_IDS === undefined || process.env.EVAL_IDS.split(',').includes(q.id));
 console.log(describeSet(questions));
 const harness = await openHarness();
 const { backend, store, packs } = harness;
@@ -42,7 +43,8 @@ for (const [i, q] of questions.entries()) {
   let answer = '';
   // GENERATE=0 records retrieval and the gate's decision without spending a
   // generation pass: enough for calibrate.ts, seconds instead of twenty minutes.
-  if (res.kind === 'answer' && process.env.GENERATE !== '0') {
+  // Card lines (#109) are fixed text: read them even under GENERATE=0.
+  if (res.kind === 'answer' && (process.env.GENERATE !== '0' || res.card !== undefined)) {
     for await (const tok of res.stream) answer += tok;
   }
   const latencyMs = Date.now() - t0;
@@ -63,6 +65,7 @@ for (const [i, q] of questions.entries()) {
     ...(res.kind === 'abstain' ? { abstainReason: res.reason } : {}),
     ...(d.cardAnswer !== undefined ? { cardAnswer: d.cardAnswer } : {}),
     ...((res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? { offer: res.offer.title } : {}),
+    ...(res.kind === 'answer' && res.card !== undefined ? { offer: res.card.title } : {}),
     ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
     ...(d.widenedTopScore !== undefined ? { widenedTopScore: d.widenedTopScore } : {}),
     ...(d.understood !== undefined ? { understood: d.understood } : {}),

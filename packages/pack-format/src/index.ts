@@ -155,6 +155,13 @@ export interface PackManifest {
   readonly clarify?: Readonly<Record<string, CardClarify>>;
   /** Field-card packs only: the manuals and pages each card quotes, keyed by chunk id. */
   readonly cardSources?: Readonly<Record<string, readonly CardSource[]>>;
+  /**
+   * Field-card packs only (#109): one INT8 vector per card line (its steps,
+   * then its don'ts, get-help line and notes, as the app parses them), keyed by
+   * chunk id and base64-encoded, `embedding.dim` bytes a line. A specific
+   * question is matched to the lines that answer it without a model call.
+   */
+  readonly cardLines?: Readonly<Record<string, string>>;
 }
 
 /** A manual a field card quotes, and the pages quoted. */

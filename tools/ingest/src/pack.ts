@@ -27,6 +27,7 @@ export interface PackInput {
   readonly clarify?: Readonly<Record<string, CardClarify>>;
   /** Field-card packs: the manuals and pages each card quotes, keyed by chunk id. */
   readonly cardSources?: Readonly<Record<string, readonly CardSource[]>>;
+  readonly cardLines?: Readonly<Record<string, string>>;
   readonly id: string;
   readonly version: string;
   readonly displayName: string;
@@ -144,6 +145,7 @@ export async function writePack(
     ingestVersion: INGEST_VERSION,
     ...(input.clarify === undefined ? {} : { clarify: input.clarify }),
     ...(input.cardSources === undefined ? {} : { cardSources: input.cardSources }),
+    ...(input.cardLines === undefined ? {} : { cardLines: input.cardLines }),
   };
   await writeFile(join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   return { dir, manifest };

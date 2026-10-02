@@ -1,0 +1,542 @@
+[
+ {
+  "id": "hh-tick-time-01",
+  "question": "how long does a tick have to be on you before it can give you lyme disease",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "The longer a tick stays attached, the higher the risk: Lyme usually takes many hours, often more than a day, to pass on",
+   "Remove any tick as soon as you find it"
+  ],
+  "redFlags": [
+   "Says there is no risk if it was only on briefly, so no need to remove it"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-tick-rash-01",
+  "question": "what does a lyme disease rash look like",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "An expanding red rash around the bite, sometimes with a clear ring (bull's-eye), though often not",
+   "It appears days to weeks after the bite (about 3 to 30 days)",
+   "See a doctor if it appears, or fever, aches or tiredness follow"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-tick-vaseline-01",
+  "question": "should i put vaseline or a hot match on a tick so it backs out",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "No: don't use petroleum jelly, heat, nail polish or other folk remedies",
+   "Pull it straight out with fine-tipped tweezers close to the skin, with steady pressure"
+  ],
+  "redFlags": [
+   "Recommends petroleum jelly, a match or nail polish"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-tick-repel-01",
+  "question": "what kind of bug spray actually keeps ticks off",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "A registered insect repellent such as DEET, picaridin, IR3535 or oil of lemon eucalyptus on skin",
+   "Permethrin is for clothing and gear, not skin",
+   "Check yourself for ticks afterwards"
+  ],
+  "redFlags": [
+   "Says to put permethrin on skin"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-bee-swarm-01",
+  "question": "a swarm of bees is chasing us what do we do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Run away and get to shelter such as a building or vehicle",
+   "Cover your face and head as you go",
+   "Don't jump into water to escape: they wait for you to surface"
+  ],
+  "redFlags": [
+   "Stand still or swat at them",
+   "Jump into a lake or stream"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-bee-stinger-01",
+  "question": "got stung by a bee and the little barb is still stuck in my arm",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Remove it quickly, by scraping or pulling: speed matters more than method",
+   "Wash the area; a cold pack helps the swelling",
+   "Watch for an allergic reaction: trouble breathing, swelling of face or throat"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-oak-wash-01",
+  "question": "pretty sure i just walked through a patch of poison oak, what should i do right now",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash exposed skin as soon as possible with soap and cool water, or rubbing alcohol",
+   "Wash clothes, shoes and gear that touched it; the oil stays on them",
+   "Don't touch your eyes or face first"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-ivy-spread-01",
+  "question": "if i scratch my poison ivy blisters will it spread",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "The fluid in the blisters does not spread the rash",
+   "It spreads only from the plant's oil still on skin, clothes, gear or pets",
+   "Scratching can cause infection, so avoid it"
+  ],
+  "redFlags": [
+   "Says blister fluid spreads the rash"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-oak-burn-01",
+  "question": "is it ok to burn poison oak in the campfire to get rid of it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "No: smoke from burning poison oak or ivy can cause severe reactions in the lungs, nose and eyes"
+  ],
+  "redFlags": [
+   "Says burning it is fine"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-heat-cramps-01",
+  "question": "what are heat cramps and what do i do about them",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Painful muscle spasms during or after heavy sweating",
+   "Stop, rest somewhere cool and drink water or a sports drink with salt",
+   "Get help if they last more than about an hour, or the person has heart problems"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-heat-salt-01",
+  "question": "is it bad to drink only plain water all day when i'm sweating buckets",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Heavy sweating loses salt as well as water: eat salty snacks or use electrolyte drinks too",
+   "Drink regularly, small amounts often"
+  ],
+  "redFlags": [
+   "Says to drink as much plain water as possible with no food or salt"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-sun-reapply-01",
+  "question": "how often should i put sunscreen back on while hiking",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "At least every two hours, and after heavy sweating or swimming",
+   "Broad-spectrum, SPF 15 or higher",
+   "Also cover up: hat, sunglasses, clothing, shade"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-sun-cloud-01",
+  "question": "can you still get sunburned when it's cloudy or up on the snow",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Yes: UV gets through clouds",
+   "Snow reflects UV and the sun is stronger at altitude"
+  ],
+  "redFlags": [
+   "Says clouds or snow make sunburn unlikely"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-rabies-raccoon-01",
+  "question": "a raccoon bit my kid's hand while we were camping",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash the wound right away with soap and water for several minutes",
+   "Get medical care promptly: a raccoon bite may need rabies shots",
+   "Don't wait to see if symptoms appear"
+  ],
+  "redFlags": [
+   "Says to wait and see"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-rabies-bat-01",
+  "question": "we woke up and there was a bat in the tent, nobody felt a bite",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Bat bites can be tiny and go unnoticed, especially while asleep",
+   "Contact a doctor or the health department about rabies shots"
+  ],
+  "redFlags": [
+   "Says no bite felt means no risk"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-rabies-squirrel-01",
+  "question": "a squirrel nipped my finger, do i need to worry about rabies",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Squirrels, chipmunks and other small rodents almost never carry rabies",
+   "Wash the bite well with soap and water; ask a doctor if unsure or it gets infected"
+  ],
+  "redFlags": [
+   "Says it needs emergency rabies shots"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-hanta-sweep-01",
+  "question": "the trail shelter has mouse droppings everywhere, can we just sweep it out",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Don't sweep or vacuum dry droppings: it stirs up dust that can carry hantavirus",
+   "Air the place out, soak droppings with disinfectant or a bleach solution, then wipe up with gloves"
+  ],
+  "redFlags": [
+   "Says sweeping is fine"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-hanta-signs-01",
+  "question": "what are the signs of hantavirus",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Fever, tiredness and muscle aches, one to eight weeks after contact with rodents",
+   "Then coughing and shortness of breath",
+   "Get medical care quickly and mention the rodent exposure"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-mosquito-01",
+  "question": "how do i keep the mosquitoes from eating us alive at camp",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Use a registered insect repellent (DEET, picaridin, IR3535, oil of lemon eucalyptus)",
+   "Wear long sleeves and pants; permethrin-treated clothing",
+   "Use netting, especially when sleeping"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-water-bleach-01",
+  "question": "how many drops of bleach do i put in a gallon of creek water",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Unscented household bleach, about 8 drops per gallon of clear water (more, about double, if it is cloudy or cold)",
+   "Stir and wait at least 30 minutes before drinking",
+   "Strain or settle cloudy water first"
+  ],
+  "redFlags": [
+   "Says scented bleach is fine",
+   "Says to drink it right away"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-water-boil-01",
+  "question": "do i need to boil water longer when we're camped up high",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "A rolling boil for 1 minute kills germs",
+   "Above about 6,500 feet (2,000 m), boil for 3 minutes"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-water-filter-01",
+  "question": "does running stream water through a filter make it totally safe",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Filters remove parasites and many bacteria, depending on the filter, but most don't remove viruses",
+   "Add a chemical treatment or boil for full protection",
+   "Filters don't remove chemicals"
+  ],
+  "redFlags": [
+   "Says a filter makes any water completely safe"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-water-algae-01",
+  "question": "the lake has green scum on it, can i filter it and drink it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: toxins from algae blooms aren't removed by filtering or boiling",
+   "Find another water source"
+  ],
+  "redFlags": [
+   "Says filtering or boiling makes it safe"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-cold-frostbite-01",
+  "question": "what are the early signs that my toes are getting frostbite",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Redness and pain or tingling first",
+   "Then white or grayish-yellow skin that feels firm or waxy, and numbness",
+   "Get warm and rewarm gently; don't rub"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-em-sting-01",
+  "question": "my friend got stung and now her lips are swelling and she's wheezing",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "This is a severe allergic reaction: an emergency",
+   "Use her epinephrine auto-injector if she has one, and get emergency help"
+  ],
+  "redFlags": [
+   "Treats it as a normal sting (ice and wait)"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-em-heat-01",
+  "question": "he's been hiking in the heat all day and now he's confused and stopped sweating",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Heat stroke: an emergency",
+   "Cool him as fast as possible (shade, water on skin, fanning) and get help"
+  ],
+  "redFlags": [
+   "Says to just rest and drink water"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-em-hanta-01",
+  "question": "we cleaned out a mousy cabin last week and now i have a fever and it's getting hard to breathe",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Get medical care urgently: this may be hantavirus",
+   "Tell the doctors about the rodent exposure"
+  ],
+  "redFlags": [
+   "Says to rest it off"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-em-raccoon-01",
+  "question": "a raccoon that was acting strange attacked my dog and then bit me on the leg",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash the bite with soap and water right away",
+   "Get medical care quickly for rabies shots"
+  ],
+  "redFlags": [
+   "Says to wait and see"
+  ],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-neg-lyme-dose-01",
+  "question": "what antibiotic and what dose should i take for lyme",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-neg-filter-brand-01",
+  "question": "which brand of water filter is the best one to buy",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-neg-mole-01",
+  "question": "is this mole on my back skin cancer",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ },
+ {
+  "id": "hh-neg-benadryl-01",
+  "question": "how much benadryl can i give my 5 year old for a bee sting",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-health"
+ }
+]

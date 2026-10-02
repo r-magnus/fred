@@ -10,6 +10,7 @@
  * a one-line summary, numbered steps, then the don'ts, the get-help line and
  * any notes, one per line. The parse below relies on that layout.
  */
+import { cosineInt8 } from './score.ts';
 import type { PromptParts } from './prompt.ts';
 
 export interface ParsedCard {
@@ -76,22 +77,29 @@ export function cardLines(card: ParsedCard): string[] {
   return [...card.steps, ...card.rest];
 }
 
-/** Ask the model which lines of the card answer the question. Numbers only. */
-export function buildLinePickParts(query: string, earlier: readonly string[], card: ParsedCard): PromptParts {
-  const lines = cardLines(card);
-  return {
-    system: 'You pick which lines of a first-aid or survival card answer a hiker\'s question. Reply with line numbers only.',
-    user: `CARD: ${card.title}\n${lines.map((l, i) => `${i + 1}. ${l}`).join('\n')}\n\n` +
-      (earlier.length === 0 ? '' : `EARLIER MESSAGES: ${earlier.join(' / ')}\n`) +
-      `QUESTION: ${query}\n\n` +
-      'Which lines answer exactly this question? Reply with at most 3 line numbers separated by commas. If no line answers it, reply 0.\n\nLINES:',
-  };
-}
+/**
+ * #109: the lowest similarity at which a card line counts as answering a
+ * question. Set on seen chats (2026-10-02): the line that answers scored
+ * 0.39-0.55 ("Don't put ice on it" 0.54 for "can i put ice on it"); a card
+ * with no such line topped out at 0.28-0.36 ("can she walk on it" 0.30, a
+ * soaked dressing 0.36). Under it the card is shown whole, as before.
+ */
+export const LINE_FLOOR = 0.37;
 
-/** The picked lines (0-based, card order), or empty for "none" or nothing readable. At most 3. */
-export function readLinePick(text: string, lineCount: number): number[] {
-  if (/^\s*0\b/.test(text)) return [];
-  return readPick(text, lineCount).slice(0, 3);
+/** Lines this close to the best one are shown with it. */
+const LINE_BAND = 0.08;
+
+/**
+ * The card lines (0-based, card order) that answer a question: the best one if
+ * it reaches LINE_FLOOR, and the next if it is nearly as close. Empty when no
+ * line does, or the vectors do not match the card (a pack built from other text).
+ */
+export function matchCardLines(queryVec: Float32Array, card: ParsedCard, rows: readonly Int8Array[] | undefined): number[] {
+  if (rows === undefined || rows.length !== cardLines(card).length) return [];
+  const sims = rows.map((r, i) => [cosineInt8(queryVec, r), i] as const).sort((x, y) => y[0] - x[0]);
+  const best = sims[0];
+  if (best === undefined || best[0] < LINE_FLOOR) return [];
+  return sims.slice(0, 2).filter(([d]) => d >= Math.max(LINE_FLOOR, best[0] - LINE_BAND)).map(([, i]) => i).sort((x, y) => x - y);
 }
 
 /**

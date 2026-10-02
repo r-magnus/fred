@@ -79,6 +79,13 @@ export function cosineInt8(query: Float32Array, candidate: Int8Array): number {
  * otherwise silently alias a neighbouring row and produce a plausible but wrong
  * similarity, so it throws.
  */
+/** Every row of a packed INT8 matrix (a card's line vectors). A short last row is dropped. */
+export function splitRows(buffer: Uint8Array, dim: number): Int8Array[] {
+  const rows: Int8Array[] = [];
+  for (let i = 0; (i + 1) * dim <= buffer.byteLength; i++) rows.push(vectorRow(buffer, i, dim));
+  return rows;
+}
+
 export function vectorRow(buffer: Uint8Array, ordinal: number, dim: number): Int8Array {
   if (!Number.isInteger(ordinal) || ordinal < 0) {
     throw new Error(`ordinal must be a non-negative integer, got ${ordinal}`);

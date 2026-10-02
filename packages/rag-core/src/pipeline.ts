@@ -11,7 +11,7 @@ import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
-import { retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
+import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
@@ -19,7 +19,7 @@ import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
-import { buildLinePickParts, buildPickParts, cardLines, parseCard, pickChoice, readLinePick, readPick, renderCard, renderCardSteps } from './card-answer.ts';
+import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 
 /**
@@ -328,6 +328,15 @@ const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist
  * answer.
  */
 const SPECIFIC = /^\W*(?:ok(?:ay)?,?\s+|so,?\s+|and\s+|but\s+)?(?:should|shall|can|could|may|is|are|do|does|did|would|will|was|must)\b(?!.*\bwhat (?:do|should) (?:i|we) do\b)|\bhow (?:long|much|many|far|tight|warm|hot|cold|often|soon|deep)\b|\bwhere (?:exactly |do |should |can )?(?:i|we|you)?\b|\bwhich (?:way|side|one)\b|\bwhat (?:temperature|should (?:i|we) (?:watch|look) for)\b|\bwould\b.*\bhelp\b/i;
+/**
+ * The question as the search embeds it. The embedding wrapper keeps each text's
+ * vector for the turn, so when retrieval searched these exact words this costs
+ * nothing more.
+ */
+function queryVector(backend: InferenceBackend, query: string): Promise<Float32Array> {
+  return backend.embed(applyQueryTemplate(backend.embeddingSpec().queryTemplate, query));
+}
+
 export function asksSpecifically(message: string): boolean {
   return SPECIFIC.test(message) && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
 }
@@ -1203,23 +1212,20 @@ export async function ask(
     // #109: a specific question about the card's subject ("can i put ice on
     // it", "how long should i ice it") gets the card's summary and the lines
     // that answer it, in the card's own words, with the whole card folded
-    // beneath. The summary always leads: picking alone missed the point the
-    // card opens with ("only eat what you can positively identify", "stop and
-    // take stock", "rest" for a sprain) on seen chats. The model only
-    // picks line numbers: a rewritten answer inverted the card (results-
-    // phase3.md; "No. Do not take off her ring", #109 try-out). No line picked:
-    // the card itself, open, as before. How-to questions and first reports keep
-    // the card open: its steps are the answer, and in an emergency speed matters.
+    // beneath. The lines are matched to the question by the search model, as
+    // passages are; nothing is written. A rewritten answer inverted the card
+    // ("No. Do not take off her ring", #109 try-out; results-phase3.md), and
+    // the 1.7B model asked to pick line numbers found no line for "can i put
+    // ice on it" beside "Don't put ice on it". The summary leads because the
+    // lines alone miss the point a card opens with ("rest" for a sprain). No
+    // line close enough: the card itself, open, as before. How-to questions
+    // and first reports keep the card open: its steps are the answer.
     if (cardMode === 'verbatim' && guardsOn && opts.lead !== false && asksSpecifically(query) && !petPatient) {
       const lines = cardLines(parsed);
-      const pickPrompt = buildLinePickParts(query, history.slice(-UNDERSTAND_HISTORY), parsed);
-      let raw = '';
-      for await (const tok of backend.generate(pickPrompt, opts.signal ? { maxTokens: 12, temperature: 0, signal: opts.signal } : { maxTokens: 12, temperature: 0 })) raw += tok;
-      const picked = readLinePick(raw, lines.length);
+      const picked = matchCardLines(await queryVector(backend, query), parsed, store.cardLineVectorsFor?.(card.chunk.id));
       if (picked.length > 0) {
         return {
           ...common,
-          prompt: pickPrompt,
           card: toOffer(card, citeOf(card, 0)),
           stream: once([parsed.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
         };
@@ -1253,25 +1259,22 @@ export async function ask(
   }
 
   // #109: a specific follow-up about the card this conversation is on (the
-  // condition it is about, or the card just shown) is answered from that
-  // card's lines when they answer it: "should we kill the snake to bring it to
-  // the hospital" after a snakebite was written from four manual passages
-  // (13-25 s on the phone) though the snakebite card says not to. No line
-  // picked: the passages, as before.
+  // condition it is about, or the card just shown) gets that card's summary
+  // and matching lines when a line is close enough: "should we kill the snake
+  // to bring it to the hospital" after a snakebite was written from four manual
+  // passages (13-25 s on the phone) though the snakebite card says not to. No
+  // line close enough: the passages, as before.
   const onCard = followed ?? lastShown;
   if (guardsOn && opts.lead !== false && onCard !== undefined && asksSpecifically(query) && !petPatient && cardMode === 'verbatim') {
     const parsedOn = parseCard(onCard.chunk.text);
     const lines = cardLines(parsedOn);
-    const pickPrompt = buildLinePickParts(query, history.slice(-UNDERSTAND_HISTORY), parsedOn);
-    let raw = '';
-    for await (const tok of backend.generate(pickPrompt, opts.signal ? { maxTokens: 12, temperature: 0, signal: opts.signal } : { maxTokens: 12, temperature: 0 })) raw += tok;
-    const picked = readLinePick(raw, lines.length);
+    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id));
     if (picked.length > 0) {
       return {
         kind: 'answer',
         stream: once([parsedOn.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
         citations: [citeOf(onCard, 0)],
-        prompt: pickPrompt,
+        prompt: { system: '', user: '' },
         medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),
         card: toOffer(onCard, citeOf(onCard, 0)),
         diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode },

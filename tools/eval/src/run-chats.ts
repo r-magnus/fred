@@ -79,7 +79,7 @@ for (const set of sets) {
         });
         const decideMs = Date.now() - t0;
         let text = '';
-        if (r.kind === 'answer' && generate) for await (const tok of r.stream) text += tok;
+        if (r.kind === 'answer' && (generate || r.card !== undefined)) for await (const tok of r.stream) text += tok;
         const refused = r.kind === 'answer' && generate && isRefusal(text);
         const outcome: Outcome =
           r.kind === 'answer' ? (refused ? 'decline' : 'answer')

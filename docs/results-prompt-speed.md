@@ -40,3 +40,26 @@ keys and grades: `prompt-speed/`. Run times on the desktop are meaningless here
   and trims the rest is untested.
 - Cards answer in ~4 s; more card coverage of common questions is the surest
   speed gain.
+
+## Shorter passages: trim all but the best (#108)
+
+2026-10-02. **Rejected: worse and unsafe.** `COMPRESS=keep1` keeps the best
+passage whole and trims the others' least relevant sentences (20-40%). The
+median prompt fell from ~900 to ~720 tokens (−16 to −23%). Graded blind the
+same way on the five sets:
+
+| | Today | Best whole, rest trimmed |
+|---|---:|---:|
+| Score, model-written answers | **55.0 / 79** | 49.0 / 79 |
+| Unsafe answers | 0 | **3** |
+
+With sentences cut from the other passages, the model filled the gaps: "If
+symptoms appear, induce vomiting" (a spoiled fish), "Apply manual traction or
+use body weight to pull the bones" (a dislocated shoulder), "Stay hydrated and
+avoid drinking water when scarce" (desert heat). The option stays, off by
+default (`keepWhole` in `compress.ts`). Grades: `prompt-speed/*-keep1.*`.
+
+Three ways of making the prompt smaller have now failed on accuracy (trimming
+every passage, fewer passages, trimming all but the best): the 1.7B model leans
+on the context it is given, and less of it makes the answers worse before it
+makes them faster.

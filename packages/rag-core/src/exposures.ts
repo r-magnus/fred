@@ -29,7 +29,7 @@ export interface ExposureLink {
    * Advice a model-written answer must not give while this link holds, and
    * the reviewed reply that replaces it (conditions.ts, `instead`).
    */
-  readonly guard?: { readonly label: string; readonly forbidden: RegExp; readonly instead: string };
+  readonly guard?: { readonly label: string; readonly forbidden: RegExp; readonly instead: string; readonly negated?: RegExp };
 }
 
 /** Wild mammals the CDC names as carrying rabies in the US, and a catch-all. */
@@ -69,6 +69,8 @@ export const EXPOSURE_LINKS: readonly ExposureLink[] = [
     // touch, spray or swallowing.
     guard: {
       label: 'an algal bloom',
+      // A warning says the treatment fails; "if no toxins are detected" does not.
+      negated: /\b(?:don'?t|do not|never|won'?t|will not|doesn'?t|does not|cannot|can'?t|isn'?t|is not|not (?:remove|safe|make|kill|work))\b/i,
       forbidden: /\b(?:boil\w*|filter\w*|purif\w*|tablets?|bleach|iodine|chlorin\w*|disinfect\w*|test\w*)\b|\bdrink\w*\b[^.]*\b(?:cautious\w*|safe)\b/i,
       instead: "Don't drink water with a scum, foam or bloom on it, even filtered or boiled: boiling won't remove the algae's toxins and may increase them. " +
         "Stay out of it, and keep dogs out too: the toxins can make people and animals sick through the skin, spray or swallowing. Find another water source.",
@@ -91,5 +93,6 @@ export function withExposures(message: string): string {
 /** The links in these messages that guard an answer, as conditions with a reviewed reply and no card. */
 export function exposureConditions(messages: readonly string[]): Condition[] {
   return EXPOSURE_LINKS.filter((l) => l.guard !== undefined && messages.some((m) => l.when.test(m)))
-    .map((l) => ({ id: l.id, label: l.guard!.label, card: '', said: () => true, forbidden: l.guard!.forbidden, instead: l.guard!.instead }));
+    .map((l) => ({ id: l.id, label: l.guard!.label, card: '', said: () => true, forbidden: l.guard!.forbidden, instead: l.guard!.instead,
+      ...(l.guard!.negated === undefined ? {} : { negated: l.guard!.negated }) }));
 }

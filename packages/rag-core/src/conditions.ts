@@ -55,6 +55,12 @@ export interface Condition {
    * words. With it, `card` is empty.
    */
   readonly instead?: string;
+  /**
+   * What makes a sentence a warning against the advice, when NEGATED is too
+   * loose: "If no toxins are detected, filter it and drink it cautiously"
+   * contains "no" and is still the advice (#51).
+   */
+  readonly negated?: RegExp;
 }
 
 const SNAKE = /\b(?:snakes?|rattlers?|rattlesnakes?|copperheads?|cottonmouths?|vipers?|adders?|water moccasins?)\b/i;
@@ -198,7 +204,7 @@ const NEGATED = /\b(?:don'?t|do not|never|avoid|not|no|instead of|rather than|wi
 export function violatedCondition(answer: string, active: readonly Condition[]): Condition | undefined {
   const sentences = answer.split(/(?<=[.!?])\s+|\n+/);
   return active.find((c) => c.forbidden !== undefined &&
-    sentences.some((s) => c.forbidden!.test(s) && !NEGATED.test(s)));
+    sentences.some((s) => c.forbidden!.test(s) && !(c.negated ?? NEGATED).test(s)));
 }
 
 /**

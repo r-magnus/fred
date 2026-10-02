@@ -146,7 +146,7 @@ test('an algal bloom guards the answer: boiling or filtering that water is repla
   const watched = exposureConditions(['the lake has green scum on it, can i filter it and drink it']);
   assert.equal(watched[0]?.id, 'algal-bloom');
   assert.equal(violatedCondition('Boil the water for 1 minute, or use purification tablets.', watched)?.id, 'algal-bloom');
-  assert.equal(violatedCondition('If no toxins are detected, drink it cautiously.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('If no toxins are detected, consider filtering the water and drink it cautiously.', watched)?.id, 'algal-bloom');
   assert.equal(violatedCondition('No, boiling water will not remove the toxins.', watched), undefined);
   assert.equal(violatedCondition('Find another water source.', watched), undefined);
   assert.deepEqual(exposureConditions(['how do i purify stream water']), []);

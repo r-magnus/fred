@@ -123,3 +123,19 @@ test('specific questions a card answers in a sentence, not how-tos', () => {
     "can't feel my fingertips and they've gone kind of waxy", "I think I'm lost. I don't know which way the trail is."]) assert.ok(!asksSpecifically(m), m);
   for (const m of ['ok so how long should i ice it', 'Which way should we go?', 'is ice ok for it']) assert.ok(asksSpecifically(m), m);
 });
+
+test('a situation with an unnamed disease risk is searched with the disease beside it (#51)', async () => {
+  const { EXPOSURE_LINKS, withExposures } = await import('../src/exposures.ts');
+  const ids = (m: string): string[] => EXPOSURE_LINKS.filter((l) => l.when.test(m)).map((l) => l.id);
+  assert.deepEqual(ids("a raccoon bit my kid's hand"), ['rabies']);
+  assert.deepEqual(ids('a skunk scratched my arm'), ['rabies']);
+  assert.deepEqual(ids('we woke up and there was a bat in the tent'), ['rabies-bat']);
+  assert.deepEqual(ids('the shelter has mouse droppings everywhere'), ['hantavirus']);
+  assert.deepEqual(ids('dead squirrels near camp'), ['plague']);
+  assert.deepEqual(ids('the lake has green scum on it'), ['algal-bloom']);
+  // Small rodents almost never carry rabies (CDC); an ankle is not an exposure.
+  assert.deepEqual(ids('a squirrel bit my finger'), []);
+  assert.deepEqual(ids('a chipmunk bit me'), []);
+  assert.equal(withExposures('i rolled my ankle'), 'i rolled my ankle');
+  assert.match(withExposures('a fox nipped my ankle'), /\(rabies exposure/);
+});

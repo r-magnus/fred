@@ -18,6 +18,7 @@ import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
+import { withExposures } from './exposures.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -617,7 +618,11 @@ export async function ask(
   const pressure = memory?.pressure() ?? 0;
   const maxTokens = maxTokensForPressure(pressure);
 
-  let keywords = extractKeywords(query);
+  // #51: a situation with a disease risk the hiker does not name is searched
+  // with the disease beside it ("a raccoon bit my kid" + rabies). Search only:
+  // the prompt keeps the hiker's own words.
+  const searched = opts.understand !== false && opts.guards !== false ? withExposures(query) : query;
+  let keywords = extractKeywords(searched);
   let routed = route(keywords, packs, {
     state: opts.state,
     ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
@@ -629,8 +634,8 @@ export async function ask(
 
   // The text the adopted search was run on: the question, or it joined to the
   // previous one, or restated (below).
-  let searchText = query;
-  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
+  let searchText = searched;
+  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searched);
   // The best score, not the first chunk's: a reserved field card goes first
   // and may score below the top manual passage (retrieve.ts).
   const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);

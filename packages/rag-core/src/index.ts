@@ -18,3 +18,4 @@ export * from './join.ts';
 export * from './conditions.ts';
 export * from './triage.ts';
 export * from './type-out.ts';
+export * from './exposures.ts';

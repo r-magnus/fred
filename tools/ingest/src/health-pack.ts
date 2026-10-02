@@ -70,6 +70,18 @@ const DROP = new Set([
   'discover.', 'connect.', 'ask.', 'follow.', 'ground water and drinking water', 'on this page',
   'diagnosis and testing', 'testing and diagnosis', 'treatment', 'treatment and recovery', 'for healthcare providers',
   'data and statistics', 'surveillance', 'what cdc is doing', 'clinical overview',
+  // EPA's bloom FAQ is about tap water: its advisory levels, dialysis and
+  // utilities are not a hiker's; boiling, health effects and animals are kept.
+  'what are health advisories?', 'what are the health advisories for cyanotoxins?', '10-day health advisories level',
+  'why are there different health advisories for the two population groups?',
+  'why do older children have different health advisory levels than younger children?',
+  'what happens if you exceed the', 'value, what happens if you exceed for a smaller number of days?',
+  'what do the green, yellow and red advisory levels of cyanotoxins mean?', 'advisory level actionaction advisory level',
+  'which advisory level should sensitive populations or nursing mothers follow?', 'can dialysis be impacted by cyanotoxins?',
+  'what is my public water system doing to address harmful algal blooms or cyanotoxins?',
+  'where can i find more information about harmful algal blooms and cyanotoxins?',
+  'what can we do to help prevent cyanotoxins from occurring in my drinking water sources?',
+  'if a drinking water advisory is issued, is the tap water safe for other uses other than drinking?',
   // Home and workplace advice, not a hiker's.
   'reducing risk of tick exposure around homes', 'employer recommendations', 'staying safe during power outages',
 ]);
@@ -105,7 +117,9 @@ export function healthChunks(count: (t: string) => number, pages: readonly Healt
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
     const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*\|\s*(?:US EPA|FDA|CDC|Rabies))+\s*$/, '').replace(/\s+/g, ' ').trim();
     const pub = PUBLISHERS[p.publisher];
-    return pageChunks(title, sections(body(cached, p.publisher), DROP, true), count, pub.license.id)
+    // A short answer can be the whole point: "No, boiling water will not
+    // remove cyanotoxins and may increase toxin levels." is 76 characters.
+    return pageChunks(title, sections(body(cached, p.publisher), DROP, true), count, pub.license.id, 40)
       .map((c) => ({ ...c, text: c.text.replace(NAV_TEXT, ' ').replace(/ {2,}/g, ' '), domain: p.domain, source: pub.source }));
   });
 }

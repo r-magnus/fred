@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -18,7 +18,7 @@ import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
-import { withExposures } from './exposures.ts';
+import { exposureConditions, withExposures } from './exposures.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -1356,15 +1356,27 @@ export async function ask(
   // full before it is shown, and one that gives advice the condition's card
   // says not to give is replaced by that card (conditions.ts). Streaming is
   // given up only then.
-  const watched = active.filter((c) => c.forbidden !== undefined);
+  // #51: a risk with no card (an algal bloom) guards the answer too, with its
+  // reviewed reply in place of a card.
+  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
+  // #51: someone in danger is never left with "I don't have reliable
+  // information": "we cleaned out a mousy cabin last week and now i have a
+  // fever and it's getting hard to breathe" found the hantavirus passages and
+  // the model declined (health set).
+  const emergency = guardsOn && dangerSign([...history, query]);
   const guardCard = async (text: string): Promise<string> => {
     // A refusal in the middle of a condition is a dead end too.
     if (isRefusal(text) && followed !== undefined) {
       answerGuard.replacedBy = 'refusal';
       return renderCard(parseCard(followed.chunk.text));
     }
+    if (isRefusal(text) && emergency) {
+      answerGuard.replacedBy = 'safety-net';
+      return SAFETY_NET_REPLY;
+    }
     const by = violatedCondition(text, watched);
     if (by === undefined) return text;
+    if (by.instead !== undefined) { answerGuard.replacedBy = by.id; return by.instead; }
     const card = await cardByTitle(by.card);
     if (card === undefined) return text;
     answerGuard.replacedBy = by.id;
@@ -1392,8 +1404,12 @@ export async function ask(
   const stream = watched.length > 0
     ? streamChecked(backend.generate(prompt, generateOpts), {
       violates: (sentence) => violatedCondition(sentence, watched),
-      holdsFirst: (sentence) => followed !== undefined && isRefusal(sentence),
+      holdsFirst: (sentence) => (followed !== undefined || emergency) && isRefusal(sentence),
       replace: async (by, shownAlready) => {
+        if (by.instead !== undefined) {
+          answerGuard.replacedBy = by.id;
+          return shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${by.instead}` : by.instead;
+        }
         const card = await cardByTitle(by.card);
         if (card === undefined) return undefined;
         answerGuard.replacedBy = by.id;
@@ -1405,7 +1421,7 @@ export async function ask(
       },
       whole: guardCard,
     })
-    : followed !== undefined ? refusalOnly : backend.generate(prompt, generateOpts);
+    : followed !== undefined || emergency ? refusalOnly : backend.generate(prompt, generateOpts);
 
   return {
     kind: 'answer',

@@ -193,11 +193,11 @@ function windows(header: string, body: string, count: (t: string) => number): st
 const MIN_BODY = 80;
 
 export function pageChunks(
-  title: string, secs: readonly Section[], count: (t: string) => number, licenseId?: string,
+  title: string, secs: readonly Section[], count: (t: string) => number, licenseId?: string, minBody = MIN_BODY,
 ): DraftChunk[] {
   const chunks: DraftChunk[] = [];
   for (const s of secs) {
-    if (s.body.length < MIN_BODY) continue;
+    if (s.body.length < minBody) continue;
     const section = [title, ...s.path].join(' > ');
     for (const t of windows([title, ...s.path].join(' — '), s.body, count)) {
       chunks.push({

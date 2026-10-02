@@ -139,3 +139,15 @@ test('a situation with an unnamed disease risk is searched with the disease besi
   assert.equal(withExposures('i rolled my ankle'), 'i rolled my ankle');
   assert.match(withExposures('a fox nipped my ankle'), /\(rabies exposure/);
 });
+
+test('an algal bloom guards the answer: boiling or filtering that water is replaced (#51)', async () => {
+  const { exposureConditions } = await import('../src/exposures.ts');
+  const { violatedCondition } = await import('../src/conditions.ts');
+  const watched = exposureConditions(['the lake has green scum on it, can i filter it and drink it']);
+  assert.equal(watched[0]?.id, 'algal-bloom');
+  assert.equal(violatedCondition('Boil the water for 1 minute, or use purification tablets.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('If no toxins are detected, drink it cautiously.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('No, boiling water will not remove the toxins.', watched), undefined);
+  assert.equal(violatedCondition('Find another water source.', watched), undefined);
+  assert.deepEqual(exposureConditions(['how do i purify stream water']), []);
+});

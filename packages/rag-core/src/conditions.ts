@@ -49,6 +49,12 @@ export interface Condition {
    * ("i have a bad blister on my heel") is not about it (#101).
    */
   readonly situation?: boolean;
+  /**
+   * For a risk with no field card of its own (#51, exposures.ts): the reviewed
+   * reply that replaces an answer giving forbidden advice, in the sources'
+   * words. With it, `card` is empty.
+   */
+  readonly instead?: string;
 }
 
 const SNAKE = /\b(?:snakes?|rattlers?|rattlesnakes?|copperheads?|cottonmouths?|vipers?|adders?|water moccasins?)\b/i;

@@ -16,9 +16,11 @@
  * corpora/health/ and never refetched; corpora/ is not committed.
  * Everything is fetched once, here: Fred never fetches at run time.
  */
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { DomainTag } from '@fred/pack-format';
+import { extractPdf } from './pdf.ts';
+import { tmpdir } from 'node:os';
 
 const OUT = 'corpora/health';
 const PAUSE_MS = 500;
@@ -33,6 +35,8 @@ export interface HealthPage {
   /** CDC syndication media id; the others are fetched from `url`. */
   readonly mediaId?: number;
   readonly url?: string;
+  /** A PDF: its text is extracted, and its capitalised question lines become headings. */
+  readonly pdf?: boolean;
   readonly domain: DomainTag;
 }
 
@@ -65,6 +69,10 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   // Water.
   cdc('giardia-about', 223502, 'survival'),
   cdc('harmful-algal-blooms-freshwater-symptoms', 279389, 'survival'),
+  // Bloom water: CDC's backcountry page says filters and boiling don't remove
+  // the toxins, but it is behind the 403; without that line the model told a
+  // hiker to boil scum-covered lake water (health set, #51). EPA's FAQ says it.
+  { key: 'epa-hab-faq', publisher: 'epa', pdf: true, url: 'https://www.epa.gov/sites/default/files/2016-11/documents/harmful_algal_blooms_and_cyanotoxins_frequently_asked_questions.pdf', domain: 'survival' },
   { key: 'epa-emergency-disinfection', publisher: 'epa', url: 'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water', domain: 'survival' },
   // Heat and cold.
   { key: 'nws-heat-illness', publisher: 'nws', url: 'https://www.weather.gov/safety/heat-illness', domain: 'first-aid-physical' },
@@ -82,6 +90,40 @@ async function fetchText(url: string): Promise<string> {
       await new Promise((r) => setTimeout(r, 2000 * attempt));
     }
   }
+}
+
+/** A run of capitalised lines, the first ending in nothing and the last in "?" or not. */
+const CAPS = /^[A-Z0-9 ,'’()&/-]{6,}\??$/;
+
+/** The first capitalised heading, in title case: the document's own name. */
+function pdfTitle(text: string): string {
+  const lines = text.split('\n').map((l) => l.trim()).filter((l) => CAPS.test(l) && l !== 'FREQUENTLY ASKED QUESTIONS');
+  const head: string[] = [];
+  for (const l of lines) { head.push(l); if (l.endsWith('?')) break; }
+  const t = head.join(' ').toLowerCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/** Capitalised question lines become h3 headings; the rest becomes paragraphs. */
+function pdfHtml(text: string): string {
+  const out: string[] = [];
+  let head: string[] = [];
+  let para: string[] = [];
+  const flushPara = (): void => { if (para.length > 0) out.push(`<p>${para.join(' ')}</p>`); para = []; };
+  for (const raw of text.split('\n')) {
+    const l = raw.trim();
+    if (l === '' || l === 'FREQUENTLY ASKED QUESTIONS' || /^EPA: \d/.test(l)) continue;
+    if (CAPS.test(l)) {
+      flushPara();
+      head.push(l);
+      if (l.endsWith('?')) { out.push(`<h3>${head.join(' ')}</h3>`); head = []; }
+      continue;
+    }
+    if (head.length > 0) { out.push(`<h3>${head.join(' ')}</h3>`); head = []; }
+    para.push(l);
+  }
+  flushPara();
+  return out.join('\n');
 }
 
 /** What is cached per page: the HTML and where it came from. */
@@ -104,6 +146,14 @@ async function main(): Promise<void> {
         const res = JSON.parse(await fetchText(`https://tools.cdc.gov/api/v2/resources/media/${p.mediaId}/syndicate`)) as
           { results: { name: string; sourceUrl: string; content: string } };
         page = { title: res.results.name, sourceUrl: res.results.sourceUrl, html: res.results.content, fetchedAt: new Date().toISOString() };
+      } else if (p.pdf === true) {
+        const res = await fetch(p.url!, { headers: { 'user-agent': USER_AGENT } });
+        if (!res.ok) throw new Error(`${p.url}: HTTP ${res.status}`);
+        const tmp = join(tmpdir(), `${p.key}.pdf`);
+        writeFileSync(tmp, Buffer.from(await res.arrayBuffer()));
+        const pages = await extractPdf(tmp);
+        rmSync(tmp);
+        page = { title: pdfTitle(pages.map((x) => x.text).join('\n')), sourceUrl: p.url!, html: pdfHtml(pages.map((x) => x.text).join('\n')), fetchedAt: new Date().toISOString() };
       } else {
         const html = await fetchText(p.url!);
         const title = (html.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? p.key).replace(/\s+/g, ' ').trim();

@@ -327,7 +327,15 @@ const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist
  * i stop the bleeding") or "what do i do": there the card's steps are the
  * answer.
  */
-const SPECIFIC = /^\W*(?:ok(?:ay)?,?\s+|so,?\s+|and\s+|but\s+)?(?:should|shall|can|could|may|is|are|do|does|did|would|will|was|must)\b(?!.*\bwhat (?:do|should) (?:i|we) do\b)|\bhow (?:long|much|many|far|tight|warm|hot|cold|often|soon|deep)\b|\bwhere (?:exactly |do |should |can )?(?:i|we|you)?\b|\bwhich (?:way|side|one)\b|\bwhat (?:temperature|should (?:i|we) (?:watch|look) for)\b|\bwould\b.*\bhelp\b/i;
+const LEAD_IN = String.raw`^\W*(?:(?:ok(?:ay)?|so|and|but),?\s+)*`;
+// A yes/no opener, but not "can't feel my fingertips" or "don't know which way":
+// those are statements.
+const YES_NO = new RegExp(LEAD_IN + String.raw`(?:should|shall|can|could|may|is|are|do|does|did|would|will|was|must)\b(?!['’]?t\b)(?!.*\bwhat (?:do|should) (?:i|we) do\b)`, 'i');
+const WH = String.raw`(?:how (?:long|much|many|far|tight|warm|hot|cold|often|soon|deep)\b|where (?:exactly |do |should |can )?(?:i|we|you)?\b|which (?:way|side|one)\b|what (?:temperature|should (?:i|we) (?:watch|look) for)\b)`;
+/** How long, where, which...: at the start of the message, or anywhere in one that ends in a question mark. */
+const WH_START = new RegExp(LEAD_IN + WH, 'i');
+const WH_ANY = new RegExp(String.raw`\b` + WH, 'i');
+const WOULD_HELP = /\bwould\b.*\bhelp\b/i;
 /**
  * The question as the search embeds it. The embedding wrapper keeps each text's
  * vector for the turn, so when retrieval searched these exact words this costs
@@ -338,7 +346,8 @@ function queryVector(backend: InferenceBackend, query: string): Promise<Float32A
 }
 
 export function asksSpecifically(message: string): boolean {
-  return SPECIFIC.test(message) && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
+  const specific = YES_NO.test(message) || WH_START.test(message) || (/\?\s*$/.test(message) && WH_ANY.test(message)) || WOULD_HELP.test(message);
+  return specific && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
 }
 
 const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|shaky|dizzy|nause\w*|headache|throwing up|threw up|vomit\w*|hurts?|pain\w*|bleeding|blood|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|sweat\w*|breathing|soak\w*|bent|broken|tick|bonk\w*|hit (?:his|her|my|their) head|fell|tripped|landed on|stung|bit|bitten|cut|sliced|gash\w*|burn\w*|scald\w*|splinter|puffy|hives|sick|pale|out of it|confused|getting (?:cold|dark|worse)|freezing|can'?t (?:walk|stand|breathe|feel|move))\b/i;

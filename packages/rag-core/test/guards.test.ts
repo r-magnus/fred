@@ -115,5 +115,7 @@ test('a dog with a tick is a pet patient', () => {
 test('specific questions a card answers in a sentence, not how-tos', () => {
   for (const m of ['can i put ice on it', 'should we run to the car', 'how long should i ice it', 'where exactly do i put the tourniquet',
     'would butter help', 'is it worth trying to draw the poison out with my mouth', 'what should i watch for after']) assert.ok(asksSpecifically(m), m);
-  for (const m of ['how do i stop the bleeding', 'what should i do', 'what now', 'a snake struck my buddy', 'my ankle is swelling']) assert.ok(!asksSpecifically(m), m);
+  for (const m of ['how do i stop the bleeding', 'what should i do', 'what now', 'a snake struck my buddy', 'my ankle is swelling',
+    "can't feel my fingertips and they've gone kind of waxy", "I think I'm lost. I don't know which way the trail is."]) assert.ok(!asksSpecifically(m), m);
+  for (const m of ['ok so how long should i ice it', 'Which way should we go?', 'is ice ok for it']) assert.ok(asksSpecifically(m), m);
 });

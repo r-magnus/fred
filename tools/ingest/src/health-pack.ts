@@ -17,6 +17,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { LicenseEntry } from '@fred/pack-format';
 import type { DraftChunk } from './chunk.ts';
+import { contextualize } from './contextualize.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
 import { HEALTH_PAGES, type CachedPage, type HealthPage, type Publisher } from './health-fetch.ts';
 import { writePack } from './pack.ts';
@@ -119,8 +120,21 @@ async function main(): Promise<void> {
     return;
   }
   const embedder = await loadGgufEmbedder(EMBEDDING_GEMMA);
-  const chunks = healthChunks((t) => embedder.tokenCount(t));
-  const vectors = await embedder.embed(chunks.map((c) => documentText(EMBEDDING_GEMMA, c.section, c.text)));
+  let chunks = healthChunks((t) => embedder.tokenCount(t));
+  // CONTEXTUALIZE=1: a one-line lead-in per passage, written by the local
+  // model (contextualize.ts), so a hiker's everyday words ("a raccoon bit my
+  // kid") can reach the agencies' clinical ones ("post-exposure prophylaxis").
+  // Written by a model rather than by hand, so no phrasing comes from whoever
+  // wrote the test questions.
+  if (process.env.CONTEXTUALIZE === '1') {
+    const contexts = await contextualize(chunks, {
+      modelPath: process.env.GEN_MODEL ?? `${process.env.HOME}/models/Qwen3-1.7B-Q4_K_M.gguf`,
+      documentTitle: 'US Government health guidance for people outdoors',
+    });
+    chunks = chunks.map((c, i) => ({ ...c, context: contexts[i] ?? '' }));
+  }
+  const vectors = await embedder.embed(chunks.map((c) =>
+    documentText(EMBEDDING_GEMMA, c.section, c.context === undefined || c.context === '' ? c.text : `${c.context}\n${c.text}`)));
   const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
     id: 'core-health', version: '1.0.0', displayName: 'Health Risks Outdoors',
     description: 'Public-domain US Government guidance (CDC, EPA, FDA, National Weather Service): ticks and Lyme disease, rabies, hantavirus, plague, mosquitoes, poisonous plants, heat and cold illness, safe drinking water.',

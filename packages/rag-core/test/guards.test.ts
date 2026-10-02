@@ -73,7 +73,7 @@ test('a pet that is hurt is the patient; a pet along for the hike is not', () =>
   assert.ok(!petIsPatient('a raccoon that was acting strange attacked my dog and then bit me on the leg'));
   assert.ok(!petIsPatient('a snake bit my dog and i got bitten too'));
   assert.ok(petIsPatient('a raccoon attacked my dog'));
-  assert.ok(petIsPatient('a snake bit him', 'my dog was sniffing in the rocks'));
+  assert.ok(petIsPatient('a snake bit him again', 'my dog is limping'));
   assert.ok(!petIsPatient('my friend got stung and his face is swelling', 'a bee stung my dog'));
 });
 

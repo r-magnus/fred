@@ -21,9 +21,10 @@ import { askOptionsFromEnv } from './retrieval-env.ts';
 
 const outPath = process.argv[2] ?? 'docs/graded-runs.jsonl';
 
+// EVAL_IDS=a,b runs only those questions, e.g. the ones a decision sweep saw change.
 const questions: GradedQuestion[] = setsFor(process.env.EVAL_SET).flatMap((s) =>
   loadGradedSet(s, (p) => readFileSync(p, 'utf8')),
-);
+).filter((q) => process.env.EVAL_IDS === undefined || process.env.EVAL_IDS.split(',').includes(q.id));
 console.log(describeSet(questions));
 const harness = await openHarness();
 const { backend, store, packs } = harness;

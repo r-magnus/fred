@@ -99,7 +99,7 @@ for (const [i, c] of conversations.entries()) {
   });
   let answer = '';
   // GENERATE=0 records the decision only, for a quick sweep (as run-graded.ts).
-  if (res.kind === 'answer' && process.env.GENERATE !== '0') for await (const tok of res.stream) answer += tok;
+  if (res.kind === 'answer' && (process.env.GENERATE !== '0' || res.card !== undefined)) for await (const tok of res.stream) answer += tok;
   const d = res.diagnostics;
   const sheet = c.sheet === undefined ? undefined : sheets.get(c.sheet);
   if (c.sheet !== undefined && sheet === undefined) throw new Error(`${c.id}: no answer sheet ${c.sheet}`);
@@ -120,6 +120,7 @@ for (const [i, c] of conversations.entries()) {
     ...(d.understood === undefined ? {} : { understood: d.understood }),
     cardAnswer: card2,
     cardRepeat: card2 !== null && card2 === card1,
+    ...(res.kind === 'answer' && res.card !== undefined ? { offer: res.card.title } : {}),
     citations: res.kind === 'answer'
       ? res.citations.map((x) => `${x.source}${x.page === null ? '' : ` p.${x.page}`} — ${x.section}`)
       : [],

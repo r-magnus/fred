@@ -59,7 +59,9 @@ const records: object[] = [];
 let misses = 0;
 let turnsRun = 0;
 for (const set of sets) {
-  const chats = (JSON.parse(readFileSync(set, 'utf8')) as { chats: Chat[] }).chats;
+  const all = (JSON.parse(readFileSync(set, 'utf8')) as { chats: Chat[] }).chats;
+  // CHAT_IDS=a,b runs only those chats, e.g. the ones a decision sweep saw change.
+  const chats = process.env.CHAT_IDS === undefined ? all : all.filter((c) => process.env.CHAT_IDS!.split(',').includes(c.id));
   for (const c of chats) {
     const wordings: (readonly string[])[] = [c.turns.map((t) => t.q), ...(c.variant === undefined ? [] : [c.variant])];
     for (const [w, qs] of wordings.entries()) {

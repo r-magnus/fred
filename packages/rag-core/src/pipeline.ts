@@ -1201,8 +1201,11 @@ export async function ask(
       return { ...common, stream: backend.generate(prompt, opts.signal ? { maxTokens, signal: opts.signal } : { maxTokens }) };
     }
     // #109: a specific question about the card's subject ("can i put ice on
-    // it", "how long should i ice it") gets the card lines that answer it, in
-    // the card's own words, with the whole card folded beneath. The model only
+    // it", "how long should i ice it") gets the card's summary and the lines
+    // that answer it, in the card's own words, with the whole card folded
+    // beneath. The summary always leads: picking alone missed the point the
+    // card opens with ("only eat what you can positively identify", "stop and
+    // take stock", "rest" for a sprain) on seen chats. The model only
     // picks line numbers: a rewritten answer inverted the card (results-
     // phase3.md; "No. Do not take off her ring", #109 try-out). No line picked:
     // the card itself, open, as before. How-to questions and first reports keep
@@ -1218,7 +1221,7 @@ export async function ask(
           ...common,
           prompt: pickPrompt,
           card: toOffer(card, citeOf(card, 0)),
-          stream: once(picked.map((i) => lines[i]!).join('\n')),
+          stream: once([parsed.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
         };
       }
     }
@@ -1266,7 +1269,7 @@ export async function ask(
     if (picked.length > 0) {
       return {
         kind: 'answer',
-        stream: once(picked.map((i) => lines[i]!).join('\n')),
+        stream: once([parsedOn.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
         citations: [citeOf(onCard, 0)],
         prompt: pickPrompt,
         medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),

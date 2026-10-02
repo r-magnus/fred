@@ -891,7 +891,7 @@ test('a specific question about a card gets the card lines that answer it, the c
   assert.equal(res.kind, 'answer');
   if (res.kind === 'answer') {
     assert.equal(res.card?.title, 'Snakebite');
-    assert.equal(await readAll(res.stream), "Don't put ice on it.");
+    assert.equal(await readAll(res.stream), "Keep them still and get help.\nDon't put ice on it.");
   }
 });
 

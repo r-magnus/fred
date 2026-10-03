@@ -18,6 +18,7 @@ import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
+import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -371,10 +372,53 @@ function clearlyLeadingCard(candidates: readonly ScoredChunk[], isCard: (c: Scor
   return second === undefined || second.score <= THREAD_CARD_MARGIN * first.score ? first : undefined;
 }
 
-function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean): ScoredChunk | undefined {
+/**
+ * How close a passage must be to a field card, cosine between their stored
+ * vectors, to count as saying the same thing. Measured 2026-10-02 (#121):
+ * the same topic scored 0.65-0.81 (the sprain card and NIH's
+ * sprain treatment 0.76, the water card and EPA's or the Army's purification
+ * 0.68-0.81, hypothermia and NWS's cold page 0.65-0.66); related but different
+ * topics 0.43-0.61 (shock and heat exhaustion 0.61, snakebite and sprain
+ * treatment 0.48-0.55, choking and chest wounds 0.47-0.53).
+ */
+export const SAME_THING = 0.65;
+
+/** For each card in a result list, the other passages that say the same thing. */
+export type CardSupport = ReadonlyMap<string, ReadonlySet<string>>;
+
+/**
+ * A passage that says the same thing as a card is not evidence against it.
+ * New reference packs pushed weakly matched cards out of the lead with
+ * passages on the very same thing: NIH's sprain treatment (0.181) above the
+ * sprain card (0.146) for "my knee swelled up after a long descent", EPA's
+ * disinfection page above the water card (#116, #51).
+ */
+async function cardSupport(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean, store: PackStore): Promise<CardSupport> {
+  const cards = candidates.filter(isCard);
+  const others = candidates.filter((c) => !isCard(c));
+  const out = new Map<string, Set<string>>();
+  if (cards.length === 0 || others.length === 0) return out;
+  const all = [...cards, ...others];
+  const vecs = await store.getVectors(all.map((c) => ({ chunkId: c.chunk.id, packId: c.chunk.packId, ordinal: c.chunk.ordinal })));
+  cards.forEach((card, i) => {
+    const v = dequantizeInt8(vecs[i]!.vec, vecs[i]!.scale);
+    const same = new Set<string>();
+    others.forEach((o, j) => { if (cosineInt8(v, vecs[cards.length + j]!.vec) >= SAME_THING) same.add(o.chunk.id); });
+    out.set(card.chunk.id, same);
+  });
+  return out;
+}
+
+/** The best score among a card and the passages that say the same thing. */
+function supportedScore(card: ScoredChunk, candidates: readonly ScoredChunk[], support?: CardSupport): number {
+  const same = support?.get(card.chunk.id);
+  return candidates.reduce((m, c) => (same?.has(c.chunk.id) === true ? Math.max(m, c.score) : m), card.score);
+}
+
+function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean, support?: CardSupport): ScoredChunk | undefined {
   const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
   const card = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-  return card !== undefined && card.score >= INTENT_CARD_FLOOR && card.score >= INTENT_CARD_NEAR_TOP * top ? card : undefined;
+  return card !== undefined && card.score >= INTENT_CARD_FLOOR && supportedScore(card, candidates, support) >= INTENT_CARD_NEAR_TOP * top ? card : undefined;
 }
 
 /**
@@ -750,6 +794,10 @@ export async function ask(
   let offer: CardOffer | undefined;
   const reserve = retrievalOpts.reserve;
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
+  // #121: with guards on, passages that say the same thing as a
+  // card back it instead of outranking it.
+  const supportOf = async (cs: readonly ScoredChunk[]): Promise<CardSupport | undefined> =>
+    (opts.understand !== false && opts.guards !== false ? cardSupport(cs, isCard, store) : undefined);
   // Only the earlier messages this one continues (understand.ts, currentThread).
   const history = currentThread(query, opts.history ?? []);
   const understandOn = opts.understand !== false;
@@ -836,7 +884,7 @@ export async function ask(
     // again in plain words: "uhh dude there's a bear in front of me".
     const noTipsPool = (): readonly RoutablePack[] => packs.filter((p) => !tipsPackIds.has(p.id));
     if (understandOn && u === undefined && intent === 'now' && topScore < effectiveThreshold &&
-        leadingCard(candidates, isCard) === undefined && !ABOUT_A_PET.test(query)) {
+        leadingCard(candidates, isCard, await supportOf(candidates)) === undefined && !ABOUT_A_PET.test(query)) {
       u = await understandMessage(query, history, backend, opts.signal);
       if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
       if (u?.intent === 'out') intent = 'question';
@@ -876,14 +924,14 @@ export async function ask(
         const ranked = [...candO].sort((a, b) => b.score - a.score);
         const at = topR === undefined ? -1 : ranked.findIndex((c) => c.chunk.id === topR.chunk.id);
         if (at >= 0) { ownScore = ranked[at]!.score; ownRank = at; }
-        threadCard = leadingCard(candO, isCard) ?? clearlyLeadingCard(candO, isCard);
+        threadCard = leadingCard(candO, isCard, await supportOf(candO)) ?? clearlyLeadingCard(candO, isCard);
       }
       // Kept when it clears the own-words floor or, with guards on, ranks
       // near the top for the hiker's own words.
       const used = clears && ownScore !== undefined && (
         ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
         (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
-      requestCard = leadingCard(candR, isCard);
+      requestCard = leadingCard(candR, isCard, await supportOf(candR));
       understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), ...(ownRank === undefined ? {} : { ownRank }), used };
       if (used) {
         keywords = kwR;
@@ -901,7 +949,7 @@ export async function ask(
     // INTENT_CARD_NEAR_TOP of the first. "His leg is bleeding a lot, help"
     // ranked a manual passage first (0.289) and the bleeding card second
     // (0.256); for an emergency the card is the safer answer.
-    const topCard = leadingCard(candidates, isCard);
+    const topCard = leadingCard(candidates, isCard, await supportOf(candidates));
     // Only an emergency forces a card open under the gate. Forcing it for any
     // question too opened the cuts card for "talk me through stitching a cut
     // closed" on the tuning set. And a pet is never the patient: veterinary
@@ -1144,7 +1192,7 @@ export async function ask(
   let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
-  let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve);
+  let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve, await supportOf(usable));
   // The same holds for the understanding step's search: "what's the magnetic
   // declination where I'm standing?" after "how can I find north?" was read as
   // a navigation request and repeated the finding-north card word for word
@@ -1158,7 +1206,7 @@ export async function ask(
   // answered that way (docs/plan-memory.md). Without the card, the model
   // answers from the passages and can say the sources do not cover it.
   if (followUp?.used === true && clear !== undefined &&
-      clearCard(standalone, retrievalOpts.reserve)?.chunk.id !== clear.chunk.id) {
+      clearCard(standalone, retrievalOpts.reserve, await supportOf(standalone))?.chunk.id !== clear.chunk.id) {
     clear = undefined;
   }
   // Round 2: a card that must not follow a condition is never shown
@@ -1511,13 +1559,16 @@ function toOffer(card: ScoredChunk, citation: Citation): CardOffer {
 function clearCard(
   cands: readonly ScoredChunk[],
   reserve: RetrievalOptions['reserve'],
+  support?: CardSupport,
 ): ScoredChunk | undefined {
   if (reserve === undefined) return undefined;
   const top = (cs: readonly ScoredChunk[]): ScoredChunk | undefined =>
     cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
   const card = top(cands.filter((c) => c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider'));
   if (card === undefined) return undefined;
-  const manual = top(cands.filter((c) => c.chunk.packId !== reserve.packId));
+  // Only a passage on something else outranks the card (cardSupport).
+  const same = support?.get(card.chunk.id);
+  const manual = top(cands.filter((c) => c.chunk.packId !== reserve.packId && same?.has(c.chunk.id) !== true));
   return card.score >= reserve.minScore || (card.score >= CARD_TOP_FLOOR && card.score >= (manual?.score ?? 0))
     ? card : undefined;
 }

@@ -40,7 +40,7 @@ export interface PackInput {
   readonly embedding: EmbeddingSpec;
 }
 
-async function sha256(path: string): Promise<{ sha256: string; bytes: number }> {
+export async function sha256(path: string): Promise<{ sha256: string; bytes: number }> {
   const buf = await readFile(path);
   return { sha256: createHash('sha256').update(buf).digest('hex'), bytes: buf.byteLength };
 }

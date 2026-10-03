@@ -140,3 +140,14 @@ export function petIsPatient(message: string, previous?: string): boolean {
   if (PET_PATIENT.test(message)) return true;
   return previous !== undefined && PET_PATIENT.test(previous) && PRONOUN.test(message) && !PERSON.test(message);
 }
+
+/**
+ * Stuck on terrain: a ledge, a cliff, unable to go up or down (#126). The
+ * signalling card answers it (stay put, signal with whistle, light or bright
+ * clothing): no free-to-use source covers being cliffed out, and the general
+ * safety net says only to call for help.
+ */
+const STUCK = /\b(?:stuck|stranded|trapped|cliffed out) on (?:a|the|this) (?:ledge|cliff)\b|\bcliffed out\b|\bcan'?t (?:climb|get) (?:up or down|down or up|off (?:the|this) (?:ledge|cliff))\b/i;
+export function stuckOnTerrain(messages: readonly string[]): boolean {
+  return messages.some((m) => STUCK.test(m));
+}

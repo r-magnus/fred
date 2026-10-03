@@ -52,6 +52,15 @@ const PUBLISHERS: Record<Publisher, { source: string; license: LicenseEntry }> =
       attribution: 'US Food and Drug Administration, fda.gov.', nonCommercial: false,
     },
   },
+  nih: {
+    source: 'NIH',
+    license: {
+      id: 'nih', license: 'Public domain (US Government work)',
+      sourceTitle: 'US National Institutes of Health: NIDDK and NIAMS health information pages',
+      sourceUrl: 'https://www.nih.gov/web-policies-notices',
+      attribution: 'National Institutes of Health (NIDDK, NIAMS), nih.gov.', nonCommercial: false,
+    },
+  },
   nws: {
     source: 'National Weather Service',
     license: {
@@ -82,12 +91,18 @@ const DROP = new Set([
   'where can i find more information about harmful algal blooms and cyanotoxins?',
   'what can we do to help prevent cyanotoxins from occurring in my drinking water sources?',
   'if a drinking water advisory is issued, is the tap water safe for other uses other than drinking?',
+  // NIH, FDA and EPA (#116): clinical care, medicines (Fred refers those),
+  // references and site news.
+  'references', 'clinical trials', 'related conditions & diseases', 'your digestive system & how it works', 'diagnosis',
+  'latest news', 'removed ingredients', 'how do doctors treat diarrhea?', 'antidiarrheal medicine',
+  'persistent and chronic diarrhea', 'vaccinate infants to prevent rotavirus', 'eating, diet, & nutrition',
+  'diagnosis of sports injuries', 'who treats sports injuries?', 'learn about research',
   // Home and workplace advice, not a hiker's.
   'reducing risk of tick exposure around homes', 'employer recommendations', 'staying safe during power outages',
 ]);
 
 /** NWS's program banner and breadcrumb, which survive as text across their tags. */
-const NAV_TEXT = /Safety National Program Weather\.gov > Safety > [^\n]*?(?= [A-Z][a-z]+ [a-z])|Safety National Program|(?:Heat|Cold) Safety Resources|Cold Resources/g;
+const NAV_TEXT = /Home Health Information Digestive Diseases[^\n]*?View or Print All Sections|Safety National Program Weather\.gov > Safety > [^\n]*?(?= [A-Z][a-z]+ [a-z])|Safety National Program|(?:Heat|Cold) Safety Resources|Cold Resources/g;
 
 /** The part of a cached page that is the article itself. */
 function body(page: CachedPage, publisher: Publisher): string {
@@ -98,7 +113,7 @@ function body(page: CachedPage, publisher: Publisher): string {
     const e = h.search(end);
     if (e > 0) h = h.slice(0, e);
   };
-  if (publisher === 'epa' || publisher === 'fda') between('<main', /<\/main>|Content current as of/);
+  if (publisher === 'epa' || publisher === 'fda' || publisher === 'nih') between('<main', /<\/main>|Content current as of|Last Reviewed/);
   if (publisher === 'nws') between('<div class="div-full">', /<div[^>]*class="footer/);
   return h
     .replace(/<div id="cdcAttribution"[\s\S]*?<\/div>/g, ' ')
@@ -115,11 +130,14 @@ function body(page: CachedPage, publisher: Publisher): string {
 export function healthChunks(count: (t: string) => number, pages: readonly HealthPage[] = HEALTH_PAGES): DraftChunk[] {
   return pages.flatMap((p) => {
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
-    const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*\|\s*(?:US EPA|FDA|CDC|Rabies))+\s*$/, '').replace(/\s+/g, ' ').trim();
+    const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*(?:\||-)\s*(?:US EPA|FDA|CDC|Rabies|NIDDK|NIAMS|National Institute[^|]*))+\s*$/, '')
+      .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
     const pub = PUBLISHERS[p.publisher];
     // A short answer can be the whole point: "No, boiling water will not
     // remove cyanotoxins and may increase toxin levels." is 76 characters.
     return pageChunks(title, sections(body(cached, p.publisher), DROP, true), count, pub.license.id, 40)
+      // A page's own menu or table of contents, with nothing to answer from.
+      .filter((c) => !/^[^\n]*\n(?:Home Health Information|Print Overview)/.test(c.text))
       .map((c) => ({ ...c, text: c.text.replace(NAV_TEXT, ' ').replace(/ {2,}/g, ' '), domain: p.domain, source: pub.source }));
   });
 }
@@ -150,7 +168,7 @@ async function main(): Promise<void> {
   const vectors = await embedder.embed(chunks.map((c) =>
     documentText(EMBEDDING_GEMMA, c.section, c.context === undefined || c.context === '' ? c.text : `${c.context}\n${c.text}`)));
   const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
-    id: 'core-health', version: '1.0.0', displayName: 'Health Risks Outdoors',
+    id: 'core-health', version: '1.1.0', displayName: 'Health Risks Outdoors',
     description: 'Public-domain US Government guidance (CDC, EPA, FDA, National Weather Service): ticks and Lyme disease, rabies, hantavirus, plague, mosquitoes, poisonous plants, heat and cold illness, safe drinking water.',
     domains: ['first-aid-physical', 'survival'], scope: { kind: 'global' }, source: 'CDC',
     licenseId: PUBLISHERS.cdc.license.id, licenses: Object.values(PUBLISHERS).map((p) => p.license), embedding: embedder.spec,

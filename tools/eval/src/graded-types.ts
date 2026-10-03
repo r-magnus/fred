@@ -143,6 +143,13 @@ export const HEALTH_SETS = ['tools/eval/data/holdout-health.json'] as const;
  */
 export const HEALTH_CONFIRM_SETS = ['tools/eval/data/confirm-health.json'] as const;
 
+/**
+ * Common trail ailments (2026-10-02, #116): diarrhea, sunburn, chafing, knee
+ * pain on descents. Written and committed before any source was searched for.
+ * 18 everyday questions, 2 emergencies near the topics, 3 to decline.
+ */
+export const AILMENT_SETS = ['tools/eval/data/holdout-ailments.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -153,8 +160,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'everyday': return EVERYDAY_SETS;
     case 'health': return HEALTH_SETS;
     case 'health-confirm': return HEALTH_CONFIRM_SETS;
+    case 'ailments': return AILMENT_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | all, got "${name}"`);
   }
 }
 

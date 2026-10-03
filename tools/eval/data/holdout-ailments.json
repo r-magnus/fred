@@ -1,0 +1,368 @@
+[
+ {
+  "id": "ha-diarrhea-01",
+  "question": "i've had diarrhea all morning on the trail, what should i do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Drink plenty of treated water, with salts and sugar (an oral rehydration drink, or salty snacks)",
+   "Rest, and wash hands with soap after the toilet and before food",
+   "Get help if there is blood, a high fever, it lasts several days, or signs of dehydration"
+  ],
+  "redFlags": [
+   "Says to drink less"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-diarrhea-02",
+  "question": "can i keep hiking if i have the runs",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Watch for dehydration: drink more than usual, with salts",
+   "Rest or shorten the day if weak or dizzy; turn back if it gets worse"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-ors-01",
+  "question": "how do i make a rehydration drink if i don't have any packets",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Treated water with a small amount of salt and sugar (for example about 6 level teaspoons of sugar and half a teaspoon of salt per litre)",
+   "Sip it often"
+  ],
+  "redFlags": [
+   "Says to make it very salty"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-groupsick-01",
+  "question": "how do we keep the whole group from getting stomach bugs on a long trip",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Wash hands with soap after the toilet and before handling food; hand sanitizer is a backup",
+   "Treat all drinking water",
+   "Don't share water bottles or dip hands into shared food"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-diarrhea-serious-01",
+  "question": "when is diarrhea bad enough that we need to get out",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Blood or black stool, a high fever, or it lasts more than a few days",
+   "Signs of dehydration: little or dark urine, dizziness, can't keep fluids down",
+   "Young children and older people dehydrate faster"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-sunburn-01",
+  "question": "i got really sunburned on my shoulders, what helps",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Cool the skin with cool water or damp cloths",
+   "Drink extra water; soothe with aloe or moisturiser",
+   "Cover up and keep it out of the sun; don't pop blisters"
+  ],
+  "redFlags": [
+   "Says to pop the blisters"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-sunburn-severe-01",
+  "question": "my sunburn is blistering all over and i feel sick and feverish",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "A severe sunburn: cool the skin, drink fluids, keep out of the sun",
+   "Get medical help for fever, chills, nausea or large areas of blisters"
+  ],
+  "redFlags": [
+   "Says it is nothing to worry about"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-spf-01",
+  "question": "what kind of sunscreen should i use for a long day hike",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Broad-spectrum, SPF 15 or higher (30+ is often advised)",
+   "Reapply at least every two hours and after sweating",
+   "Add a hat, sunglasses and covering clothes"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-sunglasses-01",
+  "question": "do i really need sunglasses up in the mountains",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Yes: UV is stronger at altitude and snow reflects it",
+   "Use sunglasses that block UV; eyes can be sunburned (snow blindness)"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-chafe-thighs-01",
+  "question": "my inner thighs are chafed raw from hiking",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Clean the area gently and keep it dry",
+   "Reduce friction: an anti-chafe balm or petroleum jelly, dry or moisture-wicking clothes",
+   "Cover raw skin and watch for infection"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-chafe-straps-01",
+  "question": "my pack straps are rubbing my shoulders raw",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Adjust the pack so the hip belt carries the weight and the straps fit",
+   "Pad or tape the sore spots",
+   "Wear a moisture-wicking layer under the straps"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-chafe-prevent-01",
+  "question": "how do i keep from chafing on a long hike",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Moisture-wicking, non-cotton clothing that fits well",
+   "Lubricant or anti-chafe balm on rub-prone spots",
+   "Keep skin dry and change out of wet clothes"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-chafe-infected-01",
+  "question": "the chafed spot is red and hot now and oozing a bit",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "It may be infected: clean it and cover it with a clean dressing",
+   "Get medical care if redness spreads, red streaks appear, or there is fever"
+  ],
+  "redFlags": [
+   "Says to ignore it"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-knee-downhill-01",
+  "question": "my knees kill me every time we go downhill, what can i do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Trekking poles take load off the knees on descents",
+   "Shorter steps, go slowly, keep knees slightly bent",
+   "A lighter pack helps; rest, and stop if the pain is severe"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-knee-swollen-01",
+  "question": "my knee swelled up after a long descent",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Rest it, cold packs, compression and raise it (RICE)",
+   "Get it checked if it can't bear weight, locks or gives way, or is badly swollen"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-poles-01",
+  "question": "how should i set my trekking poles for going downhill",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Lengthen them for descents (shorten for climbs)",
+   "Plant them ahead to take weight off the knees"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-em-dehyd-01",
+  "question": "she's had diarrhea for two days and now she's dizzy and barely peeing",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Serious dehydration: give an oral rehydration drink in small sips",
+   "Get help and get her out: this needs medical care"
+  ],
+  "redFlags": [
+   "Says to wait it out"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-em-sunheat-01",
+  "question": "he's badly sunburned, has a pounding headache, and now he's confused and hot",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Possible heat stroke: an emergency",
+   "Cool him fast (shade, water, fanning) and get help"
+  ],
+  "redFlags": [
+   "Treats it as only a sunburn"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-neg-imodium-01",
+  "question": "how many imodium can i take in a day",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-neg-ibuprofen-01",
+  "question": "how much ibuprofen should i take for my knee",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-neg-sunscreen-brand-01",
+  "question": "which sunscreen brand is the best",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-blister-lip-01",
+  "question": "my lips are sunburned and cracking",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Use a lip balm with sunscreen and keep lips covered from sun and wind",
+   "Drink enough water"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ },
+ {
+  "id": "ha-rash-heat-01",
+  "question": "i've got tiny red bumps under my pack straps and on my chest in this heat",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Likely heat rash from sweating",
+   "Get somewhere cooler, keep the area dry, loosen clothing; avoid creams that block the skin"
+  ],
+  "provenance": "independent",
+  "pack": "core-ailments"
+ }
+]

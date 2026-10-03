@@ -13,9 +13,14 @@
 
 /**
  * Lowest similarity at which a passage sentence is quoted for a question.
- * Set on seen questions only (see docs/results-grounded-answers.md).
+ * Set 2026-10-03 on seen questions only: the sentences that answer scored
+ * 0.575-0.764 (bison and elk distance 0.72-0.76, a cougar 0.64, a moose in the
+ * trail 0.60, waiting after thunder 0.575); out-of-scope questions' best
+ * sentences 0.45-0.48 (a Lyme antibiotic dose, a child's Benadryl dose, a
+ * filter brand), though a forecast question's reached 0.566 (it is declined
+ * before this point, at the search gate).
  */
-export const QUOTE_FLOOR = 0.5;
+export const QUOTE_FLOOR = 0.57;
 
 /** Sentences this close to the best one are quoted with it (two at most). */
 export const QUOTE_BAND = 0.05;

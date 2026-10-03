@@ -1,0 +1,408 @@
+[
+ {
+  "id": "hz-ltg-ridge-01",
+  "question": "we're up on the ridge and just heard thunder, what do we do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get off the ridge and summit right away, down to lower ground",
+   "Avoid lone tall trees, open ground and water; don't wait for the storm to arrive",
+   "Spread the group out"
+  ],
+  "redFlags": [
+   "Shelter under a lone tall tree",
+   "Stay on the ridge to wait it out"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ltg-spread-01",
+  "question": "there's six of us caught out in a thunderstorm, should we huddle together",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: spread out (at least about 50 feet apart) so one strike can't hit everyone"
+  ],
+  "redFlags": [
+   "Says to huddle together"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ltg-tent-01",
+  "question": "is our tent a safe place to wait out lightning",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: a tent gives no protection from lightning",
+   "There is no safe place outdoors; reduce risk by getting off high ground, away from tall isolated objects"
+  ],
+  "redFlags": [
+   "Says the tent is safe"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ltg-wait-01",
+  "question": "the thunder stopped, how long before we keep hiking up",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Wait at least 30 minutes after the last thunder before going back out or up"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ltg-count-01",
+  "question": "how can i tell how close the lightning is",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Count seconds from the flash to the thunder: about 5 seconds per mile",
+   "If you can hear thunder, you are close enough to be struck"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ltg-plan-01",
+  "question": "we're climbing a peak tomorrow, how do we avoid getting caught by lightning",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Start early and be off summits and ridges before afternoon storms build",
+   "Watch the sky for building clouds and turn back at the first thunder"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-em-ltg-01",
+  "question": "my buddy just got struck by lightning, is it safe to touch him",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Yes: a person struck by lightning carries no charge and is safe to touch",
+   "Check breathing and start CPR if needed; get help"
+  ],
+  "redFlags": [
+   "Says not to touch him"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-flood-slot-01",
+  "question": "we want to hike the slot canyon but there are clouds over the mountains",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Rain miles away can send a flash flood through the canyon: don't go in if storms are possible anywhere upstream",
+   "Know the escape routes to high ground"
+  ],
+  "redFlags": [
+   "Says it is fine if it isn't raining where you are"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-flood-signs-01",
+  "question": "the creek in the canyon suddenly got muddy and there's a roaring sound",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Signs of a flash flood: climb to high ground immediately",
+   "Don't try to outrun it down the canyon"
+  ],
+  "redFlags": [
+   "Says to keep going downstream"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-flood-wash-01",
+  "question": "is it ok to camp in the dry wash, it's nice and flat",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: dry washes and streambeds can flood fast with no warning; camp on higher ground"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-flood-road-01",
+  "question": "there's water running over the dirt road to the trailhead, can we drive through",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: turn around, don't drown; a little moving water can float a car",
+   "Wait or find another way"
+  ],
+  "redFlags": [
+   "Says to drive through slowly"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-em-flood-01",
+  "question": "the water is rising around us in the canyon and we can't get out",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Climb as high as you can: a ledge, rocks, the canyon wall",
+   "Stay out of the water and wait for it to drop"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-river-rose-01",
+  "question": "the river rose overnight and now we can't cross back to the trailhead",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Don't cross high or fast water; wait for the level to drop (often lower in the early morning)",
+   "Look for a safer crossing or another route"
+  ],
+  "redFlags": [
+   "Says to just wade across"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-river-swept-01",
+  "question": "what do i do if i get swept off my feet crossing a stream",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Float on your back, feet first and pointed downstream",
+   "Don't stand up in fast water (feet can get trapped); work toward shore at an angle"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-fire-smoke-01",
+  "question": "we can see a column of smoke over the next ridge",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area: head away from the fire, downhill and upwind if you can",
+   "Don't wait to see if it grows"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-fire-close-01",
+  "question": "the wildfire is coming toward us and we can't outrun it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get to an area with little fuel: a rock field, a road, a stream, an already burned area",
+   "Lie face down, cover skin, shield yourself from heat; breathe the cooler air near the ground"
+  ],
+  "redFlags": [
+   "Says to run uphill ahead of the fire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-fire-air-01",
+  "question": "the smoke is so thick it's hard to breathe",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Move away from the smoke to lower ground or cleaner air",
+   "Cover nose and mouth; get help if breathing trouble gets worse"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-fire-camp-01",
+  "question": "it's really windy and dry, is it ok to have a small campfire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: in high winds and dry conditions, don't build a fire; follow fire restrictions"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-fire-out-01",
+  "question": "how do we make sure our campfire is really out",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Drown it with water, stir the ashes, drown again",
+   "Feel for heat; it must be cold to the touch before you leave"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ledge-01",
+  "question": "we're stuck on a ledge and can't climb up or down",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stop: don't try a risky move; stay put and make yourselves secure",
+   "Signal for help (whistle, light, bright clothing) and stay warm while you wait"
+  ],
+  "redFlags": [
+   "Says to try to climb down anyway"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-ledge-route-01",
+  "question": "the trail ended at a cliff and we're not sure how we got here",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stop and don't try to down-climb unknown terrain",
+   "Go back the way you came if it's safe; if lost, stay put and signal"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-whiteout-01",
+  "question": "a storm rolled in and we can barely see in the snow",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stop moving if you can't see the route; shelter from the wind and stay together",
+   "Stay warm and dry, wait for visibility"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-neg-forecast-01",
+  "question": "will it thunderstorm here tomorrow afternoon",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz-neg-app-01",
+  "question": "what's the best lightning tracker app",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ }
+]

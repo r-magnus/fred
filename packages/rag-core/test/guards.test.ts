@@ -171,3 +171,26 @@ test('a negation counts only in the clause that gives the advice (#117)', async 
   assert.equal(violatedCondition("Don't put ice on it.", snake), undefined);
   assert.equal(violatedCondition('Do not wrap the ankle tightly with ice, as this can cause damage.', snake), undefined);
 });
+
+test('hazards that call for help now are danger signs (#115)', () => {
+  for (const m of ['the wildfire is coming toward us and we can\'t outrun it', 'the water is rising around us in the canyon', 'my friend got swept away crossing the creek', 'the fire is coming toward us',
+    "we're stuck on a ledge and can't climb up or down", 'trapped by the flood']) assert.ok(dangerSign([m]), m);
+  for (const m of ['how do we make sure our campfire is really out', 'the creek is high today', 'we want to hike the ledge trail']) assert.ok(!dangerSign([m]), m);
+});
+
+test('the emergency rule echoed back is a dead end, not an answer (#115)', async () => {
+  const { isRefusal } = await import('../src/prompt.ts');
+  assert.ok(isRefusal('If life is at risk, say to contact emergency services first.'));
+  assert.ok(isRefusal("I don't have reliable information on that."));
+  assert.ok(!isRefusal('If life is at risk, call for help, then start CPR.'));
+});
+
+test('a lightning strike guards against "don\'t touch them" (#115)', async () => {
+  const { exposureConditions } = await import('../src/exposures.ts');
+  const { violatedCondition } = await import('../src/conditions.ts');
+  const watched = exposureConditions(['lightning hit right near us and my friend is on the ground not breathing']);
+  assert.equal(watched[0]?.id, 'lightning-strike');
+  assert.equal(violatedCondition('Do not attempt to rescue the friend unless instructed by a professional.', watched)?.id, 'lightning-strike');
+  assert.equal(violatedCondition("Don't touch him until help arrives.", watched)?.id, 'lightning-strike');
+  assert.equal(violatedCondition('Check his breathing and start CPR.', watched), undefined);
+});

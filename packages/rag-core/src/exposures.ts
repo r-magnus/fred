@@ -79,6 +79,24 @@ export const EXPOSURE_LINKS: readonly ExposureLink[] = [
     },
     when: /\b(?:scum|algae|algal|pond scum)\b|\b(?:green|blue-green|bright green)\b[^.?!]{0,20}\b(?:foam|slime|film|water)\b/i,
   },
+  {
+    id: 'lightning-strike',
+    term: 'lightning victim first aid, safe to touch, CPR',
+    when: /\b(?:struck|hit|zapped|got) by lightning\b|\blightning (?:hit|struck|strike)s?\b/i,
+    // "lightning hit right near us and my friend is on the ground not
+    // breathing" got "Do not attempt to rescue the friend unless instructed by
+    // a professional" (#115). NWS: "It is perfectly safe to touch a lightning
+    // victim to give them first aid"; "calling 911, starting CPR, and using an
+    // AED, may be critically important to keep the person alive". The
+    // forbidden advice is itself a negative, so nothing counts as negating it.
+    guard: {
+      label: 'lightning strike',
+      forbidden: /\b(?:don'?t|do not|never|avoid)\s+(?:\w+\s+){0,2}(?:touch\w*|rescu\w*|help\w*|approach\w*|mov\w+|giv\w+ first aid)\b|\bnot safe to touch\b|\bwait for (?:a )?(?:professional|help) (?:before|to)\b/i,
+      negated: /(?!)/,
+      instead: 'It is perfectly safe to touch a lightning victim to give them first aid: they carry no charge. Check their breathing. ' +
+        "If they aren't breathing, start CPR right away and keep going. Get help as fast as you can, and if the storm is still close, move to a safer spot if you can do it quickly.",
+    },
+  },
 ];
 
 /** The search terms of every link this message makes, in list order. */

@@ -84,9 +84,20 @@ export const CONDITION_INSTEAD = (label: string): string => `Use this instead, f
 export const CONDITION_CLARIFY = (label: string): string => `Is this about the ${label}?`;
 
 /** True when a generated answer is really the model declining. */
+/** The emergency rule the prompt adds for medical passages (buildQuerySuffix). */
+export const EMERGENCY_RULE = 'If life is at risk, say to contact emergency services first.';
+
+/**
+ * Replies that answer nothing: the model's decline, or the emergency rule
+ * echoed back verbatim. "my buddy just got struck by lightning, is it safe to
+ * touch him" got only "If life is at risk, say to contact emergency services
+ * first." (#115), shown as an answer.
+ */
+export const DEAD_ENDS: readonly string[] = [NO_ANSWER_REPLY, EMERGENCY_RULE];
+
 export function isRefusal(text: string): boolean {
   const t = text.trim().toLowerCase().replace(/[.!]+$/, '');
-  return t === NO_ANSWER_REPLY.toLowerCase().replace(/[.!]+$/, '');
+  return DEAD_ENDS.some((d) => t === d.toLowerCase().replace(/[.!]+$/, ''));
 }
 
 /**
@@ -259,7 +270,7 @@ export function buildQuerySuffix(
   // Fired unconditionally before, so it turned up on "what plants and animals are
   // near me?" and on a question about what mountain lions eat.
   if (isMedical(blocks)) {
-    rules.push('If life is at risk, say to contact emergency services first.');
+    rules.push(EMERGENCY_RULE);
   }
   // "Are there black bears in this state?" cannot be answered from a passage
   // about California unless the model knows "this state" is California: the

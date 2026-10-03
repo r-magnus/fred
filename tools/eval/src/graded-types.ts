@@ -158,6 +158,15 @@ export const AILMENT_SETS = ['tools/eval/data/holdout-ailments.json'] as const;
  */
 export const WILDLIFE_SETS = ['tools/eval/data/holdout-wildlife.json'] as const;
 
+/**
+ * Weather and terrain hazards (2026-10-03, #115): lightning, flash floods,
+ * rising rivers, wildfire and smoke, stuck on a ledge, whiteout. Written and
+ * committed before any source was searched for, reworded away from the
+ * existing storm and lightning questions. Every key point is something to do
+ * with no signal. 22 to answer, 2 to decline.
+ */
+export const HAZARD_SETS = ['tools/eval/data/holdout-hazards.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -170,8 +179,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'health-confirm': return HEALTH_CONFIRM_SETS;
     case 'ailments': return AILMENT_SETS;
     case 'wildlife': return WILDLIFE_SETS;
+    case 'hazards': return HAZARD_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | all, got "${name}"`);
   }
 }
 

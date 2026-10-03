@@ -26,7 +26,7 @@ const OUT = 'corpora/health';
 const PAUSE_MS = 500;
 const USER_AGENT = 'fred-ingest/0.1 (CS-195 academic project; https://github.com/r-magnus/fred)';
 
-export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda' | 'nih';
+export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda' | 'nih' | 'nps' | 'blm' | 'usfs';
 
 export interface HealthPage {
   /** A file name. */
@@ -37,6 +37,8 @@ export interface HealthPage {
   readonly url?: string;
   /** A PDF: its text is extracted, and its capitalised question lines become headings. */
   readonly pdf?: boolean;
+  /** The pack it goes in: the health pack unless said (#115's hazards pack). */
+  readonly pack?: 'core-hazards';
   readonly domain: DomainTag;
 }
 
@@ -89,6 +91,28 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   // Heat and cold.
   { key: 'nws-heat-illness', publisher: 'nws', url: 'https://www.weather.gov/safety/heat-illness', domain: 'first-aid-physical' },
   { key: 'nws-cold-during', publisher: 'nws', url: 'https://www.weather.gov/safety/cold-during', domain: 'first-aid-physical' },
+  // Weather and terrain hazards (#115), packed as core-hazards: lightning,
+  // flash floods, rivers, wildfire. Chosen from tools/eval/data/
+  // holdout-hazards.json's topics before any was read; everything here is
+  // what to do on the spot, with no signal.
+  { key: 'nws-lightning-safety', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-safety', domain: 'survival' },
+  { key: 'nws-lightning-outdoors', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-outdoors', domain: 'survival' },
+  { key: 'nws-lightning-struck', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-struck', domain: 'first-aid-physical' },
+  { key: 'nws-lightning-tips', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-tips', domain: 'survival' },
+  // The only NWS page that says a victim is safe to touch (#115).
+  { key: 'nws-lightning-myths', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-myths', domain: 'first-aid-physical' },
+  // NWS's backcountry lightning sheet (a PDF) was tried: its columns extract
+  // as run-together words, and the web pages carry the same advice.
+  { key: 'nws-flood-turn-around', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/flood-turn-around-dont-drown', domain: 'survival' },
+  { key: 'nws-flood-during', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/flood-during', domain: 'survival' },
+  { key: 'blm-flash-floods', publisher: 'blm', pack: 'core-hazards', url: 'https://www.blm.gov/flash-floods-tread-safely', domain: 'survival' },
+  { key: 'nps-zion-flash-flood', publisher: 'nps', pack: 'core-hazards', url: 'https://www.nps.gov/zion/planyourvisit/flash-flood.htm', domain: 'survival' },
+  { key: 'nps-river-crossings', publisher: 'nps', pack: 'core-hazards', url: 'https://www.nps.gov/articles/safe-river-crossings.htm', domain: 'survival' },
+  { key: 'nps-wildland-fire-visitors', publisher: 'nps', pack: 'core-hazards', url: 'https://www.nps.gov/subjects/fire/wildland-fire-safety-for-park-visitors.htm', domain: 'survival' },
+  { key: 'nws-wildfire', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/wildfire', domain: 'survival' },
+  { key: 'usfs-fire', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/visit/know-before-you-go/fire', domain: 'survival' },
+  { key: 'usfs-superior-stay-safe', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/r09/superior/safety-ethics/stay-safe', domain: 'survival' },
+  { key: 'usfs-burned-areas', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/r06/fire/management/safety-burned-areas', domain: 'survival' },
 ];
 
 async function fetchText(url: string): Promise<string> {

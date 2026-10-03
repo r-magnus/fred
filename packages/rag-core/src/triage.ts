@@ -33,6 +33,9 @@ const SIGNS: readonly RegExp[] = [
   /\bheat ?stroke\b|\bstopped sweating\b|\b(?:skin is |skin'?s )?hot and dry\b/i,
   // Cold water and severe cold (hypothermia).
   /\bstopped shivering\b|\bwent through the ice\b|\bdrown/i,
+  // Water rising around them, swept away, fire closing in, trapped on a ledge
+  // (#115, #100: these lost the get-help-now reply on round 1's sealed set).
+  /\b(?:water|river|creek|flood)\b[^.?!]{0,30}\b(?:rising|coming up|getting higher|surrounding)\b|\b(?:swept|washed) (?:away|downstream|off (?:his|her|my|their) feet)\b|\b(?:fire|flames)\b[^.?!]{0,30}\b(?:coming (?:at|toward|towards|our way)|closing in|all around|surrounding|cut (?:us )?off)\b|\btrapped by (?:the )?(?:fire|flames|water|flood)\b|\b(?:stuck|stranded|trapped|cliffed out) on (?:a|the|this) (?:ledge|cliff)\b|\bcliffed out\b|\bcan'?t (?:climb|get) (?:up or down|down or up|off (?:the|this) (?:ledge|cliff))\b/i,
   // A bone through the skin (fracture), a stab or a gunshot, lightning.
   /\bbone (?:is )?(?:sticking|poking) (?:out|through)\b|\bstabbed\b|\bimpaled\b|\bshot\b(?! of)|\bstruck by lightning\b|\blightning (?:hit|struck)\b/i,
 ];

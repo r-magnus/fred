@@ -171,3 +171,9 @@ test('a negation counts only in the clause that gives the advice (#117)', async 
   assert.equal(violatedCondition("Don't put ice on it.", snake), undefined);
   assert.equal(violatedCondition('Do not wrap the ankle tightly with ice, as this can cause damage.', snake), undefined);
 });
+
+test('hazards that call for help now are danger signs (#115)', () => {
+  for (const m of ['the water is rising around us in the canyon', 'my friend got swept away crossing the creek', 'the fire is coming toward us',
+    "we're stuck on a ledge and can't climb up or down", 'trapped by the flood']) assert.ok(dangerSign([m]), m);
+  for (const m of ['how do we make sure our campfire is really out', 'the creek is high today', 'we want to hike the ledge trail']) assert.ok(!dangerSign([m]), m);
+});

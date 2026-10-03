@@ -163,3 +163,11 @@ test('a big animal attacking is a danger sign however it is said (#117)', () => 
 test('"a bit" is not a bite (#117)', () => {
   assert.ok(!dangerSign(['we saw a bear a bit up the trail, far off']));
 });
+
+test('a negation counts only in the clause that gives the advice (#117)', async () => {
+  const { conditionsIn, violatedCondition } = await import('../src/conditions.ts');
+  const snake = conditionsIn(['a snake bit my friend']);
+  assert.equal(violatedCondition('Apply ice for 20 minutes at a time, but do not leave it on longer than 20 minutes.', snake)?.id, 'snakebite');
+  assert.equal(violatedCondition("Don't put ice on it.", snake), undefined);
+  assert.equal(violatedCondition('Do not wrap the ankle tightly with ice, as this can cause damage.', snake), undefined);
+});

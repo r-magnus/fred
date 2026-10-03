@@ -150,6 +150,14 @@ export const HEALTH_CONFIRM_SETS = ['tools/eval/data/confirm-health.json'] as co
  */
 export const AILMENT_SETS = ['tools/eval/data/holdout-ailments.json'] as const;
 
+/**
+ * Wildlife encounters and trail etiquette (2026-10-03, #117): mountain lions,
+ * moose, elk and bison distance, rattlesnakes, coyotes, horses, bikes, dogs.
+ * Written and committed before any source was searched for, reworded away from
+ * the everyday set's horses and elk questions. 20 to answer, 2 to decline.
+ */
+export const WILDLIFE_SETS = ['tools/eval/data/holdout-wildlife.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -161,8 +169,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'health': return HEALTH_SETS;
     case 'health-confirm': return HEALTH_CONFIRM_SETS;
     case 'ailments': return AILMENT_SETS;
+    case 'wildlife': return WILDLIFE_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | all, got "${name}"`);
   }
 }
 

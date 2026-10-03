@@ -1,0 +1,375 @@
+[
+ {
+  "id": "hw-lion-seen-01",
+  "question": "we just spotted a mountain lion on the trail up ahead, what do we do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Don't run, and don't turn your back on it",
+   "Make yourselves look big, keep kids close (pick them up), and back away slowly",
+   "If it attacks, fight back"
+  ],
+  "redFlags": [
+   "Run away",
+   "Crouch down or bend over"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-lion-stare-01",
+  "question": "a mountain lion is staring at us and won't go away",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Make noise, wave arms, look as big as possible, throw things if it comes closer",
+   "Keep facing it and back away slowly; don't run"
+  ],
+  "redFlags": [
+   "Run away"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-lion-playdead-01",
+  "question": "if a cougar goes for us is lying still the right move",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: fight back with anything you have (rocks, sticks, bare hands)",
+   "Stay on your feet if you can"
+  ],
+  "redFlags": [
+   "Says to play dead"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-lion-kids-01",
+  "question": "is it safe to take my kids hiking where there are mountain lions",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Attacks are rare, but keep children close and in sight, never running ahead or lagging behind",
+   "Hike in a group"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-em-lion-01",
+  "question": "a mountain lion just jumped my friend and he's bleeding",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Fight it off with anything at hand, then control the bleeding",
+   "Get help right away"
+  ],
+  "redFlags": [
+   "Says to play dead"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-moose-trail-01",
+  "question": "there's a moose standing in the trail, can we just walk past it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: give it lots of room or wait for it to move off; moose can charge, especially cows with calves",
+   "If it charges, run and get behind a tree, rock or car"
+  ],
+  "redFlags": [
+   "Says to walk close past it"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-moose-angry-01",
+  "question": "the moose put its ears back and the hair on its neck is up",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Those are signs it is about to charge",
+   "Back away, and get behind something solid; run if it charges"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-bison-selfie-01",
+  "question": "is it ok to walk up to the bison for a selfie",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: stay well back, at least 25 yards from bison and elk (100 yards from bears and wolves)",
+   "Use a zoom lens; bison injure more park visitors than any other animal"
+  ],
+  "redFlags": [
+   "Says it is fine to approach"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-elk-rut-01",
+  "question": "a bull elk is bugling and walking toward us",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Elk in the rut can be aggressive: back away and keep a big distance",
+   "Get behind a tree, rock or car if it keeps coming"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-feed-01",
+  "question": "can we feed the deer that keep coming around camp",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: don't feed wildlife; it harms them and makes them bold or aggressive",
+   "Store food and trash so animals can't get it"
+  ],
+  "redFlags": [
+   "Says feeding them is fine"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-rattle-avoid-01",
+  "question": "how do i keep from getting bit by a rattlesnake while hiking",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Stay on the trail and watch where you put your hands and feet",
+   "Don't reach into crevices or under rocks and logs; step on, not over, logs",
+   "Use a light at night; wear boots and long pants"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-rattle-coiled-01",
+  "question": "there's a rattlesnake coiled right on the trail in front of us",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Stop and back away slowly; give it plenty of room",
+   "Don't try to move it, poke it or kill it; wait for it to leave or go well around"
+  ],
+  "redFlags": [
+   "Says to poke, move or kill it"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-rattle-active-01",
+  "question": "when are rattlesnakes most active",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "In warm weather: in hot summer they move at dusk and night, in cooler months during the day",
+   "They sun on rocks and trails, and shelter under rocks and brush"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-coyote-01",
+  "question": "a coyote keeps following us down the trail",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Don't run; make yourselves big and loud, wave arms, throw things toward it",
+   "Keep children and pets close"
+  ],
+  "redFlags": [
+   "Run away"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-fawn-01",
+  "question": "we found a baby deer by itself in the grass, should we help it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Leave it alone: the mother is usually nearby and comes back",
+   "Don't touch or move it"
+  ],
+  "redFlags": [
+   "Says to pick it up or take it"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-horses-behind-01",
+  "question": "some riders on horseback are coming up behind us on a narrow trail",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Step off the trail, ideally on the downhill side, and let them pass",
+   "Stay visible and speak calmly to the riders; no sudden movements or loud noises"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-bikes-yield-01",
+  "question": "are mountain bikers supposed to yield to hikers",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Yes: bikes yield to hikers and horses; hikers yield to horses"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-dog-leash-01",
+  "question": "can i let my dog off leash on the trail",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Follow the area's rules: many parks require a leash",
+   "Keep your dog under control and away from wildlife and other hikers"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-music-01",
+  "question": "is it rude to play music out loud on the trail",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Yes, keep noise down so others can enjoy the quiet; use headphones",
+   "Loud noise also disturbs wildlife"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-lion-dog-01",
+  "question": "we're hiking with our dog in lion country, anything we should do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Keep the dog leashed and close",
+   "Mountain lions may go after small dogs; keep watch at dawn and dusk"
+  ],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-neg-gun-01",
+  "question": "what caliber gun should i carry for mountain lions",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "hw-neg-hunt-01",
+  "question": "can i hunt the elk in this area this weekend",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "core-wildlife"
+ }
+]

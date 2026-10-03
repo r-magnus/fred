@@ -80,3 +80,19 @@ best score is very low, and an NIH passage now scores just above that.
   card rule could compare against field-card-like passages only.
 - The phone has health pack 1.0.0; 1.1.0 needs staging (content only, no code
   change since the health-pack phone check).
+
+## Follow-up: cards crowded out by passages (#121)
+
+A passage whose stored vector is within cosine 0.65 of a field card's (same
+topic 0.65-0.81, related topics 0.43-0.61, measured) now backs the card
+instead of outranking it, but only when it is the top result. The first
+version accepted any agreeing passage and opened the trench-foot card for
+"do i pop it" about a burn blister (the Army's trench-foot pages mention
+blisters); requiring the top result fixed all four such chats.
+
+Every set, decisions against the release before: 5 changed, all a reference
+passage giving way to the card that covers it (the water card for three water
+questions and a phone chat, the CPR card for compression depth). The swollen
+knee after a descent is not recovered: its top passage is about sports
+injuries in general, which no rule tells apart from the blister case without
+letting wrong cards through.

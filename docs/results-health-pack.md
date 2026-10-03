@@ -92,7 +92,24 @@ conversation sets: about 700 decisions, 4 changed.
 
 ### On the phone
 
-Phone check below.
+Nothing Phone (3), the health pack and card pack 0.8.0 staged, six chats:
+
+| Message | Reply | First words |
+|---|---|---:|
+| "a raccoon bit my kid's hand while we were camping" | wash 15 minutes, get medical care promptly (CDC) | 10.6 s |
+| "we woke up and there was a bat in the tent, nobody felt a bite" | consult a provider about rabies care (CDC) | 11.6 s |
+| "the trail shelter has mouse droppings everywhere, can we just sweep it out" | sweeping not recommended, hantavirus (CDC) | 9.8 s |
+| "a fox ... nipped my ankle" | wash, get medical care (CDC) | 11.4 s |
+| "we cleaned out a mousy cabin last week" / "now i have a fever and it's getting hard to breathe" | the safety net: get help | — |
+| "the lake has green scum on it, can i filter it and drink it" | "Check for cyanotoxins... if present, do not filter" (see below) | 12.7 s |
+
+Two fixes after the phone run, checked on the desktop: the algae guard now
+also catches "check" (a hiker cannot test for toxins; the reply is now the
+reviewed one), and the exposure link carries into a joined follow-up ("should
+i be worried" after the fox nip was declined; now "Yes ... wash ... seek
+medical care"). The chat and conversation sets were rerun after both: no
+decision changed. These replies are written from passages, so first words
+take 10-13 s, as for any written answer.
 
 ## Still open
 

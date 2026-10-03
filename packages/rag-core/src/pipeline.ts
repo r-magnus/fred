@@ -650,7 +650,10 @@ export async function ask(
   // itself fell under the gate as the opener, "what's the capital of France?"
   // was turned into a request for the hiker's state.
   if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold) {
-    const joined = `${opts.previous.question} ${query}`;
+    // #51: the earlier message's exposure holds for its follow-up: "a fox ...
+    // nipped my ankle" then "should i be worried" (phone).
+    const joined = opts.understand !== false && opts.guards !== false
+      ? withExposures(`${opts.previous.question} ${query}`) : `${opts.previous.question} ${query}`;
     const keywordsJ = extractKeywords(joined);
     const routedJ = route(keywordsJ, packs, {
       state: opts.state,

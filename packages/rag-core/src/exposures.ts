@@ -66,12 +66,14 @@ export const EXPOSURE_LINKS: readonly ExposureLink[] = [
     // water or use tablets, then to test it and drink it cautiously (health
     // set, #51). EPA: "No, boiling water will not remove cyanotoxins and may
     // increase toxin levels." CDC: the toxins make people and animals sick by
-    // touch, spray or swallowing.
+    // touch, spray or swallowing. On the phone: "Check for cyanotoxins in the
+    // water. If cyanotoxins are present, do not filter the water.", which
+    // leaves "no toxins found" as safe to drink; a hiker cannot check.
     guard: {
       label: 'algal bloom',
       // A warning says the treatment fails; "if no toxins are detected" does not.
       negated: /\b(?:don'?t|do not|never|won'?t|will not|doesn'?t|does not|cannot|can'?t|isn'?t|is not|not (?:remove|safe|make|kill|work))\b/i,
-      forbidden: /\b(?:boil\w*|filter\w*|purif\w*|tablets?|bleach|iodine|chlorin\w*|disinfect\w*|test\w*)\b|\bdrink\w*\b[^.]*\b(?:cautious\w*|safe)\b/i,
+      forbidden: /\b(?:boil\w*|filter\w*|purif\w*|tablets?|bleach|iodine|chlorin\w*|disinfect\w*|test\w*|check\w*)\b|\bdrink\w*\b[^.]*\b(?:cautious\w*|safe)\b/i,
       instead: "Don't drink water with a scum, foam or bloom on it, even filtered or boiled: boiling won't remove the algae's toxins and may increase them. " +
         "Stay out of it, and keep dogs out too: the toxins can make people and animals sick through the skin, spray or swallowing. Find another water source.",
     },

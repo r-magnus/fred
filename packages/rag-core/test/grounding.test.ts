@@ -46,3 +46,8 @@ test('species passages from the asked-about section go first; others keep their 
   const out = speciesSectionOrder(cs, 'when is the elk rut', new Set(['state-CO'])) as unknown as { chunk: { id: string } }[];
   assert.deepEqual(out.map((x) => x.chunk.id), ['b', 'm', 'a']);
 });
+
+test('list markers are neither sentences nor claims (#126)', async () => {
+  const out = await all(numberChecked(from('1.', ' Use DEET', ' on skin.', '\n2.', ' Wear long sleeves.'), 'use DEET', async () => 'REPLACED'));
+  assert.equal(out, '1. Use DEET on skin.\n2. Wear long sleeves.');
+});

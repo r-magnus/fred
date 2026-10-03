@@ -1465,7 +1465,16 @@ export async function ask(
     const ranked = rankSentences(await queryVector(backend, query), passages);
     const best = ranked[0];
     if (best === undefined || best.similarity < QUOTE_FLOOR) return undefined;
-    return ranked.filter((r) => r.similarity >= Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND)).slice(0, 2).map((r) => r.text).join('\n');
+    // The same sentence often sits on two pages ("pick them up if possible so
+    // they don't panic and run", three mountain-lion pages): quote it once.
+    const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const picked: string[] = [];
+    for (const r of ranked) {
+      if (r.similarity < Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND) || picked.length === 2) break;
+      if (picked.some((p) => norm(p).includes(norm(r.text)) || norm(r.text).includes(norm(p)))) continue;
+      picked.push(r.text);
+    }
+    return picked.join('\n');
   };
   const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable

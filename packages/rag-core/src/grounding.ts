@@ -47,14 +47,20 @@ export function numbersIn(text: string): string[] {
  * and step numbers are not claims.
  */
 export function unsourcedNumbers(sentence: string, sources: ReadonlySet<string>): string[] {
-  const claim = sentence.replace(/^\s*(?:\d+[.)]|step \d+:?)\s+/i, '');
+  const claim = sentence.replace(/^\s*(?:\d+[.)]|step \d+:?)(?=\s|$)/i, '');
   return [...new Set(numbersIn(claim))].filter((n) => !sources.has(n));
 }
 
-/** The end of the first sentence in a buffer, or 0. Numbers like "2.5" don't end one. */
+/**
+ * The end of the first sentence in a buffer, or 0. Numbers like "2.5" don't
+ * end one, and neither does a list marker: "1." before "Use DEET..." was read
+ * as a sentence stating the unsourced number 1, and good answers were cut
+ * after their first marker.
+ */
 function sentenceEnd(buf: string): number {
-  const m = /(?<!\d)[.!?](?=\s)|(?<=\d)[.!?](?=\s+[A-Z])|\n/.exec(buf);
-  return m === null ? 0 : m.index + m[0].length;
+  const lead = /^\s*\d+[.)]\s*/.exec(buf)?.[0].length ?? 0;
+  const m = /(?<!\d)[.!?](?=\s)|(?<=\d)[.!?](?=\s+[A-Z])|\n/.exec(buf.slice(lead));
+  return m === null ? 0 : lead + m.index + m[0].length;
 }
 
 export async function* numberChecked(

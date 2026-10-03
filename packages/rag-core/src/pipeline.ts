@@ -409,10 +409,16 @@ async function cardSupport(candidates: readonly ScoredChunk[], isCard: (c: Score
   return out;
 }
 
-/** The best score among a card and the passages that say the same thing. */
+/**
+ * The card's score, or the top result's when the top result says the same
+ * thing as the card: the strongest evidence agrees with it. Any agreeing
+ * passage was too loose: "do i pop it" (a burn blister) led with a blister
+ * passage, and the Army's trench-foot pages two and three down, which agree
+ * with the trench-foot card because it mentions blisters, opened that card.
+ */
 function supportedScore(card: ScoredChunk, candidates: readonly ScoredChunk[], support?: CardSupport): number {
-  const same = support?.get(card.chunk.id);
-  return candidates.reduce((m, c) => (same?.has(c.chunk.id) === true ? Math.max(m, c.score) : m), card.score);
+  const top = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  return top !== undefined && support?.get(card.chunk.id)?.has(top.chunk.id) === true ? Math.max(card.score, top.score) : card.score;
 }
 
 function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk) => boolean, support?: CardSupport): ScoredChunk | undefined {
@@ -1566,9 +1572,10 @@ function clearCard(
     cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
   const card = top(cands.filter((c) => c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider'));
   if (card === undefined) return undefined;
-  // Only a passage on something else outranks the card (cardSupport).
-  const same = support?.get(card.chunk.id);
-  const manual = top(cands.filter((c) => c.chunk.packId !== reserve.packId && same?.has(c.chunk.id) !== true));
+  // The top manual passage outranks the card only if it is on something else
+  // (cardSupport); one that says the same thing backs it.
+  const manualTop = top(cands.filter((c) => c.chunk.packId !== reserve.packId));
+  const manual = manualTop !== undefined && support?.get(card.chunk.id)?.has(manualTop.chunk.id) === true ? undefined : manualTop;
   return card.score >= reserve.minScore || (card.score >= CARD_TOP_FLOOR && card.score >= (manual?.score ?? 0))
     ? card : undefined;
 }

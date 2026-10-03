@@ -26,7 +26,7 @@ const OUT = 'corpora/health';
 const PAUSE_MS = 500;
 const USER_AGENT = 'fred-ingest/0.1 (CS-195 academic project; https://github.com/r-magnus/fred)';
 
-export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda';
+export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda' | 'nih';
 
 export interface HealthPage {
   /** A file name. */
@@ -74,6 +74,18 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   // hiker to boil scum-covered lake water (health set, #51). EPA's FAQ says it.
   { key: 'epa-hab-faq', publisher: 'epa', pdf: true, url: 'https://www.epa.gov/sites/default/files/2016-11/documents/harmful_algal_blooms_and_cyanotoxins_frequently_asked_questions.pdf', domain: 'survival' },
   { key: 'epa-emergency-disinfection', publisher: 'epa', url: 'https://www.epa.gov/ground-water-and-drinking-water/emergency-disinfection-drinking-water', domain: 'survival' },
+  // Common trail ailments (#116): diarrhea and rehydration, handwashing,
+  // sun, sore and injured knees. Chosen from tools/eval/data/holdout-ailments.json
+  // before any was read.
+  { key: 'niddk-diarrhea', publisher: 'nih', url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/diarrhea', domain: 'first-aid-physical' },
+  { key: 'niddk-diarrhea-symptoms', publisher: 'nih', url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/diarrhea/symptoms-causes', domain: 'first-aid-physical' },
+  { key: 'niddk-diarrhea-treatment', publisher: 'nih', url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/diarrhea/treatment', domain: 'first-aid-physical' },
+  cdc('norovirus-prevention', 402715),
+  { key: 'fda-sun-tips', publisher: 'fda', url: 'https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses', domain: 'first-aid-physical' },
+  { key: 'fda-sunscreen', publisher: 'fda', url: 'https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun', domain: 'first-aid-physical' },
+  { key: 'epa-sun-safety', publisher: 'epa', url: 'https://www.epa.gov/sunsafety/action-steps-sun-safety', domain: 'first-aid-physical' },
+  { key: 'niams-sports-injuries', publisher: 'nih', url: 'https://www.niams.nih.gov/health-topics/sports-injuries', domain: 'first-aid-physical' },
+  { key: 'niams-sports-injuries-treatment', publisher: 'nih', url: 'https://www.niams.nih.gov/health-topics/sports-injuries/diagnosis-treatment-and-steps-to-take', domain: 'first-aid-physical' },
   // Heat and cold.
   { key: 'nws-heat-illness', publisher: 'nws', url: 'https://www.weather.gov/safety/heat-illness', domain: 'first-aid-physical' },
   { key: 'nws-cold-during', publisher: 'nws', url: 'https://www.weather.gov/safety/cold-during', domain: 'first-aid-physical' },

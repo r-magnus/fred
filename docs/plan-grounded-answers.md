@@ -48,7 +48,7 @@ Nothing is written, so nothing is invented; the condition and exposure guards
 still apply. A floor on sentence similarity, set on seen questions only, keeps
 weak matches out (then the decline stands).
 
-### 4. Section matching for species questions
+### 4. Section matching for species questions (tried, removed)
 
 FEIS reviews have fixed sections. A question's form says which one answers
 it: looks like, how tall → Botanical Description; where → General
@@ -56,6 +56,11 @@ Distribution, Site Characteristics; eats, eaten by → Diet, Importance to
 Wildlife; when → Timing of Major Life History Events. State-pack passages from
 the matching section go first among state-pack passages in the prompt. Order
 only: no score changes, no gate changes.
+
+*Removed 2026-10-03 after measuring:* no answer improved, and one got worse
+("is salal edible": with the Other Uses passage first, the model wrote that
+salal is "not recommended for human consumption due to potential
+toxicity").
 
 ### 5. Stuck on a ledge
 

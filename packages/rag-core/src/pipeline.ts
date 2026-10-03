@@ -21,7 +21,6 @@ import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
 import { rankSentences } from './sentences.ts';
-import { speciesSectionOrder } from './species.ts';
 import { numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
@@ -1247,8 +1246,6 @@ export async function ask(
     };
   }
   let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
-  // #126: species passages from the section the question asks about first.
-  if (guardsOn) usable = speciesSectionOrder(usable, query, new Set(packs.filter((p) => p.scope.kind === 'us-state').map((p) => p.id)));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve, await supportOf(usable));

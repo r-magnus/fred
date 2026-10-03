@@ -37,7 +37,9 @@ const WORDS: Readonly<Record<string, string>> = {
 /** The numbers a text states, normalised: "1,000" -> "1000", "three" -> "3". */
 export function numbersIn(text: string): string[] {
   const out: string[] = [];
-  for (const m of text.matchAll(/\d[\d,]*(?:\.\d+)?/g)) out.push(m[0].replace(/,(?=\d{3}\b)/g, '').replace(/\.0+$/, ''));
+  // Digits joined to letters are names, not claims: IR3535 (a repellent), N95,
+  // H5N1. The mosquito answer lost its list over "IR3535" (#126).
+  for (const m of text.matchAll(/(?<![A-Za-z\d])\d[\d,]*(?:\.\d+)?(?![A-Za-z\d])/g)) out.push(m[0].replace(/,(?=\d{3}\b)/g, '').replace(/\.0+$/, ''));
   for (const m of text.toLowerCase().matchAll(/\b[a-z]+\b/g)) if (WORDS[m[0]] !== undefined) out.push(WORDS[m[0]]!);
   return out;
 }

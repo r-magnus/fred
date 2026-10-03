@@ -39,15 +39,12 @@ test('a truncated vector has unit length', () => {
   assert.ok(Math.abs(v.reduce((a, x) => a + x * x, 0) - 1) < 1e-5);
 });
 
-test('species passages from the asked-about section go first; others keep their place', async () => {
-  const { speciesSectionOrder } = await import('../src/species.ts');
-  const c = (id: string, packId: string, section: string) => ({ chunk: { id, packId, section } } as never);
-  const cs = [c('a', 'state-CO', 'elk > Preferred Habitat'), c('m', 'core-survival', 'X'), c('b', 'state-CO', 'elk > Biological Characteristics')];
-  const out = speciesSectionOrder(cs, 'when is the elk rut', new Set(['state-CO'])) as unknown as { chunk: { id: string } }[];
-  assert.deepEqual(out.map((x) => x.chunk.id), ['b', 'm', 'a']);
-});
-
 test('list markers are neither sentences nor claims (#126)', async () => {
   const out = await all(numberChecked(from('1.', ' Use DEET', ' on skin.', '\n2.', ' Wear long sleeves.'), 'use DEET', async () => 'REPLACED'));
   assert.equal(out, '1. Use DEET on skin.\n2. Wear long sleeves.');
+});
+
+test('digits joined to letters are names, not numbers (#126)', () => {
+  assert.deepEqual(numbersIn('Use DEET, picaridin or IR3535; an N95 mask.'), []);
+  assert.deepEqual(numbersIn('wait 30 minutes'), ['30']);
 });

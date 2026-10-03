@@ -21,7 +21,7 @@ import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
 import { rankSentences } from './sentences.ts';
-import { numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
+import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -1455,7 +1455,7 @@ export async function ask(
   // #126: the one or two sentences of the passages given that are closest to
   // the question, verbatim, when one clears QUOTE_FLOOR.
   const quoteSources = async (): Promise<string | undefined> => {
-    if (!guardsOn) return undefined;
+    if (!guardsOn || NOT_FREDS_JOB.test(query)) return undefined;
     const passages = blocks.filter((b) => b.chunk.packId !== retrievalOpts.reserve?.packId)
       .map((b) => ({ chunkId: b.chunk.id, text: b.chunk.text, rows: store.sentenceVectorsFor?.(b.chunk.id) }));
     if (!passages.some((p) => p.rows !== undefined)) return undefined;

@@ -49,7 +49,9 @@ export function numbersIn(text: string): string[] {
  * and step numbers are not claims.
  */
 export function unsourcedNumbers(sentence: string, sources: ReadonlySet<string>): string[] {
-  const claim = sentence.replace(/^\s*(?:\d+[.)]|step \d+:?)(?=\s|$)/i, '');
+  // Parentheses hold conversions the model adds ("68° F (20° C)", "8,000 feet
+  // (2,438 meters)"); the number before them is the claim, and it is checked.
+  const claim = sentence.replace(/^\s*(?:\d+[.)]|step \d+:?)(?=\s|$)/i, '').replace(/\([^)]*\)/g, ' ');
   return [...new Set(numbersIn(claim))].filter((n) => !sources.has(n));
 }
 
@@ -73,21 +75,39 @@ export async function* numberChecked(
   const sources = new Set(numbersIn(sourceText));
   let held = '';
   let shown = false;
+  // Text of the current sentence already passed through, before a digit made
+  // us hold the rest of it.
+  let lineSoFar = '';
+  let partial = false;
   for await (const tok of tokens) {
     if (held === '' && !/\d/.test(tok)) {
-      // Not inside a sentence with a number: pass straight through, but keep
-      // the current sentence's text in case a digit arrives later in it.
       yield tok;
       if (tok.trim() !== '') shown = true;
+      lineSoFar += tok;
+      const end = sentenceEnd(lineSoFar);
+      if (end > 0) lineSoFar = lineSoFar.slice(end);
+      // A sentence that ends the text so far is finished too ("bogs." before
+      // the next token's leading space), unless it is only a list marker.
+      else if (/[.!?]\s*$/.test(lineSoFar) && !/^\s*\d+[.)]\s*$/.test(lineSoFar)) lineSoFar = '';
       continue;
     }
+    if (held === '') partial = lineSoFar.trim() !== '';
     held += tok;
     for (let cut = sentenceEnd(held); cut > 0; cut = sentenceEnd(held)) {
       const sentence = held.slice(0, cut);
       if (unsourcedNumbers(sentence, sources).length > 0) {
-        yield await onUnsourced(shown);
-        return;
+        // Nothing shown yet: the whole answer is replaced. Something shown:
+        // only this sentence goes, and the rest streams on. Ending the answer
+        // there left "how much water should i bring" with one line (#126).
+        // Part of this sentence is on screen already: it can't be dropped
+        // cleanly, so the rest is replaced, said as such.
+        if (!shown || partial) { yield await onUnsourced(shown); return; }
+        held = held.slice(cut);
+        lineSoFar = '';
+        continue;
       }
+      partial = false;
+      lineSoFar = '';
       yield sentence;
       if (sentence.trim() !== '') shown = true;
       held = held.slice(cut);
@@ -95,7 +115,15 @@ export async function* numberChecked(
     }
   }
   if (held !== '') {
-    if (unsourcedNumbers(held, sources).length > 0) { yield await onUnsourced(shown); return; }
+    if (unsourcedNumbers(held, sources).length > 0) { if (!shown || partial) yield await onUnsourced(shown); return; }
     yield held;
   }
 }
+
+/**
+ * Questions Fred declines by design (docs: what Fred won't do): which product
+ * or brand to buy, and weather forecasts. A quote is never put in place of
+ * their decline: "whats the best tent to buy" got a tent-size tip, "is that
+ * thunderhead going to reach me before dark" a lightning line (#126).
+ */
+export const NOT_FREDS_JOB = /\b(?:best|which|what)\b[^.?!]{0,40}\b(?:to buy|should i (?:buy|get)|brand|model)\b|\bbrand\b|\b(?:will|is|are)\b[^.?!]{0,30}\b(?:going to (?:rain|snow|storm|reach|hit)|rain|snow|storm|thunderstorm)\b[^.?!]{0,30}\b(?:tomorrow|tonight|today|this (?:afternoon|weekend|evening)|before dark|later)\b|\bthunderhead\b[^.?!]{0,30}\breach\b|\bforecast\b/i;

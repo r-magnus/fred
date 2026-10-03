@@ -21,11 +21,26 @@ test('an answer streams unchanged when its numbers have sources', async () => {
   assert.equal(out, 'Boil it for 1 minute. Then cool it.');
 });
 
-test('a wrong number is never shown: the rest is replaced', async () => {
-  const out = await all(numberChecked(from('Black spruce ', 'reaches ', '30 to 60 meters.', ' It grows in bogs.'), 'a small tree 5 to 15 m tall',
+test('a wrong number is never shown: first sentence replaced, a later one dropped', async () => {
+  const first = await all(numberChecked(from('Black spruce reaches ', '30 to 60 meters.', ' It grows in bogs.'), 'a small tree 5 to 15 m tall',
     async (shown) => (shown ? '\nFrom the source:\nQUOTE' : 'QUOTE')));
-  assert.ok(!out.includes('30'));
-  assert.match(out, /From the source:\nQUOTE$/);
+  assert.equal(first, 'Black spruce reaches \nFrom the source:\nQUOTE');
+  const later = await all(numberChecked(from('It grows in bogs.', ' 30 to 60 meters tall.', ' Cones are small.'), 'bogs', async () => 'QUOTE'));
+  assert.ok(!later.includes('30'));
+  assert.match(later, /It grows in bogs\..*Cones are small\./);
+});
+
+test('a conversion in parentheses is not checked; the number before it is', () => {
+  const src = new Set(numbersIn('At 68 °F you need 2 to 3 quarts.'));
+  assert.deepEqual(unsourcedNumbers('At 68° F (20° C) you need 2 to 3 quarts.', src), []);
+});
+
+test('product picks and forecasts are never quoted in place of a decline', async () => {
+  const { NOT_FREDS_JOB } = await import('../src/grounding.ts');
+  for (const q of ['whats the best tent to buy for next time', 'which brand of water filter is best', 'Is that thunderhead going to reach me before dark?', 'will it snow tonight up at the pass'])
+    assert.ok(NOT_FREDS_JOB.test(q), q);
+  for (const q of ['how close can i get to elk for a good photo', 'the thunder stopped, how long before we keep hiking up', 'is it ok to walk up to the bison for a selfie'])
+    assert.ok(!NOT_FREDS_JOB.test(q), q);
 });
 
 test('quotable sentences skip the heading and split list items', () => {

@@ -167,6 +167,15 @@ export const WILDLIFE_SETS = ['tools/eval/data/holdout-wildlife.json'] as const;
  */
 export const HAZARD_SETS = ['tools/eval/data/holdout-hazards.json'] as const;
 
+/**
+ * Plants and wildlife outside California and Oregon (2026-10-03, #118): 11
+ * states from every region, each question tagged with its state, written from
+ * general knowledge after checking only that each species is in that state's
+ * pack (names, not text). One trap (grizzlies in Georgia) and one with no
+ * location.
+ */
+export const STATE_SETS = ['tools/eval/data/holdout-states.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -180,8 +189,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'ailments': return AILMENT_SETS;
     case 'wildlife': return WILDLIFE_SETS;
     case 'hazards': return HAZARD_SETS;
+    case 'states': return STATE_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | all, got "${name}"`);
   }
 }
 

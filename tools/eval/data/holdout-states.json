@@ -1,0 +1,417 @@
+[
+ {
+  "id": "hst-az-saguaro-01",
+  "question": "how tall do saguaros get",
+  "state": "AZ",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Very tall columnar cactus, often around 40-50 feet (12-15 m) at most",
+   "Grows very slowly; arms come late in life"
+  ],
+  "provenance": "independent",
+  "pack": "state-AZ-flora-fauna"
+ },
+ {
+  "id": "hst-az-sycamore-01",
+  "question": "where do arizona sycamores grow",
+  "state": "AZ",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Along streams, washes and canyon bottoms (riparian areas)"
+  ],
+  "provenance": "independent",
+  "pack": "state-AZ-flora-fauna"
+ },
+ {
+  "id": "hst-co-aspen-01",
+  "question": "what does quaking aspen look like",
+  "state": "CO",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Smooth pale or whitish bark",
+   "Round leaves on flat stalks that tremble in the wind; yellow in fall",
+   "Often grows in large clonal groves"
+  ],
+  "provenance": "independent",
+  "pack": "state-CO-flora-fauna"
+ },
+ {
+  "id": "hst-co-bighorn-01",
+  "question": "what do bighorn sheep eat",
+  "state": "CO",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Mostly grasses, also forbs and shrubs"
+  ],
+  "provenance": "independent",
+  "pack": "state-CO-flora-fauna"
+ },
+ {
+  "id": "hst-co-elk-01",
+  "question": "are there elk around here and when is the rut",
+  "state": "CO",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes, elk live in Colorado",
+   "The rut is in fall (about September-October)"
+  ],
+  "provenance": "independent",
+  "pack": "state-CO-flora-fauna"
+ },
+ {
+  "id": "hst-mt-grizzly-01",
+  "question": "are there grizzly bears in this state",
+  "state": "MT",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes: grizzly bears live in Montana's northern Rockies (Glacier and the Yellowstone area)"
+  ],
+  "redFlags": [
+   "Says there are none"
+  ],
+  "provenance": "independent",
+  "pack": "state-MT-flora-fauna"
+ },
+ {
+  "id": "hst-mt-whitebark-01",
+  "question": "what animals eat whitebark pine seeds",
+  "state": "MT",
+  "expect": "answer",
+  "domains": [
+   "wildlife",
+   "plants"
+  ],
+  "keyPoints": [
+   "Clark's nutcrackers (which also spread the seeds), red squirrels",
+   "Grizzly and black bears raid squirrel caches"
+  ],
+  "provenance": "independent",
+  "pack": "state-MT-flora-fauna"
+ },
+ {
+  "id": "hst-mt-goat-01",
+  "question": "where do mountain goats live",
+  "state": "MT",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Steep, rocky cliffs and ledges in alpine and subalpine terrain, often above treeline"
+  ],
+  "provenance": "independent",
+  "pack": "state-MT-flora-fauna"
+ },
+ {
+  "id": "hst-fl-palmetto-01",
+  "question": "what does saw palmetto look like",
+  "state": "FL",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "A low, shrubby palm with fan-shaped leaves",
+   "Leaf stalks lined with sharp, saw-like teeth; trunks often creep along the ground"
+  ],
+  "provenance": "independent",
+  "pack": "state-FL-flora-fauna"
+ },
+ {
+  "id": "hst-fl-cabbage-01",
+  "question": "where does cabbage palmetto grow",
+  "state": "FL",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Coastal areas, hammocks and flatwoods of the southeastern coastal plain"
+  ],
+  "provenance": "independent",
+  "pack": "state-FL-flora-fauna"
+ },
+ {
+  "id": "hst-ny-maple-01",
+  "question": "what does sugar maple look like",
+  "state": "NY",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Leaves with about five lobes; bright orange-red fall color",
+   "Gray, furrowed bark on older trees; sap used for maple syrup"
+  ],
+  "provenance": "independent",
+  "pack": "state-NY-flora-fauna"
+ },
+ {
+  "id": "hst-ny-bear-01",
+  "question": "are there black bears in this state",
+  "state": "NY",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes: black bears live in New York"
+  ],
+  "redFlags": [
+   "Says there are none"
+  ],
+  "provenance": "independent",
+  "pack": "state-NY-flora-fauna"
+ },
+ {
+  "id": "hst-ny-hemlock-01",
+  "question": "where does eastern hemlock grow",
+  "state": "NY",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Cool, moist sites: ravines, north-facing slopes, along streams",
+   "Very shade tolerant"
+  ],
+  "provenance": "independent",
+  "pack": "state-NY-flora-fauna"
+ },
+ {
+  "id": "hst-me-moose-01",
+  "question": "do moose live around here",
+  "state": "ME",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes: moose are common across much of Maine"
+  ],
+  "provenance": "independent",
+  "pack": "state-ME-flora-fauna"
+ },
+ {
+  "id": "hst-me-blueberry-01",
+  "question": "can you eat lowbush blueberries",
+  "state": "ME",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Yes: the berries are edible, eaten by people and wildlife"
+  ],
+  "provenance": "independent",
+  "pack": "state-ME-flora-fauna"
+ },
+ {
+  "id": "hst-me-lynx-01",
+  "question": "are there lynx in maine",
+  "state": "ME",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes: Canada lynx live in northern Maine, though rarely seen"
+  ],
+  "provenance": "independent",
+  "pack": "state-ME-flora-fauna"
+ },
+ {
+  "id": "hst-tx-mesquite-01",
+  "question": "what eats honey mesquite pods",
+  "state": "TX",
+  "expect": "answer",
+  "domains": [
+   "wildlife",
+   "plants"
+  ],
+  "keyPoints": [
+   "Many animals: livestock, deer, javelina, rodents, coyotes and others"
+  ],
+  "provenance": "independent",
+  "pack": "state-TX-flora-fauna"
+ },
+ {
+  "id": "hst-wa-cedar-01",
+  "question": "what does western redcedar look like",
+  "state": "WA",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "A large tree with flat sprays of scale-like leaves",
+   "Fibrous, reddish bark that peels in strips; drooping branches"
+  ],
+  "provenance": "independent",
+  "pack": "state-WA-flora-fauna"
+ },
+ {
+  "id": "hst-wa-salal-01",
+  "question": "is salal edible",
+  "state": "WA",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Yes: its dark berries are edible, eaten by people traditionally and by wildlife"
+  ],
+  "provenance": "independent",
+  "pack": "state-WA-flora-fauna"
+ },
+ {
+  "id": "hst-wa-madrone-01",
+  "question": "what's the tree with the peeling red bark out here",
+  "state": "WA",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "Pacific madrone: smooth reddish-orange bark that peels in thin sheets",
+   "An evergreen broadleaf tree"
+  ],
+  "provenance": "independent",
+  "pack": "state-WA-flora-fauna"
+ },
+ {
+  "id": "hst-ak-spruce-01",
+  "question": "what does black spruce look like",
+  "state": "AK",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "A small, narrow spruce with short bluish-green needles",
+   "Grows in bogs, muskeg and cold wet soils; small cones near the top"
+  ],
+  "provenance": "independent",
+  "pack": "state-AK-flora-fauna"
+ },
+ {
+  "id": "hst-ak-fireweed-01",
+  "question": "what is fireweed",
+  "state": "AK",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "A tall plant with spikes of pink-purple flowers",
+   "One of the first plants to come back after fire"
+  ],
+  "provenance": "independent",
+  "pack": "state-AK-flora-fauna"
+ },
+ {
+  "id": "hst-mn-wolf-01",
+  "question": "are there wolves in this state",
+  "state": "MN",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Yes: gray wolves live in northern Minnesota"
+  ],
+  "provenance": "independent",
+  "pack": "state-MN-flora-fauna"
+ },
+ {
+  "id": "hst-mn-birch-01",
+  "question": "what does paper birch look like",
+  "state": "MN",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "White bark that peels in papery strips, with dark marks"
+  ],
+  "provenance": "independent",
+  "pack": "state-MN-flora-fauna"
+ },
+ {
+  "id": "hst-ga-kudzu-01",
+  "question": "what is kudzu and why is it a problem",
+  "state": "GA",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "A fast-growing invasive vine from Asia, with large three-part leaves",
+   "It smothers trees and other plants"
+  ],
+  "provenance": "independent",
+  "pack": "state-GA-flora-fauna"
+ },
+ {
+  "id": "hst-ga-longleaf-01",
+  "question": "where does longleaf pine grow",
+  "state": "GA",
+  "expect": "answer",
+  "domains": [
+   "plants"
+  ],
+  "keyPoints": [
+   "The southeastern coastal plain, on sandy soils",
+   "Fire-maintained open pine forests"
+  ],
+  "provenance": "independent",
+  "pack": "state-GA-flora-fauna"
+ },
+ {
+  "id": "hst-ga-grizzly-01",
+  "question": "are there grizzlies around here",
+  "state": "GA",
+  "expect": "answer",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: grizzly bears don't live in Georgia (they live in the northern Rockies and Alaska)"
+  ],
+  "redFlags": [
+   "Says there are grizzlies in Georgia"
+  ],
+  "provenance": "independent",
+  "pack": "state-GA-flora-fauna"
+ },
+ {
+  "id": "hst-none-moose-01",
+  "question": "are there moose around here",
+  "state": null,
+  "expect": "needs-location",
+  "domains": [
+   "wildlife"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "state"
+ }
+]

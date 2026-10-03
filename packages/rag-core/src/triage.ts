@@ -125,7 +125,14 @@ const HARM = '(?:bit|bitten|struck|stung|attacked|swelling|swollen|bleeding|limp
 const PET_PATIENT = new RegExp(`\\b${HARM}\\b[^.?!]{0,30}\\b${PET}\\b|\\b${PET}\\b(?:'s)?[^.?!]{0,40}\\b(?:${HARM}|face|paw|leg|mouth|nose)\\b`, 'i');
 const PERSON = /\b(?:i|i'm|me|my (?!dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)\w+|friend|buddy|wife|husband|son|daughter|kid|child|dad|mom|he's my|someone|person|guy)\b/i;
 const PRONOUN = /\b(?:he|she|it|his|her|its|him)\b/i;
+/**
+ * A person is hurt too: "a raccoon ... attacked my dog and then bit me on the
+ * leg" is a person's rabies exposure, and declining it as a pet question left
+ * them with nothing (health set, #51). Fred answers for the person.
+ */
+const PERSON_HURT = new RegExp(`\\b${HARM}\\s+(?:me|us|my (?!dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)\\w+)\\b|\\b(?:i|i'm|i've|we|we've)\\s+(?:was |were |got |been |am |are )?(?:${HARM})\\b`, 'i');
 export function petIsPatient(message: string, previous?: string): boolean {
+  if (PERSON_HURT.test(message)) return false;
   if (PET_PATIENT.test(message)) return true;
   return previous !== undefined && PET_PATIENT.test(previous) && PRONOUN.test(message) && !PERSON.test(message);
 }

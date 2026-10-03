@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -18,6 +18,7 @@ import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
 import { joinNeighbours } from './join.ts';
+import { exposureConditions, withExposures } from './exposures.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -617,7 +618,11 @@ export async function ask(
   const pressure = memory?.pressure() ?? 0;
   const maxTokens = maxTokensForPressure(pressure);
 
-  let keywords = extractKeywords(query);
+  // #51: a situation with a disease risk the hiker does not name is searched
+  // with the disease beside it ("a raccoon bit my kid" + rabies). Search only:
+  // the prompt keeps the hiker's own words.
+  const searched = opts.understand !== false && opts.guards !== false ? withExposures(query) : query;
+  let keywords = extractKeywords(searched);
   let routed = route(keywords, packs, {
     state: opts.state,
     ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
@@ -629,8 +634,8 @@ export async function ask(
 
   // The text the adopted search was run on: the question, or it joined to the
   // previous one, or restated (below).
-  let searchText = query;
-  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, query);
+  let searchText = searched;
+  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searched);
   // The best score, not the first chunk's: a reserved field card goes first
   // and may score below the top manual passage (retrieve.ts).
   const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
@@ -645,7 +650,10 @@ export async function ask(
   // itself fell under the gate as the opener, "what's the capital of France?"
   // was turned into a request for the hiker's state.
   if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold) {
-    const joined = `${opts.previous.question} ${query}`;
+    // #51: the earlier message's exposure holds for its follow-up: "a fox ...
+    // nipped my ankle" then "should i be worried" (phone).
+    const joined = opts.understand !== false && opts.guards !== false
+      ? withExposures(`${opts.previous.question} ${query}`) : `${opts.previous.question} ${query}`;
     const keywordsJ = extractKeywords(joined);
     const routedJ = route(keywordsJ, packs, {
       state: opts.state,
@@ -1351,15 +1359,27 @@ export async function ask(
   // full before it is shown, and one that gives advice the condition's card
   // says not to give is replaced by that card (conditions.ts). Streaming is
   // given up only then.
-  const watched = active.filter((c) => c.forbidden !== undefined);
+  // #51: a risk with no card (an algal bloom) guards the answer too, with its
+  // reviewed reply in place of a card.
+  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
+  // #51: someone in danger is never left with "I don't have reliable
+  // information": "we cleaned out a mousy cabin last week and now i have a
+  // fever and it's getting hard to breathe" found the hantavirus passages and
+  // the model declined (health set).
+  const emergency = guardsOn && dangerSign([...history, query]);
   const guardCard = async (text: string): Promise<string> => {
     // A refusal in the middle of a condition is a dead end too.
     if (isRefusal(text) && followed !== undefined) {
       answerGuard.replacedBy = 'refusal';
       return renderCard(parseCard(followed.chunk.text));
     }
+    if (isRefusal(text) && emergency) {
+      answerGuard.replacedBy = 'safety-net';
+      return SAFETY_NET_REPLY;
+    }
     const by = violatedCondition(text, watched);
     if (by === undefined) return text;
+    if (by.instead !== undefined) { answerGuard.replacedBy = by.id; return by.instead; }
     const card = await cardByTitle(by.card);
     if (card === undefined) return text;
     answerGuard.replacedBy = by.id;
@@ -1387,8 +1407,12 @@ export async function ask(
   const stream = watched.length > 0
     ? streamChecked(backend.generate(prompt, generateOpts), {
       violates: (sentence) => violatedCondition(sentence, watched),
-      holdsFirst: (sentence) => followed !== undefined && isRefusal(sentence),
+      holdsFirst: (sentence) => (followed !== undefined || emergency) && isRefusal(sentence),
       replace: async (by, shownAlready) => {
+        if (by.instead !== undefined) {
+          answerGuard.replacedBy = by.id;
+          return shownAlready ? `\n\n${CONDITION_INSTEAD(by.label)}\n${by.instead}` : by.instead;
+        }
         const card = await cardByTitle(by.card);
         if (card === undefined) return undefined;
         answerGuard.replacedBy = by.id;
@@ -1400,7 +1424,7 @@ export async function ask(
       },
       whole: guardCard,
     })
-    : followed !== undefined ? refusalOnly : backend.generate(prompt, generateOpts);
+    : followed !== undefined || emergency ? refusalOnly : backend.generate(prompt, generateOpts);
 
   return {
     kind: 'answer',

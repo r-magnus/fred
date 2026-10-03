@@ -70,6 +70,10 @@ test('a pet that is hurt is the patient; a pet along for the hike is not', () =>
   assert.ok(petIsPatient('his face is swelling', 'a snake struck my dog'));
   assert.ok(petIsPatient('my dog is limping'));
   assert.ok(!petIsPatient('my dog and i are lost'));
+  assert.ok(!petIsPatient('a raccoon that was acting strange attacked my dog and then bit me on the leg'));
+  assert.ok(!petIsPatient('a snake bit my dog and i got bitten too'));
+  assert.ok(petIsPatient('a raccoon attacked my dog'));
+  assert.ok(petIsPatient('a snake bit him again', 'my dog is limping'));
   assert.ok(!petIsPatient('my friend got stung and his face is swelling', 'a bee stung my dog'));
 });
 
@@ -118,4 +122,33 @@ test('specific questions a card answers in a sentence, not how-tos', () => {
   for (const m of ['how do i stop the bleeding', 'what should i do', 'what now', 'a snake struck my buddy', 'my ankle is swelling',
     "can't feel my fingertips and they've gone kind of waxy", "I think I'm lost. I don't know which way the trail is."]) assert.ok(!asksSpecifically(m), m);
   for (const m of ['ok so how long should i ice it', 'Which way should we go?', 'is ice ok for it']) assert.ok(asksSpecifically(m), m);
+});
+
+test('a situation with an unnamed disease risk is searched with the disease beside it (#51)', async () => {
+  const { EXPOSURE_LINKS, withExposures } = await import('../src/exposures.ts');
+  const ids = (m: string): string[] => EXPOSURE_LINKS.filter((l) => l.when.test(m)).map((l) => l.id);
+  assert.deepEqual(ids("a raccoon bit my kid's hand"), ['rabies']);
+  assert.deepEqual(ids('a skunk scratched my arm'), ['rabies']);
+  assert.deepEqual(ids('we woke up and there was a bat in the tent'), ['rabies-bat']);
+  assert.deepEqual(ids('the shelter has mouse droppings everywhere'), ['hantavirus']);
+  assert.deepEqual(ids('dead squirrels near camp'), ['plague']);
+  assert.deepEqual(ids('the lake has green scum on it'), ['algal-bloom']);
+  // Small rodents almost never carry rabies (CDC); an ankle is not an exposure.
+  assert.deepEqual(ids('a squirrel bit my finger'), []);
+  assert.deepEqual(ids('a chipmunk bit me'), []);
+  assert.equal(withExposures('i rolled my ankle'), 'i rolled my ankle');
+  assert.match(withExposures('a fox nipped my ankle'), /\(rabies exposure/);
+});
+
+test('an algal bloom guards the answer: boiling or filtering that water is replaced (#51)', async () => {
+  const { exposureConditions } = await import('../src/exposures.ts');
+  const { violatedCondition } = await import('../src/conditions.ts');
+  const watched = exposureConditions(['the lake has green scum on it, can i filter it and drink it']);
+  assert.equal(watched[0]?.id, 'algal-bloom');
+  assert.equal(violatedCondition('Boil the water for 1 minute, or use purification tablets.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('If no toxins are detected, consider filtering the water and drink it cautiously.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('Check for cyanotoxins in the water.', watched)?.id, 'algal-bloom');
+  assert.equal(violatedCondition('No, boiling water will not remove the toxins.', watched), undefined);
+  assert.equal(violatedCondition('Find another water source.', watched), undefined);
+  assert.deepEqual(exposureConditions(['how do i purify stream water']), []);
 });

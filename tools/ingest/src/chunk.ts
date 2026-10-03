@@ -31,6 +31,8 @@ export interface DraftChunk {
    * page, e.g. each Wikivoyage article at the revision it was taken from.
    */
   readonly licenseId?: string;
+  /** Overrides the pack's source for this chunk, for a pack drawn from several publishers. */
+  readonly source?: string;
 }
 
 export interface ChunkOptions {

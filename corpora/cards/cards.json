@@ -1059,7 +1059,7 @@
     "summary": "Treat any water from a lake, stream, pond or spring before drinking it. Clear muddy water first, then boil it or treat it with tablets, iodine or bleach.",
     "steps": [
       "Muddy or cloudy water: filter it through cloth, or let it seep into a hole dug beside the source, first. That makes it clearer, but you still have to purify it.",
-      "Boil it: bring it to a rolling boil for 1 minute, or 3 minutes at high altitude.",
+      "Boil it: bring it to a rolling boil for 1 minute. Above about 5,000 feet, boil it for 3 minutes.",
       "Can't boil? Use purification tablets and follow the instructions on the packet. Check they haven't expired.",
       "Tincture of iodine (2%): 5 drops per quart, or 10 if the water is cloudy or cold. Wait 30 minutes, or 60 if it's cold and cloudy.",
       "Household bleach: the manual's amount is 2 drops per quart for 5.25% bleach, then wait 30 minutes (60 if the water is cold and cloudy). Bleach strength varies, so check the label.",
@@ -1067,10 +1067,11 @@
     ],
     "dont": [
       "Don't add drink mix until the treatment time is over.",
-      "Don't rely on a filter alone. Most filters don't remove viruses."
+      "Don't rely on a filter alone. Most filters don't remove viruses.",
+      "If the water might contain fuel, pesticides or other chemicals, don't drink it. Boiling and disinfecting don't remove chemicals. Find another source."
     ],
     "getHelp": "",
-    "reviewerNote": "Changes from your review that the manuals support: settle or filter first, bleach strength varies (the manual itself says to check it), the shellfish-iodine line removed, the 'rainwater is usually safe' line removed. The CDC points (6,500 ft, iodine cautions, chemical contamination) aren't in the manuals, so they are marked as such. Adding CDC's public-domain guidance as a proper source is on the next-steps list; then these lines can be quoted instead of flagged. Solar disinfection is still left out: the manual names it but gives no method.",
+    "reviewerNote": "Changes from your review that the manuals support: settle or filter first, bleach strength varies (the manual itself says to check it), the shellfish-iodine line removed, the 'rainwater is usually safe' line removed. The CDC points (6,500 ft, iodine cautions, chemical contamination) aren't in the manuals, so they are marked as such. Adding CDC's public-domain guidance as a proper source is on the next-steps list; then these lines can be quoted instead of flagged. Solar disinfection is still left out: the manual names it but gives no method. 2026-10-02 (#51): the boiling altitude now follows EPA's 5,000 ft, quoted from the health pack; sources differ (EPA 5,000 ft, CDC 6,500 ft, the 2018 Army manual 8,000 ft) and the lowest is the safe choice. The chemicals line is now quoted from EPA. The iodine caution stays unsourced: its CDC page is not reachable for ingest.",
     "sources": [
       {
         "source": "ATP 3-50.21 Survival 2018",
@@ -1131,20 +1132,22 @@
         "source": "ATP 3-50.21 Survival 2018",
         "page": 69,
         "quote": "most filters do not remove\nviruses"
+      },
+      {
+        "source": "EPA",
+        "page": null,
+        "quote": "At altitudes above 5,000 feet (1,000 meters), boil water for three minutes."
+      },
+      {
+        "source": "EPA",
+        "page": null,
+        "quote": "boiling or disinfection will not destroy other contaminants, such as heavy metals, salts, and most other chemicals."
       }
     ],
     "unsourced": [
       {
-        "text": "Current CDC guidance says to boil for 3 minutes anywhere above 6,500 feet (the 2018 manual says above 8,000 feet).",
-        "why": "Reviewer request. CDC guidance; newer than the manual."
-      },
-      {
         "text": "Iodine isn't suitable for everyone, for example during pregnancy or with thyroid problems. Use boiling or another method if unsure.",
         "why": "Reviewer request. CDC guidance; replaces the manual's shellfish-allergy line, which the reviewer flagged as inaccurate."
-      },
-      {
-        "text": "If the water might contain fuel, pesticides or other chemicals, don't drink it. Boiling and disinfecting don't remove chemicals. Find another source.",
-        "why": "Reviewer request. CDC guidance; not in the manuals."
       }
     ]
   },

@@ -90,7 +90,7 @@ const WIKIVOYAGE_DROP_OWN = new Set(['ticks']);
 const decode = (s: string): string =>
   s.replace(/&nbsp;|&#160;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&#39;|&rsquo;|&lsquo;|&#8217;|&#8216;/g, "'").replace(/&quot;|&ldquo;|&rdquo;|&#8220;|&#8221;/g, '"')
-    .replace(/&mdash;|&#8212;/g, '—').replace(/&ndash;|&#8211;/g, '–').replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
+    .replace(/&deg;/g, '°').replace(/&mdash;|&#8212;/g, '—').replace(/&ndash;|&#8211;/g, '–').replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)));
 
 /** Markup to text, keeping paragraph and list-item breaks. */
 function text(html: string): string {
@@ -193,11 +193,11 @@ function windows(header: string, body: string, count: (t: string) => number): st
 const MIN_BODY = 80;
 
 export function pageChunks(
-  title: string, secs: readonly Section[], count: (t: string) => number, licenseId?: string,
+  title: string, secs: readonly Section[], count: (t: string) => number, licenseId?: string, minBody = MIN_BODY,
 ): DraftChunk[] {
   const chunks: DraftChunk[] = [];
   for (const s of secs) {
-    if (s.body.length < MIN_BODY) continue;
+    if (s.body.length < minBody) continue;
     const section = [title, ...s.path].join(' > ');
     for (const t of windows([title, ...s.path].join(' — '), s.body, count)) {
       chunks.push({

@@ -45,12 +45,13 @@ const COLLAPSED = /\bcollaps(?:ed|es|ing)\b|\bkeeled over\b/i;
 const THINGS = /\b(?:tent|tarp|shelter|bridge|snow ?cave|roof|wall|chair|table|stove|pole)s?\b/i;
 
 /**
- * A big animal close by, charging or getting into camp (bear-encounter): read
+ * A big animal close by, charging, attacking ("a mountain lion just jumped my
+ * friend", wildlife set, #117) or getting into camp (bear-encounter): read
  * across the thread, because "something big is sniffing around the tent" and
  * "its a bear" arrive as two messages.
  */
 const ANIMAL = /\b(?:bears?|grizzl(?:y|ies)|mountain lions?|cougars?|pumas?|moose|bison|buffalo|wolf|wolves)\b/i;
-const CLOSE = /\b(?:charg(?:e|es|ed|ing)|attack(?:s|ed|ing)?|coming (?:at|toward|towards|straight)|stalking|following|staring|in front of|right (?:there|here|next to)|outside (?:the|our|my) tent|in (?:our|the) camp|into (?:our|the) camp|getting into|sniffing|rustling|close|near)\b/i;
+const CLOSE = /\b(?:charg(?:e|es|ed|ing)|attack(?:s|ed|ing)?|jump(?:ed|s|ing)|pounc(?:e|ed|es|ing)|maul(?:ed|ing|s)?|grab(?:bed|s|bing)|bitten|clawed|knocked (?:him|her|me|them) down|coming (?:at|toward|towards|straight)|stalking|following|staring|in front of|right (?:there|here|next to)|outside (?:the|our|my) tent|in (?:our|the) camp|into (?:our|the) camp|getting into|sniffing|rustling|close|near)\b/i;
 
 /**
  * Drowsiness or vomiting after a knock to the head (head-injury card:

@@ -152,3 +152,14 @@ test('an algal bloom guards the answer: boiling or filtering that water is repla
   assert.equal(violatedCondition('Find another water source.', watched), undefined);
   assert.deepEqual(exposureConditions(['how do i purify stream water']), []);
 });
+
+test('a big animal attacking is a danger sign however it is said (#117)', () => {
+  assert.ok(dangerSign(["a mountain lion just jumped my friend and he's bleeding"]));
+  assert.ok(dangerSign(['a cougar pounced on my brother']));
+  assert.ok(dangerSign(['the moose knocked her down']));
+  assert.ok(!dangerSign(['we saw a moose way across the meadow']));
+});
+
+test('"a bit" is not a bite (#117)', () => {
+  assert.ok(!dangerSign(['we saw a bear a bit up the trail, far off']));
+});

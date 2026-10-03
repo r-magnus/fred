@@ -1453,8 +1453,12 @@ export async function ask(
       return renderCard(parseCard(followed.chunk.text));
     }
     if (isRefusal(text) && emergency) {
-      answerGuard.replacedBy = 'safety-net';
-      return SAFETY_NET_REPLY;
+      // The reviewed reply for the risk at hand, when there is one: a
+      // lightning victim gets "safe to touch... start CPR", not only "call
+      // emergency services" (#115).
+      const specific = watched.find((c) => c.instead !== undefined);
+      answerGuard.replacedBy = specific?.id ?? 'safety-net';
+      return specific?.instead ?? SAFETY_NET_REPLY;
     }
     const by = violatedCondition(text, watched);
     if (by === undefined) return text;

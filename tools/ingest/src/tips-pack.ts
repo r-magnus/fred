@@ -20,12 +20,12 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { LicenseEntry } from '@fred/pack-format';
+import type { DomainTag, LicenseEntry } from '@fred/pack-format';
 import { looksLikeProcedure } from '@fred/rag-core';
 import type { DraftChunk } from './chunk.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
 import { writePack } from './pack.ts';
-import { npsSlug, WIKIVOYAGE_PAGES, type WikivoyagePage } from './tips-fetch.ts';
+import { NPS_WILDLIFE_PAGES, npsSlug, WIKIVOYAGE_PAGES, type WikivoyagePage } from './tips-fetch.ts';
 
 const DIR = 'corpora/tips';
 /** Same window as the FEIS packs: room under the encoder's limit for the header. */
@@ -146,8 +146,12 @@ export function sections(
 export function npsArticle(page: string): { title: string; html: string } {
   const title = decode(page.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? '')
     .replace(/\s*\(U\.S\. National Park Service\)\s*$/, '').replace(/\s+/g, ' ').trim();
-  const start = page.indexOf('id="main"');
-  let html = start < 0 ? page : page.slice(start);
+  // From the end of the tag that holds id="main": slicing at the attribute
+  // left 'id="main" role="main" class="MainContent">' at the head of 27
+  // passages in core-tips-nps 1.0.0.
+  const at = page.indexOf('id="main"');
+  const start = at < 0 ? -1 : page.indexOf('>', at) + 1;
+  let html = start <= 0 ? page : page.slice(start);
   // The article ends where the series navigation, tags or page footer begin.
   const end = html.search(/Part of a series of articles titled|<footer|Last updated:|class="Tags/);
   if (end > 0) html = html.slice(0, end);
@@ -213,13 +217,28 @@ export function pageChunks(
   return chunks;
 }
 
-export function npsChunks(count: (t: string) => number): DraftChunk[] {
-  const urls = JSON.parse(readFileSync(join(DIR, 'nps', 'urls.json'), 'utf8')) as string[];
+export function npsChunks(count: (t: string) => number, urls: readonly string[] = JSON.parse(readFileSync(join(DIR, 'nps', 'urls.json'), 'utf8')) as string[]): DraftChunk[] {
   return urls.flatMap((url) => {
     const { title, html } = npsArticle(readFileSync(join(DIR, 'nps', `${npsSlug(url)}.html`), 'utf8'));
     return pageChunks(title, sections(html, NPS_DROP, false), count);
   });
 }
+
+/** Wildlife-encounter pages (#117), as survival passages so an emergency can reach them. */
+export function wildlifeChunks(count: (t: string) => number): DraftChunk[] {
+  return npsChunks(count, NPS_WILDLIFE_PAGES)
+    .filter((c) => !WILDLIFE_DROP.test(c.section))
+    .map((c) => ({ ...c, domain: 'survival' as const }));
+}
+
+/**
+ * Yellowstone's safety page covers far more than wildlife. Kept: wildlife in
+ * general, bears (including food storage and a bear in camp), bison, elk,
+ * wolves and cougars. Dropped: thermal areas and driving (not a hiker's
+ * question here), weather (#115), ticks and mosquitoes (the health pack),
+ * buying or renting bear spray, and pointers elsewhere.
+ */
+const WILDLIFE_DROP = /^Safety - Yellowstone National Park(?: > (?:Emergency\?|Find Out More|Thermal Areas|Driving|Ticks & Mosquitoes|Weather & Environment|Bears > (?:Buying|Renting) Bear Spray)(?:$| >)|$)|> More Resources$/;
 
 export function wikivoyagePages(): WikivoyagePage[] {
   return WIKIVOYAGE_PAGES.map((t) =>
@@ -244,7 +263,7 @@ async function main(): Promise<void> {
     // A word count stands in for the encoder's tokens: close enough to review windows.
     const count = (t: string): number => Math.ceil(t.split(/\s+/).length * 1.3);
     mkdirSync(DIR, { recursive: true });
-    for (const [name, chunks] of [['nps', npsChunks(count)], ['wikivoyage', wikivoyageChunks(pages, count)]] as const) {
+    for (const [name, chunks] of [['nps', npsChunks(count)], ['wikivoyage', wikivoyageChunks(pages, count)], ['wildlife', wildlifeChunks(count)]] as const) {
       writeFileSync(join(DIR, `chunks-${name}.json`), JSON.stringify(chunks, null, 1));
       console.log(`${name}: ${chunks.length} chunks -> ${join(DIR, `chunks-${name}.json`)}`);
     }
@@ -253,23 +272,32 @@ async function main(): Promise<void> {
 
   const embedder = await loadGgufEmbedder(EMBEDDING_GEMMA);
   const count = (t: string): number => embedder.tokenCount(t);
-  const packs = [
+  const packs: { id: string; version: string; domains: DomainTag[]; displayName: string; source: string; description: string; licenseId: string; licenses: LicenseEntry[]; chunks: DraftChunk[] }[] = [
     {
-      id: 'core-tips-nps', displayName: 'Outdoor Tips (National Park Service)', source: 'National Park Service',
+      // 1.1.0: trail etiquette with horses, bikes and dogs (#117).
+      id: 'core-tips-nps', version: '1.1.0', domains: ['outdoor-skills'], displayName: 'Outdoor Tips (National Park Service)', source: 'National Park Service',
       description: 'Everyday outdoor know-how from National Park Service articles: hiking, camping, food storage, wildlife distance, waste, etiquette.',
       licenseId: NPS_LICENSE.id, licenses: [NPS_LICENSE], chunks: npsChunks(count),
     },
     {
-      id: 'core-tips-wikivoyage', displayName: 'Outdoor Tips (Wikivoyage)', source: 'Wikivoyage',
+      id: 'core-tips-wikivoyage', version: '1.0.0', domains: ['outdoor-skills'], displayName: 'Outdoor Tips (Wikivoyage)', source: 'Wikivoyage',
       description: 'Everyday outdoor know-how from Wikivoyage travel topics, CC BY-SA 4.0: backpacking, hiking, camping, clothing, food, bugs.',
       licenseId: wikivoyageLicense(pages[0]!).id, licenses: pages.map(wikivoyageLicense), chunks: wikivoyageChunks(pages, count),
     },
   ];
-  for (const p of packs) {
+  packs.push({
+    id: 'core-wildlife-safety', version: '1.0.0', domains: ['survival', 'wildlife'], displayName: 'Wildlife Safety (National Park Service)', source: 'National Park Service',
+    description: 'What to do when a mountain lion, moose, elk, bison, rattlesnake or coyote is close, from National Park Service park pages.',
+    licenseId: NPS_LICENSE.id, licenses: [NPS_LICENSE], chunks: wildlifeChunks(count),
+  });
+  // PACKS_ONLY=a,b builds only those packs: a rebuild of an unchanged pack
+  // is not a no-op when the cleaning code has moved on since it was built.
+  const only = process.env.PACKS_ONLY?.split(',');
+  for (const p of packs.filter((x) => only === undefined || only.includes(x.id))) {
     const vectors = await embedder.embed(p.chunks.map((c) => documentText(EMBEDDING_GEMMA, c.section, c.text)));
     const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
-      id: p.id, version: '1.0.0', displayName: p.displayName, description: p.description,
-      domains: ['outdoor-skills'], scope: { kind: 'global' }, source: p.source,
+      id: p.id, version: p.version, displayName: p.displayName, description: p.description,
+      domains: p.domains, scope: { kind: 'global' }, source: p.source,
       licenseId: p.licenseId, licenses: p.licenses, embedding: embedder.spec,
     }, p.chunks, vectors);
     const mb = manifest.files.reduce((s, f) => s + f.bytes, 0) / 1024 / 1024;

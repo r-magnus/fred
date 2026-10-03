@@ -142,7 +142,7 @@ test('setsFor selects a family and rejects anything else', () => {
   assert.equal(setsFor('all').length, GRADED_SETS.length + HOLDOUT_SETS.length);
   assert.deepEqual(setsFor('breadth'), BREADTH_SETS);
   assert.deepEqual(setsFor('everyday'), EVERYDAY_SETS);
-  assert.throws(() => setsFor('graded'), /tuning \| holdout \| breadth \| colloquial \| everyday \| health \| health-confirm \| ailments \| all/);
+  assert.throws(() => setsFor('graded'), /tuning \| holdout \| breadth \| colloquial \| everyday \| health \| health-confirm \| ailments \| wildlife \| all/);
 });
 
 test('the holdout set covers every corpus and both non-answer outcomes', () => {

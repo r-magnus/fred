@@ -51,6 +51,33 @@ export const NPS_PAGES: readonly string[] = [
   'https://www.nps.gov/articles/camp-safety-before-the-trip.htm',
   'https://www.nps.gov/articles/camp-safety-during-your-stay.htm',
   'https://www.nps.gov/articles/000/idkt_lnt.htm',
+  // Trail etiquette with horses, bikes and dogs (#117).
+  'https://www.nps.gov/samo/planyourvisit/horsesafety.htm',
+  'https://www.nps.gov/samo/planyourvisit/bikesafety.htm',
+  'https://www.nps.gov/subjects/trails/hiking-with-pets.htm',
+];
+
+/**
+ * Wildlife encounters (#117): what to do when a mountain lion, moose, elk,
+ * bison, rattlesnake or coyote is close, and a fawn found alone. Park pages,
+ * public domain like the rest of nps.gov. Packed apart from the tips
+ * (core-wildlife-safety, tips-pack.ts), because an emergency is never
+ * answered from the tips and "a mountain lion is staring at us" is one.
+ * Chosen from tools/eval/data/holdout-wildlife.json's topics before any was read.
+ */
+export const NPS_WILDLIFE_PAGES: readonly string[] = [
+  'https://www.nps.gov/articles/mountain-lion-safety.htm',
+  'https://www.nps.gov/pore/planyourvisit/yoursafety_mountainlions.htm',
+  'https://www.nps.gov/gumo/planyourvisit/mountain-lion-safety.htm',
+  'https://www.nps.gov/wrst/planyourvisit/moose-safety.htm',
+  'https://www.nps.gov/kefj/planyourvisit/moose-safety.htm',
+  'https://www.nps.gov/yose/learn/nature/rattlesnake.htm',
+  'https://www.nps.gov/grba/learn/nature/rattlesnakes.htm',
+  'https://www.nps.gov/samo/learn/nature/coyotes.htm',
+  'https://www.nps.gov/zion/learn/nature/encountering-wildlife.htm',
+  'https://www.nps.gov/articles/000/fawns-at-vafo.htm',
+  'https://www.nps.gov/romo/planyourvisit/wildlife-safety.htm',
+  'https://www.nps.gov/yell/planyourvisit/safety.htm',
 ];
 
 /** The "I Didn't Know That! Leave No Trace" series: every article it links to is fetched. */
@@ -110,7 +137,8 @@ async function main(): Promise<void> {
   }
   const failures: string[] = [];
   const npsUrls = [...new Set(nps)];
-  for (const url of npsUrls) {
+  const allNps = [...npsUrls, ...NPS_WILDLIFE_PAGES];
+  for (const url of allNps) {
     const file = join(npsDir, `${npsSlug(url)}.html`);
     if (existsSync(file)) continue;
     try { writeFileSync(file, await fetchText(url)); } catch (e) { failures.push(String(e)); }
@@ -136,8 +164,8 @@ async function main(): Promise<void> {
     await pause();
   }
 
-  const npsCount = npsUrls.filter((u) => existsSync(join(npsDir, `${npsSlug(u)}.html`))).length;
-  console.log(`NPS: ${npsCount}/${npsUrls.length} pages cached; Wikivoyage: ${WIKIVOYAGE_PAGES.length} topics`);
+  const npsCount = allNps.filter((u) => existsSync(join(npsDir, `${npsSlug(u)}.html`))).length;
+  console.log(`NPS: ${npsCount}/${allNps.length} pages cached; Wikivoyage: ${WIKIVOYAGE_PAGES.length} topics`);
   for (const f of failures) console.log(`  failed: ${f}`);
   if (failures.length > 0) process.exitCode = 1;
 }

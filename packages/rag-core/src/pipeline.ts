@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, DEAD_ENDS, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -1445,14 +1445,15 @@ export async function ask(
   // everything else still streams: holding every answer in a "lost" chat
   // took the first words to 27.7 s on the phone (#101).
   const refusalOnly = (async function* () {
-    const refusal = NO_ANSWER_REPLY.toLowerCase();
+    const ends = DEAD_ENDS.map((d) => d.toLowerCase());
     let head = '';
     let streaming = false;
     for await (const tok of backend.generate(prompt, generateOpts)) {
       if (streaming) { yield tok; continue; }
       head += tok;
       const h = head.trimStart().toLowerCase();
-      if (!refusal.startsWith(h.slice(0, refusal.length)) || h.length > refusal.length + 4) { streaming = true; yield head; }
+      // Held while it could still be a dead end (a decline, the rule echoed).
+      if (!ends.some((e) => e.startsWith(h.slice(0, e.length)) && h.length <= e.length + 4)) { streaming = true; yield head; }
     }
     if (!streaming) yield await guardCard(head);
   })();

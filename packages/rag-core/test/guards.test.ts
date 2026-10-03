@@ -173,7 +173,14 @@ test('a negation counts only in the clause that gives the advice (#117)', async 
 });
 
 test('hazards that call for help now are danger signs (#115)', () => {
-  for (const m of ['the water is rising around us in the canyon', 'my friend got swept away crossing the creek', 'the fire is coming toward us',
+  for (const m of ['the wildfire is coming toward us and we can\'t outrun it', 'the water is rising around us in the canyon', 'my friend got swept away crossing the creek', 'the fire is coming toward us',
     "we're stuck on a ledge and can't climb up or down", 'trapped by the flood']) assert.ok(dangerSign([m]), m);
   for (const m of ['how do we make sure our campfire is really out', 'the creek is high today', 'we want to hike the ledge trail']) assert.ok(!dangerSign([m]), m);
+});
+
+test('the emergency rule echoed back is a dead end, not an answer (#115)', async () => {
+  const { isRefusal } = await import('../src/prompt.ts');
+  assert.ok(isRefusal('If life is at risk, say to contact emergency services first.'));
+  assert.ok(isRefusal("I don't have reliable information on that."));
+  assert.ok(!isRefusal('If life is at risk, call for help, then start CPR.'));
 });

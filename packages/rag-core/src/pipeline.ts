@@ -802,6 +802,18 @@ export async function ask(
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
   // #121: with guards on, passages that say the same thing as a
   // card back it instead of outranking it.
+  // #115: the message's own best score, leaving out passages that say the
+  // same thing as the conversation's card. "its getting dark" in a lost chat
+  // lost the lost card once a Forest Service passage on getting lost ("STOP
+  // where you are") scored above AGREED_CARD_FLOOR.
+  const ownTopAgainst = async (card: ScoredChunk | undefined): Promise<number> => {
+    const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
+    if (card === undefined || candidates.length === 0) return top;
+    const others = candidates.filter((c) => c.chunk.id !== card.chunk.id);
+    const vecs = await store.getVectors([card, ...others].map((c) => ({ chunkId: c.chunk.id, packId: c.chunk.packId, ordinal: c.chunk.ordinal })));
+    const v = dequantizeInt8(vecs[0]!.vec, vecs[0]!.scale);
+    return others.reduce((m, c, j) => (cosineInt8(v, vecs[j + 1]!.vec) >= SAME_THING ? m : Math.max(m, c.score)), 0);
+  };
   const supportOf = async (cs: readonly ScoredChunk[]): Promise<CardSupport | undefined> =>
     (opts.understand !== false && opts.guards !== false ? cardSupport(cs, isCard, store) : undefined);
   // Only the earlier messages this one continues (understand.ts, currentThread).
@@ -978,7 +990,7 @@ export async function ask(
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
           requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id && ownCard(own) !== undefined) {
         forcedCard = agreedCard = own;
-      } else if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
+      } else if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
@@ -1005,7 +1017,7 @@ export async function ask(
     // as a question and declined (confirmation chat set).
     else if (guardsOn && topCard === undefined && intent === 'question' && !ABOUT_A_PET.test(query)) {
       const said = setHere[0];
-      if ((lastShown !== undefined || threadCard !== undefined) && topScore < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
+      if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
@@ -1107,7 +1119,33 @@ export async function ask(
     forcedCard = agreedCard = lastShown;
   }
 
+  // #109: a specific follow-up answered from the lines of the card the
+  // conversation is on. Before a decline too (#115): "should we run to the
+  // car" after "a bear just came into camp" was declined once a lightning
+  // passage on sheltering in a vehicle scored 0.13, above the thread-card
+  // floor, though the bear card says "Don't run" in so many words.
+  const cardLinesReply = async (): Promise<AskResult | undefined> => {
+    const onCard = followed ?? lastShown;
+    if (!guardsOn || opts.lead === false || onCard === undefined || !asksSpecifically(query) || petPatient ||
+        (opts.cardAnswer ?? 'verbatim') !== 'verbatim') return undefined;
+    const parsedOn = parseCard(onCard.chunk.text);
+    const lines = cardLines(parsedOn);
+    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id));
+    if (picked.length === 0) return undefined;
+    return {
+      kind: 'answer',
+      stream: once([parsedOn.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
+      citations: [citeOf(onCard, 0)],
+      prompt: { system: '', user: '' },
+      medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),
+      card: toOffer(onCard, citeOf(onCard, 0)),
+      diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: opts.cardAnswer ?? 'verbatim' },
+    };
+  };
+
   if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
+    const fromCard = await cardLinesReply();
+    if (fromCard !== undefined) return fromCard;
     const weak = {
       ...baseDiag,
       candidates,
@@ -1335,22 +1373,9 @@ export async function ask(
   // to bring it to the hospital" after a snakebite was written from four manual
   // passages (13-25 s on the phone) though the snakebite card says not to. No
   // line close enough: the passages, as before.
-  const onCard = followed ?? lastShown;
-  if (guardsOn && opts.lead !== false && onCard !== undefined && asksSpecifically(query) && !petPatient && cardMode === 'verbatim') {
-    const parsedOn = parseCard(onCard.chunk.text);
-    const lines = cardLines(parsedOn);
-    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id));
-    if (picked.length > 0) {
-      return {
-        kind: 'answer',
-        stream: once([parsedOn.summary, ...picked.slice(0, 2).map((i) => lines[i]!)].join('\n')),
-        citations: [citeOf(onCard, 0)],
-        prompt: { system: '', user: '' },
-        medical: MEDICAL_DOMAINS.has(onCard.chunk.domain),
-        card: toOffer(onCard, citeOf(onCard, 0)),
-        diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode },
-      };
-    }
+  {
+    const fromCard = await cardLinesReply();
+    if (fromCard !== undefined) return fromCard;
   }
 
   // Stage 3 — compress before prefill.

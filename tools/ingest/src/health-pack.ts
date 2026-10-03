@@ -153,6 +153,15 @@ const HEALTH_ONLY = HEALTH_PAGES.filter((p) => p.pack === undefined);
 /** #115: the hazards pack's pages, built into core-hazards with the same cleaning. */
 const HAZARD_PAGES = HEALTH_PAGES.filter((p) => p.pack === 'core-hazards');
 
+/**
+ * Per-page repairs to extracted text. NWS's myths page sets its first myth's
+ * label as an image, so "you should crouch down" arrived unlabelled, reading
+ * as advice (#115); every later myth keeps its "Myth :".
+ */
+const REPAIRS: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
+  'nws-lightning-myths': [[/^(Lightning Myths\n)\s*(If you're caught outside during a thunderstorm, you should crouch)/, '$1Myth : $2']],
+};
+
 export function healthChunks(count: (t: string) => number, pages: readonly HealthPage[] = HEALTH_ONLY): DraftChunk[] {
   return pages.flatMap((p) => {
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
@@ -167,7 +176,7 @@ export function healthChunks(count: (t: string) => number, pages: readonly Healt
     return pageChunks(title, sections(body(cached, p.publisher), DROP, true), count, pub.license.id, 40)
       // A page's own menu or table of contents, with nothing to answer from.
       .filter((c) => !/^[^\n]*\n(?:Home Health Information|Print Overview|T T T )/.test(c.text))
-      .map((c) => ({ ...c, text: c.text.replace(NAV_TEXT, ' ').replace(/ {2,}/g, ' '), domain: p.domain, source: pub.source }));
+      .map((c) => ({ ...c, text: (REPAIRS[p.key] ?? []).reduce((t, [re, to]) => t.replace(re, to), c.text.replace(NAV_TEXT, ' ').replace(/ {2,}/g, ' ')), domain: p.domain, source: pub.source }));
   });
 }
 

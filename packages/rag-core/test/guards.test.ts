@@ -184,3 +184,13 @@ test('the emergency rule echoed back is a dead end, not an answer (#115)', async
   assert.ok(isRefusal("I don't have reliable information on that."));
   assert.ok(!isRefusal('If life is at risk, call for help, then start CPR.'));
 });
+
+test('a lightning strike guards against "don\'t touch them" (#115)', async () => {
+  const { exposureConditions } = await import('../src/exposures.ts');
+  const { violatedCondition } = await import('../src/conditions.ts');
+  const watched = exposureConditions(['lightning hit right near us and my friend is on the ground not breathing']);
+  assert.equal(watched[0]?.id, 'lightning-strike');
+  assert.equal(violatedCondition('Do not attempt to rescue the friend unless instructed by a professional.', watched)?.id, 'lightning-strike');
+  assert.equal(violatedCondition("Don't touch him until help arrives.", watched)?.id, 'lightning-strike');
+  assert.equal(violatedCondition('Check his breathing and start CPR.', watched), undefined);
+});

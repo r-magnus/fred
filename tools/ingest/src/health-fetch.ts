@@ -99,6 +99,8 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   { key: 'nws-lightning-outdoors', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-outdoors', domain: 'survival' },
   { key: 'nws-lightning-struck', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-struck', domain: 'first-aid-physical' },
   { key: 'nws-lightning-tips', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-tips', domain: 'survival' },
+  // The only NWS page that says a victim is safe to touch (#115).
+  { key: 'nws-lightning-myths', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/lightning-myths', domain: 'first-aid-physical' },
   // NWS's backcountry lightning sheet (a PDF) was tried: its columns extract
   // as run-together words, and the web pages carry the same advice.
   { key: 'nws-flood-turn-around', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/safety/flood-turn-around-dont-drown', domain: 'survival' },

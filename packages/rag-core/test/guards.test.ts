@@ -194,3 +194,10 @@ test('a lightning strike guards against "don\'t touch them" (#115)', async () =>
   assert.equal(violatedCondition("Don't touch him until help arrives.", watched)?.id, 'lightning-strike');
   assert.equal(violatedCondition('Check his breathing and start CPR.', watched), undefined);
 });
+
+test('stuck on a ledge is recognised however it is said (#128)', async () => {
+  const { stuckOnTerrain } = await import('../src/triage.ts');
+  assert.ok(stuckOnTerrain(["we're stuck on a ledge and can't climb up or down"]));
+  assert.ok(stuckOnTerrain(['i think we cliffed out']));
+  assert.ok(!stuckOnTerrain(['we want to hike the ledge trail']));
+});

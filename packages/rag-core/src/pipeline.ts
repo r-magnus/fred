@@ -1168,18 +1168,27 @@ export async function ask(
     // safe to touch cholla" got it in round 1. Without one, Fred says it has
     // no steps for that, names the signs that would make it urgent, and asks
     // (WATCH_REPLY): still no dead end, and no alarm over a sore knee.
+    // Stuck on a ledge opens the signalling card, however the message was
+    // classified: "we're stuck on a ledge and can't climb up or down" was read
+    // as a question, not NOW, and got a decline (phone, #128).
+    // Not either card whole: the signalling card's first step is to reach
+    // the highest ground, and the lost card's that moving may be better;
+    // both summaries, reviewed text, say what fits (stay put; be seen and
+    // heard), with the signalling card folded beneath.
+    if (guardsOn && !ABOUT_A_PET.test(query) && stuckOnTerrain([...history, query])) {
+      const signal = await cardByTitle('Signalling for rescue');
+      const lost = await cardByTitle('Lost: should I stay or keep moving?');
+      if (signal !== undefined && lost !== undefined) {
+        return {
+          kind: 'answer', stream: once(`${parseCard(lost.chunk.text).summary}\n${parseCard(signal.chunk.text).summary}`),
+          citations: [citeOf(lost, 0), citeOf(signal, 1)], card: toOffer(signal, citeOf(signal, 0)),
+          prompt: { system: '', user: '' }, medical: false,
+          diagnostics: { ...weak, sufficient: null, cardAnswer: 'verbatim' },
+        };
+      }
+    }
     if (understandOn && intent === 'now' && !ABOUT_A_PET.test(query)) {
       const danger = !guardsOn || dangerSign([...history, query]);
-      if (guardsOn && stuckOnTerrain([...history, query])) {
-        const signal = await cardByTitle('Signalling for rescue');
-        if (signal !== undefined) {
-          return {
-            kind: 'answer', stream: once(renderCard(parseCard(signal.chunk.text))), citations: [citeOf(signal, 0)],
-            prompt: { system: '', user: '' }, medical: false,
-            diagnostics: { ...weak, sufficient: null, cardAnswer: 'verbatim' },
-          };
-        }
-      }
       return {
         kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
         ...(offer === undefined ? {} : { offer }),

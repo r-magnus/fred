@@ -629,18 +629,38 @@ export async function ask(
   deps: PipelineDeps,
   opts: AskOptions,
 ): Promise<AskResult> {
-  const res = await askCore(query, deps, opts);
   // The opener goes only in front of a model-written answer: a card or a
   // reviewed reply is already quick and in Fred's voice, a decline gets none,
   // and in an emergency the first words must be what to do.
-  if (opts.opener !== true || opts.understand === false || opts.guards === false) return res;
-  if (res.kind !== 'answer' || res.diagnostics.cardAnswer !== undefined || res.clarify !== undefined) return res;
   const earlier = opts.history ?? [];
-  if (dangerSign([...earlier, query])) return res;
+  if (opts.opener !== true || opts.understand === false || opts.guards === false || dangerSign([...earlier, query])) {
+    return askCore(query, deps, opts);
+  }
+  // Started as the message arrives, while the question is turned into a
+  // vector: on the phone that runs on the CPU and the opener on the GPU, and
+  // nothing else needs the model until the search is done. Generated after
+  // the search, it delayed answers by about 5 s (docs/results-friendly-opener.md).
+  const stop = new AbortController();
+  const forward = (): void => stop.abort();
+  opts.signal?.addEventListener('abort', forward, { once: true });
+  const pending = makeOpener(query, earlier, deps.backend, stop.signal).catch(() => null);
+  let res: AskResult;
+  try {
+    res = await askCore(query, deps, opts);
+  } catch (e) {
+    stop.abort();
+    throw e;
+  }
+  if (res.kind !== 'answer' || res.diagnostics.cardAnswer !== undefined || res.clarify !== undefined) {
+    stop.abort();
+    opts.signal?.removeEventListener('abort', forward);
+    return res;
+  }
   const holder: { text?: string | null } = {};
   const inner = res.stream;
   async function* withOpener(): AsyncGenerator<string> {
-    holder.text = await makeOpener(query, earlier, deps.backend, opts.signal).catch(() => null);
+    holder.text = await pending;
+    opts.signal?.removeEventListener('abort', forward);
     if (holder.text !== null) yield `${holder.text}\n`;
     yield* inner;
   }

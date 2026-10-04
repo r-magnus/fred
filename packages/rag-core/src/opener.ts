@@ -113,7 +113,8 @@ export async function makeOpener(
   let out = '';
   for await (const tok of backend.generate(
     { system: OPENER_SYSTEM, user: openerUser(message, history) },
-    { maxTokens: 40, temperature: 0, stop: ['\n'], lane: 'opener', ...(signal === undefined ? {} : { signal }) },
+    { maxTokens: 30, temperature: 0, stop: ['\n', '.', '!'], lane: 'opener', ...(signal === undefined ? {} : { signal }) },
   )) out += tok;
+  // Stopped at the first sentence end, which the stop string leaves off.
   return checkOpener(out, [...earlier, message]);
 }

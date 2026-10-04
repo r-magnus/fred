@@ -318,6 +318,8 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     ...(opts.queryTemplate === undefined ? {} : { queryTemplate: opts.queryTemplate }),
   };
 
+  let genTurn: Promise<void> = Promise.resolve();
+
   return {
     embeddingSpec: () => spec,
     async embed(text: string) {
@@ -330,6 +332,17 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     },
     async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
       if (!genCtx) throw new Error('no generation model loaded');
+      // One model call at a time, in the order asked, as on the phone
+      // (device-pack.ts, exclusive): the opener (#130) runs beside the
+      // pipeline, and two calls decoded together in one context changed the
+      // intent check's word ("my wife's feeling dizzy": NOW became CHAT).
+      let release!: () => void;
+      const mine = new Promise<void>((r) => { release = r; });
+      const before = genTurn;
+      genTurn = before.then(() => mine);
+      await before;
+      // A call stopped while it waited takes no sequence.
+      if (genOpts.signal?.aborted === true) { release(); return; }
       // Acquire and release per call: a context owns a fixed pool of sequences,
       // and leaking them fails with "No sequences left" on the second question.
       const sequence = genCtx.getSequence();
@@ -358,6 +371,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
         const user = THINKING_BUDGET > 0 ? `${prompt.user}\n/think` : prompt.user;
         const meta = await session.promptWithMeta(user, {
           maxTokens: genOpts.maxTokens + THINKING_BUDGET,
+          ...(genOpts.signal === undefined ? {} : { signal: genOpts.signal, stopOnAbortSignal: true }),
           ...samplingFor(genOpts),
           budgets: { thoughtTokens: THINKING_BUDGET },
         });
@@ -378,6 +392,7 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
         yield answer.trim();
       } finally {
         sequence.dispose();
+        release();
       }
     },
     async dispose() {

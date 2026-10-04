@@ -6,9 +6,9 @@
 kept only when built from the hiker's own words plus a fixed vocabulary of
 feelings. Answers after it are word-for-word unchanged (113 of 113). On the
 second sealed set 11 of 35 messages got one, none with advice, a fact or
-reassurance. On the phone it fails the speed bar: the answer's own first
-words come about 5 s later on average, and most of the time the opener is
-then dropped, so the hiker waits longer for nothing. Not merged.**
+reassurance. On the phone it fails the speed bar both ways it was tried: after the
+search, answers came about 5 s later; started as the message arrives, they
+came 15-25 s later. Not merged.**
 
 ## What was built
 
@@ -82,3 +82,25 @@ once came back empty, with no error logged, and answered normally on two
 repeats: not explained.
 
 Ship bar: answers' first words no later on model-written answers. Not met.
+
+### Second try: the opener started as the message arrives
+
+Ryan chose one more try: start the opener while the question is turned into
+a vector (CPU on the phone; the generator is on the GPU), stop it at its
+first sentence, and stop it outright when a card or decline answers. The kept
+lines on sealed set 2 were the same 11. On the desktop, model calls now run
+one at a time as on the phone: running the opener beside the intent check in
+one context had changed the intent check's word ("my wife's feeling dizzy":
+NOW became CHAT), and stopped openers held their sequences ("No sequences
+left"). With that fixed, 113 of 113 answers identical.
+
+On the phone it is much slower, not faster: the same session took 23.6-42.8 s
+to first words (twice, and once more after the phone had cooled to thermal
+status 0), against 7.8-16.9 s with the opener off and 3.6-20.7 s with the
+opener after the search. The generator and the embedder evidently compete
+for the phone's cores. (The first two runs also left the phone at thermal
+status 3, CPU cores at 105 °C; the cooled run was no better.) The opener-off
+run after cooling did not happen: the phone disconnected.
+
+**Conclusion: on this phone a generated opener costs seconds on every
+model-written answer, run before, after or beside the search. Not merged.**

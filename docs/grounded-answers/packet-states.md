@@ -1,0 +1,4 @@
+## hst-ak-spruce-01 (expect answer) | what does black spruce look like
+Key points: A small, narrow spruce with short bluish-green needles; Grows in bogs, muskeg and cold wet soils; small cones near the top | Red flags: 
+  A: I don't have reliable information on that. /   [source: USFS FEIS — black spruce > General Distribution]
+  B: Black spruce (Picea mariana) is a coniferous tree with needle-like leaves, typically reaching heights of 30 to 60 meters. It has a slender trunk and produces cones that are approximately 5 centimeters in length. The bark is thin and reddish-brown, and the tree grows in cold, wet environments such as peatlands. /   [source: USFS FEIS — black spruce > General Distribution]

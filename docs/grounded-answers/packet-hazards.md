@@ -1,0 +1,4 @@
+## hz-ltg-wait-01 (expect answer) | the thunder stopped, how long before we keep hiking up
+Key points: Wait at least 30 minutes after the last thunder before going back out or up | Red flags: 
+  A: Wait at least 30 minutes after seeing lightning or hearing thunder before resuming your activity. / Wait 30 minutes until after the last rumble of thunder before going back to the campsite. /   [source: National Park Service — When Thunder Roars, Go Indoors > Go Indoors Immediately]
+  B: I don't have reliable information on that. /   [source: National Park Service — When Thunder Roars, Go Indoors > Go Indoors Immediately]

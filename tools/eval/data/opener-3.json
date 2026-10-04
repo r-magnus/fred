@@ -1,0 +1,226 @@
+{
+ "name": "opener-3",
+ "sealed": "2026-10-04, written before the comforting prompt and its check rules ran on anything",
+ "note": "Third sealed set for the opening line (#130), comforting tone. A kept line must comfort without advice, a fact, a promise about the outcome, or anything that reads as a yes to a yes/no or is-it-safe question.",
+ "questions": [
+  {
+   "id": "op3-worried-01",
+   "kind": "worried",
+   "question": "i think i took a wrong turn somewhere and i'm kind of freaking out",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-02",
+   "kind": "worried",
+   "question": "i'm so embarrassed, i forgot to pack enough food",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-03",
+   "kind": "worried",
+   "question": "my partner and i are arguing about whether to turn back",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-04",
+   "kind": "worried",
+   "question": "i'm worried my kid is getting too tired",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-05",
+   "kind": "worried",
+   "question": "i dropped my water filter in the river, ugh",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-06",
+   "kind": "worried",
+   "question": "i'm scared of the bears out here, every noise wakes me up",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-07",
+   "kind": "worried",
+   "question": "i feel dumb, i didn't check the weather and now it's pouring",
+   "state": "CA"
+  },
+  {
+   "id": "op3-worried-08",
+   "kind": "worried",
+   "question": "first time backpacking and honestly i'm overwhelmed",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-01",
+   "kind": "minor",
+   "question": "i cut my thumb whittling a stick",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-02",
+   "kind": "minor",
+   "question": "i slipped and bruised my shin pretty bad",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-03",
+   "kind": "minor",
+   "question": "got a bunch of bug bites on my ankles",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-04",
+   "kind": "minor",
+   "question": "my feet are covered in hot spots",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-05",
+   "kind": "minor",
+   "question": "i think i ate something weird, my stomach is cramping",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-06",
+   "kind": "minor",
+   "question": "i've got a bad sunburn on my shoulders",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-07",
+   "kind": "minor",
+   "question": "my legs are shaking after that climb",
+   "state": "CA"
+  },
+  {
+   "id": "op3-minor-08",
+   "kind": "minor",
+   "question": "i stepped in a hole and my ankle hurts",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-01",
+   "kind": "yes-no",
+   "question": "is it ok to drink from this pond if i boil it",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-02",
+   "kind": "yes-no",
+   "question": "is it safe to keep hiking with a headache",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-03",
+   "kind": "yes-no",
+   "question": "can i leave food in my tent for one night",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-04",
+   "kind": "yes-no",
+   "question": "should we keep going if it's getting dark",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-05",
+   "kind": "yes-no",
+   "question": "is it normal to feel this out of breath up here",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-06",
+   "kind": "yes-no",
+   "question": "is it fine to eat these wild strawberries",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-07",
+   "kind": "yes-no",
+   "question": "can i swim in this river, it looks shallow",
+   "state": "CA"
+  },
+  {
+   "id": "op3-yes-no-08",
+   "kind": "yes-no",
+   "question": "is it okay if i hike alone tomorrow",
+   "state": "CA"
+  },
+  {
+   "id": "op3-everyday-01",
+   "kind": "everyday",
+   "question": "how do i keep my sleeping bag dry",
+   "state": "CA"
+  },
+  {
+   "id": "op3-everyday-02",
+   "kind": "everyday",
+   "question": "what's a good snack for a long climb",
+   "state": "CA"
+  },
+  {
+   "id": "op3-everyday-03",
+   "kind": "everyday",
+   "question": "how do i find a good campsite",
+   "state": "CA"
+  },
+  {
+   "id": "op3-everyday-04",
+   "kind": "everyday",
+   "question": "what birds sing at dawn around here",
+   "state": "CA"
+  },
+  {
+   "id": "op3-emergency-01",
+   "kind": "emergency",
+   "question": "my friend fell off a rock and isn't moving",
+   "state": "CA"
+  },
+  {
+   "id": "op3-emergency-02",
+   "kind": "emergency",
+   "question": "a rattlesnake bit my dog and my hand",
+   "state": "CA"
+  },
+  {
+   "id": "op3-emergency-03",
+   "kind": "emergency",
+   "question": "my wife is having trouble breathing after a bee sting",
+   "state": "CA"
+  },
+  {
+   "id": "op3-emergency-04",
+   "kind": "emergency",
+   "question": "there's smoke and fire coming up the ridge toward us",
+   "state": "CA"
+  },
+  {
+   "id": "op3-follow-up-01",
+   "kind": "follow-up",
+   "question": "it's bleeding a little, is that bad",
+   "state": "CA",
+   "history": [
+    "i stepped on a nail at camp"
+   ]
+  },
+  {
+   "id": "op3-follow-up-02",
+   "kind": "follow-up",
+   "question": "should we wait here or go look for them",
+   "state": "CA",
+   "history": [
+    "we got separated from our group"
+   ]
+  },
+  {
+   "id": "op3-follow-up-03",
+   "kind": "follow-up",
+   "question": "he says he feels a bit better now",
+   "state": "CA",
+   "history": [
+    "my son has a fever"
+   ]
+  }
+ ]
+}

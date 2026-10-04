@@ -93,6 +93,16 @@ export async function* numberChecked(
     }
     if (held === '') partial = lineSoFar.trim() !== '';
     held += tok;
+    // A list marker at the start of a line ("1.", "2)") is not a claim:
+    // release it at once instead of holding the whole first sentence, which
+    // delayed the first words of list answers on the phone (#128).
+    if (lineSoFar.trim() === '' && /^\s*\d{1,2}[.)]\s*$/.test(held)) {
+      yield held;
+      shown = true;
+      lineSoFar = held;
+      held = '';
+      continue;
+    }
     for (let cut = sentenceEnd(held); cut > 0; cut = sentenceEnd(held)) {
       const sentence = held.slice(0, cut);
       if (unsourcedNumbers(sentence, sources).length > 0) {

@@ -63,3 +63,9 @@ test('digits joined to letters are names, not numbers (#126)', () => {
   assert.deepEqual(numbersIn('Use DEET, picaridin or IR3535; an N95 mask.'), []);
   assert.deepEqual(numbersIn('wait 30 minutes'), ['30']);
 });
+
+test('a list marker is released at once, not held with its sentence (#128)', async () => {
+  const seen: string[] = [];
+  for await (const t of numberChecked(from('1', '.', ' Use', ' DEET.'), 'DEET', async () => 'X')) seen.push(t);
+  assert.deepEqual(seen.slice(0, 2), ['1.', ' Use']);
+});

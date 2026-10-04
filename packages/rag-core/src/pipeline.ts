@@ -25,6 +25,7 @@ import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } 
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
+import { makeOpener } from './opener.ts';
 
 /**
  * Abstention threshold on the fused score U_i.
@@ -210,6 +211,13 @@ export interface AskOptions {
    * folded. Costs one short generation. Off by default until measured.
    */
   readonly intent?: boolean;
+  /**
+   * A friendly opening line before a model-written answer (#130, opener.ts):
+   * one checked sentence written from the hiker's words, never the passages.
+   * Left off for emergencies (a danger sign), card replies, declines, and
+   * with guards off. Off by default until measured.
+   */
+  readonly opener?: boolean;
 }
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
@@ -560,6 +568,11 @@ export type AskResult =
        * a short direct answer. Undefined when the card itself is the answer.
        */
       readonly card?: CardOffer;
+      /**
+       * #130: the opening line streamed before the answer, filled in once it
+       * is decided (null: none was shown). Undefined when no opener was tried.
+       */
+      readonly opener?: { text?: string | null };
       readonly diagnostics: Diagnostics;
     }
   /** Small talk: a short fixed reply, with the matching card offered if any. */
@@ -612,6 +625,29 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
 }
 
 export async function ask(
+  query: string,
+  deps: PipelineDeps,
+  opts: AskOptions,
+): Promise<AskResult> {
+  const res = await askCore(query, deps, opts);
+  // The opener goes only in front of a model-written answer: a card or a
+  // reviewed reply is already quick and in Fred's voice, a decline gets none,
+  // and in an emergency the first words must be what to do.
+  if (opts.opener !== true || opts.understand === false || opts.guards === false) return res;
+  if (res.kind !== 'answer' || res.diagnostics.cardAnswer !== undefined || res.clarify !== undefined) return res;
+  const earlier = opts.history ?? [];
+  if (dangerSign([...earlier, query])) return res;
+  const holder: { text?: string | null } = {};
+  const inner = res.stream;
+  async function* withOpener(): AsyncGenerator<string> {
+    holder.text = await makeOpener(query, earlier, deps.backend, opts.signal).catch(() => null);
+    if (holder.text !== null) yield `${holder.text}\n`;
+    yield* inner;
+  }
+  return { ...res, stream: withOpener(), opener: holder };
+}
+
+async function askCore(
   query: string,
   deps: PipelineDeps,
   opts: AskOptions,

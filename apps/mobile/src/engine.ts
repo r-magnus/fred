@@ -148,6 +148,8 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // Decide what the hiker wants, not just the topic: casual emergencies
           // open their card, small talk gets a reply (docs/results-intent-probe.md).
           intent: true,
+          // A friendly opening line before a model-written answer (#130).
+          opener: true,
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),
@@ -202,19 +204,25 @@ function timed(res: AskResult, t0: number): AskResult {
     return res;
   }
   const inner = res.stream;
+  const opener = res.opener;
   async function* stream(): AsyncGenerator<string> {
     let first = 0;
     let chars = 0;
     let text = '';
+    // #130: with an opening line, the answer's own first words come after it.
+    let answerFirst = 0;
+    let seen = 0;
     for await (const tok of inner) {
       if (first === 0) first = Date.now();
+      else if (answerFirst === 0 && opener?.text != null && seen === 1) answerFirst = Date.now();
+      seen++;
       chars += tok.length;
       if (verbose) text += tok;
       yield tok;
     }
     const end = Date.now();
     if (verbose) console.log(`[fred] text ${JSON.stringify(text.trim())}`);
-    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent}${understood}${guards}${timing} top=${top}`);
+    console.log(`[fred] answer retrieval=${retrievalMs}ms first=${first === 0 ? -1 : first - t0}ms total=${end - t0}ms${opener === undefined ? '' : opener.text == null ? ' opener=none' : ` opener=yes answerFirst=${answerFirst === 0 ? -1 : answerFirst - t0}ms`} chars=${chars} U=${res.diagnostics.topScore.toFixed(3)}${mem} tokens=${res.diagnostics.tokensAfter}${intent}${understood}${guards}${timing} top=${top}`);
   }
   return { ...res, stream: stream() };
 }

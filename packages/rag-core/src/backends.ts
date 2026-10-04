@@ -75,6 +75,9 @@ export interface PackStore {
   /** A field card's line vectors (manifest `cardLines`), one INT8 row per line. Optional, like clarifyFor. */
   cardLineVectorsFor?(chunkId: string): readonly Int8Array[] | undefined;
 
+  /** A passage's sentence vectors (manifest `sentences`), one row per quotable sentence. Optional. */
+  sentenceVectorsFor?(chunkId: string): readonly Int8Array[] | undefined;
+
   /** A licence entry by id, from the pack manifests. Optional, like clarifyFor. */
   licenseFor?(licenseId: string): LicenseEntry | undefined;
 

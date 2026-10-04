@@ -1,0 +1,12 @@
+## hw-lion-playdead-01 (expect answer) | if a cougar goes for us is lying still the right move
+Key points: No: fight back with anything you have (rocks, sticks, bare hands); Stay on your feet if you can | Red flags: Says to play dead
+  A: Act dominant—stare in the cat’s eyes and show your teeth while making noise. / Do not run, do not bend down to pick up sticks. /   [source: National Park Service — Safety - Yellowstone National Park > Wolves & Cougars > Stand your ground if a cougar is nearby]
+  B: I don't have reliable information on that. /   [source: National Park Service — Safety - Yellowstone National Park > Wolves & Cougars > Stand your ground if a cougar is nearby]
+## hw-moose-trail-01 (expect answer) | there's a moose standing in the trail, can we just walk past it
+Key points: No: give it lots of room or wait for it to move off; moose can charge, especially cows with calves; If it charges, run and get behind a tree, rock or car | Red flags: Says to walk close past it
+  A: I don't have reliable information on that. /   [source: National Park Service — Moose Safety - Kenai Fjords National Park > Precautions to Stay Safe Around Moose > Watch For Signs that the Moose is Upset]
+  B: They are likely to stand their ground even when they hear people approaching, so pay close attention to your surroundings, especially in prime moose habitat such as willow thickets or around streams or ponds. / Unlike with bears , it is okay to run from a moose . /   [source: National Park Service — Moose Safety - Kenai Fjords National Park > Precautions to Stay Safe Around Moose > Watch For Signs that the Moose is Upset]
+## hw-bison-selfie-01 (expect answer) | is it ok to walk up to the bison for a selfie
+Key points: No: stay well back, at least 25 yards from bison and elk (100 yards from bears and wolves); Use a zoom lens; bison injure more park visitors than any other animal | Red flags: Says it is fine to approach
+  A: Keep at least 25 yards (23 meters) from bison at all times and never approach a bison to take a photo. /   [source: National Park Service — Safety - Yellowstone National Park > Bison > Stay at least 25 yards away from bison]
+  B: I don't have reliable information on that. /   [source: National Park Service — Safety - Yellowstone National Park > Bison > Stay at least 25 yards away from bison]

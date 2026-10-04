@@ -16,10 +16,12 @@ import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from './triage.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient, stuckOnTerrain } from './triage.ts';
 import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
+import { rankSentences } from './sentences.ts';
+import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -1168,6 +1170,16 @@ export async function ask(
     // (WATCH_REPLY): still no dead end, and no alarm over a sore knee.
     if (understandOn && intent === 'now' && !ABOUT_A_PET.test(query)) {
       const danger = !guardsOn || dangerSign([...history, query]);
+      if (guardsOn && stuckOnTerrain([...history, query])) {
+        const signal = await cardByTitle('Signalling for rescue');
+        if (signal !== undefined) {
+          return {
+            kind: 'answer', stream: once(renderCard(parseCard(signal.chunk.text))), citations: [citeOf(signal, 0)],
+            prompt: { system: '', user: '' }, medical: false,
+            diagnostics: { ...weak, sufficient: null, cardAnswer: 'verbatim' },
+          };
+        }
+      }
       return {
         kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
         ...(offer === undefined ? {} : { offer }),
@@ -1440,6 +1452,27 @@ export async function ask(
   // given up only then.
   // #51: a risk with no card (an algal bloom) guards the answer too, with its
   // reviewed reply in place of a card.
+  // #126: the one or two sentences of the passages given that are closest to
+  // the question, verbatim, when one clears QUOTE_FLOOR.
+  const quoteSources = async (): Promise<string | undefined> => {
+    if (!guardsOn || NOT_FREDS_JOB.test(query)) return undefined;
+    const passages = blocks.filter((b) => b.chunk.packId !== retrievalOpts.reserve?.packId)
+      .map((b) => ({ chunkId: b.chunk.id, text: b.chunk.text, rows: store.sentenceVectorsFor?.(b.chunk.id) }));
+    if (!passages.some((p) => p.rows !== undefined)) return undefined;
+    const ranked = rankSentences(await queryVector(backend, query), passages);
+    const best = ranked[0];
+    if (best === undefined || best.similarity < QUOTE_FLOOR) return undefined;
+    // The same sentence often sits on two pages ("pick them up if possible so
+    // they don't panic and run", three mountain-lion pages): quote it once.
+    const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const picked: string[] = [];
+    for (const r of ranked) {
+      if (r.similarity < Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND) || picked.length === 2) break;
+      if (picked.some((p) => norm(p).includes(norm(r.text)) || norm(r.text).includes(norm(p)))) continue;
+      picked.push(r.text);
+    }
+    return picked.join('\n');
+  };
   const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
   // information": "we cleaned out a mousy cabin last week and now i have a
@@ -1452,13 +1485,18 @@ export async function ask(
       answerGuard.replacedBy = 'refusal';
       return renderCard(parseCard(followed.chunk.text));
     }
-    if (isRefusal(text) && emergency) {
+    if (isRefusal(text)) {
       // The reviewed reply for the risk at hand, when there is one: a
       // lightning victim gets "safe to touch... start CPR", not only "call
       // emergency services" (#115).
-      const specific = watched.find((c) => c.instead !== undefined);
-      answerGuard.replacedBy = specific?.id ?? 'safety-net';
-      return specific?.instead ?? SAFETY_NET_REPLY;
+      const specific = emergency ? watched.find((c) => c.instead !== undefined) : undefined;
+      if (specific !== undefined) { answerGuard.replacedBy = specific.id; return specific.instead!; }
+      // #126: the sources' own sentences, when the search cleared the gate
+      // and one of them is close to the question.
+      const quoted = await quoteSources();
+      if (quoted !== undefined) { answerGuard.replacedBy = 'quoted'; return quoted; }
+      if (emergency) { answerGuard.replacedBy = 'safety-net'; return SAFETY_NET_REPLY; }
+      return text;
     }
     const by = violatedCondition(text, watched);
     if (by === undefined) return text;
@@ -1469,6 +1507,16 @@ export async function ask(
     return renderCard(parseCard(card.chunk.text));
   };
   const answerGuard: { replacedBy?: string } = {};
+  // #126: the generation with its numbers checked against the passages given.
+  const sourceText = [query, earlier ?? '', ...blocks.map((b) => b.text)].join('\n');
+  const generated = (): AsyncIterable<string> => (guardsOn
+    ? numberChecked(backend.generate(prompt, generateOpts), sourceText, async (shown) => {
+      const quoted = await quoteSources();
+      answerGuard.replacedBy = 'number';
+      if (quoted !== undefined) return shown ? `\n\n${QUOTE_INSTEAD}\n${quoted}` : quoted;
+      return shown ? '' : NO_ANSWER_REPLY;
+    })
+    : backend.generate(prompt, generateOpts));
   // Only advice a condition forbids needs the whole answer read first. A
   // refusal in the middle of a condition is caught from its first words, so
   // everything else still streams: holding every answer in a "lost" chat
@@ -1477,7 +1525,7 @@ export async function ask(
     const ends = DEAD_ENDS.map((d) => d.toLowerCase());
     let head = '';
     let streaming = false;
-    for await (const tok of backend.generate(prompt, generateOpts)) {
+    for await (const tok of generated()) {
       if (streaming) { yield tok; continue; }
       head += tok;
       const h = head.trimStart().toLowerCase();
@@ -1489,7 +1537,7 @@ export async function ask(
   // #103: checked sentence by sentence, so the first words come with the
   // first sentence instead of the whole answer (19 s on the phone, #101).
   const stream = watched.length > 0
-    ? streamChecked(backend.generate(prompt, generateOpts), {
+    ? streamChecked(generated(), {
       violates: (sentence) => violatedCondition(sentence, watched),
       holdsFirst: (sentence) => (followed !== undefined || emergency) && isRefusal(sentence),
       replace: async (by, shownAlready) => {
@@ -1508,7 +1556,9 @@ export async function ask(
       },
       whole: guardCard,
     })
-    : followed !== undefined || emergency ? refusalOnly : backend.generate(prompt, generateOpts);
+    // Every answer is read for a dead end at its start (a few tokens): a
+    // decline becomes a quote, a card or the safety net (#126).
+    : guardsOn ? refusalOnly : backend.generate(prompt, generateOpts);
 
   return {
     kind: 'answer',

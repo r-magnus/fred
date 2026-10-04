@@ -162,6 +162,13 @@ export interface PackManifest {
    * question is matched to the lines that answer it without a model call.
    */
   readonly cardLines?: Readonly<Record<string, string>>;
+  /**
+   * The sentence index (#126): `sentences.i8` holds one INT8 row of `dim` per
+   * quotable sentence (rag-core quotableSentences), passages in ordinal order;
+   * `sentences.idx` holds each passage's first row as a little-endian uint32,
+   * plus the total. Optional; a pack without it is quoted from nothing.
+   */
+  readonly sentences?: { readonly dim: number; readonly rows: number };
 }
 
 /** A manual a field card quotes, and the pages quoted. */

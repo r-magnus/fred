@@ -27,6 +27,8 @@ for the project report.**
 | `nws` | National Weather Service safety pages (*Heat Cramps, Exhaustion, Stroke*; *During Extremely Cold Weather*) — used in `core-health`; lightning (safety, outdoors, how it strikes people, tips, myths), flood (*Turn Around Don't Drown*, during a flood) and wildfire pages — used in `core-hazards` (#115) | Public domain (US Gov work) | ✅ Yes |
 | `wikivoyage:<Article>` | Wikivoyage travel topics (12 articles: Wilderness backpacking, Hiking, Camping, Wild camping, Leave-no-trace camping, Camping food, Outdoor cooking, Cold weather, Hot weather, Arid region safety, Pests, Orienteering) — used in `core-tips-wikivoyage` (#96). One licence entry per article, pinned to the revision fetched | CC BY-SA 4.0. Every use credits the article, "Wikivoyage contributors", the licence and a link. Share-alike: the pack is released under CC BY-SA 4.0. Text only. | ✅ With attribution + share-alike |
 
+Sentence index (#126): core packs carry `sentences.i8`/`sentences.idx`, vectors of the packs' own sentences; no new source text, same licences as the pack.
+
 ## Two constraints to act on
 
 **1. The WHO first-aid material is NonCommercial.**

@@ -20,6 +20,8 @@ interface LoadedPack {
   readonly db: DatabaseSync;
   readonly vectors: Buffer;
   readonly dim: number;
+  /** The sentence index (#126), when the pack has one. */
+  readonly sentences?: { readonly vectors: Uint8Array; readonly starts: Uint32Array; readonly dim: number };
 }
 
 export class NodePackStore implements PackStore {
@@ -33,9 +35,26 @@ export class NodePackStore implements PackStore {
     if (vectors.byteLength !== expected) {
       throw new Error(`${manifest.id}: vectors.i8 is ${vectors.byteLength} bytes, expected ${expected}`);
     }
-    this.packs.set(manifest.id, { manifest, db, vectors, dim: manifest.embedding.dim });
+    const sv = manifest.sentences;
+    const sentences = sv === undefined ? undefined : (() => {
+      const idx = readFileSync(join(dir, 'sentences.idx'));
+      return { vectors: new Uint8Array(readFileSync(join(dir, 'sentences.i8'))), starts: new Uint32Array(idx.buffer.slice(idx.byteOffset, idx.byteOffset + idx.byteLength)), dim: sv.dim };
+    })();
+    this.packs.set(manifest.id, { manifest, db, vectors, dim: manifest.embedding.dim, ...(sentences === undefined ? {} : { sentences }) });
     return manifest;
   }
+
+  sentenceVectorsFor(chunkId: string): readonly Int8Array[] | undefined {
+    const p = this.packs.get(chunkId.slice(0, chunkId.lastIndexOf(':')));
+    const s = p?.sentences;
+    if (p === undefined || s === undefined) return undefined;
+    const ord = Number(chunkId.slice(chunkId.lastIndexOf(':') + 1));
+    if (!Number.isInteger(ord) || ord + 1 >= s.starts.length) return undefined;
+    const rows: Int8Array[] = [];
+    for (let r = s.starts[ord]!; r < s.starts[ord + 1]!; r++) rows.push(vectorRow(s.vectors, r, s.dim));
+    return rows;
+  }
+
 
   manifests(): PackManifest[] {
     return [...this.packs.values()].map((p) => p.manifest);

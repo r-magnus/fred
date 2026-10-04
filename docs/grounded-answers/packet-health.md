@@ -1,0 +1,4 @@
+## hh-tick-time-01 (expect answer) | how long does a tick have to be on you before it can give you lyme disease
+Key points: The longer a tick stays attached, the higher the risk: Lyme usually takes many hours, often more than a day, to pass on; Remove any tick as soon as you find it | Red flags: Says there is no risk if it was only on briefly, so no need to remove it
+  A: Begins at the site of a tick bite after a delay of 3 to 30 days (average is about 7 days) / Ticks suck blood anywhere from minutes to days, depending on the tick species. /   [source: CDC — Signs and Symptoms of Untreated Lyme Disease > Signs and symptoms > Early signs and symptoms (3 to 30 days after tick bite)]
+  B: 1. A tick must remain attached for at least 24 hours to transmit Lyme disease. /   [source: CDC — Signs and Symptoms of Untreated Lyme Disease > Signs and symptoms > Early signs and symptoms (3 to 30 days after tick bite)]

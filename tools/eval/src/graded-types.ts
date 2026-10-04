@@ -176,6 +176,14 @@ export const HAZARD_SETS = ['tools/eval/data/holdout-hazards.json'] as const;
  */
 export const STATE_SETS = ['tools/eval/data/holdout-states.json'] as const;
 
+/**
+ * Grounded-answers confirmation set (2026-10-03, #126): questions whose
+ * answer sits in a passage but is asked a different way, written after
+ * QUOTE_FLOOR was set on seen questions and before any run with it. 14 to
+ * answer, 4 to decline.
+ */
+export const GROUNDED_CONFIRM_SETS = ['tools/eval/data/confirm-grounded.json'] as const;
+
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -190,8 +198,9 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'wildlife': return WILDLIFE_SETS;
     case 'hazards': return HAZARD_SETS;
     case 'states': return STATE_SETS;
+    case 'grounded-confirm': return GROUNDED_CONFIRM_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | grounded-confirm | all, got "${name}"`);
   }
 }
 

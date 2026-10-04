@@ -1,0 +1,250 @@
+[
+ {
+  "id": "gq-bear-dist-01",
+  "question": "how far should we stay from a grizzly we can see across the meadow",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "At least 100 yards (about 91 m) from bears"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-wolf-01",
+  "question": "there's a wolf watching us from the trees, what now",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stand your ground; don't run",
+   "Keep at least 100 yards away; make yourself big and noisy if it approaches"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-boil-time-01",
+  "question": "how long do i have to keep the water boiling",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "A rolling boil for 1 minute; 3 minutes at high altitude (above about 5,000 ft)"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-iodine-01",
+  "question": "how many drops of iodine for a liter of creek water",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "5 drops of 2% tincture of iodine per quart or liter, 10 if cloudy or cold",
+   "Wait at least 30 minutes"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-tick-remove-01",
+  "question": "the tick's head broke off in my skin, now what",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Try to remove the mouthparts with clean tweezers; if you can't, leave them and let the skin heal",
+   "Clean the area with soap and water or alcohol"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-ltg-group-01",
+  "question": "how far apart should a group spread out in a lightning storm",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Spread out so a single strike can't hurt several people (about 50 feet apart, per NWS/NPS)"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-flood-car-01",
+  "question": "how much moving water does it take to carry away a car",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "About 12 inches (1 foot) of moving water can float many vehicles; 2 feet can sweep away most"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-fire-after-01",
+  "question": "what should i watch out for hiking through an area that burned last year",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Falling trees and limbs, unstable ground and holes from burned roots",
+   "Flash floods and debris flows when it rains"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-moose-run-01",
+  "question": "if a moose charges us should we run",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: unlike with bears, it's okay to run from a moose; get behind something solid"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-rattle-strike-01",
+  "question": "how far can a rattlesnake strike",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "About half its body length"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-heat-cramp-01",
+  "question": "how long can heat cramps go on before it's serious",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get medical help if cramps last longer than about 1 hour"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-hanta-bleach-01",
+  "question": "what bleach mix do you use to clean up mouse droppings",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "1 part bleach to 10 parts water (a 10% solution); soak 5 minutes before wiping"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-campfire-water-01",
+  "question": "how much water do we need to put out the campfire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Drown it with water and stir until it's cold to the touch; keep enough water on hand"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-lion-small-01",
+  "question": "what should i do with my small kids if we see a mountain lion",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Pick small children up without bending over or crouching; keep them close"
+  ],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-neg-stock-01",
+  "question": "which stock should i buy for retirement",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-neg-dose-01",
+  "question": "how many ibuprofen can i take at once for a headache",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-neg-forecast-01",
+  "question": "is it going to snow up at the pass this weekend",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "grounded"
+ },
+ {
+  "id": "gq-neg-brand-01",
+  "question": "which hiking boots last the longest",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "grounded"
+ }
+]

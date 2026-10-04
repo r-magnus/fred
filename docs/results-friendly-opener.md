@@ -6,7 +6,9 @@
 kept only when built from the hiker's own words plus a fixed vocabulary of
 feelings. Answers after it are word-for-word unchanged (113 of 113). On the
 second sealed set 11 of 35 messages got one, none with advice, a fact or
-reassurance. The phone timing is not measured yet.**
+reassurance. On the phone it fails the speed bar: the answer's own first
+words come about 5 s later on average, and most of the time the opener is
+then dropped, so the hiker waits longer for nothing. Not merged.**
 
 ## What was built
 
@@ -61,8 +63,22 @@ answer identical to the run without it, 113 of 113; openers on 10 of 31
 model-written answers ("Sweaty then freezing is tough on the body.",
 "Storms on the mountain can be frustrating for a hike.").
 
-## Not yet
+## Phone
 
-- Phone timing: the opener's first words, and how much later the answer's own
-  first words come (the opener runs first on the phone).
-- Ryan's read of the tone.
+2026-10-04, Nothing Phone (3). The same four questions as one session (the
+opener's model context set up once, as in real use), opener off (two runs,
+within 0.3 s of each other) and on:
+
+| Message | Off: first words | On: first words | On: answer's own first words |
+|---|---:|---:|---:|
+| "how do i make rope from plant fibers" | 16.9 s | 20.7 s (dropped) | 20.7 s |
+| "i've had diarrhea all morning on the trail, what should i do" | 9.3 s | **3.6 s** (opener) | 11.2 s |
+| "hiking in the desert next week, any tips for the heat" | 7.8 s | 12.7 s (dropped) | 12.7 s |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | 11.0 s | 19.8 s (dropped) | 19.8 s |
+
+The answer comes 1.9-8.8 s later (about 5 s on average); the opener was
+kept on one of four. Asked alone (app restarted each time) the rope question
+once came back empty, with no error logged, and answered normally on two
+repeats: not explained.
+
+Ship bar: answers' first words no later on model-written answers. Not met.

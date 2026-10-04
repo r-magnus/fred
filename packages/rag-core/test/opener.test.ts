@@ -35,7 +35,9 @@ test('drops numbers, questions, more than one sentence, and talk about Fred', ()
   assert.equal(checkOpener('Ten hours of rain is a lot.', m('rain')), null);
   assert.equal(checkOpener('3 days of rain is a lot.', m('rain')), null);
   assert.equal(checkOpener('Ouch, how did that happen?', m('splinter')), null);
+  // Only the first sentence is kept, then checked on its own.
   assert.equal(checkOpener('Ouch. That sounds painful.', m('splinter')), null);
+  assert.equal(checkOpener("Oh no, that's frustrating. Let's go find it.", m('i dropped my filter')), "Oh no, that's frustrating.");
   assert.equal(checkOpener("I'm not a doctor, but that sounds rough.", m('knee')), null);
   assert.equal(checkOpener('Ok.', m('hi')), null);
 });
@@ -59,4 +61,24 @@ test('only the hiker\'s words and a fixed vocabulary: no new facts (#130)', () =
   for (const [line, said] of cases) assert.equal(checkOpener(line, m(said)), null, line);
   assert.equal(checkOpener('Wolves howling at night can be unsettling.', m('we heard wolves howling last night')), 'Wolves howling at night can be unsettling.');
   assert.equal(checkOpener('Soaked and freezing feet are no fun at all.', m('my feet are soaked and freezing')), 'Soaked and freezing feet are no fun at all.');
+});
+
+test('comfort without permission or promises (#130, round 3)', () => {
+  const ok = (line: string, said: string) => assert.equal(checkOpener(line, m(said)), line.endsWith('.') || line.endsWith('!') ? line : `${line}.`, line);
+  const no = (line: string, said: string) => assert.equal(checkOpener(line, m(said)), null, line);
+  ok("Hey, these things happen, it's okay.", 'i forgot my rain jacket');
+  ok("Take a deep breath, we'll work through this together.", "i'm lost and freaking out");
+  ok('Glad you asked before heading out.', 'is it ok to drink from this pond if i boil it');
+  // "okay" never opens onto what is okay.
+  no("It's okay to swim in this river.", 'can i swim in this river');
+  // Asked whether it is all right: nothing that sounds like yes.
+  no('Hey, these things happen.', 'is it normal to feel this out of breath up here');
+  no('Good thinking, the strawberries look great.', 'is it fine to eat these wild strawberries');
+  // Promises and normalising still go.
+  no("You'll be fine, it happens to everyone.", 'my stomach is cramping');
+  no("Let's keep walking together.", 'should we keep walking');
+  no('Take the ibuprofen and breathe.', 'can i take ibuprofen');
+  ok("Oh no, scraped skin is no fun, let's take care of it together.", 'i scraped my knee on some rocks');
+  no("Oh no, darkness is scary, let's find another way.", 'my headlamp died, how do i get back');
+  no("Oh no, cold nights are miserable, let's find a way to stay warm.", 'it is so cold tonight i cant sleep');
 });

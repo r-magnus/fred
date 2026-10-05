@@ -54,7 +54,7 @@ const THINGS = /\b(?:tent|tarp|shelter|bridge|snow ?cave|roof|wall|chair|table|s
  * "its a bear" arrive as two messages.
  */
 const ANIMAL = /\b(?:bears?|grizzl(?:y|ies)|mountain lions?|cougars?|pumas?|moose|bison|buffalo|wolf|wolves)\b/i;
-const CLOSE = /\b(?:charg(?:e|es|ed|ing)|attack(?:s|ed|ing)?|jump(?:ed|s|ing)|pounc(?:e|ed|es|ing)|maul(?:ed|ing|s)?|grab(?:bed|s|bing)|bitten|clawed|knocked (?:him|her|me|them) down|coming (?:at|toward|towards|straight)|stalking|following|staring|in front of|right (?:there|here|next to)|outside (?:the|our|my) tent|in (?:our|the) camp|into (?:our|the) camp|getting into|sniffing|rustling|close|near)\b/i;
+const CLOSE = /\b(?:charg(?:e|es|ed|ing)|attack(?:s|ed|ing)?|jump(?:ed|s|ing)|pounc(?:e|ed|es|ing)|maul(?:ed|ing|s)?|grab(?:bed|s|bing)|bitten|clawed|knocked (?:him|her|me|them) down|coming (?:at|toward|towards|straight)|stalking|following|staring|snuffl(?:e|es|ed|ing)|outside|in front of|right (?:there|here|next to)|outside (?:the|our|my) tent|in (?:our|the) camp|into (?:our|the) camp|getting into|sniffing|rustling|close|near)\b/i;
 
 /**
  * Drowsiness or vomiting after a knock to the head (head-injury card:
@@ -109,12 +109,14 @@ export function asksToEatUnknown(message: string): boolean {
 /**
  * The same, across the thread (#101): "my daughter wants to pick berries" /
  * "are these blue ones safe", or "she already ate a couple". The plant was
- * said one message back; the question or the eating is in this one.
+ * said up to three messages back ("lots of berries" / "the purple ones look
+ * good" / "are those safe" / "my kid already tried one"); the question or the
+ * eating is in this one.
  */
 const FORAGE = /\b(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?|seeds|nuts|fruit)\b/i;
 const EAT_OR_SAFE = /\b(?:eat|ate|eaten|edible|tried (?:one|some|a few|it)|tasted|swallowed|snack on|safe)\b/i;
 export function eatingUnknownInThread(message: string, earlier: readonly string[]): boolean {
-  return EAT_OR_SAFE.test(message) && !FORAGE.test(message) && earlier.slice(-2).some((m) => FORAGE.test(m)) && !/\b(?:my|our|the) (?:dog|cat|pet|horse)\b/i.test(message);
+  return EAT_OR_SAFE.test(message) && !FORAGE.test(message) && earlier.slice(-3).some((m) => FORAGE.test(m)) && !/\b(?:my|our|the) (?:dog|cat|pet|horse)\b/i.test(message);
 }
 
 /**

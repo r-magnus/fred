@@ -902,10 +902,14 @@ export async function ask(
     // "a few bubbles came up on the skin" after a burn, "my kid already tried
     // one" after berries, "yep its a bear" got "Got it" (sealed chat sets).
     // Unless the hiker says it is over ("he's fine now") or is only
-    // acknowledging ("ok it's off", "ok made camp", "thanks").
+    // acknowledging ("ok it's off", "ok made camp", "thanks"). And only when the
+    // search found something: in a lost-hiker chat "i can hear a river" went
+    // from "Got it" to a decline.
     const openProblem = active.length > 0 || eatingUnknownInThread(query, opts.history ?? []) ||
-      (history.length > 0 && dangerSign(history));
-    if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem && !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
+      dangerSign([...history, query]);
+    const foundSomething = topScore >= effectiveThreshold || leadingCard(candidates, isCard, await supportOf(candidates)) !== undefined;
+    if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem && foundSomething &&
+        !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
       intent = dangerSign([...history, query]) ? 'now' : 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }

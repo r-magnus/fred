@@ -219,6 +219,11 @@ export class DevicePackStore implements PackStore {
 export interface DeviceBackendOptions {
   readonly modelPath: string;
   /**
+   * Where the intent and understanding prompts are saved once read (#133,
+   * #134). Unset: those prompts are read in full on every call.
+   */
+  readonly sessionDir?: string;
+  /**
    * How to embed queries, chosen from the packs' own EmbeddingSpec so the app
    * can never search a pack with the wrong encoder.
    *
@@ -328,6 +333,16 @@ export type DeviceBackend = InferenceBackend & {
   readonly genInfo: Readonly<Record<string, unknown>>;
 };
 
+/** A short stable hash for file names (FNV-1a, 32-bit). */
+function fnv1a(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
 export async function createDeviceBackend(
   opts: DeviceBackendOptions,
 ): Promise<DeviceBackend> {
@@ -357,21 +372,35 @@ export async function createDeviceBackend(
     // context and needs retesting on CPU before it means anything.
   });
 
-  // One small context per lane (#101): the intent check and the understanding
-  // step send the same system prompt every time, but in the one shared context
-  // the answer that follows overwrites it, so llama.rn read ~300 tokens of
-  // intent prompt from scratch on every message (2.4 s on this phone). In a
-  // context of their own, only the hiker's new words are read. The model file
-  // is memory-mapped, so a second context costs its KV cache (~120 MB at
-  // 1024 tokens), not another copy of the weights.
-  const lanes = new Map<string, Promise<LlamaContext>>();
-  const laneContext = (lane: string): Promise<LlamaContext> => {
-    let ctx = lanes.get(lane);
-    if (ctx === undefined) {
-      ctx = initLlama({ model: opts.modelPath, n_ctx: 1024, n_batch: 512, n_threads: N_THREADS, n_gpu_layers: opts.gpuLayers ?? 0 });
-      lanes.set(lane, ctx);
+  // The intent check and the understanding step send the same system prompt
+  // every time (#101). They used to get a model context each, so that prompt
+  // stayed read between messages; but each context held its own copy of the
+  // weights, about 0.8 GB, not the KV cache alone (the app at 5.4 GB with
+  // both, #134), and set up cold it cost the first message 24 s (#133). Now
+  // all calls share one context, and each lane's prompt, once read, is saved
+  // to a file and loaded back before the lane's next call: llama.rn then reads
+  // only the part that differs. The file outlives the app, so even the first
+  // message after a restart starts warm. It is named by a hash of the model
+  // and the prompt, so a changed prompt is read afresh, never the old one.
+  const sessionDir = opts.sessionDir;
+  let inLane: string | null = null;
+  const laneFile = (lane: string, system: string): string => `${sessionDir}/lane-${lane}-${fnv1a(`${opts.modelPath}\n${system}`)}.session`;
+  const fileOf = (path: string): File => new File(`file://${path}`);
+  /** Bring the lane's saved prompt into the context; true when it has to be saved after this call. */
+  const enterLane = async (lane: string, system: string): Promise<boolean> => {
+    if (sessionDir === undefined) return false;
+    const path = laneFile(lane, system);
+    if (inLane === path) return false;
+    inLane = path;
+    if (!fileOf(path).exists) return true;
+    try {
+      await gen.loadSession(path);
+      return false;
+    } catch {
+      // A file from another llama.rn or model build: read the prompt afresh.
+      try { fileOf(path).delete(); } catch { /* already gone */ }
+      return true;
     }
-    return ctx;
   };
 
   let embed: (text: string) => Promise<Float32Array>;
@@ -460,7 +489,7 @@ export async function createDeviceBackend(
       // while it waits its turn, stopping would end someone else's.
       let running = false;
       let cancelled = false;
-      let ctx: LlamaContext = gen;
+      const ctx: LlamaContext = gen;
       const onAbort = (): void => {
         cancelled = true;
         if (running) void ctx.stopCompletion();
@@ -474,7 +503,8 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
-        if (genOpts.lane !== undefined) ctx = await laneContext(genOpts.lane);
+        const save = genOpts.lane === undefined ? false : await enterLane(genOpts.lane, prompt.system);
+        if (genOpts.lane === undefined) inLane = null;
         running = true;
         try {
           await ctx.completion(
@@ -507,6 +537,9 @@ export async function createDeviceBackend(
               },
               (tok) => stream.push(tok.token),
           );
+          if (save && !cancelled && inLane !== null) {
+            await gen.saveSession(inLane).catch(() => undefined);
+          }
         } finally {
           running = false;
         }
@@ -518,7 +551,6 @@ export async function createDeviceBackend(
       return stream.iterate();
     },
     async release() {
-      for (const ctx of lanes.values()) await (await ctx).release();
       await gen.release();
       await releaseEmbedder();
     },

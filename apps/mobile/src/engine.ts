@@ -92,6 +92,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     const files = embedderFilesFor(manifests[0]!.embedding.modelId);
     const backend = await createDeviceBackend({
       modelPath: `${BASE_PATH}/${MODEL_FILE}`,
+      sessionDir: BASE_PATH,
       embedder: files.kind === 'onnx'
         ? { kind: 'onnx', modelPath: `${BASE_PATH}/${files.model}`, vocabPath: `${BASE_PATH}/${files.vocab}` }
         : { kind: 'gguf', modelPath: `${BASE_PATH}/${files.model}` },
@@ -134,11 +135,15 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
       .sort();
 
     console.log(`[fred] engine ready in ${Date.now() - t0}ms, encoder ${manifests[0]!.embedding.modelId}`);
-    // #133: set up the intent and understanding contexts now, in the
-    // background, so the first question (an emergency, perhaps) doesn't pay
-    // for it. A question asked meanwhile waits its turn behind it.
+    // #133: the first time, read the intent and understanding prompts now, in
+    // the background, so the first question (an emergency, perhaps) doesn't
+    // pay for it; a question asked meanwhile waits its turn. Once their
+    // prompts are saved (device-pack.ts), later launches have nothing to warm.
+    const saved = BASE.list().map((f) => f.name);
+    const warm = ['intent', 'understand'].every((lane) => saved.some((n) => n.startsWith(`lane-${lane}-`)));
     const tw = Date.now();
-    void warmUp(backend).then(
+    if (warm) console.log('[fred] warm-up not needed: lane prompts saved');
+    else void warmUp(backend).then(
       () => console.log(`[fred] warm-up done in ${Date.now() - tw}ms`),
       (e: unknown) => console.log(`[fred] warm-up failed: ${e instanceof Error ? e.message : String(e)}`),
     );

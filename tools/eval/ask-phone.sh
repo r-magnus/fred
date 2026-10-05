@@ -36,7 +36,11 @@ fi
 "$ADB" shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
 # ASK_AFTER: the questions go in only once the app has been ready that long.
 if [ -n "${ASK_AFTER:-}" ]; then
-  until "$ADB" logcat -d -s ReactNativeJS | grep -q '\[fred\] engine ready'; do sleep 1; done
+  ready_by=$((SECONDS + 180))
+  until "$ADB" logcat -d -s ReactNativeJS | grep -q '\[fred\] engine ready'; do
+    [ $SECONDS -lt $ready_by ] || { echo "app not ready after 180 s (screen off?)" >&2; exit 2; }
+    sleep 1
+  done
   sleep "$ASK_AFTER"
   "$ADB" shell "run-as $PKG sh -c 'cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
 fi

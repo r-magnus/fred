@@ -42,7 +42,7 @@ export const UNDERSTAND_HISTORY = 3;
  * front of me", "is this plant safe"), and "his head" tied a head injury to
  * a flat tire on the phone.
  */
-const POINTS_BACK = /\b(?:it|it's|he|he's|she|she's|him|they|they're|them|same)\b|^\s*(?:and|also|but|so|then|now|ok|okay|what about|what if)\b|\bwhat (?:now|next)\b|\bhelp\b|\bwhat (?:do|should|can) (?:i|we) do\b/i;
+const POINTS_BACK = /\b(?:it|it's|its|he|he's|she|she's|him|they|they're|them|same)\b|^\s*(?:and|also|but|so|then|now|ok|okay|yep|yeah|yes|yup|nope|what about|what if)\b|\bwhat (?:now|next)\b|\bhelp\b|\bwhat (?:do|should|can) (?:i|we) do\b/i;
 
 /**
  * A message leans on the ones before it when it is very short or points back.

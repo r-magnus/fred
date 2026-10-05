@@ -227,3 +227,9 @@ test('follow-ups: news about an open problem, acknowledgements, and what points 
   assert.ok(eatingUnknownInThread('my kid already tried one', ['lots of berries along this trail', 'the purple ones look good', 'are those safe']));
   assert.ok(saysResolved('morning now, feeling ok'));
 });
+
+test('nothing but thanks is small talk; thanks with a question is not (#142)', async () => {
+  const { ONLY_ACKNOWLEDGES } = await import('../src/pipeline.ts');
+  for (const m of ['ok thanks', 'got it, will do', 'cool!', 'thank you so much', 'ok']) assert.ok(ONLY_ACKNOWLEDGES.test(m), m);
+  for (const m of ["ok it's off", 'thanks, how long should i keep it cool', 'ok made camp', 'ok now what']) assert.ok(!ONLY_ACKNOWLEDGES.test(m), m);
+});

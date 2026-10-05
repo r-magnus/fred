@@ -625,6 +625,10 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
 /** A message that only acknowledges or reports progress: "ok it's off", "thanks", "ok made camp". */
 export const ACKNOWLEDGES = /^\s*(?:ok(?:ay)?|k|alright|all right|thanks?|thank you|thx|got it|will do|done|cool|great|nice|sounds good|perfect)\b/i;
 
+/** A message of nothing but acknowledgement: "ok thanks", "got it, will do", "cool!". */
+const ACK_WORD = "(?:ok(?:ay)?|k|alright|all right|thanks?(?: (?:so much|a lot|again))?|thank you(?: (?:so much|again))?|thx|ty|got it|will do|cool|great|nice|sounds good|perfect|awesome|appreciate it)";
+export const ONLY_ACKNOWLEDGES = new RegExp(`^\\s*${ACK_WORD}(?:[\\s,.!]+${ACK_WORD})*[\\s.!]*$`, 'i');
+
 export const SAYS_MISSING = /\b(?:there'?s no|there is no|there are no|no (?!(?:longer|more|worries|problem|thanks|way|idea)\b)[a-z]+s?$|(?:i|we) (?:don'?t|do not|didn'?t) (?:have|bring|pack)|without (?:a|an|the|any)|(?:forgot|lost|broke|left) (?:the|my|our|a)|(?:doesn'?t|didn'?t) come with|(?:it'?s|is) (?:missing|broken))\b/i;
 
 export async function warmUp(backend: InferenceBackend): Promise<void> {
@@ -893,7 +897,13 @@ async function askCore(
   let threadCard: ScoredChunk | undefined;
   // Small talk read as news about an open problem (below); ask() turns a decline back into small talk.
   let newsNotChat = false;
-  if (opts.intent === true) {
+  // Nothing but thanks or an acknowledgement is small talk, without asking the
+  // model: "ok thanks" after a burn is three words, so it was read in its
+  // conversation, restated as "bubbles on skin, what to do", called NOW, and
+  // answered (20 s on the phone).
+  const onlyThanks = guardsOn && opts.intent === true && ONLY_ACKNOWLEDGES.test(query);
+  if (onlyThanks) intent = 'chat';
+  if (opts.intent === true && !onlyThanks) {
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
     // check rather than adding to it.

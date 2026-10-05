@@ -184,6 +184,25 @@
      "expect": "not-chat"
     }
    ]
+  },
+  {
+   "id": "dv-burn-thanks",
+   "kind": "follow-up",
+   "note": "Phone, 2026-10-05 (#142): 'ok thanks' was restated as the burn and answered as an emergency (20 s).",
+   "turns": [
+    {
+     "q": "i burned my hand on the stove",
+     "expect": "answer"
+    },
+    {
+     "q": "a few bubbles came up on the skin",
+     "expect": "answer"
+    },
+    {
+     "q": "ok thanks",
+     "expect": "chat"
+    }
+   ]
   }
  ]
 }

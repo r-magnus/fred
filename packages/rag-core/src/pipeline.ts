@@ -881,7 +881,11 @@ export async function ask(
     // i follow it down" CHAT, and Fred answered "Got it" (phone, 2026-09-30).
     // A danger sign does not overrule CHAT: "he was bleeding badly yesterday
     // but he's fine now" is small talk.
-    if (guardsOn && intent === 'chat' && asksSomething(query)) {
+    // The same holds for what the understanding step made of a follow-up: "how
+    // do i set up a tent" / "there's no manual" was restated as "missing tent
+    // manual, how to set up a tent" and still called CHAT, and Fred said "Got
+    // it" (Ryan, phone, 2026-10-04).
+    if (guardsOn && intent === 'chat' && (asksSomething(query) || (u !== undefined && asksSomething(u.request)))) {
       intent = 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }

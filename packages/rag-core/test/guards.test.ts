@@ -207,3 +207,9 @@ test('fire or smoke coming at the hiker is a danger sign, however it is said (#1
   for (const m of ["there's smoke and fire coming up the ridge toward us", 'the fire is heading our way', 'smoke is getting closer to camp', 'flames spreading toward the trail we are on']) assert.ok(dangerSign([m]), m);
   for (const m of ['how do i get my campfire going', 'is the smoke from the fires bad for hiking', 'we put the fire out and are heading to bed']) assert.ok(!dangerSign([m]), m);
 });
+
+test('saying something is missing marks a follow-up as a question, plain news does not (#138)', async () => {
+  const { SAYS_MISSING: re } = await import('../src/pipeline.ts');
+  for (const m of ["There's no manual", "we don't have a filter", 'forgot the poles', 'without a lighter', 'no instructions', "it didn't come with stakes"]) assert.ok(re.test(m), m);
+  for (const m of ['ok we made it back', "ok it's off", 'ok the hives are fading', 'phone at 15%', 'ok found the trail thank god', 'ok made camp', 'no worries', 'no idea']) assert.ok(!re.test(m), m);
+});

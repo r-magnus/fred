@@ -148,3 +148,28 @@ smoke and more phrasings; it now gets the safety net. Decisions on every set
 
 Timing is as in the first try (generated after the search: about 5 s later
 answers on the phone); not re-measured for this prompt.
+
+### Round 3 on the phone
+
+2026-10-04, cooled to thermal status 0 before each session; opener on, then off.
+
+| Message (one session each) | Off | On |
+|---|---:|---:|
+| "how do i make rope from plant fibers" | 16.5 s | opener 8.2 s, answer 19.0 s |
+| "i've had diarrhea all morning on the trail, what should i do" | 9.2 s | 11.2 s (opener dropped) |
+| "hiking in the desert next week, any tips for the heat" | 7.9 s | 9.3 s (opener dropped) |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | 10.7 s | **no answer within 9 minutes** |
+| "my feet are covered in hot spots" (card, no opener) | 3.5 s | 11.6 s |
+| "is it ok to drink from this pond if i boil it" (card, no opener) | 2.0 s | 3.9 s |
+
+The one opener shown was "Hey, these things happen, it's okay." to "how do i
+make rope from plant fibers": the prompt's example, copied onto a how-to
+question. Card replies, which get no opener, were slower too, with the
+question's embedding taking 8.8 s instead of 1.5 s: with a third model
+context loaded the phone is short of memory (the app held 6.2 GB, 57%, earlier
+today). The fourth answer never came.
+
+**Conclusion: not merged.** On this phone a generated opener costs seconds on
+every answer (cards included), once stalled the app, and what passes the
+safety check is often off-key. The fire danger-sign fix found on the way was
+merged on its own (#131, PR #132).

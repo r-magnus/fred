@@ -201,3 +201,9 @@ test('stuck on a ledge is recognised however it is said (#128)', async () => {
   assert.ok(stuckOnTerrain(['i think we cliffed out']));
   assert.ok(!stuckOnTerrain(['we want to hike the ledge trail']));
 });
+
+test('fire or smoke coming at the hiker is a danger sign, however it is said (#130)', async () => {
+  const { dangerSign } = await import('../src/triage.ts');
+  for (const m of ["there's smoke and fire coming up the ridge toward us", 'the fire is heading our way', 'smoke is getting closer to camp', 'flames spreading toward the trail we are on']) assert.ok(dangerSign([m]), m);
+  for (const m of ['how do i get my campfire going', 'is the smoke from the fires bad for hiking', 'we put the fire out and are heading to bed']) assert.ok(!dangerSign([m]), m);
+});

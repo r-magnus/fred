@@ -619,6 +619,9 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
  * fire coming up the ridge toward us": 26 s to the emergency reply). The same
  * code and prompts as a real question, so nothing here can drift from them.
  */
+/** The hiker says something isn't there: "there's no manual", "i don't have a filter", "forgot the poles". */
+export const SAYS_MISSING = /\b(?:there'?s no|there is no|there are no|no (?!(?:longer|more|worries|problem|thanks|way|idea)\b)[a-z]+s?$|(?:i|we) (?:don'?t|do not|didn'?t) (?:have|bring|pack)|without (?:a|an|the|any)|(?:forgot|lost|broke|left) (?:the|my|our|a)|(?:doesn'?t|didn'?t) come with|(?:it'?s|is) (?:missing|broken))\b/i;
+
 export async function warmUp(backend: InferenceBackend): Promise<void> {
   await classifyIntent('hello there', backend);
   await understandMessage('it hurts', ['i slipped on the trail'], backend);
@@ -881,7 +884,14 @@ export async function ask(
     // i follow it down" CHAT, and Fred answered "Got it" (phone, 2026-09-30).
     // A danger sign does not overrule CHAT: "he was bleeding badly yesterday
     // but he's fine now" is small talk.
-    if (guardsOn && intent === 'chat' && asksSomething(query)) {
+    // A follow-up that says something is missing asks for another way, whatever
+    // the model calls it: "how do i set up a tent" / "there's no manual" was
+    // restated as "missing tent manual, how to set up a tent" and still called
+    // CHAT, and Fred said "Got it" (Ryan, phone, 2026-10-04). Only then: the
+    // restatement adds "what to do next" to plain news ("ok we made it back"),
+    // which is small talk.
+    const lacks = u !== undefined && SAYS_MISSING.test(query) && asksSomething(u.request);
+    if (guardsOn && intent === 'chat' && (asksSomething(query) || lacks)) {
       intent = 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }

@@ -386,15 +386,17 @@ export async function createDeviceBackend(
   // message gets the same reply whatever came before: reusing whatever the
   // last call left changed the answer to "how should i dress for a cold hike"
   // (the prompt was read in different pieces, and greedy decoding followed a
-  // different word). The saved state is the system prompt alone, read once
-  // (a one-token completion of it) and kept in a file named by the call's
-  // kind and a hash of model and prompt; answers get one too, which saves
-  // reading their instructions on every question. One file per kind: a new
-  // prompt (another state named in the answer's) replaces the old one.
+  // different word). An answer starts from an empty context, as on the
+  // desktop where accuracy is graded: a saved answer prompt changed answers'
+  // wording from the desktop's ("Use natural fibers..." for "To make rope from
+  // plant fibers, identify...") to save under a second. A lane starts from its
+  // system prompt alone, read once (a one-token completion of it) and kept in
+  // a file named by the lane and a hash of model and prompt; a new prompt
+  // replaces the lane's old file.
   const sessionDir = opts.sessionDir;
   const fileOf = (path: string): File => new File(`file://${path}`);
-  const prepare = async (kind: string, system: string): Promise<void> => {
-    if (sessionDir === undefined) {
+  const prepare = async (kind: string | undefined, system: string): Promise<void> => {
+    if (kind === undefined || sessionDir === undefined) {
       await gen.clearCache();
       return;
     }
@@ -522,7 +524,7 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
-        await prepare(genOpts.lane ?? 'answer', prompt.system);
+        await prepare(genOpts.lane, prompt.system);
         running = true;
         try {
           await ctx.completion(

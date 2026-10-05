@@ -519,6 +519,8 @@ export interface Diagnostics {
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
+  /** Small talk taken as news about a problem still open in the conversation. */
+  readonly newsNotChat?: boolean;
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
   readonly followUp?: { readonly standaloneTopScore: number; readonly joinedTopScore: number; readonly used: boolean };
   /** Set when the answer was built from a field card rather than the passages. */
@@ -620,6 +622,9 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
  * code and prompts as a real question, so nothing here can drift from them.
  */
 /** The hiker says something isn't there: "there's no manual", "i don't have a filter", "forgot the poles". */
+/** A message that only acknowledges or reports progress: "ok it's off", "thanks", "ok made camp". */
+export const ACKNOWLEDGES = /^\s*(?:ok(?:ay)?|k|alright|all right|thanks?|thank you|thx|got it|will do|done|cool|great|nice|sounds good|perfect)\b/i;
+
 export const SAYS_MISSING = /\b(?:there'?s no|there is no|there are no|no (?!(?:longer|more|worries|problem|thanks|way|idea)\b)[a-z]+s?$|(?:i|we) (?:don'?t|do not|didn'?t) (?:have|bring|pack)|without (?:a|an|the|any)|(?:forgot|lost|broke|left) (?:the|my|our|a)|(?:doesn'?t|didn'?t) come with|(?:it'?s|is) (?:missing|broken))\b/i;
 
 export async function warmUp(backend: InferenceBackend): Promise<void> {
@@ -628,6 +633,23 @@ export async function warmUp(backend: InferenceBackend): Promise<void> {
 }
 
 export async function ask(
+  query: string,
+  deps: PipelineDeps,
+  opts: AskOptions,
+): Promise<AskResult> {
+  const res = await askCore(query, deps, opts);
+  // News about an open problem that nothing answered stays small talk: a
+  // decline would read as Fred not listening ("i can hear a river").
+  if (res.kind === 'abstain' && (res.reason === 'low-score' || res.reason === 'insufficient') && res.diagnostics.newsNotChat === true) {
+    return {
+      kind: 'chat', reply: res.offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: res.offer ?? null,
+      diagnostics: res.diagnostics,
+    };
+  }
+  return res;
+}
+
+async function askCore(
   query: string,
   deps: PipelineDeps,
   opts: AskOptions,
@@ -869,6 +891,8 @@ export async function ask(
   let agreedCard: ScoredChunk | undefined;
   // The leading card of the hiker's own thread, searched as one text.
   let threadCard: ScoredChunk | undefined;
+  // Small talk read as news about an open problem (below); ask() turns a decline back into small talk.
+  let newsNotChat = false;
   if (opts.intent === true) {
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
@@ -893,6 +917,21 @@ export async function ask(
     const lacks = u !== undefined && SAYS_MISSING.test(query) && asksSomething(u.request);
     if (guardsOn && intent === 'chat' && (asksSomething(query) || lacks)) {
       intent = 'question';
+      if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
+    // News about a problem still open in the conversation is not small talk:
+    // "a few bubbles came up on the skin" after a burn, "my kid already tried
+    // one" after berries, "yep its a bear" got "Got it" (sealed chat sets).
+    // Unless the hiker says it is over ("he's fine now") or is only
+    // acknowledging ("ok it's off", "ok made camp", "thanks"). If nothing then
+    // answers it, ask() falls back to small talk (newsNotChat): in a lost-hiker
+    // chat "i can hear a river" went from "Got it" to a decline.
+    const openProblem = active.length > 0 || eatingUnknownInThread(query, opts.history ?? []) ||
+      dangerSign([...history, query]);
+    if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem &&
+        !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
+      newsNotChat = true;
+      intent = dangerSign([...history, query]) ? 'now' : 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
     // A message that says something happened to someone (a condition,
@@ -1093,6 +1132,7 @@ export async function ask(
 
   const baseDiag = {
     ...(intent === undefined ? {} : { intent }),
+    ...(newsNotChat ? { newsNotChat } : {}),
     keywords,
     route: routed,
     maxTokens,

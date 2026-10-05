@@ -611,6 +611,19 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
   return out;
 }
 
+/**
+ * Run the intent check and the understanding step once, on a harmless
+ * message, so their model contexts are set up and their fixed prompts read
+ * before the hiker's first question (#133). Cold, the first message after the
+ * app opened spent 24 s in those two calls on the phone ("there's smoke and
+ * fire coming up the ridge toward us": 26 s to the emergency reply). The same
+ * code and prompts as a real question, so nothing here can drift from them.
+ */
+export async function warmUp(backend: InferenceBackend): Promise<void> {
+  await classifyIntent('hello there', backend);
+  await understandMessage('it hurts', ['i slipped on the trail'], backend);
+}
+
 export async function ask(
   query: string,
   deps: PipelineDeps,

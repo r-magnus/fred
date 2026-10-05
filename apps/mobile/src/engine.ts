@@ -12,7 +12,7 @@
  */
 import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
-import { ask, verifyEmbedderParity, type AskResult, type RoutablePack } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, warmUp, type AskResult, type RoutablePack } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
 
 const BASE = Paths.document;
@@ -134,6 +134,14 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
       .sort();
 
     console.log(`[fred] engine ready in ${Date.now() - t0}ms, encoder ${manifests[0]!.embedding.modelId}`);
+    // #133: set up the intent and understanding contexts now, in the
+    // background, so the first question (an emergency, perhaps) doesn't pay
+    // for it. A question asked meanwhile waits its turn behind it.
+    const tw = Date.now();
+    void warmUp(backend).then(
+      () => console.log(`[fred] warm-up done in ${Date.now() - tw}ms`),
+      (e: unknown) => console.log(`[fred] warm-up failed: ${e instanceof Error ? e.message : String(e)}`),
+    );
     onPhase({
       phase: 'ready',
       packs: manifests.length,

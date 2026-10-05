@@ -454,12 +454,11 @@ function Screen() {
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
-                  {t.map === true ? 'Here\u2019s where you are.' : 'I don\u2019t have reliable information on that.'}
+                  {t.map === true ? 'Here\u2019s where you are.' : 'I don\u2019t have that in my guides, and I\u2019d rather not guess.'}
                 </Text>
                 {t.map === true && t.offer === undefined ? null : t.offer === undefined ? (
                   <Text style={styles.hint}>
-                    Fred only answers from the manuals he carries, and says nothing rather
-                    than guessing.
+                    Try asking another way, or tell me a bit more about what&apos;s going on.
                   </Text>
                 ) : (
                   <Text style={styles.hint}>The closest field card, in case it&apos;s what you need:</Text>

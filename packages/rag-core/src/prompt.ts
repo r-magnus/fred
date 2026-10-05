@@ -29,7 +29,7 @@ export interface ContextBlock {
 export const NO_ANSWER_REPLY = "I don't have reliable information on that.";
 
 /** Fred's reply to small talk (intent 'chat'): no advice, nothing invented. */
-export const CHAT_REPLY = "Got it. I'm here if anything comes up, whether it's first aid, survival, or the plants and animals around you.";
+export const CHAT_REPLY = "Got it. I'm right here whenever you need me, whether it's first aid, finding your way, or the plants and animals around you.";
 
 /**
  * Small talk that still matched a field card. "I think I'm lost" was read as

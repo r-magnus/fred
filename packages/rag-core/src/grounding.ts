@@ -26,7 +26,33 @@ export const QUOTE_FLOOR = 0.57;
 export const QUOTE_BAND = 0.05;
 
 /** Said before quoted sentences that replace the rest of an answer. */
-export const QUOTE_INSTEAD = 'From the source:';
+/**
+ * How a quote is introduced (#135): by who said it, as a person would ("Here's
+ * what the National Park Service says:"), not "From the source:". A source's
+ * name in the packs is a citation label ("ATP 3-50.21 Survival 2018"); this
+ * is what it is called aloud. Several publishers, or one not listed: "my guides".
+ */
+const PUBLISHERS: readonly [RegExp, string][] = [
+  [/^National Park Service/, 'the National Park Service'],
+  [/^CDC/, 'the CDC'],
+  [/^(?:ATP 3-50\.21|FM 21-76)/, 'the Army survival manual'],
+  [/^ATP 4-02\.11/, 'the Army first aid manual'],
+  [/^National Weather Service/, 'the National Weather Service'],
+  [/^NIH/, 'the National Institutes of Health'],
+  [/^FDA/, 'the FDA'],
+  [/^EPA/, 'the EPA'],
+  [/^(?:USFS|US Forest Service)/, 'the Forest Service'],
+  [/^Bureau of Land Management/, 'the Bureau of Land Management'],
+  [/^WHO/, 'the World Health Organization'],
+  [/^Wikivoyage/, 'Wikivoyage'],
+];
+
+export function quoteIntro(sources: readonly string[]): string {
+  const names = new Set(sources.map((s) => PUBLISHERS.find(([re]) => re.test(s))?.[1] ?? 'my guides'));
+  if (names.size !== 1) return "Here's what my guides say:";
+  const [name] = [...names];
+  return name === 'my guides' ? "Here's what my guides say:" : `Here's what ${name} says:`;
+}
 
 const WORDS: Readonly<Record<string, string>> = {
   one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9', ten: '10',

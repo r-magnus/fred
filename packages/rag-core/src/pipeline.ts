@@ -21,7 +21,7 @@ import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
 import { rankSentences } from './sentences.ts';
-import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
+import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, quoteIntro } from './grounding.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -1487,13 +1487,15 @@ export async function ask(
     // The same sentence often sits on two pages ("pick them up if possible so
     // they don't panic and run", three mountain-lion pages): quote it once.
     const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
-    const picked: string[] = [];
+    const picked: { text: string; chunkId: string }[] = [];
     for (const r of ranked) {
       if (r.similarity < Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND) || picked.length === 2) break;
-      if (picked.some((p) => norm(p).includes(norm(r.text)) || norm(r.text).includes(norm(p)))) continue;
-      picked.push(r.text);
+      if (picked.some((p) => norm(p.text).includes(norm(r.text)) || norm(r.text).includes(norm(p.text)))) continue;
+      picked.push({ text: r.text, chunkId: r.chunkId });
     }
-    return picked.join('\n');
+    // Introduced by who said it (#135).
+    const sources = picked.map((p) => blocks.find((b) => b.chunk.id === p.chunkId)?.chunk.source ?? '');
+    return `${quoteIntro(sources)}\n${picked.map((p) => p.text).join('\n')}`;
   };
   const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
@@ -1535,7 +1537,7 @@ export async function ask(
     ? numberChecked(backend.generate(prompt, generateOpts), sourceText, async (shown) => {
       const quoted = await quoteSources();
       answerGuard.replacedBy = 'number';
-      if (quoted !== undefined) return shown ? `\n\n${QUOTE_INSTEAD}\n${quoted}` : quoted;
+      if (quoted !== undefined) return shown ? `\n\n${quoted}` : quoted;
       return shown ? '' : NO_ANSWER_REPLY;
     })
     : backend.generate(prompt, generateOpts));

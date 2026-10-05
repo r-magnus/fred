@@ -620,6 +620,9 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
  * code and prompts as a real question, so nothing here can drift from them.
  */
 /** The hiker says something isn't there: "there's no manual", "i don't have a filter", "forgot the poles". */
+/** A message that only acknowledges or reports progress: "ok it's off", "thanks", "ok made camp". */
+export const ACKNOWLEDGES = /^\s*(?:ok(?:ay)?|k|alright|all right|thanks?|thank you|thx|got it|will do|done|cool|great|nice|sounds good|perfect)\b/i;
+
 export const SAYS_MISSING = /\b(?:there'?s no|there is no|there are no|no (?!(?:longer|more|worries|problem|thanks|way|idea)\b)[a-z]+s?$|(?:i|we) (?:don'?t|do not|didn'?t) (?:have|bring|pack)|without (?:a|an|the|any)|(?:forgot|lost|broke|left) (?:the|my|our|a)|(?:doesn'?t|didn'?t) come with|(?:it'?s|is) (?:missing|broken))\b/i;
 
 export async function warmUp(backend: InferenceBackend): Promise<void> {
@@ -893,6 +896,17 @@ export async function ask(
     const lacks = u !== undefined && SAYS_MISSING.test(query) && asksSomething(u.request);
     if (guardsOn && intent === 'chat' && (asksSomething(query) || lacks)) {
       intent = 'question';
+      if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
+    // News about a problem still open in the conversation is not small talk:
+    // "a few bubbles came up on the skin" after a burn, "my kid already tried
+    // one" after berries, "yep its a bear" got "Got it" (sealed chat sets).
+    // Unless the hiker says it is over ("he's fine now") or is only
+    // acknowledging ("ok it's off", "ok made camp", "thanks").
+    const openProblem = active.length > 0 || eatingUnknownInThread(query, opts.history ?? []) ||
+      (history.length > 0 && dangerSign(history));
+    if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem && !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
+      intent = dangerSign([...history, query]) ? 'now' : 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
     // A message that says something happened to someone (a condition,

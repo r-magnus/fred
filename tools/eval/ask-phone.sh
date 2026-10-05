@@ -2,6 +2,7 @@
 # Ask the phone app questions from the desktop, even while the screen is locked.
 #
 #   tools/eval/ask-phone.sh questions.tsv      # lines: question<TAB>state (state optional)
+#   ASK_AFTER=8 tools/eval/ask-phone.sh q.tsv   # ask 8 s after the app is ready, as a person typing would
 #
 # Turns on the app's development hook (the `devhooks` file; see App.tsx), queues
 # the questions in its inbox, restarts the app, and prints the per-question log
@@ -22,13 +23,27 @@ grep -q 'DEBUGGABLE' <<<"$flags" || { echo "installed $PKG is not debuggable; in
 # killed, so that question was never answered (2026-09-30, twice).
 "$ADB" shell am force-stop $PKG
 "$ADB" push "$Q" /data/local/tmp/fred-ask.txt >/dev/null
-"$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
+if [ -z "${ASK_AFTER:-}" ]; then
+  "$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
+else
+  "$ADB" shell "run-as $PKG sh -c 'touch files/devhooks && rm -f files/devhooks-ask.txt'"
+fi
 # The default 256 KB buffer holds seconds of this phone's lowmemorykiller
 # chatter (~10 lines/s), so the answer lines scroll out before they are read.
 "$ADB" logcat -G 16M
 "$ADB" logcat -c
 "$ADB" shell am force-stop $PKG
 "$ADB" shell monkey -p $PKG -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
+# ASK_AFTER: the questions go in only once the app has been ready that long.
+if [ -n "${ASK_AFTER:-}" ]; then
+  ready_by=$((SECONDS + 180))
+  until "$ADB" logcat -d -s ReactNativeJS | grep -q '\[fred\] engine ready'; do
+    [ $SECONDS -lt $ready_by ] || { echo "app not ready after 180 s (screen off?)" >&2; exit 2; }
+    sleep 1
+  done
+  sleep "$ASK_AFTER"
+  "$ADB" shell "run-as $PKG sh -c 'cp /data/local/tmp/fred-ask.txt files/devhooks-ask.txt'"
+fi
 # One "[fred] answer|abstain|needs-location|chat|error" line per question.
 deadline=$((SECONDS + 120 * n + 60))
 while [ $SECONDS -lt $deadline ]; do

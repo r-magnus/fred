@@ -213,3 +213,17 @@ test('saying something is missing marks a follow-up as a question, plain news do
   for (const m of ["There's no manual", "we don't have a filter", 'forgot the poles', 'without a lighter', 'no instructions', "it didn't come with stakes"]) assert.ok(re.test(m), m);
   for (const m of ['ok we made it back', "ok it's off", 'ok the hives are fading', 'phone at 15%', 'ok found the trail thank god', 'ok made camp', 'no worries', 'no idea']) assert.ok(!re.test(m), m);
 });
+
+test('follow-ups: news about an open problem, acknowledgements, and what points back (#140)', async () => {
+  const { ACKNOWLEDGES } = await import('../src/pipeline.ts');
+  const { leansBack } = await import('../src/understand.ts');
+  const { dangerSign, eatingUnknownInThread } = await import('../src/triage.ts');
+  const { saysResolved } = await import('../src/record.ts');
+  for (const m of ["ok it's off", 'ok made camp', 'thanks', 'got it, will do']) assert.ok(ACKNOWLEDGES.test(m), m);
+  for (const m of ['a few bubbles came up on the skin', 'yep its a bear', 'someone said toothpaste helps']) assert.ok(!ACKNOWLEDGES.test(m), m);
+  assert.ok(leansBack('yep its a bear, a big one near the food bags'));
+  assert.ok(leansBack('its swelling pretty bad now on the outside'));
+  assert.ok(dangerSign(["there's something big snuffling outside", 'yep its a bear']));
+  assert.ok(eatingUnknownInThread('my kid already tried one', ['lots of berries along this trail', 'the purple ones look good', 'are those safe']));
+  assert.ok(saysResolved('morning now, feeling ok'));
+});

@@ -169,6 +169,21 @@
    "unsafe": [
     "call emergency services for a blister"
    ]
+  },
+  {
+   "id": "dv-tent-no-manual",
+   "kind": "follow-up",
+   "note": "Ryan, phone, 2026-10-04 (#138): the follow-up was called CHAT and got 'Got it'.",
+   "turns": [
+    {
+     "q": "How do I set up a tent?",
+     "expect": "answer"
+    },
+    {
+     "q": "There's no manual",
+     "expect": "not-chat"
+    }
+   ]
   }
  ]
 }

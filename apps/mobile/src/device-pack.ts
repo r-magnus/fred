@@ -382,25 +382,33 @@ export async function createDeviceBackend(
   // only the part that differs. The file outlives the app, so even the first
   // message after a restart starts warm. It is named by a hash of the model
   // and the prompt, so a changed prompt is read afresh, never the old one.
+  //
+  // Every call starts from a known state, so the same message gets the same
+  // reply whatever came before: a lane from its saved prompt, an answer from
+  // an empty context. Reusing whatever the last call left changed the answer
+  // to "how should i dress for a cold hike" on the phone: the prompt was read
+  // in different pieces, and greedy decoding followed a different word.
   const sessionDir = opts.sessionDir;
-  let inLane: string | null = null;
   const laneFile = (lane: string, system: string): string => `${sessionDir}/lane-${lane}-${fnv1a(`${opts.modelPath}\n${system}`)}.session`;
   const fileOf = (path: string): File => new File(`file://${path}`);
-  /** Bring the lane's saved prompt into the context; true when it has to be saved after this call. */
-  const enterLane = async (lane: string, system: string): Promise<boolean> => {
-    if (sessionDir === undefined) return false;
-    const path = laneFile(lane, system);
-    if (inLane === path) return false;
-    inLane = path;
-    if (!fileOf(path).exists) return true;
-    try {
-      await gen.loadSession(path);
-      return false;
-    } catch {
-      // A file from another llama.rn or model build: read the prompt afresh.
-      try { fileOf(path).delete(); } catch { /* already gone */ }
-      return true;
+  /** Set the context up for this call; the path to save the lane's prompt to afterwards, if it isn't saved yet. */
+  const prepare = async (lane: string | undefined, system: string): Promise<string | null> => {
+    if (lane === undefined || sessionDir === undefined) {
+      await gen.clearCache();
+      return null;
     }
+    const path = laneFile(lane, system);
+    if (fileOf(path).exists) {
+      try {
+        await gen.loadSession(path);
+        return null;
+      } catch {
+        // A file from another llama.rn or model build: read the prompt afresh.
+        try { fileOf(path).delete(); } catch { /* already gone */ }
+      }
+    }
+    await gen.clearCache();
+    return path;
   };
 
   let embed: (text: string) => Promise<Float32Array>;
@@ -503,8 +511,7 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
-        const save = genOpts.lane === undefined ? false : await enterLane(genOpts.lane, prompt.system);
-        if (genOpts.lane === undefined) inLane = null;
+        const saveTo = await prepare(genOpts.lane, prompt.system);
         running = true;
         try {
           await ctx.completion(
@@ -537,9 +544,9 @@ export async function createDeviceBackend(
               },
               (tok) => stream.push(tok.token),
           );
-          if (save && !cancelled && inLane !== null) {
-            await gen.saveSession(inLane).catch(() => undefined);
-          }
+          // Saved even when stopped early: the intent check stops as soon as
+          // it reads its word, and only the prompt's start is reused.
+          if (saveTo !== null) await gen.saveSession(saveTo).catch(() => undefined);
         } finally {
           running = false;
         }

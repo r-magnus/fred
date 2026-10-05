@@ -69,3 +69,12 @@ test('a list marker is released at once, not held with its sentence (#128)', asy
   for await (const t of numberChecked(from('1', '.', ' Use', ' DEET.'), 'DEET', async () => 'X')) seen.push(t);
   assert.deepEqual(seen.slice(0, 2), ['1.', ' Use']);
 });
+
+test('a quote is introduced by who said it (#135)', async () => {
+  const { quoteIntro } = await import('../src/grounding.ts');
+  assert.equal(quoteIntro(['National Park Service — Bison Safety']), "Here's what the National Park Service says:");
+  assert.equal(quoteIntro(['ATP 3-50.21 Survival 2018', 'FM 21-76 Survival 1992']), "Here's what the Army survival manual says:");
+  assert.equal(quoteIntro(['CDC — Ticks', 'National Park Service — Ticks']), "Here's what my guides say:");
+  assert.equal(quoteIntro(['Some new source']), "Here's what my guides say:");
+  assert.equal(quoteIntro(['Wikivoyage — Desert travel']), "Here's what Wikivoyage says:");
+});

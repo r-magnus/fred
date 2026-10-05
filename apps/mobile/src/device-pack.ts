@@ -10,8 +10,7 @@
  * entirely FTS5, so without that flag every query returns nothing.
  */
 import { open, type DB } from '@op-engineering/op-sqlite';
-import type { Directory } from 'expo-file-system';
-import { File } from 'expo-file-system';
+import { Directory, File } from 'expo-file-system';
 import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import {
@@ -383,32 +382,44 @@ export async function createDeviceBackend(
   // message after a restart starts warm. It is named by a hash of the model
   // and the prompt, so a changed prompt is read afresh, never the old one.
   //
-  // Every call starts from a known state, so the same message gets the same
-  // reply whatever came before: a lane from its saved prompt, an answer from
-  // an empty context. Reusing whatever the last call left changed the answer
-  // to "how should i dress for a cold hike" on the phone: the prompt was read
-  // in different pieces, and greedy decoding followed a different word.
+  // Every call starts from the same state for the same system prompt, so a
+  // message gets the same reply whatever came before: reusing whatever the
+  // last call left changed the answer to "how should i dress for a cold hike"
+  // (the prompt was read in different pieces, and greedy decoding followed a
+  // different word). The saved state is the system prompt alone, read once
+  // (a one-token completion of it) and kept in a file named by the call's
+  // kind and a hash of model and prompt; answers get one too, which saves
+  // reading their instructions on every question. One file per kind: a new
+  // prompt (another state named in the answer's) replaces the old one.
   const sessionDir = opts.sessionDir;
-  const laneFile = (lane: string, system: string): string => `${sessionDir}/lane-${lane}-${fnv1a(`${opts.modelPath}\n${system}`)}.session`;
   const fileOf = (path: string): File => new File(`file://${path}`);
-  /** Set the context up for this call; the path to save the lane's prompt to afterwards, if it isn't saved yet. */
-  const prepare = async (lane: string | undefined, system: string): Promise<string | null> => {
-    if (lane === undefined || sessionDir === undefined) {
+  const prepare = async (kind: string, system: string): Promise<void> => {
+    if (sessionDir === undefined) {
       await gen.clearCache();
-      return null;
+      return;
     }
-    const path = laneFile(lane, system);
+    const prefix = `lane-${kind}-`;
+    const path = `${sessionDir}/${prefix}${fnv1a(`${opts.modelPath}\n${system}`)}.session`;
     if (fileOf(path).exists) {
       try {
         await gen.loadSession(path);
-        return null;
+        return;
       } catch {
         // A file from another llama.rn or model build: read the prompt afresh.
         try { fileOf(path).delete(); } catch { /* already gone */ }
       }
     }
     await gen.clearCache();
-    return path;
+    await gen.completion({
+      messages: [{ role: 'system', content: system }],
+      jinja: true, enable_thinking: false, n_predict: 1, temperature: 0,
+    });
+    await gen.saveSession(path);
+    for (const old of new Directory(`file://${sessionDir}`).list()) {
+      if (old.name.startsWith(prefix) && `${sessionDir}/${old.name}` !== path) {
+        try { old.delete(); } catch { /* in use or gone */ }
+      }
+    }
   };
 
   let embed: (text: string) => Promise<Float32Array>;
@@ -511,7 +522,7 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
-        const saveTo = await prepare(genOpts.lane, prompt.system);
+        await prepare(genOpts.lane ?? 'answer', prompt.system);
         running = true;
         try {
           await ctx.completion(
@@ -544,9 +555,6 @@ export async function createDeviceBackend(
               },
               (tok) => stream.push(tok.token),
           );
-          // Saved even when stopped early: the intent check stops as soon as
-          // it reads its word, and only the prompt's start is reused.
-          if (saveTo !== null) await gen.saveSession(saveTo).catch(() => undefined);
         } finally {
           running = false;
         }

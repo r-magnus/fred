@@ -10,6 +10,7 @@
  * opener, which costs nothing but warmth.
  */
 import type { InferenceBackend } from './backends.ts';
+import { leansBack } from './understand.ts';
 
 export const OPENER_SYSTEM = `You are Fred, a kind, calm friend on the trail. The hiker just said something. Write ONE short sentence (under 15 words) that shows you heard them: it must name what THEY are talking about, in their own words. Another part of Fred gives the actual answer right after your sentence.
 Match what they said:
@@ -29,15 +30,20 @@ Examples:
 "what are those tall purple flowers" (start with "Good question") -> Good question about those tall purple flowers.
 "any tips for cooking on a campfire" (start with "Sure, let's") -> Sure, let's look at cooking on a campfire.
 "is it ok to camp near a stream" (start with "Glad you asked") -> Glad you asked about camping near a stream.
-"is it ok to camp near a stream" (start with "Good question") -> Good question about camping near a stream.
+"is it ok to camp near a stream" (start with "Thanks for asking") -> Thanks for asking about camping near a stream.
 "can i burn pine cones in the fire" (start with "Glad you asked") -> Glad you asked about burning pine cones.
-"should we cross the snowfield this late" (start with "Good question") -> Good question about crossing the snowfield.
-"ugh i forgot my rain jacket" -> Oh no, sorry about the rain jacket.
-"my toes are numb and it's freezing out" -> Oh no, numb toes in the cold are no fun.
-"i think i walked through stinging nettles" -> Ouch, stinging nettles are nasty, sorry you're dealing with that.
-"my back is killing me from this pack" -> Ouch, sorry your back is hurting from the pack.
+"should we cross the snowfield this late" (start with "Thanks for asking") -> Thanks for asking about crossing the snowfield.
+"ugh i forgot my rain jacket" (start with "Oh no") -> Oh no, sorry about the rain jacket.
+"ugh i forgot my rain jacket" (start with "Sorry") -> Sorry about the rain jacket, that's frustrating.
+"ugh i forgot my rain jacket" (start with "Ugh") -> Ugh, a forgotten rain jacket is a bummer.
+"my toes are numb and it's freezing out" (start with "Oh no") -> Oh no, numb toes in the cold are no fun.
+"my toes are numb and it's freezing out" (start with "Sorry") -> Sorry about your numb toes, that sounds miserable.
+"my toes are numb and it's freezing out" (start with "Ugh") -> Ugh, numb toes in the freezing cold are rough.
+"my back is killing me from this pack, what do i do" (start with "Sorry") -> Sorry your back is hurting from the pack.
+"i'm lost and kind of panicking" (start with "Take a deep breath") -> Take a deep breath, being lost is scary, we'll work through it together.
+"i'm lost and kind of panicking" (start with "Hey") -> Hey, being lost is frightening, I'm here with you.
+"i'm nervous about the storm tonight" (start with "Hey") -> Hey, a storm at night is unsettling, I'm here with you.
 "the trail is flooded and we can't get through" -> Ugh, a flooded trail is frustrating.
-"i'm lost and kind of panicking" -> Take a deep breath, being lost is scary, we'll work through it together.
 "we finally reached the lake!" -> Well done on reaching the lake!`;
 
 /** How much of the conversation the opener sees: the hiker's last messages. */
@@ -74,7 +80,7 @@ const CONDITIONS = /\b(?:sprain\w*|strain\w*|fractur\w*|broken|break|heat ?(?:ex
 const GLUE = new Set(`a an the that this these those it its it's that's there's what's is are was were be been can could would will
 sound sounds sounding like feel feels felt feeling seem seems so such really very quite pretty bit little of to on in at for with
 from and or but your you you're you've we we're our us my i i'm me all after when while out there here up down back
-make makes making for get gets getting have has had just still both one's way handle deal through around off over before about now how being not going goes`.split(/\s+/));
+make makes making for get gets getting have has had just still both one's way handle deal through around off over before about now how being not going goes where without`.split(/\s+/));
 const FEELING = new Set(`fun tough rough hard uncomfortable annoying painful miserable frustrating stressful scary frightening
 unsettling nerve-wracking tiring exhausting draining long tricky exciting amazing wonderful great awesome beautiful lovely
 fascinating interesting rewarding nice ouch oh ugh yikes wow nasty unpleasant bother bummer sorry glad love enjoy
@@ -83,17 +89,25 @@ congratulations congrats well done no happy big achievement reach reaching`.spli
 const COMFORT = new Set(`hey happen happens happened take deep breath breathe together we'll let's sort figure work
 through asking ask asked thinking smart plan planning ahead okay ok alright right thing step steps one here glad good
 see do care look handle help helping hear question about what they dealing
-prepare ready fix start started learn choose pick sure i'm with`.split(/\s+/));
+prepare ready fix start started learn choose pick sure i'm with thanks`.split(/\s+/));
 /** The comfort words that by themselves make a line warm. */
-const WARM = new Set(['happy', 'hey', 'happen', 'happens', 'happened', 'breath', 'breathe', 'together', 'glad', 'okay', 'ok', 'alright', 'thinking', 'smart']);
+const WARM = new Set(['happy', 'thanks', 'hey', 'happen', 'happens', 'happened', 'breath', 'breathe', 'together', 'glad', 'okay', 'ok', 'alright', 'thinking', 'smart']);
 const SETTING = new Set(`day days hike hikes hiking trail trails trip night nights morning afternoon evening time spot moment
 walk climb outdoors camp camping weather part start adventure out watch week hours miles summit top mountain woods
 heat hot cold chill rain wet wind snow sun dark storm gear pack boots shoes tent
 legs feet body hands arms knees back nose throat skin head hurt hurting hurts ache aching aches mood`.split(/\s+/));
 
 /** "dogs" for "dog", "eating" for "eat", "hiking" for "hike", "stopped" for "stop". */
+const IRREGULAR: Record<string, readonly string[]> = {
+  died: ['dying', 'die', 'dead'], ran: ['running', 'run'], fell: ['falling', 'fall'], stung: ['sting', 'stinging', 'stings'],
+  bit: ['bitten', 'biting', 'bite', 'bites'], tore: ['torn', 'tearing'], cut: ['cutting', 'cuts'], lost: ['losing'],
+  froze: ['frozen', 'freezing'], felt: ['feeling'], slept: ['sleeping', 'sleep'], swollen: ['swelling'],
+};
 function formOf(w: string, h: string): boolean {
   if (h.length < 3 || GLUE.has(h)) return false;
+  if (IRREGULAR[h]?.includes(w) === true) return true;
+  // "rubs" for "rubbing", "throwing" for "threw", "forgotten" for "forgot".
+  if (w.length >= 4 && h.length >= 4 && w.slice(0, 3) === h.slice(0, 3)) return true;
   const last = h[h.length - 1]!;
   return [`${h}s`, `${h}es`, `${h}ed`, `${h}d`, `${h}ing`, `${h}${last}ing`, `${h}${last}ed`, `${h.slice(0, -1)}ing`, `${h.slice(0, -1)}ies`].includes(w);
 }
@@ -150,7 +164,7 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   const saidWords = said.split(/[^a-z']+/).filter((w) => w !== '');
   // "Happy to help you keep your phone battery going": after an offer to
   // help, the hiker's own verb is their request, not Fred's advice.
-  const offer = /^(?:happy to help|sure, let's (?:work|figure) out|good question)\b/i.test(line);
+  const offer = /^(?:happy to help|sure, let's (?:work|figure) out|good question|thanks for asking)\b/i.test(line);
   const mine = line.replace(new RegExp(ADVICE.source, 'gi'), (m) => (offer && saidWords.includes(m.toLowerCase().split(' ').pop()!) ? '' : m));
   for (const [name, re] of [['advice', ADVICE], ['judgment', JUDGES], ['about Fred', SELF]] as const) {
     const m = re.exec(name === 'judgment' ? judged : name === 'advice' ? mine : line);
@@ -174,6 +188,8 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   if (SYMPATHY.test(line) && (ASKS.test(latest) || ASKS_YES_NO.test(latest))) return no('sympathy for a question');
   // "Happy to help you cook those mushrooms" answers "can i cook them".
   if (/^(?:happy to help|sure)\b/i.test(line) && ASKS_YES_NO.test(latest)) return no('an offer reads as yes');
+  // Calming words are for a scare, not a stomach bug.
+  if (/\btake a (?:deep )?breath\b/i.test(line) && !WORRY.test(said)) return no('calm without a worry');
   if (SYMPATHY.test(line) && DELIGHT.test(line)) return no('sympathy with delight');
   // "Okay" closes a phrase ("it's okay."), never "okay to swim".
   if (/\b(?:ok(?:ay)?|alright)\b(?!\s*(?:[.!,;:\u2013\u2014-]|$))/i.test(line)) return no('okay to');
@@ -192,40 +208,58 @@ export function checkOpener(raw: string, messages: readonly string[]): string | 
   return explainOpener(raw, messages).line;
 }
 
-/** How a plain question's opener may begin, and a yes/no question's. */
-const STARTS_QUESTION = ['Happy to help', "Sure, let's", 'Good question'];
-const STARTS_YES_NO = ['Glad you asked', 'Good question'];
+/** How an opener may begin, by what the message is. */
+const STARTS = {
+  question: ['Happy to help', "Sure, let's", 'Good question'],
+  yesNo: ['Glad you asked', 'Thanks for asking'],
+  problem: ['Oh no', 'Sorry', 'Ugh'],
+  worry: ['Take a deep breath', 'Hey'],
+} as const;
+/** The hiker says they are frightened or uneasy. */
+const WORRY = /\b(?:scared|afraid|nervous|worried|worrying|anxious|panick\w*|freaking|terrified|frightened|spooked|uneasy|creeped)\b/i;
+/** Something hurts, is broken, is missing or has gone wrong. */
+const PROBLEM = /\b(?:hurt\w*|ach(?:e|es|ing)|sore|pain\w*|broke\w*|forgot\w*|dropped|soaked|numb|exhausted|sick|diarrhea|threw up|throwing up|vomit\w*|nause\w*|bitten|stung|scraped|burn(?:ed|t)|blister\w*|splinter|died|won'?t|can'?t|ran out|stuck|itch\w*|swollen|swelling|bleeding|cramp\w*|headache|dizzy|cracked|snapped|ripped|torn|leak\w*|ugh|killing me|throbbing|stiff|bruised|sunburn\w*|rash|lost (?:my|a|our|the)|miserable|freezing|twisted|rubbed|raw)\b/i;
+/** A question somewhere after a statement: "..., how do i keep it burning". */
+const ASKS_LATER = /\b(?:how (?:do|can|should|long|much|many) |what (?:should|do|can|helps) |where (?:do|should|can) |any (?:tips|advice))/i;
 function hashOf(message: string): number {
   let h = 2166136261;
   for (const c of message.trim().toLowerCase()) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   return h >>> 0;
 }
-function startsFor(message: string): readonly string[] | null {
-  return ASKS_YES_NO.test(message) ? STARTS_YES_NO : ASKS.test(message) ? STARTS_QUESTION : null;
+function kindOf(message: string): keyof typeof STARTS | null {
+  if (ASKS_YES_NO.test(message)) return 'yesNo';
+  if (ASKS.test(message)) return 'question';
+  if (WORRY.test(message)) return 'worry';
+  if (PROBLEM.test(message)) return 'problem';
+  return ASKS_LATER.test(message) ? 'question' : null;
 }
 
 /**
- * The words a question's opener begins with, or null for a message that is
- * not a plain question (a problem, a worry: the model picks its own). A model
- * this small writes every how-to opener in the one shape its examples favour
- * ("Happy to help you..."), so the first words are picked here, from the
- * message, and never the ones the message before it would have got.
+ * The words this message's opener begins with, or null when it is not
+ * plainly a question, a problem or a worry (the model picks its own). A model
+ * this small writes every opener of a kind in the one shape its examples
+ * favour ("Happy to help you..."), and gave a stomach bug the calming words
+ * meant for a scare, so the first words are picked here: by what the message
+ * is, and stepping one on with each message of the conversation, so no two
+ * running begin alike.
  */
-export function openerStart(message: string, earlier: readonly string[]): string | null {
-  const starts = startsFor(message);
-  if (starts === null) return null;
-  const mine = hashOf(message) % starts.length;
-  const last = earlier[earlier.length - 1];
-  const before = last === undefined ? null : startsFor(last);
-  const taken = before === null ? null : before[hashOf(last!) % before.length];
-  return starts[mine] === taken ? starts[(mine + 1) % starts.length]! : starts[mine]!;
+export function openerStart(message: string, history: readonly string[]): string | null {
+  const kind = kindOf(message);
+  if (kind === null) return null;
+  const starts = STARTS[kind];
+  return starts[(hashOf(history[0] ?? message) + history.length) % starts.length]!;
 }
 
 /** The user turn: the hiker's last messages, this one, and for a question its first words. */
 export function openerUser(message: string, history: readonly string[]): string {
-  const earlier = history.filter((h) => h.trim() !== '').slice(-EARLIER);
+  // Earlier messages come along only when this one points back at them
+  // ("it still hurts"): shown them otherwise, the model answered three at
+  // once ("Happy to help you pick a sleeping pad and store your food, and set
+  // up a rain fly.").
+  // ("is it ok to..." points at nothing.)
+  const earlier = leansBack(message.replace(/\bis it (?=ok|okay|fine|safe|alright|all right|bad|normal)/gi, '')) ? history.filter((h) => h.trim() !== '').slice(-EARLIER) : [];
   const before = earlier.length === 0 ? '' : `Earlier the hiker said: ${earlier.map((h) => `"${h}"`).join(' ')}\n`;
-  const start = openerStart(message, earlier);
+  const start = openerStart(message, history.filter((h) => h.trim() !== ''));
   return `${before}"${message}"${start === null ? '' : ` (start with "${start}")`} ->`;
 }
 

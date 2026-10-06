@@ -1,0 +1,400 @@
+[
+ {
+  "id": "op6-problem-01",
+  "kind": "problem",
+  "question": "my water bottle leaked all over my spare clothes",
+  "skipped": false,
+  "raw": "Sorry about the mess with your spare clothes.",
+  "kept": null,
+  "why": "word: mess"
+ },
+ {
+  "id": "op6-problem-02",
+  "kind": "problem",
+  "question": "i twisted my wrist catching myself on a fall",
+  "skipped": false,
+  "raw": "Sorry about your wrist hurt from the fall.",
+  "kept": "Sorry about your wrist hurt from the fall."
+ },
+ {
+  "id": "op6-problem-03",
+  "kind": "problem",
+  "question": "my tent pole snapped in the wind",
+  "skipped": false,
+  "raw": "Sorry about your tent pole snapping in the wind.",
+  "kept": "Sorry about your tent pole snapping in the wind."
+ },
+ {
+  "id": "op6-problem-04",
+  "kind": "problem",
+  "question": "i've been throwing up since breakfast",
+  "skipped": false,
+  "raw": "Oh no, throwing up since breakfast is uncomfortable.",
+  "kept": "Oh no, throwing up since breakfast is uncomfortable."
+ },
+ {
+  "id": "op6-problem-05",
+  "kind": "problem",
+  "question": "my heel is rubbed raw from these new boots",
+  "skipped": false,
+  "raw": "Oh no, rubbed heels from new boots are uncomfortable.",
+  "kept": "Oh no, rubbed heels from new boots are uncomfortable."
+ },
+ {
+  "id": "op6-problem-06",
+  "kind": "problem",
+  "question": "we forgot the tent stakes at home",
+  "skipped": false,
+  "raw": "Oh no, forgotten tent stakes at home are a hassle.",
+  "kept": null,
+  "why": "word: hassle"
+ },
+ {
+  "id": "op6-problem-07",
+  "kind": "problem",
+  "question": "my glasses broke and i can barely see the trail",
+  "skipped": false,
+  "raw": "Ugh, a broken pair of glasses is frustrating.",
+  "kept": null,
+  "why": "word: pair"
+ },
+ {
+  "id": "op6-problem-08",
+  "kind": "problem",
+  "question": "i got sap all over my hands and it won't come off",
+  "skipped": false,
+  "raw": "Oh no, sap on hands is annoying.",
+  "kept": "Oh no, sap on hands is annoying."
+ },
+ {
+  "id": "op6-problem-q-01",
+  "kind": "problem-q",
+  "question": "my hands are covered in blisters from the paddle, what should i do",
+  "skipped": false,
+  "raw": "Oh no, numb hands from the paddle are uncomfortable.",
+  "kept": null,
+  "why": "word: numb"
+ },
+ {
+  "id": "op6-problem-q-02",
+  "kind": "problem-q",
+  "question": "i burned my tongue on the soup, how do i make it stop hurting",
+  "skipped": false,
+  "raw": "Sorry about the burning tongue from the soup.",
+  "kept": "Sorry about the burning tongue from the soup."
+ },
+ {
+  "id": "op6-problem-q-03",
+  "kind": "problem-q",
+  "question": "my boots are soaked through, how do i dry them by morning",
+  "skipped": true,
+  "raw": "",
+  "kept": null
+ },
+ {
+  "id": "op6-problem-q-04",
+  "kind": "problem-q",
+  "question": "i lost a contact lens in the dirt, what do i do",
+  "skipped": false,
+  "raw": "Ugh, a lost contact lens in the dirt is frustrating.",
+  "kept": "Ugh, a lost contact lens in the dirt is frustrating."
+ },
+ {
+  "id": "op6-problem-q-05",
+  "kind": "problem-q",
+  "question": "my lighter ran out, how do i start the stove",
+  "skipped": false,
+  "raw": "Oh no, sorry about the lighter running out and starting the stove.",
+  "kept": "Oh no, sorry about the lighter running out and starting the stove."
+ },
+ {
+  "id": "op6-problem-q-06",
+  "kind": "problem-q",
+  "question": "i've got a cramp in my side that won't quit, what helps",
+  "skipped": false,
+  "raw": "Oh no, numb sides and cramps are really uncomfortable.",
+  "kept": null,
+  "why": "word: numb"
+ },
+ {
+  "id": "op6-worried-01",
+  "kind": "worried",
+  "question": "i'm scared we won't make it back before dark",
+  "skipped": false,
+  "raw": "Take a deep breath, being scared of not making it back before dark is unsettling.",
+  "kept": "Take a deep breath, being scared of not making it back before dark is unsettling."
+ },
+ {
+  "id": "op6-worried-02",
+  "kind": "worried",
+  "question": "i'm really nervous about sleeping outside for the first time",
+  "skipped": false,
+  "raw": "Hey, being nervous about sleeping outside for the first time is unsettling, I'm here with you.",
+  "kept": "Hey, being nervous about sleeping outside for the first time is unsettling, I'm here with you."
+ },
+ {
+  "id": "op6-worried-03",
+  "kind": "worried",
+  "question": "my son is afraid of the dark and won't go in the tent",
+  "skipped": false,
+  "raw": "Hey, being afraid of the dark is scary, I'm here with you.",
+  "kept": "Hey, being afraid of the dark is scary, I'm here with you."
+ },
+ {
+  "id": "op6-worried-04",
+  "kind": "worried",
+  "question": "i'm worried about my mom keeping up on this climb",
+  "skipped": false,
+  "raw": "Take a deep breath, worrying about your mom keeping up on the climb is scary.",
+  "kept": "Take a deep breath, worrying about your mom keeping up on the climb is scary."
+ },
+ {
+  "id": "op6-worried-05",
+  "kind": "worried",
+  "question": "honestly i'm freaking out a little, the fog rolled in fast",
+  "skipped": false,
+  "raw": "Take a deep breath, being caught in fog is scary.",
+  "kept": null,
+  "why": "word: caught"
+ },
+ {
+  "id": "op6-worried-06",
+  "kind": "worried",
+  "question": "i'm anxious about the snakes people keep mentioning",
+  "skipped": false,
+  "raw": "Take a deep breath, being anxious about snakes is unsettling, we'll work through it together.",
+  "kept": "Take a deep breath, being anxious about snakes is unsettling, we'll work through it together."
+ },
+ {
+  "id": "op6-statement-q-01",
+  "kind": "statement-q",
+  "question": "just set up camp by the lake, how do i keep the mosquitoes away",
+  "skipped": false,
+  "raw": "Good question about keeping mosquitoes away when setting up camp by the lake.",
+  "kept": "Good question about keeping mosquitoes away when setting up camp by the lake."
+ },
+ {
+  "id": "op6-statement-q-02",
+  "kind": "statement-q",
+  "question": "heading out at dawn tomorrow, what should i eat for breakfast",
+  "skipped": false,
+  "raw": "Happy to help you figure out what to eat for breakfast tomorrow.",
+  "kept": "Happy to help you figure out what to eat for breakfast tomorrow."
+ },
+ {
+  "id": "op6-statement-q-03",
+  "kind": "statement-q",
+  "question": "we've got a free day at camp, any tips for teaching kids to fish",
+  "skipped": false,
+  "raw": "Sure, let's figure out how to teach kids to fish.",
+  "kept": "Sure, let's figure out how to teach kids to fish."
+ },
+ {
+  "id": "op6-statement-q-04",
+  "kind": "statement-q",
+  "question": "finally got the stove going, how long do i boil the water",
+  "skipped": false,
+  "raw": "Good question about how long to boil water for the stove.",
+  "kept": "Good question about how long to boil water for the stove."
+ },
+ {
+  "id": "op6-statement-q-05",
+  "kind": "statement-q",
+  "question": "bringing my dad on his first hike, how do i pick a trail",
+  "skipped": false,
+  "raw": "Sure, let's figure out what trails are suitable for your dad's first hike.",
+  "kept": null,
+  "why": "word: suitable"
+ },
+ {
+  "id": "op6-howto-01",
+  "kind": "howto",
+  "question": "how do i fold a map so it fits in my pocket",
+  "skipped": false,
+  "raw": "Sure, let's figure out how to fold a map so it fits in your pocket.",
+  "kept": "Sure, let's figure out how to fold a map so it fits in your pocket."
+ },
+ {
+  "id": "op6-howto-02",
+  "kind": "howto",
+  "question": "how do i keep my socks from slipping down",
+  "skipped": false,
+  "raw": "Happy to help you keep socks from slipping down.",
+  "kept": "Happy to help you keep socks from slipping down."
+ },
+ {
+  "id": "op6-howto-03",
+  "kind": "howto",
+  "question": "what's a good knot for tying down a tarp",
+  "skipped": false,
+  "raw": "Sure, let's figure out what a good knot for tying down a tarp is.",
+  "kept": "Sure, let's figure out what a good knot for tying down a tarp is."
+ },
+ {
+  "id": "op6-howto-04",
+  "kind": "howto",
+  "question": "how do i clean a fish i just caught",
+  "skipped": false,
+  "raw": "Sure, let's figure out how to clean a fish.",
+  "kept": null,
+  "why": "judgment: clean"
+ },
+ {
+  "id": "op6-howto-05",
+  "kind": "howto",
+  "question": "where should i put my food at night",
+  "skipped": false,
+  "raw": "Sure, let's figure out where to put your food at night.",
+  "kept": "Sure, let's figure out where to put your food at night."
+ },
+ {
+  "id": "op6-howto-06",
+  "kind": "howto",
+  "question": "why is my compass needle spinning",
+  "skipped": false,
+  "raw": "Sure, let's figure out why your compass needle is spinning.",
+  "kept": "Sure, let's figure out why your compass needle is spinning."
+ },
+ {
+  "id": "op6-yesno-01",
+  "kind": "yesno",
+  "question": "is it ok to burn my trash in the campfire",
+  "skipped": false,
+  "raw": "Thanks for asking about burning trash in the campfire.",
+  "kept": "Thanks for asking about burning trash in the campfire."
+ },
+ {
+  "id": "op6-yesno-02",
+  "kind": "yesno",
+  "question": "can i use my phone flashlight instead of a headlamp",
+  "skipped": false,
+  "raw": "Thanks for asking about using a phone flashlight instead of a headlamp.",
+  "kept": "Thanks for asking about using a phone flashlight instead of a headlamp."
+ },
+ {
+  "id": "op6-yesno-03",
+  "kind": "yesno",
+  "question": "should i wear two pairs of socks",
+  "skipped": false,
+  "raw": "Thanks for asking about wearing two pairs of socks.",
+  "kept": null,
+  "why": "empty, a question or a number"
+ },
+ {
+  "id": "op6-yesno-04",
+  "kind": "yesno",
+  "question": "is it alright to swim right after eating",
+  "skipped": false,
+  "raw": "Glad you asked about swimming after eating.",
+  "kept": "Glad you asked about swimming after eating."
+ },
+ {
+  "id": "op6-yesno-05",
+  "kind": "yesno",
+  "question": "can i feed the squirrels",
+  "skipped": false,
+  "raw": "Thanks for asking about feeding the squirrels.",
+  "kept": "Thanks for asking about feeding the squirrels."
+ },
+ {
+  "id": "op6-convo-01",
+  "kind": "convo",
+  "question": "how do i pack for a three season trip",
+  "skipped": false,
+  "raw": "Happy to help you pack for a three season trip.",
+  "kept": null,
+  "why": "empty, a question or a number"
+ },
+ {
+  "id": "op6-convo-02",
+  "kind": "convo",
+  "question": "how do i pick a sleeping pad",
+  "skipped": false,
+  "raw": "Sure, let's figure out how to pick a sleeping pad.",
+  "kept": "Sure, let's figure out how to pick a sleeping pad."
+ },
+ {
+  "id": "op6-convo-03",
+  "kind": "convo",
+  "question": "what's a good way to store my food",
+  "skipped": false,
+  "raw": "Good question about packing for a three season trip, picking a sleeping pad, and storing food.",
+  "kept": null,
+  "why": "empty, a question or a number"
+ },
+ {
+  "id": "op6-convo-04",
+  "kind": "convo",
+  "question": "how do i set up a rain fly",
+  "skipped": false,
+  "raw": "Happy to help you pick a sleeping pad and store your food, and set up a rain fly.",
+  "kept": "Happy to help you pick a sleeping pad and store your food, and set up a rain fly."
+ },
+ {
+  "id": "op6-convo-05",
+  "kind": "convo",
+  "question": "how do i stay dry in a downpour",
+  "skipped": false,
+  "raw": "Sure, let's figure out how to store food properly and set up a rain fly.",
+  "kept": null,
+  "why": "word: properly"
+ },
+ {
+  "id": "op6-convo-06",
+  "kind": "convo",
+  "question": "what should i cook on the first night",
+  "skipped": false,
+  "raw": "Good question about cooking on the first night.",
+  "kept": "Good question about cooking on the first night."
+ },
+ {
+  "id": "op6-convo-yn-01",
+  "kind": "convo-yesno",
+  "question": "is it ok to camp on the beach",
+  "skipped": false,
+  "raw": "Thanks for asking about camping on the beach.",
+  "kept": "Thanks for asking about camping on the beach."
+ },
+ {
+  "id": "op6-convo-yn-02",
+  "kind": "convo-yesno",
+  "question": "can i have a fire there",
+  "skipped": false,
+  "raw": "Glad you asked about camping on the beach.",
+  "kept": null,
+  "why": "not about the message"
+ },
+ {
+  "id": "op6-convo-yn-03",
+  "kind": "convo-yesno",
+  "question": "should i worry about the tide",
+  "skipped": false,
+  "raw": "Thanks for asking about camping on the beach and having a fire there, and worrying about the tide.",
+  "kept": "Thanks for asking about camping on the beach and having a fire there, and worrying about the tide."
+ },
+ {
+  "id": "op6-convo-yn-04",
+  "kind": "convo-yesno",
+  "question": "is it fine to leave my shoes outside the tent",
+  "skipped": false,
+  "raw": "Glad you asked about fire and tide.",
+  "kept": null,
+  "why": "not about the message"
+ },
+ {
+  "id": "op6-emergency-01",
+  "kind": "emergency",
+  "question": "my friend fell in the river and is not breathing",
+  "skipped": true,
+  "raw": "",
+  "kept": null
+ },
+ {
+  "id": "op6-emergency-02",
+  "kind": "emergency",
+  "question": "there's a wildfire coming over the ridge toward our camp",
+  "skipped": true,
+  "raw": "",
+  "kept": null
+ }
+]

@@ -117,24 +117,43 @@ test('the line is about what the hiker just said (#130, round 4)', () => {
   no('Ouch, poison oak on your arm is no fun.', 'i got a rash on my arm i think');
 });
 
-test('a question\'s opener is told how to begin, and not the same way twice running (#130, round 5)', async () => {
+test('the opener is told how to begin, by what the message is, and never the same way twice running (#130, rounds 5 and 6)', async () => {
   const { openerStart, openerUser } = await import('../src/opener.ts');
-  const how = ['how do i hang a hammock', 'how do i read a topo map', 'what birds are those', 'how do i make coffee at camp', 'any tips for hiking with a toddler', 'how do i dry my boots'];
-  const starts = new Set(how.map((q) => openerStart(q, [])));
-  assert.ok(starts.size >= 2, [...starts].join(' | '));
-  for (const s of starts) assert.ok(['Happy to help', "Sure, let's", 'Good question'].includes(s!), String(s));
-  // A yes/no question never gets an offer to help.
-  for (const q of ['is it ok to pop this blister', 'can i eat these berries', 'should we keep going']) assert.ok(['Glad you asked', 'Good question'].includes(openerStart(q, [])!), q);
-  // A problem or a worry: the model picks its own words.
-  assert.equal(openerStart('my toes are numb', []), null);
-  assert.equal(openerStart("i've had diarrhea all morning on the trail, what should i do", []), null);
-  // Never the same beginning as the message before.
-  for (const a of how) for (const b of how) if (a !== b) assert.notEqual(openerStart(b, [a]), openerStart(a, []), `${a} / ${b}`);
+  const kinds: [string, string[]][] = [
+    ['how do i dry my boots', ['Happy to help', "Sure, let's", 'Good question']],
+    ['ok got the fire going, how do i keep it burning all night', ['Happy to help', "Sure, let's", 'Good question']],
+    ['hiking in the desert next week, any tips for the heat', ['Happy to help', "Sure, let's", 'Good question']],
+    // A yes/no question never gets an offer to help.
+    ['is it ok to pop this blister', ['Glad you asked', 'Thanks for asking']],
+    ['my ankle is sore, can i keep hiking on it', ['Glad you asked', 'Thanks for asking']],
+    // A problem gets sympathy, a scare gets calm: not the other way round.
+    ["i've had diarrhea all morning on the trail, what should i do", ['Oh no', 'Sorry', 'Ugh']],
+    ["my stove won't light and we're hungry", ['Oh no', 'Sorry', 'Ugh']],
+    ["i'm nervous about crossing the river tomorrow", ['Take a deep breath', 'Hey']],
+    ['my daughter is scared of the thunder', ['Take a deep breath', 'Hey']],
+  ];
+  for (const [q, allowed] of kinds) assert.ok(allowed.includes(openerStart(q, [])!), `${q}: ${openerStart(q, [])}`);
+  // Neither a question, a problem nor a worry: the model picks its own words.
+  assert.equal(openerStart('we finally reached the lake!', []), null);
+  // Through a conversation the beginnings step on: all three in three messages.
+  const convo = ['how do i pack for a trip', 'how do i pick a sleeping pad', 'how do i set up a rain fly', 'what should i cook'];
+  const got = convo.map((q, i) => openerStart(q, convo.slice(0, i)));
+  for (let i = 1; i < got.length; i++) assert.notEqual(got[i], got[i - 1], got.join(' | '));
+  assert.equal(new Set(got.slice(0, 3)).size, 3, got.join(' | '));
   assert.match(openerUser('how do i dry my boots', []), /^"how do i dry my boots" \(start with "[^"]+"\) ->$/);
-  assert.equal(openerUser('my toes are numb', []), '"my toes are numb" ->');
-  // The new beginnings pass the check; "sure" after a yes/no question does not.
+  assert.equal(openerUser('we finally reached the lake!', []), '"we finally reached the lake!" ->');
+  // Earlier messages are shown only when this one points back at them.
+  assert.ok(!openerUser('how do i set up a rain fly', ['how do i pick a sleeping pad']).includes('sleeping pad'));
+  assert.ok(!openerUser('is it fine to leave my shoes outside the tent', ['should i worry about the tide']).includes('tide'));
+  assert.ok(openerUser('it still hurts, how do i wrap it', ['i rolled my ankle on a root']).includes('Earlier the hiker said: "i rolled my ankle on a root"'));
+  // The beginnings pass the check; "sure" after a yes/no question does not.
   assert.equal(checkOpener("Sure, let's figure out how to read a topo map.", ['how do i read a topo map']), "Sure, let's figure out how to read a topo map.");
   assert.equal(checkOpener('Good question about drying boots overnight.', ['how do i dry my boots overnight']), 'Good question about drying boots overnight.');
-  assert.equal(checkOpener('Good question about eating snow.', ["is it safe to eat snow when i'm thirsty"]), 'Good question about eating snow.');
+  assert.equal(checkOpener('Thanks for asking about eating snow.', ["is it safe to eat snow when i'm thirsty"]), 'Thanks for asking about eating snow.');
   assert.equal(checkOpener("Sure, let's figure out how to swim across this river.", ['can i swim across this river, it looks calm']), null);
+  assert.equal(checkOpener("Hey, being scared of thunder is frightening, I'm here with you.", ['my daughter is scared of the thunder']), "Hey, being scared of thunder is frightening, I'm here with you.");
+  // Calming words are for a scare.
+  assert.equal(checkOpener('Take a deep breath, diarrhea on the trail can be uncomfortable.', ["i've had diarrhea all morning on the trail, what should i do"]), null);
+  // The hiker's word in another form.
+  assert.equal(checkOpener('Oh no, sorry about the phone dying.', ['my phone died and it had our map on it']), 'Oh no, sorry about the phone dying.');
 });

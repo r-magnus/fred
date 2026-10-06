@@ -47,6 +47,9 @@ for (const [i, q] of questions.entries()) {
   if (res.kind === 'answer' && (process.env.GENERATE !== '0' || res.card !== undefined)) {
     for await (const tok of res.stream) answer += tok;
   }
+  // #130: the opening line is recorded apart, so the answer compares word for word.
+  const opener = res.kind === 'answer' ? res.opener?.text ?? undefined : undefined;
+  if (opener != null && answer.startsWith(`${opener}\n`)) answer = answer.slice(opener.length + 1);
   const latencyMs = Date.now() - t0;
   const d = res.diagnostics;
 
@@ -55,6 +58,7 @@ for (const [i, q] of questions.entries()) {
     question: q.question,
     outcome: res.kind,
     answer: answer.trim(),
+    ...(opener == null ? {} : { opener }),
     topScore: d.topScore,
     topDomain: d.candidates[0]?.chunk.domain ?? null,
     citations: res.kind === 'answer'

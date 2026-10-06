@@ -112,5 +112,7 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.PROMPT_MEMORY === '0' ? { previousInPrompt: false } : {}),
     // INTENT=1 decides what the hiker wants as well as the topic (intent.ts).
     ...(env.INTENT === '1' ? { intent: true } : {}),
+    // OPENER=1: a friendly opening line before model-written answers (#130).
+    ...(env.OPENER === '1' ? { opener: true } : {}),
   };
 }

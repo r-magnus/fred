@@ -1,0 +1,349 @@
+[
+ {
+  "id": "op4-howto-01",
+  "kind": "howto",
+  "question": "how do i start a fire when the wood is damp",
+  "skipped": false,
+  "raw": "Happy to help you start a fire with damp wood.",
+  "kept": "Happy to help you start a fire with damp wood."
+ },
+ {
+  "id": "op4-howto-02",
+  "kind": "howto",
+  "question": "what's the best way to tie a tarp over my hammock",
+  "skipped": false,
+  "raw": "Happy to help you tie a tarp over your hammock.",
+  "kept": "Happy to help you tie a tarp over your hammock."
+ },
+ {
+  "id": "op4-howto-03",
+  "kind": "howto",
+  "question": "how do i find water in the desert",
+  "skipped": false,
+  "raw": "Happy to help you find water in the desert.",
+  "kept": "Happy to help you find water in the desert."
+ },
+ {
+  "id": "op4-howto-04",
+  "kind": "howto",
+  "question": "how can i tell which way is north from the stars",
+  "skipped": false,
+  "raw": "Happy to help you figure out which way is north from the stars.",
+  "kept": null,
+  "why": "an offer reads as yes"
+ },
+ {
+  "id": "op4-howto-05",
+  "kind": "howto",
+  "question": "how do you sharpen a knife on a rock",
+  "skipped": false,
+  "raw": "Happy to help you sharpen a knife on a rock.",
+  "kept": "Happy to help you sharpen a knife on a rock."
+ },
+ {
+  "id": "op4-howto-06",
+  "kind": "howto",
+  "question": "what should go in a small first aid kit",
+  "skipped": false,
+  "raw": "Happy to help you work out what should go in a small first aid kit.",
+  "kept": "Happy to help you work out what should go in a small first aid kit."
+ },
+ {
+  "id": "op4-howto-07",
+  "kind": "howto",
+  "question": "how do i dry my boots overnight",
+  "skipped": false,
+  "raw": "Happy to help you dry your boots overnight.",
+  "kept": "Happy to help you dry your boots overnight."
+ },
+ {
+  "id": "op4-howto-08",
+  "kind": "howto",
+  "question": "how do i build a shelter out of branches",
+  "skipped": false,
+  "raw": "Happy to help you build a shelter out of branches.",
+  "kept": "Happy to help you build a shelter out of branches."
+ },
+ {
+  "id": "op4-howto-09",
+  "kind": "howto",
+  "question": "any tips for hiking with a toddler",
+  "skipped": false,
+  "raw": "Happy to help with hiking with a toddler.",
+  "kept": "Happy to help with hiking with a toddler."
+ },
+ {
+  "id": "op4-howto-10",
+  "kind": "howto",
+  "question": "what do i do with my trash on a three day trip",
+  "skipped": false,
+  "raw": "Happy to help you work out what to do with your trash on a three day trip.",
+  "kept": null,
+  "why": "empty, a question or a number"
+ },
+ {
+  "id": "op4-curious-01",
+  "kind": "curious",
+  "question": "what kind of tree has peeling red bark",
+  "skipped": false,
+  "raw": "Happy to help you figure out what kind of tree has peeling red bark.",
+  "kept": "Happy to help you figure out what kind of tree has peeling red bark."
+ },
+ {
+  "id": "op4-curious-02",
+  "kind": "curious",
+  "question": "what animal leaves tracks with five toes and claws",
+  "skipped": false,
+  "raw": "Happy to help you figure out what animal leaves tracks with five toes and claws.",
+  "kept": null,
+  "why": "empty, a question or a number"
+ },
+ {
+  "id": "op4-curious-03",
+  "kind": "curious",
+  "question": "why do my ears pop going up the mountain",
+  "skipped": false,
+  "raw": "Oh no, popping ears on the mountain are a common experience.",
+  "kept": null,
+  "why": "judgment: common"
+ },
+ {
+  "id": "op4-curious-04",
+  "kind": "curious",
+  "question": "what's that buzzing sound coming from the bushes at dusk",
+  "skipped": false,
+  "raw": "Happy to help you figure out what that buzzing sound is coming from the bushes at dusk.",
+  "kept": "Happy to help you figure out what that buzzing sound is coming from the bushes at dusk."
+ },
+ {
+  "id": "op4-plan-01",
+  "kind": "plan",
+  "question": "we're doing our first overnight this weekend, what do we need to know",
+  "skipped": false,
+  "raw": "Happy to help you work out what you need to know for your first overnight.",
+  "kept": null,
+  "why": "advice: you need"
+ },
+ {
+  "id": "op4-plan-02",
+  "kind": "plan",
+  "question": "planning to hike at high elevation next month, how do i get ready",
+  "skipped": false,
+  "raw": "Happy to help you get ready for your high elevation hike.",
+  "kept": "Happy to help you get ready for your high elevation hike."
+ },
+ {
+  "id": "op4-plan-03",
+  "kind": "plan",
+  "question": "i want to try winter camping, where do i start",
+  "skipped": false,
+  "raw": "Happy to help you get started with winter camping.",
+  "kept": "Happy to help you get started with winter camping."
+ },
+ {
+  "id": "op4-problem-01",
+  "kind": "problem",
+  "question": "my sleeping bag got soaked in the rain",
+  "skipped": false,
+  "raw": "Oh no, soaked sleeping bag in the rain is no fun.",
+  "kept": "Oh no, soaked sleeping bag in the rain is no fun."
+ },
+ {
+  "id": "op4-problem-02",
+  "kind": "problem",
+  "question": "my knees ache every time i go downhill",
+  "skipped": false,
+  "raw": "Oh no, aching knees going downhill are no fun.",
+  "kept": null,
+  "why": "word: going"
+ },
+ {
+  "id": "op4-problem-03",
+  "kind": "problem",
+  "question": "i keep getting bitten by mosquitoes no matter what i do",
+  "skipped": false,
+  "raw": "Oh no, being bitten by mosquitoes is annoying.",
+  "kept": "Oh no, being bitten by mosquitoes is annoying."
+ },
+ {
+  "id": "op4-problem-04",
+  "kind": "problem",
+  "question": "my stove won't light and we're hungry",
+  "skipped": false,
+  "raw": "Oh no, sorry about the stove not lighting and us being hungry.",
+  "kept": "Oh no, sorry about the stove not lighting and us being hungry."
+ },
+ {
+  "id": "op4-problem-05",
+  "kind": "problem",
+  "question": "got a splinter under my fingernail from the firewood",
+  "skipped": false,
+  "raw": "Oh no, a splinter under the fingernail is annoying.",
+  "kept": "Oh no, a splinter under the fingernail is annoying."
+ },
+ {
+  "id": "op4-problem-06",
+  "kind": "problem",
+  "question": "my lips are cracked and bleeding from the wind",
+  "skipped": false,
+  "raw": "Oh no, cracked lips from the wind are no fun.",
+  "kept": "Oh no, cracked lips from the wind are no fun."
+ },
+ {
+  "id": "op4-problem-07",
+  "kind": "problem",
+  "question": "the zipper on my tent broke and it's buggy out",
+  "skipped": false,
+  "raw": "Oh no, a broken zipper on your tent is frustrating.",
+  "kept": "Oh no, a broken zipper on your tent is frustrating."
+ },
+ {
+  "id": "op4-problem-08",
+  "kind": "problem",
+  "question": "i have a pounding headache after hiking in the sun all day",
+  "skipped": false,
+  "raw": "Oh no, pounding head in the sun is no fun.",
+  "kept": "Oh no, pounding head in the sun is no fun."
+ },
+ {
+  "id": "op4-worried-01",
+  "kind": "worried",
+  "question": "we're behind schedule and it's getting dark soon",
+  "skipped": false,
+  "raw": "Take a deep breath, being behind schedule and it getting dark is scary, we'll work through it together.",
+  "kept": "Take a deep breath, being behind schedule and it getting dark is scary, we'll work through it together."
+ },
+ {
+  "id": "op4-worried-02",
+  "kind": "worried",
+  "question": "i keep hearing something walking around outside my tent",
+  "skipped": false,
+  "raw": "Oh no, hearing something walking around outside your tent is no fun.",
+  "kept": "Oh no, hearing something walking around outside your tent is no fun."
+ },
+ {
+  "id": "op4-worried-03",
+  "kind": "worried",
+  "question": "my daughter is scared of the thunder",
+  "skipped": false,
+  "raw": "Oh no, scared thunder is scary.",
+  "kept": "Oh no, scared thunder is scary."
+ },
+ {
+  "id": "op4-worried-04",
+  "kind": "worried",
+  "question": "i'm nervous about crossing the river tomorrow",
+  "skipped": false,
+  "raw": "Take a deep breath, being nervous about crossing the river is scary, we'll work through it together.",
+  "kept": "Take a deep breath, being nervous about crossing the river is scary, we'll work through it together."
+ },
+ {
+  "id": "op4-worried-05",
+  "kind": "worried",
+  "question": "i dropped my map in the creek and i feel so stupid",
+  "skipped": false,
+  "raw": "Oh no, feeling stupid after dropping your map in the creek.",
+  "kept": "Oh no, feeling stupid after dropping your map in the creek."
+ },
+ {
+  "id": "op4-yesno-01",
+  "kind": "yesno",
+  "question": "is it safe to eat snow when i'm thirsty",
+  "skipped": false,
+  "raw": "Glad you asked about eating snow.",
+  "kept": "Glad you asked about eating snow."
+ },
+ {
+  "id": "op4-yesno-02",
+  "kind": "yesno",
+  "question": "can i sleep in my car at the trailhead",
+  "skipped": false,
+  "raw": "Glad you asked about sleeping in your car at the trailhead.",
+  "kept": "Glad you asked about sleeping in your car at the trailhead."
+ },
+ {
+  "id": "op4-yesno-03",
+  "kind": "yesno",
+  "question": "is it ok to pop this blister",
+  "skipped": false,
+  "raw": "Glad you asked about popping a blister.",
+  "kept": "Glad you asked about popping a blister."
+ },
+ {
+  "id": "op4-yesno-04",
+  "kind": "yesno",
+  "question": "should we keep going if it starts to hail",
+  "skipped": false,
+  "raw": "Glad you asked about camping near a stream.",
+  "kept": null,
+  "why": "word: near"
+ },
+ {
+  "id": "op4-yesno-05",
+  "kind": "yesno",
+  "question": "are the red berries by the lake edible",
+  "skipped": false,
+  "raw": "Happy to help you figure out if those red berries by the lake are edible.",
+  "kept": null,
+  "why": "word: if"
+ },
+ {
+  "id": "op4-yesno-06",
+  "kind": "yesno",
+  "question": "is it bad that my fingers are tingling",
+  "skipped": false,
+  "raw": "Glad you asked about tingling fingers.",
+  "kept": "Glad you asked about tingling fingers."
+ },
+ {
+  "id": "op4-followup-01",
+  "kind": "followup",
+  "question": "ok got the fire going, how do i keep it burning all night",
+  "skipped": false,
+  "raw": "Happy to help you keep a damp wood fire going all night.",
+  "kept": "Happy to help you keep a damp wood fire going all night."
+ },
+ {
+  "id": "op4-followup-02",
+  "kind": "followup",
+  "question": "it still hurts when i put weight on it, how do i wrap it",
+  "skipped": false,
+  "raw": "Oh no, swollen ankle from rolling on a root.",
+  "kept": null,
+  "why": "not about the message"
+ },
+ {
+  "id": "op4-followup-03",
+  "kind": "followup",
+  "question": "what about for the kids, how much water do they need",
+  "skipped": false,
+  "raw": "Happy to help you figure out how much water to bring for a hot day and for the kids.",
+  "kept": null,
+  "why": "length"
+ },
+ {
+  "id": "op4-followup-04",
+  "kind": "followup",
+  "question": "we found the trail again, how do we avoid that next time",
+  "skipped": false,
+  "raw": "We found the trail again, how do we avoid that next time.",
+  "kept": null,
+  "why": "advice: avoid"
+ },
+ {
+  "id": "op4-emergency-01",
+  "kind": "emergency",
+  "question": "my friend got bitten by a snake and his leg is swelling fast",
+  "skipped": true,
+  "raw": "",
+  "kept": null
+ },
+ {
+  "id": "op4-emergency-02",
+  "kind": "emergency",
+  "question": "he's not breathing, what do i do",
+  "skipped": true,
+  "raw": "",
+  "kept": null
+ }
+]

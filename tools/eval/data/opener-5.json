@@ -1,0 +1,284 @@
+{
+ "name": "opener-5",
+ "sealed": "2026-10-05, written before the varied wording and its check rules ran on anything",
+ "note": "Fifth sealed set for the opening line (#130), variety. Ryan: how-to openers should not all start 'Happy to help you...'. Same grading as opener-4 (about this message; no advice, fact, promise or yes), plus how the kept lines are spread across wordings.",
+ "questions": [
+  {
+   "id": "op5-howto-01",
+   "kind": "howto",
+   "question": "how do i waterproof my matches",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-02",
+   "kind": "howto",
+   "question": "how do i pitch a tent on rocky ground",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-03",
+   "kind": "howto",
+   "question": "how do i keep my water from freezing overnight",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-04",
+   "kind": "howto",
+   "question": "what's the best way to carry a heavy pack",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-05",
+   "kind": "howto",
+   "question": "how do i signal for help with a mirror",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-06",
+   "kind": "howto",
+   "question": "how do i wash dishes at camp",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-07",
+   "kind": "howto",
+   "question": "how do you make a splint from sticks",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-08",
+   "kind": "howto",
+   "question": "how can i stay warm in a cheap sleeping bag",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-09",
+   "kind": "howto",
+   "question": "any tips for hiking with my dog",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-10",
+   "kind": "howto",
+   "question": "how do i treat my clothes for ticks",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-11",
+   "kind": "howto",
+   "question": "what should i do if i meet a bear on the trail",
+   "state": "CA"
+  },
+  {
+   "id": "op5-howto-12",
+   "kind": "howto",
+   "question": "how do i pick a safe spot to camp",
+   "state": "CA"
+  },
+  {
+   "id": "op5-curious-01",
+   "kind": "curious",
+   "question": "what bird makes that whooping call at night",
+   "state": "CA"
+  },
+  {
+   "id": "op5-curious-02",
+   "kind": "curious",
+   "question": "what's the plant with shiny leaves in groups of three",
+   "state": "CA"
+  },
+  {
+   "id": "op5-curious-03",
+   "kind": "curious",
+   "question": "why does the moss only grow on one side of these trees",
+   "state": "CA"
+  },
+  {
+   "id": "op5-curious-04",
+   "kind": "curious",
+   "question": "what kind of snake has a black and yellow striped body",
+   "state": "CA"
+  },
+  {
+   "id": "op5-plan-01",
+   "kind": "plan",
+   "question": "we're taking the kids backpacking for the first time, what should we bring",
+   "state": "CA"
+  },
+  {
+   "id": "op5-plan-02",
+   "kind": "plan",
+   "question": "i'm hiking a canyon in july, how do i prepare for the heat",
+   "state": "CA"
+  },
+  {
+   "id": "op5-plan-03",
+   "kind": "plan",
+   "question": "thinking about a solo trip in the snow, what do i need to learn",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-01",
+   "kind": "problem",
+   "question": "my hands are freezing and i can't work the zipper",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-02",
+   "kind": "problem",
+   "question": "i've got sand in my eye and it won't come out",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-03",
+   "kind": "problem",
+   "question": "my shoulder strap snapped a mile from camp",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-04",
+   "kind": "problem",
+   "question": "my phone died and it had our map on it",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-05",
+   "kind": "problem",
+   "question": "i have a blister between my toes that keeps rubbing",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-06",
+   "kind": "problem",
+   "question": "my son threw up after lunch, what should we do",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-07",
+   "kind": "problem",
+   "question": "the trail markers disappeared, what do we do now",
+   "state": "CA"
+  },
+  {
+   "id": "op5-problem-08",
+   "kind": "problem",
+   "question": "i ran out of fuel for the stove, how do i cook dinner",
+   "state": "CA"
+  },
+  {
+   "id": "op5-worried-01",
+   "kind": "worried",
+   "question": "i'm scared of heights and there's a ledge coming up",
+   "state": "CA"
+  },
+  {
+   "id": "op5-worried-02",
+   "kind": "worried",
+   "question": "my husband is way ahead and i can't see him anymore",
+   "state": "CA"
+  },
+  {
+   "id": "op5-worried-03",
+   "kind": "worried",
+   "question": "the wind is really picking up and our tent is shaking",
+   "state": "CA"
+  },
+  {
+   "id": "op5-worried-04",
+   "kind": "worried",
+   "question": "i feel bad, i snapped at my friend for walking too slow",
+   "state": "CA"
+  },
+  {
+   "id": "op5-worried-05",
+   "kind": "worried",
+   "question": "it's my first night alone out here and every sound makes me jump",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-01",
+   "kind": "yesno",
+   "question": "is it ok to wash in the river with soap",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-02",
+   "kind": "yesno",
+   "question": "can i drink rainwater off my tarp",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-03",
+   "kind": "yesno",
+   "question": "should i take my boots off to cross the creek",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-04",
+   "kind": "yesno",
+   "question": "is it safe to camp under this big dead tree",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-05",
+   "kind": "yesno",
+   "question": "can my dog drink from the puddles",
+   "state": "CA"
+  },
+  {
+   "id": "op5-yesno-06",
+   "kind": "yesno",
+   "question": "are these orange mushrooms on the log safe to touch",
+   "state": "CA"
+  },
+  {
+   "id": "op5-followup-01",
+   "kind": "followup",
+   "question": "how do i keep the kids warm at night",
+   "history": [
+    "we're taking the kids backpacking for the first time, what should we bring"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op5-followup-02",
+   "kind": "followup",
+   "question": "what do i do if the blister pops",
+   "history": [
+    "i have a blister between my toes that keeps rubbing",
+    "how do i pad it"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op5-followup-03",
+   "kind": "followup",
+   "question": "how do i find my way back without it",
+   "history": [
+    "my phone died and it had our map on it"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op5-followup-04",
+   "kind": "followup",
+   "question": "what about cooking in the rain, how do i do that",
+   "history": [
+    "how do i wash dishes at camp"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op5-emergency-01",
+   "kind": "emergency",
+   "question": "she got stung and her throat is closing up",
+   "state": "CA"
+  },
+  {
+   "id": "op5-emergency-02",
+   "kind": "emergency",
+   "question": "my dad has crushing chest pain and his arm is numb",
+   "state": "CA"
+  }
+ ]
+}

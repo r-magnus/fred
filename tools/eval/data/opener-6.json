@@ -1,0 +1,334 @@
+{
+ "name": "opener-6",
+ "sealed": "2026-10-06, written before the starts for problems and worries, the turn-by-turn rotation or the new word forms ran on anything",
+ "note": "Sixth sealed set for the opening line (#130): problems against worries, and an even spread of beginnings. Same grading as opener-5, plus: a problem must not get calming words meant for a scare ('Take a deep breath, diarrhea on the trail can be uncomfortable'), and in the two conversations no two messages running may begin the same way.",
+ "questions": [
+  {
+   "id": "op6-problem-01",
+   "kind": "problem",
+   "question": "my water bottle leaked all over my spare clothes",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-02",
+   "kind": "problem",
+   "question": "i twisted my wrist catching myself on a fall",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-03",
+   "kind": "problem",
+   "question": "my tent pole snapped in the wind",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-04",
+   "kind": "problem",
+   "question": "i've been throwing up since breakfast",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-05",
+   "kind": "problem",
+   "question": "my heel is rubbed raw from these new boots",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-06",
+   "kind": "problem",
+   "question": "we forgot the tent stakes at home",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-07",
+   "kind": "problem",
+   "question": "my glasses broke and i can barely see the trail",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-08",
+   "kind": "problem",
+   "question": "i got sap all over my hands and it won't come off",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-01",
+   "kind": "problem-q",
+   "question": "my hands are covered in blisters from the paddle, what should i do",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-02",
+   "kind": "problem-q",
+   "question": "i burned my tongue on the soup, how do i make it stop hurting",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-03",
+   "kind": "problem-q",
+   "question": "my boots are soaked through, how do i dry them by morning",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-04",
+   "kind": "problem-q",
+   "question": "i lost a contact lens in the dirt, what do i do",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-05",
+   "kind": "problem-q",
+   "question": "my lighter ran out, how do i start the stove",
+   "state": "CA"
+  },
+  {
+   "id": "op6-problem-q-06",
+   "kind": "problem-q",
+   "question": "i've got a cramp in my side that won't quit, what helps",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-01",
+   "kind": "worried",
+   "question": "i'm scared we won't make it back before dark",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-02",
+   "kind": "worried",
+   "question": "i'm really nervous about sleeping outside for the first time",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-03",
+   "kind": "worried",
+   "question": "my son is afraid of the dark and won't go in the tent",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-04",
+   "kind": "worried",
+   "question": "i'm worried about my mom keeping up on this climb",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-05",
+   "kind": "worried",
+   "question": "honestly i'm freaking out a little, the fog rolled in fast",
+   "state": "CA"
+  },
+  {
+   "id": "op6-worried-06",
+   "kind": "worried",
+   "question": "i'm anxious about the snakes people keep mentioning",
+   "state": "CA"
+  },
+  {
+   "id": "op6-statement-q-01",
+   "kind": "statement-q",
+   "question": "just set up camp by the lake, how do i keep the mosquitoes away",
+   "state": "CA"
+  },
+  {
+   "id": "op6-statement-q-02",
+   "kind": "statement-q",
+   "question": "heading out at dawn tomorrow, what should i eat for breakfast",
+   "state": "CA"
+  },
+  {
+   "id": "op6-statement-q-03",
+   "kind": "statement-q",
+   "question": "we've got a free day at camp, any tips for teaching kids to fish",
+   "state": "CA"
+  },
+  {
+   "id": "op6-statement-q-04",
+   "kind": "statement-q",
+   "question": "finally got the stove going, how long do i boil the water",
+   "state": "CA"
+  },
+  {
+   "id": "op6-statement-q-05",
+   "kind": "statement-q",
+   "question": "bringing my dad on his first hike, how do i pick a trail",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-01",
+   "kind": "howto",
+   "question": "how do i fold a map so it fits in my pocket",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-02",
+   "kind": "howto",
+   "question": "how do i keep my socks from slipping down",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-03",
+   "kind": "howto",
+   "question": "what's a good knot for tying down a tarp",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-04",
+   "kind": "howto",
+   "question": "how do i clean a fish i just caught",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-05",
+   "kind": "howto",
+   "question": "where should i put my food at night",
+   "state": "CA"
+  },
+  {
+   "id": "op6-howto-06",
+   "kind": "howto",
+   "question": "why is my compass needle spinning",
+   "state": "CA"
+  },
+  {
+   "id": "op6-yesno-01",
+   "kind": "yesno",
+   "question": "is it ok to burn my trash in the campfire",
+   "state": "CA"
+  },
+  {
+   "id": "op6-yesno-02",
+   "kind": "yesno",
+   "question": "can i use my phone flashlight instead of a headlamp",
+   "state": "CA"
+  },
+  {
+   "id": "op6-yesno-03",
+   "kind": "yesno",
+   "question": "should i wear two pairs of socks",
+   "state": "CA"
+  },
+  {
+   "id": "op6-yesno-04",
+   "kind": "yesno",
+   "question": "is it alright to swim right after eating",
+   "state": "CA"
+  },
+  {
+   "id": "op6-yesno-05",
+   "kind": "yesno",
+   "question": "can i feed the squirrels",
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-01",
+   "kind": "convo",
+   "question": "how do i pack for a three season trip",
+   "history": [],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-02",
+   "kind": "convo",
+   "question": "how do i pick a sleeping pad",
+   "history": [
+    "how do i pack for a three season trip"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-03",
+   "kind": "convo",
+   "question": "what's a good way to store my food",
+   "history": [
+    "how do i pack for a three season trip",
+    "how do i pick a sleeping pad"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-04",
+   "kind": "convo",
+   "question": "how do i set up a rain fly",
+   "history": [
+    "how do i pack for a three season trip",
+    "how do i pick a sleeping pad",
+    "what's a good way to store my food"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-05",
+   "kind": "convo",
+   "question": "how do i stay dry in a downpour",
+   "history": [
+    "how do i pack for a three season trip",
+    "how do i pick a sleeping pad",
+    "what's a good way to store my food",
+    "how do i set up a rain fly"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-06",
+   "kind": "convo",
+   "question": "what should i cook on the first night",
+   "history": [
+    "how do i pack for a three season trip",
+    "how do i pick a sleeping pad",
+    "what's a good way to store my food",
+    "how do i set up a rain fly",
+    "how do i stay dry in a downpour"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-yn-01",
+   "kind": "convo-yesno",
+   "question": "is it ok to camp on the beach",
+   "history": [],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-yn-02",
+   "kind": "convo-yesno",
+   "question": "can i have a fire there",
+   "history": [
+    "is it ok to camp on the beach"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-yn-03",
+   "kind": "convo-yesno",
+   "question": "should i worry about the tide",
+   "history": [
+    "is it ok to camp on the beach",
+    "can i have a fire there"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-convo-yn-04",
+   "kind": "convo-yesno",
+   "question": "is it fine to leave my shoes outside the tent",
+   "history": [
+    "is it ok to camp on the beach",
+    "can i have a fire there",
+    "should i worry about the tide"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op6-emergency-01",
+   "kind": "emergency",
+   "question": "my friend fell in the river and is not breathing",
+   "state": "CA"
+  },
+  {
+   "id": "op6-emergency-02",
+   "kind": "emergency",
+   "question": "there's a wildfire coming over the ridge toward our camp",
+   "state": "CA"
+  }
+ ]
+}

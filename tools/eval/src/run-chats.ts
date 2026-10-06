@@ -82,6 +82,9 @@ for (const set of sets) {
         const decideMs = Date.now() - t0;
         let text = '';
         if (r.kind === 'answer' && (generate || r.card !== undefined)) for await (const tok of r.stream) text += tok;
+        // #130: the opening line is recorded apart, so the answer compares word for word.
+        const opener = r.kind === 'answer' ? r.opener?.text ?? undefined : undefined;
+        if (opener != null && text.startsWith(`${opener}\n`)) text = text.slice(opener.length + 1);
         const refused = r.kind === 'answer' && generate && isRefusal(text);
         const outcome: Outcome =
           r.kind === 'answer' ? (refused ? 'decline' : 'answer')
@@ -100,6 +103,7 @@ for (const set of sets) {
         const rec = {
           set, chatId: c.id, kind: c.kind, wording: w, turn: i, question: q, expect: turn.expect, outcome, fits,
           answer: text.trim(),
+          ...(opener == null ? {} : { opener }),
           ...(r.kind === 'chat' ? { reply: r.reply } : {}),
           ...(r.kind === 'abstain' ? { abstainReason: r.reason } : {}),
           ...(offer === undefined ? {} : { offer }),

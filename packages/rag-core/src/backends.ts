@@ -21,7 +21,7 @@ export interface GenerateOptions {
    * instead of being read from scratch after every answer. Ignoring it is
    * correct, only slower.
    */
-  readonly lane?: 'intent' | 'understand';
+  readonly lane?: 'intent' | 'understand' | 'opener';
 }
 
 export interface InferenceBackend {

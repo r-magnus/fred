@@ -208,6 +208,8 @@ export function setsFor(name: string | undefined): readonly string[] {
 export interface GradedRun {
   readonly questionId: string;
   readonly question: string;
+  /** #130: the opening line shown before the answer, when one was. */
+  readonly opener?: string;
   /** 'chat' only when intent is on (INTENT=1): small talk, no answer. */
   readonly outcome: ExpectedOutcome | 'chat';
   /** Empty when the pipeline declined. */

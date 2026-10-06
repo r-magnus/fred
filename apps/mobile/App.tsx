@@ -63,6 +63,8 @@ interface Turn {
   /** A card's clarifying question (#50): buttons under the answer until one is used. */
   clarify?: ClarifyView;
   clarifyUsed?: boolean;
+  /** The opening line (#130) is shown and the answer has not started: a wait of about 10 s. */
+  waiting?: boolean;
 }
 
 /**
@@ -242,14 +244,17 @@ function Screen() {
       // time like a written answer; model tokens pass through as they come.
       for await (const tok of typeOut(res.stream, { signal: ctrl.signal })) {
         text += tok;
-        update(id, { text });
+        // After the opening line the model reads its sources before the
+        // answer's first word: show that Fred is still working.
+        const opener = res.opener?.text;
+        update(id, { text, waiting: opener != null && text.trim() === opener });
       }
       // The model can decline even when retrieval scored above the gate. Showing
       // that with sources and a medical disclaimer would read as a sourced
       // answer, so it is rendered as the abstention it is.
       update(id, isRefusal(text)
-        ? { kind: 'abstain', done: true }
-        : { done: true, stopped: ctrl.signal.aborted });
+        ? { kind: 'abstain', done: true, waiting: false }
+        : { done: true, stopped: ctrl.signal.aborted, waiting: false });
     } catch (e) {
       // Logged too, so a harness waiting on the log sees the question end and
       // where it failed ("Exception in HostFunction" alone does not say).
@@ -498,7 +503,14 @@ function Screen() {
             {t.kind === 'answer' && (
               <View style={styles.card}>
                 {t.text === '' && !t.done && <ActivityIndicator color="#6ca" />}
-                {t.text !== '' && <Text style={styles.body}>{t.text}</Text>}
+                {/* The opening line ends in a line break; no blank line above the wait note. */}
+                {t.text !== '' && <Text style={styles.body}>{t.waiting === true ? t.text.trimEnd() : t.text}</Text>}
+                {t.waiting === true && !t.done && (
+                  <View style={styles.waiting} accessibilityRole="progressbar" accessibilityLabel="Fred is working on your answer">
+                    <ActivityIndicator color="#6ca" size="small" />
+                    <Text style={styles.waitingText}>Working on your answer…</Text>
+                  </View>
+                )}
 
                 {/* Time-to-first-token is ~7 s on device, so a reader who stops
                     early gets no text at all. Rendering an empty body plus
@@ -690,6 +702,8 @@ const styles = StyleSheet.create({
   send: { backgroundColor: '#2f7d63', borderRadius: 10, paddingHorizontal: 18, paddingVertical: 12 },
   sendOff: { backgroundColor: '#243029' },
   sendStop: { backgroundColor: '#7d3a2f' },
+  waiting: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
+  waitingText: { color: '#9ab', fontSize: 13, fontStyle: 'italic' },
   stoppedNote: { color: '#d9a', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
   sendText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

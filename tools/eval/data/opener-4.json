@@ -1,0 +1,273 @@
+{
+ "name": "opener-4",
+ "sealed": "2026-10-05, written before the relevance prompt and its check rules ran on anything",
+ "note": "Fourth sealed set for the opening line (#130), relevance. Ryan: the line must be about the hiker's own question or situation ('how do i make rope from plants' -> 'these things happen, it's okay' makes no sense). A kept line must fit this message and name what it is about, without advice, a fact, a promise about the outcome, or anything that reads as a yes to a yes/no or is-it-safe question. Emergencies (a danger sign) must get no opener.",
+ "questions": [
+  {
+   "id": "op4-howto-01",
+   "kind": "howto",
+   "question": "how do i start a fire when the wood is damp",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-02",
+   "kind": "howto",
+   "question": "what's the best way to tie a tarp over my hammock",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-03",
+   "kind": "howto",
+   "question": "how do i find water in the desert",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-04",
+   "kind": "howto",
+   "question": "how can i tell which way is north from the stars",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-05",
+   "kind": "howto",
+   "question": "how do you sharpen a knife on a rock",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-06",
+   "kind": "howto",
+   "question": "what should go in a small first aid kit",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-07",
+   "kind": "howto",
+   "question": "how do i dry my boots overnight",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-08",
+   "kind": "howto",
+   "question": "how do i build a shelter out of branches",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-09",
+   "kind": "howto",
+   "question": "any tips for hiking with a toddler",
+   "state": "CA"
+  },
+  {
+   "id": "op4-howto-10",
+   "kind": "howto",
+   "question": "what do i do with my trash on a three day trip",
+   "state": "CA"
+  },
+  {
+   "id": "op4-curious-01",
+   "kind": "curious",
+   "question": "what kind of tree has peeling red bark",
+   "state": "CA"
+  },
+  {
+   "id": "op4-curious-02",
+   "kind": "curious",
+   "question": "what animal leaves tracks with five toes and claws",
+   "state": "CA"
+  },
+  {
+   "id": "op4-curious-03",
+   "kind": "curious",
+   "question": "why do my ears pop going up the mountain",
+   "state": "CA"
+  },
+  {
+   "id": "op4-curious-04",
+   "kind": "curious",
+   "question": "what's that buzzing sound coming from the bushes at dusk",
+   "state": "CA"
+  },
+  {
+   "id": "op4-plan-01",
+   "kind": "plan",
+   "question": "we're doing our first overnight this weekend, what do we need to know",
+   "state": "CA"
+  },
+  {
+   "id": "op4-plan-02",
+   "kind": "plan",
+   "question": "planning to hike at high elevation next month, how do i get ready",
+   "state": "CA"
+  },
+  {
+   "id": "op4-plan-03",
+   "kind": "plan",
+   "question": "i want to try winter camping, where do i start",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-01",
+   "kind": "problem",
+   "question": "my sleeping bag got soaked in the rain",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-02",
+   "kind": "problem",
+   "question": "my knees ache every time i go downhill",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-03",
+   "kind": "problem",
+   "question": "i keep getting bitten by mosquitoes no matter what i do",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-04",
+   "kind": "problem",
+   "question": "my stove won't light and we're hungry",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-05",
+   "kind": "problem",
+   "question": "got a splinter under my fingernail from the firewood",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-06",
+   "kind": "problem",
+   "question": "my lips are cracked and bleeding from the wind",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-07",
+   "kind": "problem",
+   "question": "the zipper on my tent broke and it's buggy out",
+   "state": "CA"
+  },
+  {
+   "id": "op4-problem-08",
+   "kind": "problem",
+   "question": "i have a pounding headache after hiking in the sun all day",
+   "state": "CA"
+  },
+  {
+   "id": "op4-worried-01",
+   "kind": "worried",
+   "question": "we're behind schedule and it's getting dark soon",
+   "state": "CA"
+  },
+  {
+   "id": "op4-worried-02",
+   "kind": "worried",
+   "question": "i keep hearing something walking around outside my tent",
+   "state": "CA"
+  },
+  {
+   "id": "op4-worried-03",
+   "kind": "worried",
+   "question": "my daughter is scared of the thunder",
+   "state": "CA"
+  },
+  {
+   "id": "op4-worried-04",
+   "kind": "worried",
+   "question": "i'm nervous about crossing the river tomorrow",
+   "state": "CA"
+  },
+  {
+   "id": "op4-worried-05",
+   "kind": "worried",
+   "question": "i dropped my map in the creek and i feel so stupid",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-01",
+   "kind": "yesno",
+   "question": "is it safe to eat snow when i'm thirsty",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-02",
+   "kind": "yesno",
+   "question": "can i sleep in my car at the trailhead",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-03",
+   "kind": "yesno",
+   "question": "is it ok to pop this blister",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-04",
+   "kind": "yesno",
+   "question": "should we keep going if it starts to hail",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-05",
+   "kind": "yesno",
+   "question": "are the red berries by the lake edible",
+   "state": "CA"
+  },
+  {
+   "id": "op4-yesno-06",
+   "kind": "yesno",
+   "question": "is it bad that my fingers are tingling",
+   "state": "CA"
+  },
+  {
+   "id": "op4-followup-01",
+   "kind": "followup",
+   "question": "ok got the fire going, how do i keep it burning all night",
+   "history": [
+    "how do i start a fire when the wood is damp"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op4-followup-02",
+   "kind": "followup",
+   "question": "it still hurts when i put weight on it, how do i wrap it",
+   "history": [
+    "i rolled my ankle on a root",
+    "it's a little swollen"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op4-followup-03",
+   "kind": "followup",
+   "question": "what about for the kids, how much water do they need",
+   "history": [
+    "how much water should i bring for a hot day"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op4-followup-04",
+   "kind": "followup",
+   "question": "we found the trail again, how do we avoid that next time",
+   "history": [
+    "i think we're off the trail",
+    "we backtracked to the last marker"
+   ],
+   "state": "CA"
+  },
+  {
+   "id": "op4-emergency-01",
+   "kind": "emergency",
+   "question": "my friend got bitten by a snake and his leg is swelling fast",
+   "state": "CA"
+  },
+  {
+   "id": "op4-emergency-02",
+   "kind": "emergency",
+   "question": "he's not breathing, what do i do",
+   "state": "CA"
+  }
+ ]
+}

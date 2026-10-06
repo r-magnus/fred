@@ -13,32 +13,38 @@ import type { InferenceBackend } from './backends.ts';
 
 export const OPENER_SYSTEM = `You are Fred, a kind, calm friend on the trail. The hiker just said something. Write ONE short sentence (under 15 words) that shows you heard them: it must name what THEY are talking about, in their own words. Another part of Fred gives the actual answer right after your sentence.
 Match what they said:
-- They ask how to do something, what something is, or for tips: say you're happy to help with that exact thing.
+- They ask how to do something, what something is, or for tips: offer to help with that exact thing.
 - Something is hurting, broken or going wrong: say you're sorry about that exact thing.
 - They are scared, worried or upset: calm them, naming what worries them.
-- They ask whether something is okay or safe, or whether they can or should do something: say you're glad they asked about it, and never hint at the answer.
+- They ask whether something is okay or safe, or whether they can or should do something: thank them for asking about it, and never hint at the answer.
 Say "oh no" or "sorry" only when something is hurting, broken or going wrong, never for a plain question.
 Rules: do not answer the question. Give no advice, steps, facts, numbers or warnings. Never say whether something is safe, serious, fine or normal. Never promise how things will turn out. Do not ask a question. Don't start with "Hmm".
+When the message is followed by (start with "..."), begin your sentence with exactly those words.
 Examples:
-"how do i make a fishing hook" -> Happy to help you make a fishing hook.
-"what are those tall purple flowers" -> Happy to help you work out what those tall purple flowers are.
-"any tips for cooking on a campfire" -> Cooking on a campfire, happy to help with that.
+"how do i make a fishing hook" (start with "Happy to help") -> Happy to help you make a fishing hook.
+"how do i make a fishing hook" (start with "Sure, let's") -> Sure, let's work out how to make a fishing hook.
+"how do i make a fishing hook" (start with "Good question") -> Good question about making a fishing hook.
+"what are those tall purple flowers" (start with "Happy to help") -> Happy to help you work out what those tall purple flowers are.
+"what are those tall purple flowers" (start with "Sure, let's") -> Sure, let's figure out what those tall purple flowers are.
+"what are those tall purple flowers" (start with "Good question") -> Good question about those tall purple flowers.
+"any tips for cooking on a campfire" (start with "Sure, let's") -> Sure, let's look at cooking on a campfire.
+"is it ok to camp near a stream" (start with "Glad you asked") -> Glad you asked about camping near a stream.
+"is it ok to camp near a stream" (start with "Good question") -> Good question about camping near a stream.
+"can i burn pine cones in the fire" (start with "Glad you asked") -> Glad you asked about burning pine cones.
+"should we cross the snowfield this late" (start with "Good question") -> Good question about crossing the snowfield.
 "ugh i forgot my rain jacket" -> Oh no, sorry about the rain jacket.
 "my toes are numb and it's freezing out" -> Oh no, numb toes in the cold are no fun.
 "i think i walked through stinging nettles" -> Ouch, stinging nettles are nasty, sorry you're dealing with that.
 "my back is killing me from this pack" -> Ouch, sorry your back is hurting from the pack.
 "the trail is flooded and we can't get through" -> Ugh, a flooded trail is frustrating.
 "i'm lost and kind of panicking" -> Take a deep breath, being lost is scary, we'll work through it together.
-"we finally reached the lake!" -> Well done on reaching the lake!
-"is it ok to camp near a stream" -> Glad you asked about camping near a stream.
-"can i burn pine cones in the fire" -> Glad you asked about burning pine cones.
-"should we cross the snowfield this late" -> Glad you asked about crossing the snowfield.`;
+"we finally reached the lake!" -> Well done on reaching the lake!`;
 
 /** How much of the conversation the opener sees: the hiker's last messages. */
 const EARLIER = 2;
 
 /** Words that tell the hiker to do something, or point them somewhere. */
-const ADVICE = /\b(?:you should|you'?ll want|you need|you must|you can|you could|you might|try|make sure|be sure|remember|don'?t|do not|never|always|avoid|keep|stay|apply|call|seek|drink|eat|use|check|head (?:back|out|down)|turn back|let'?s(?! (?:figure|sort|work|get through|see what we can do|take care of (?:it|this)|take (?:it|this) one step at a time|look at this together))|(?<!let'?s )take(?! a (?:deep )?breath| a moment| care of (?:it|this)| (?:it|this) one step at a time)|best|important|recommend|get help|wash|rest|cover|remove|pull|treat|carry|bring|wait|go (?:back|see|to))\b/i;
+const ADVICE = /\b(?:you should|you'?ll want|you need|you must|you can|you could|you might|try|make sure|be sure|remember|don'?t|do not|never|always|avoid|keep|stay|apply|call|seek|drink|eat|use|check|head (?:back|out|down)|turn back|let'?s(?! (?:figure|sort|work|look at|get through|see what we can do|take care of (?:it|this)|take (?:it|this) one step at a time|look at this together))|(?<!let'?s )take(?! a (?:deep )?breath| a moment| care of (?:it|this)| (?:it|this) one step at a time)|best|important|recommend|get help|wash|rest|cover|remove|pull|treat|carry|bring|wait|go (?:back|see|to))\b/i;
 
 /** Reassurance, judgment of risk, and guesses about what it is. */
 const JUDGES = /\b(?:worr(?:y|ies)|it'?ll be|everyone|everybody|you'?ll be|you'?re (?:going to|gonna) be|fine|safe(?:ly|r)?|unsafe|danger(?:ous)?|deadly|risk(?:y|s)?|serious(?:ly)?|harmless|normal|common|rare|probably|likely|maybe|might|may|could be|nothing to|no big deal|minor|severe|mild|poison(?:ous)?|venom(?:ous)?|toxic|infect\w*|allerg\w*|emergency|urgent|heal\w*|recover\w*|go away|pass soon|not good|no good|trouble|could mean|means|sign(?:s)? of|tasty|delicious|yum\w*|refreshing|clean|pure)\b/i;
@@ -47,7 +53,7 @@ const JUDGES = /\b(?:worr(?:y|ies)|it'?ll be|everyone|everybody|you'?ll be|you'?
 const ASKS_YES_NO = /^\s*(?:is|are|can|could|should|shall|do|does|did|will|would|am|may|might)\b|(?<!\b(?:what|how|where|when|which|who|why)\s)\b(?:is (?:it|this|that)|can (?:i|we|you|he|she|they)|should (?:i|we|he|she|they)|(?:ok(?:ay)?|safe|fine|alright|normal|bad) (?:to|if|for|that))\b/i;
 
 /** Words that could read as permission or "it's fine". */
-const AFFIRMS = /\b(?:ok(?:ay)?|alright|right|good|great|sure|yes|nice|happen\w*|fun|enjoy|love|awesome|exciting|wonderful|amazing|beautiful|lovely|smart)\b/i;
+const AFFIRMS = /\b(?:ok(?:ay)?|alright|right|good|great|sure|yes|nice|happen\w*|fun|enjoy|love|awesome|exciting|wonderful|amazing|beautiful|lovely|smart|well done|congrat\w*)\b/i;
 
 /** A count or amount is a claim, spelled out or not. */
 const NUMBER_WORDS = /\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|hundred|thousand|dozen|half)\b/i;
@@ -68,7 +74,7 @@ const CONDITIONS = /\b(?:sprain\w*|strain\w*|fractur\w*|broken|break|heat ?(?:ex
 const GLUE = new Set(`a an the that this these those it its it's that's there's what's is are was were be been can could would will
 sound sounds sounding like feel feels felt feeling seem seems so such really very quite pretty bit little of to on in at for with
 from and or but your you you're you've we we're our us my i i'm me all after when while out there here up down back
-make makes making for get gets getting have has had just still both one's way handle deal through around off over before about now how being not`.split(/\s+/));
+make makes making for get gets getting have has had just still both one's way handle deal through around off over before about now how being not going goes`.split(/\s+/));
 const FEELING = new Set(`fun tough rough hard uncomfortable annoying painful miserable frustrating stressful scary frightening
 unsettling nerve-wracking tiring exhausting draining long tricky exciting amazing wonderful great awesome beautiful lovely
 fascinating interesting rewarding nice ouch oh ugh yikes wow nasty unpleasant bother bummer sorry glad love enjoy
@@ -77,7 +83,7 @@ congratulations congrats well done no happy big achievement reach reaching`.spli
 const COMFORT = new Set(`hey happen happens happened take deep breath breathe together we'll let's sort figure work
 through asking ask asked thinking smart plan planning ahead okay ok alright right thing step steps one here glad good
 see do care look handle help helping hear question about what they dealing
-prepare ready fix start started learn choose pick`.split(/\s+/));
+prepare ready fix start started learn choose pick sure i'm with`.split(/\s+/));
 /** The comfort words that by themselves make a line warm. */
 const WARM = new Set(['happy', 'hey', 'happen', 'happens', 'happened', 'breath', 'breathe', 'together', 'glad', 'okay', 'ok', 'alright', 'thinking', 'smart']);
 const SETTING = new Set(`day days hike hikes hiking trail trails trip night nights morning afternoon evening time spot moment
@@ -144,7 +150,7 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   const saidWords = said.split(/[^a-z']+/).filter((w) => w !== '');
   // "Happy to help you keep your phone battery going": after an offer to
   // help, the hiker's own verb is their request, not Fred's advice.
-  const offer = /^happy to help\b/i.test(line);
+  const offer = /^(?:happy to help|sure, let's (?:work|figure) out|good question)\b/i.test(line);
   const mine = line.replace(new RegExp(ADVICE.source, 'gi'), (m) => (offer && saidWords.includes(m.toLowerCase().split(' ').pop()!) ? '' : m));
   for (const [name, re] of [['advice', ADVICE], ['judgment', JUDGES], ['about Fred', SELF]] as const) {
     const m = re.exec(name === 'judgment' ? judged : name === 'advice' ? mine : line);
@@ -157,7 +163,7 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   const words2 = line.toLowerCase().split(/[^a-z'-]+/).filter((w) => w !== '');
   const unknown = words2.find((w) => !known(w, saidWords));
   if (unknown !== undefined) return no(`word: ${unknown}`);
-  if (!words2.some((w) => (FEELING.has(w) && w !== 'no') || WARM.has(w))) return no('no warm word');
+  if (!offer && !words2.some((w) => (FEELING.has(w) && w !== 'no') || WARM.has(w))) return no('no warm word');
   // The hiker's message handed back says nothing ("So tired, we still have a long way to go.").
   if (words2.every((w) => saidWords.includes(w))) return no('only an echo');
   // It names what this message is about: "Hey, these things happen, it's
@@ -167,12 +173,13 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   const latest = messages[messages.length - 1] ?? '';
   if (SYMPATHY.test(line) && (ASKS.test(latest) || ASKS_YES_NO.test(latest))) return no('sympathy for a question');
   // "Happy to help you cook those mushrooms" answers "can i cook them".
-  if (offer && ASKS_YES_NO.test(latest)) return no('an offer reads as yes');
+  if (/^(?:happy to help|sure)\b/i.test(line) && ASKS_YES_NO.test(latest)) return no('an offer reads as yes');
   if (SYMPATHY.test(line) && DELIGHT.test(line)) return no('sympathy with delight');
   // "Okay" closes a phrase ("it's okay."), never "okay to swim".
   if (/\b(?:ok(?:ay)?|alright)\b(?!\s*(?:[.!,;:\u2013\u2014-]|$))/i.test(line)) return no('okay to');
   // Asked whether something is all right, the opener must not sound like a yes.
-  const yes = AFFIRMS.exec(line);
+  // "Good question about eating snow" praises the asking, not the eating.
+  const yes = AFFIRMS.exec(line.replace(/^good question\b/i, ''));
   if (ASKS_YES_NO.test(messages[messages.length - 1] ?? '') && yes !== null) return no(`reads as yes: ${yes[0]}`);
   for (const m of line.matchAll(CONDITIONS)) {
     if (!said.includes(m[0].toLowerCase().slice(0, 5))) return no(`condition: ${m[0]}`);
@@ -185,11 +192,41 @@ export function checkOpener(raw: string, messages: readonly string[]): string | 
   return explainOpener(raw, messages).line;
 }
 
-/** The user turn: the hiker's last messages, then this one. */
+/** How a plain question's opener may begin, and a yes/no question's. */
+const STARTS_QUESTION = ['Happy to help', "Sure, let's", 'Good question'];
+const STARTS_YES_NO = ['Glad you asked', 'Good question'];
+function hashOf(message: string): number {
+  let h = 2166136261;
+  for (const c of message.trim().toLowerCase()) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return h >>> 0;
+}
+function startsFor(message: string): readonly string[] | null {
+  return ASKS_YES_NO.test(message) ? STARTS_YES_NO : ASKS.test(message) ? STARTS_QUESTION : null;
+}
+
+/**
+ * The words a question's opener begins with, or null for a message that is
+ * not a plain question (a problem, a worry: the model picks its own). A model
+ * this small writes every how-to opener in the one shape its examples favour
+ * ("Happy to help you..."), so the first words are picked here, from the
+ * message, and never the ones the message before it would have got.
+ */
+export function openerStart(message: string, earlier: readonly string[]): string | null {
+  const starts = startsFor(message);
+  if (starts === null) return null;
+  const mine = hashOf(message) % starts.length;
+  const last = earlier[earlier.length - 1];
+  const before = last === undefined ? null : startsFor(last);
+  const taken = before === null ? null : before[hashOf(last!) % before.length];
+  return starts[mine] === taken ? starts[(mine + 1) % starts.length]! : starts[mine]!;
+}
+
+/** The user turn: the hiker's last messages, this one, and for a question its first words. */
 export function openerUser(message: string, history: readonly string[]): string {
   const earlier = history.filter((h) => h.trim() !== '').slice(-EARLIER);
   const before = earlier.length === 0 ? '' : `Earlier the hiker said: ${earlier.map((h) => `"${h}"`).join(' ')}\n`;
-  return `${before}"${message}" ->`;
+  const start = openerStart(message, earlier);
+  return `${before}"${message}"${start === null ? '' : ` (start with "${start}")`} ->`;
 }
 
 /** The opening line for this message, or null when the model's line fails the check. */

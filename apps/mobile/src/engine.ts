@@ -162,9 +162,9 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // open their card, small talk gets a reply (docs/results-intent-probe.md).
           intent: true,
           // A friendly opening line before a model-written answer (#130).
-          // Field test only, until it meets the speed bar: a `devhooks-opener`
-          // file beside `devhooks` turns it on.
-          ...(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-opener').exists ? { opener: true } : {}),
+          // Field test: a `devhooks-no-opener` file beside `devhooks` turns it
+          // off, to time answers with and without it.
+          opener: !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-opener').exists),
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),

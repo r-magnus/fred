@@ -273,3 +273,50 @@ on the desktop this round: the answer path is unchanged.
 
 Not merged yet: in the app the opener is still behind the `devhooks-opener`
 switch, waiting for Ryan to read a sample.
+
+## Round 5: variety
+
+Ryan (2026-10-05): try a round on variety, so how-to openers do not all start
+"Happy to help you...". Also added to the app: a spinner and "Working on your
+answer…" under the opening line until the answer's first word.
+
+**First try, dropped:** three numbered wordings for every kind of message,
+the number picked by code. The model followed the number and lost the kind:
+problems got "Sure, let's figure out what those throbbing toes are", fewer
+lines were kept (27 of 40 on set 4), and "Well done on popping the blister"
+was kept after "is it ok to pop this blister". Praise after a yes/no question
+is now dropped.
+
+**What is in:** the code picks only how a question's line begins, and the
+model writes the rest. A plain question (it opens with how, what, any...)
+gets "Happy to help", "Sure, let's" or "Good question"; a yes/no question
+gets "Glad you asked" or "Good question", never an offer. The pick comes from
+the message and is never the one the message before it would have got. It
+goes in the user turn ("..." (start with "Sure, let's") ->), so the saved
+prompt on the phone stays one file. Problems and worries get no instruction.
+
+Sealed set 5 (44, `opener-5.json`, written before any of this ran), run once
+(`opener-runs-set5.json`): 2 skipped (danger sign), kept 32 of 42, none with
+advice, a fact, a promise or a yes. How the kept lines begin:
+
+| | Round 4, set 4 | Round 5, set 4 (seen) | Round 5, set 5 (sealed) |
+|---|---:|---:|---:|
+| Kept | 31 of 40 | 35 of 40 | 32 of 42 |
+| Happy to... | 15 | 4 | 8 |
+| Good question... | 0 | 8 | 13 |
+| Sure, let's... | 0 | 8 | 4 |
+| Glad you asked... | 4 | 2 | 2 |
+| Oh no / Ouch / Ugh... | 10 | 10 | 2 |
+| Take a deep breath... | 2 | 3 | 3 |
+
+Weak: "Good question" is the commonest beginning, being offered to both
+kinds of question. On set 5 six of eight problem messages lost their opener,
+mostly to a word form the check does not know ("died" -> "dying", "ran out"
+-> "running", "threw up" -> "throwing"); not tuned, the set being sealed.
+Off-key but kept: "Take a deep breath, snapping at a friend for walking too
+slow is scary.", "Happy to help you pad the blister between your toes." (to
+"what do i do if the blister pops").
+
+**Phone: not measured.** The phone dropped off USB during the install
+(2026-10-05, about 23:50) and did not come back; it still runs the round 4
+build with the wait note.

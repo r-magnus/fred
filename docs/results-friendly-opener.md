@@ -317,6 +317,26 @@ Off-key but kept: "Take a deep breath, snapping at a friend for walking too
 slow is scary.", "Happy to help you pad the blister between your toes." (to
 "what do i do if the blister pops").
 
-**Phone: not measured.** The phone dropped off USB during the install
-(2026-10-05, about 23:50) and did not come back; it still runs the round 4
-build with the wait note.
+### Round 5 on the phone
+
+2026-10-06 (the phone had dropped off USB during the first install), one
+session per message, cooled to thermal status 0, opener on; "off" is the
+2026-10-05 retest.
+
+| Message | Opener | Opener at | Answer at | Off |
+|---|---|---:|---:|---:|
+| "how do i make rope from plant fibers" | "Good question about making rope from plant fibers." | 2.1 s | 13.4 s | 11.9 s |
+| "i've had diarrhea all morning on the trail, what should i do" | "Take a deep breath, diarrhea on the trail can be uncomfortable." | 2.1 s | 9.8 s | 8.1 s |
+| "hiking in the desert next week, any tips for the heat" | "Sure, let's figure out how to handle the heat while hiking in the desert." | 2.2 s | 13.8 s | 12.3 s |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | "Happy to help you figure out how to dress for a cold hike." | 2.4 s | 11.9 s | 10.2 s |
+| "how do i start a fire when the wood is damp" | "Sure, let's figure out how to start a fire with damp wood." | 2.3 s | 13.9 s | |
+| "how do i keep my feet dry on a long hike" | "Sure, let's figure out how to keep feet dry on a long hike." | 2.5 s | 11.9 s | |
+| "is it ok to drink from this pond if i boil it" (card, no opener) | | | 1.0 s | 2.5 s |
+
+An opener on all six model-written answers ("what should go in a small first
+aid kit" was declined, so none). Timing as in round 4: first words at
+2.1-2.5 s, the answer 1.5-1.7 s later than without. Four of the five question
+openers began "Sure, let's": the pick is by message, and this handful fell
+that way. The diarrhea line was "Oh no, diarrhea on the trail is not fun." in
+round 4; "Take a deep breath" suits it less. The first session after the
+install read the new prompt once (opener at 8.5 s); later ones did not.

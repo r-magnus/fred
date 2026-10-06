@@ -41,10 +41,10 @@ const EARLIER = 2;
 const ADVICE = /\b(?:you should|you'?ll want|you need|you must|you can|you could|you might|try|make sure|be sure|remember|don'?t|do not|never|always|avoid|keep|stay|apply|call|seek|drink|eat|use|check|head (?:back|out|down)|turn back|let'?s(?! (?:figure|sort|work|get through|see what we can do|take care of (?:it|this)|take (?:it|this) one step at a time|look at this together))|(?<!let'?s )take(?! a (?:deep )?breath| a moment| care of (?:it|this)| (?:it|this) one step at a time)|best|important|recommend|get help|wash|rest|cover|remove|pull|treat|carry|bring|wait|go (?:back|see|to))\b/i;
 
 /** Reassurance, judgment of risk, and guesses about what it is. */
-const JUDGES = /\b(?:worr(?:y|ies)|it'?ll be|everyone|everybody|you'?ll be|you'?re (?:going to|gonna) be|fine|safe(?:ly|r)?|unsafe|danger(?:ous)?|deadly|risk(?:y|s)?|serious(?:ly)?|harmless|normal|common|rare|probably|likely|maybe|might|may|could be|nothing to|no big deal|minor|severe|mild|poison(?:ous)?|venom(?:ous)?|toxic|infect\w*|allerg\w*|emergency|urgent|heal\w*|recover\w*|go away|pass soon|trouble|could mean|means|sign(?:s)? of|tasty|delicious|yum\w*|refreshing|clean|pure)\b/i;
+const JUDGES = /\b(?:worr(?:y|ies)|it'?ll be|everyone|everybody|you'?ll be|you'?re (?:going to|gonna) be|fine|safe(?:ly|r)?|unsafe|danger(?:ous)?|deadly|risk(?:y|s)?|serious(?:ly)?|harmless|normal|common|rare|probably|likely|maybe|might|may|could be|nothing to|no big deal|minor|severe|mild|poison(?:ous)?|venom(?:ous)?|toxic|infect\w*|allerg\w*|emergency|urgent|heal\w*|recover\w*|go away|pass soon|not good|no good|trouble|could mean|means|sign(?:s)? of|tasty|delicious|yum\w*|refreshing|clean|pure)\b/i;
 
 /** A yes/no or is-it-all-right question: "is it ok to drink from this pond". */
-const ASKS_YES_NO = /^\s*(?:is|are|can|could|should|shall|do|does|did|will|would|am|may|might)\b|\b(?:is (?:it|this|that)|can (?:i|we|you|he|she|they)|should (?:i|we|he|she|they)|(?:ok(?:ay)?|safe|fine|alright|normal|bad) (?:to|if|for|that))\b/i;
+const ASKS_YES_NO = /^\s*(?:is|are|can|could|should|shall|do|does|did|will|would|am|may|might)\b|(?<!\b(?:what|how|where|when|which|who|why)\s)\b(?:is (?:it|this|that)|can (?:i|we|you|he|she|they)|should (?:i|we|he|she|they)|(?:ok(?:ay)?|safe|fine|alright|normal|bad) (?:to|if|for|that))\b/i;
 
 /** Words that could read as permission or "it's fine". */
 const AFFIRMS = /\b(?:ok(?:ay)?|alright|right|good|great|sure|yes|nice|happen\w*|fun|enjoy|love|awesome|exciting|wonderful|amazing|beautiful|lovely|smart)\b/i;
@@ -76,7 +76,8 @@ congratulations congrats well done no happy big achievement reach reaching`.spli
 /** Comfort about how it feels and what to do next together, not about how it ends. */
 const COMFORT = new Set(`hey happen happens happened take deep breath breathe together we'll let's sort figure work
 through asking ask asked thinking smart plan planning ahead okay ok alright right thing step steps one here glad good
-see do care look handle help helping hear question about what they dealing`.split(/\s+/));
+see do care look handle help helping hear question about what they dealing
+prepare ready fix start started learn choose pick`.split(/\s+/));
 /** The comfort words that by themselves make a line warm. */
 const WARM = new Set(['happy', 'hey', 'happen', 'happens', 'happened', 'breath', 'breathe', 'together', 'glad', 'okay', 'ok', 'alright', 'thinking', 'smart']);
 const SETTING = new Set(`day days hike hikes hiking trail trails trip night nights morning afternoon evening time spot moment
@@ -144,7 +145,7 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   // "Happy to help you keep your phone battery going": after an offer to
   // help, the hiker's own verb is their request, not Fred's advice.
   const offer = /^happy to help\b/i.test(line);
-  const mine = line.replace(new RegExp(ADVICE.source, 'gi'), (m) => (offer && saidWords.includes(m.toLowerCase()) ? '' : m));
+  const mine = line.replace(new RegExp(ADVICE.source, 'gi'), (m) => (offer && saidWords.includes(m.toLowerCase().split(' ').pop()!) ? '' : m));
   for (const [name, re] of [['advice', ADVICE], ['judgment', JUDGES], ['about Fred', SELF]] as const) {
     const m = re.exec(name === 'judgment' ? judged : name === 'advice' ? mine : line);
     // "Everyone" is the hiker's group when the hiker said so.
@@ -166,7 +167,7 @@ export function explainOpener(raw: string, messages: readonly string[]): { line:
   const latest = messages[messages.length - 1] ?? '';
   if (SYMPATHY.test(line) && (ASKS.test(latest) || ASKS_YES_NO.test(latest))) return no('sympathy for a question');
   // "Happy to help you cook those mushrooms" answers "can i cook them".
-  if (offer && ASKS_YES_NO.test(latest) && !ASKS.test(latest)) return no('an offer reads as yes');
+  if (offer && ASKS_YES_NO.test(latest)) return no('an offer reads as yes');
   if (SYMPATHY.test(line) && DELIGHT.test(line)) return no('sympathy with delight');
   // "Okay" closes a phrase ("it's okay."), never "okay to swim".
   if (/\b(?:ok(?:ay)?|alright)\b(?!\s*(?:[.!,;:\u2013\u2014-]|$))/i.test(line)) return no('okay to');

@@ -204,3 +204,72 @@ a line break, the prompt's example that round 3 showed on this same question.
 **Conclusion: the memory and stall problems are gone and the delay is down to
 about a second. What remains is the opener itself: rarely kept, and off-key
 when it is. Not merged.**
+
+## Round 4: about what the hiker asked
+
+Ryan (2026-10-05): a 1 s delay is fine for now; the line must come from the
+hiker's own question or situation ("how do I make rope from plants" ->
+"these things happen, it's okay" makes zero sense).
+
+- **Prompt:** says how to match the message: an offer to help for a how-to,
+  what-is or tips question; sympathy for a problem; calm for a worry; "glad
+  you asked about X" for a yes/no question. Eleven examples, each naming its
+  own topic.
+- **Check, new rules:** the line must use one of the message's own topic
+  words, so an example copied onto another message is dropped. No sympathy
+  for a plain or yes/no question ("Oh no, sorry about the white berries" after
+  "can i eat these"); no offer to help after a yes/no question ("Happy to help
+  you cook those mushrooms"); no sympathy beside delight; not the message
+  handed back. Loosened: after an offer to help, the hiker's own verb is not
+  advice ("keep your phone battery going"); "poison oak" and "everyone" are
+  the hiker's words when the hiker said them; more word forms ("dogs",
+  "eating"). The probe prints why each line was dropped.
+
+Sealed set 4 (42, `opener-4.json`, written before the prompt or rules
+changed), run once (`opener-runs-set4.json`):
+
+| | |
+|---|---:|
+| Skipped (danger sign) | 2 |
+| Kept | 29 of 40 |
+| Kept and about the hiker's message | 29 |
+| Kept with advice, a fact, a promise or a yes | 0 |
+| Kept but nonsense | 1 ("Oh no, scared thunder is scary.") |
+
+The phone then showed the opener dropped for "i've had diarrhea all morning
+on the trail, what should i do": "what should i do" was read as a yes/no
+question. Fixed, with "prepare", "fix", "start" and the like allowed and "not
+good" added to the judgments. All four sets after that (all seen by then;
+set 4 in `opener-runs-set4-after.json`): kept 109 of 144 (30 of 37, 25 of 35,
+23 of 32, 31 of 40), every kept line read, none with advice, a fact, a promise
+or a yes. Round 3 kept 9 of 33.
+
+Typical: "Happy to help you start a fire with damp wood.", "Oh no, a broken
+zipper on your tent is frustrating.", "Glad you asked about sleeping in your
+car at the trailhead.", "Take a deep breath, being nervous about crossing the
+river is scary, we'll work through it together." Weak: how-to lines are
+nearly all "Happy to help you..."; some are clumsy ("Oh no, burned finger on
+the camp stove.", "Happy to help you work out what trash on a backpacking
+trip is.").
+
+### Round 4 on the phone
+
+2026-10-05, one session per message, cooled to thermal status 0, opener on;
+"off" is this evening's retest above.
+
+| Message | Opener | Opener at | Answer at | Off |
+|---|---|---:|---:|---:|
+| "how do i make rope from plant fibers" | "Happy to help you make rope from plant fibers." | 2.0 s | 13.5 s | 11.9 s |
+| "i've had diarrhea all morning on the trail, what should i do" | "Oh no, diarrhea on the trail is not fun." | 2.2 s | 9.7 s | 8.1 s |
+| "hiking in the desert next week, any tips for the heat" | "Happy to help you prepare for hiking in the desert next week." | 2.0 s | 13.3 s | 12.3 s |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | "Happy to help you figure out how to dress for a cold hike." | 2.7 s | 12.0 s | 10.2 s |
+| "my feet are covered in hot spots" (card, no opener) | | | 3.3 s | 3.3 s |
+| "is it ok to drink from this pond if i boil it" (card, no opener) | | | 1.0 s | 2.5 s |
+
+Openers on four of four model-written answers (one of four before), first
+words at 2.0-2.7 s; the answer itself 1.0-1.8 s later than without. Answers
+word for word the same; the app at 2.9 GB. The generated sets were not rerun
+on the desktop this round: the answer path is unchanged.
+
+Not merged yet: in the app the opener is still behind the `devhooks-opener`
+switch, waiting for Ryan to read a sample.

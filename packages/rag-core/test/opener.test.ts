@@ -104,6 +104,10 @@ test('the line is about what the hiker just said (#130, round 4)', () => {
   // An offer to help with it reads as a yes.
   no('Happy to help you cook those mushrooms.', 'these mushrooms look like chanterelles, can i cook them');
   ok('Happy to help you figure out which way is north from the stars.', 'how can i tell which way is north from the stars');
+  // "what should i do" is not a yes/no question.
+  ok('Oh no, diarrhea on the trail can be uncomfortable.', "i've had diarrhea all morning on the trail, what should i do");
+  ok('Happy to help you work out what you should pack for a day hike in the rain.', 'what should i pack for a day hike in the rain');
+  no('Oh no, green scum on the lake is not good for swimming.', 'the lake has green scum on it');
   // The message handed back is not an opener.
   no('So tired, we still have a long way to go.', 'so tired, we still have a long way to go');
   // A plant's name is not a judgment when the hiker said it.

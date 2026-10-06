@@ -340,3 +340,67 @@ openers began "Sure, let's": the pick is by message, and this handful fell
 that way. The diarrhea line was "Oh no, diarrhea on the trail is not fun." in
 round 4; "Take a deep breath" suits it less. The first session after the
 install read the new prompt once (opener at 8.5 s); later ones did not.
+
+## Round 6: problems against worries, an even spread; merged
+
+Ryan (2026-10-06): one more round on the problem/worry mix-up and the spread
+of beginnings, then merge.
+
+- **First words for every kind.** The code now also picks them for a problem
+  ("Oh no", "Sorry", "Ugh") and a worry ("Take a deep breath", "Hey"), told
+  apart by fixed word lists (scared, nervous, worried... against hurts, broke,
+  forgot, diarrhea, won't...). A yes/no question gets "Glad you asked" or
+  "Thanks for asking"; "Good question" is left to plain questions. A message
+  that is none of these gets no instruction.
+- **Stepping on each turn.** The pick starts from the conversation's first
+  message and moves one on with every message, so three questions running
+  begin three ways.
+- **Check:** "Take a deep breath" without a worry in the hiker's words is
+  dropped. More word forms pass ("dying" for "died", "rubs" for "rubbing").
+- **Earlier messages** are shown to the model only when the new one points
+  back at them ("it still hurts"). Found on the sealed set: shown them always,
+  it answered three at once ("Happy to help you pick a sleeping pad and store
+  your food, and set up a rain fly.").
+
+Sealed set 6 (48, `opener-6.json`, written before any of this ran), run once
+(`opener-runs-set6.json`): 3 skipped (danger sign; one wrongly, "my boots are
+soaked through, how do i dry them by morning"), kept 31 of 45, none with
+advice, a fact, a promise or a yes, and no problem given calming words.
+Beginnings of the kept lines: Sure, let's 6, Thanks for asking 5, Oh no 4,
+Sorry 3, Take a deep breath 3, Good question 3, Happy to help 3, Hey 2, Ugh
+1, Glad you asked 1. After the earlier-messages fix (set 6 then seen,
+`opener-runs-set6-after.json`): 33 of 45, and its six-question conversation
+went Sure, let's / Good question / Happy to help / Sure, let's / Good
+question (the first, with "three" in it, dropped as a number).
+
+### Round 6 on the phone
+
+2026-10-06, the opener on by default (a `devhooks-no-opener` file turns it
+off), cooled to thermal status 0 before each session; "off" is the 2026-10-05
+retest.
+
+| Message | Opener | Opener at | Answer at | Done at | Off: first words / done |
+|---|---|---:|---:|---:|---:|
+| "how do i make rope from plant fibers" | "Good question about making rope from plant fibers." | 2.0 s | 13.3 s | 16.6 s | 11.9 / 14.9 s |
+| "i've had diarrhea all morning on the trail, what should i do" | "Oh no, diarrhea on the trail is uncomfortable." | 2.7 s | 10.5 s | 13.1 s | 8.1 / 10.5 s |
+| "hiking in the desert next week, any tips for the heat" | "Sure, let's figure out how to handle the heat while hiking in the desert." | 2.5 s | 14.4 s | 21.7 s | 12.3 / 19.9 s |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | "Happy to help you figure out how to dress for a cold hike." | 2.5 s | 12.2 s | 19.9 s | 10.2 / 17.7 s |
+| "is it ok to drink from this pond if i boil it" (card, no opener) | | | 1.0 s | 3.5 s | 2.5 / 5.0 s |
+
+One conversation, four questions in a session: "Sure, let's figure out how to
+start a fire with damp wood." (2.4 s), "Good question about keeping feet dry
+on a long hike." (3.3 s), "Happy to help you find water in the desert."
+(3.1 s); the fourth was answered by a card, so no opener.
+
+First words at 2.0-2.7 s where they were 8-12 s; the answer itself 1.4-2.4 s
+later than without (about 2 s; the four finished in 17.8 s on average against
+15.8 s). "i'm nervous about crossing the river tomorrow" was taken as small
+talk on the phone, so it got the chat reply and no opener: not the opener's
+doing.
+
+Against the ship bar of 2026-10-04: no opener with advice, a fact or
+reassurance on any sealed set (met); answers unchanged (met: word for word on
+the phone; the desktop's 113 of 113 is from round 2 and the answer path has
+not changed since); first words no later for model-written answers (first
+words are 6-10 s sooner, the answer about 2 s later: Ryan accepted about 1 s
+on 2026-10-05, and this is over that); card replies no later (met).

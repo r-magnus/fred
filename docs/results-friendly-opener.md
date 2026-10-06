@@ -173,3 +173,34 @@ today). The fourth answer never came.
 every answer (cards included), once stalled the app, and what passes the
 safety check is often off-key. The fire danger-sign fix found on the way was
 merged on its own (#131, PR #132).
+
+## Retest after one model context (#136)
+
+2026-10-05, Nothing Phone (3). The branch with `main` merged in: the opener
+now shares the one model context, its prompt saved to a file like the other
+lanes. In the app it is behind a field-test switch (a `devhooks-opener` file),
+so one build ran both ways. One session per message, cooled to thermal status
+0 before each, opener off then on; one run each. Time to first words:
+
+| Message | Off | On | Answer later by |
+|---|---:|---:|---:|
+| "how do i make rope from plant fibers" | 11.9 s | opener 1.8 s, answer 12.4 s | 0.5 s |
+| "i've had diarrhea all morning on the trail, what should i do" | 8.1 s | 9.6 s (opener dropped) | 1.5 s |
+| "hiking in the desert next week, any tips for the heat" | 12.3 s | 13.9 s (opener dropped) | 1.6 s |
+| "how should i dress for a cold hike, i always end up sweaty then freezing" | 10.2 s | 10.4 s (opener dropped) | 0.2 s |
+| "my feet are covered in hot spots" (card, no opener) | 3.3 s | 3.3 s | 0 |
+| "is it ok to drink from this pond if i boil it" (card, no opener) | 2.5 s | 1.2 s | none (the embedding took 2.2 s, then 0.8 s) |
+
+Every answer came, word for word the same off and on. The app held 2.9 GB
+both ways (6.2 GB in round 3). Card replies are no longer slowed, and the
+cold-hike question that stalled for 9 minutes answered in 10.4 s.
+
+Still short of the ship bar: model-written answers come 0.2-1.6 s later
+(about 1 s on average, against about 5 s before), and the opener was kept on
+one of four. Its text was not logged in that session; the reply was 37
+characters longer, the length of "Hey, these things happen, it's okay." plus
+a line break, the prompt's example that round 3 showed on this same question.
+
+**Conclusion: the memory and stall problems are gone and the delay is down to
+about a second. What remains is the opener itself: rarely kept, and off-key
+when it is. Not merged.**

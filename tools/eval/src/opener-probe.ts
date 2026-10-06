@@ -5,7 +5,7 @@
  * was tuned on.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { checkOpener, dangerSign, type InferenceBackend } from '@fred/rag-core';
+import { explainOpener, dangerSign, type InferenceBackend } from '@fred/rag-core';
 import { openHarness } from './harness.ts';
 
 interface Msg { id: string; kind: string; question: string; history?: string[] }
@@ -29,9 +29,10 @@ for (const m of msgs) {
   const earlier = m.history ?? [];
   const skipped = dangerSign([...earlier, m.question]);
   const raw = skipped ? '' : await makeOpenerRaw(m.question, earlier, backend);
-  const kept = skipped ? null : checkOpener(raw, [...earlier.slice(-2), m.question]);
-  rows.push({ id: m.id, kind: m.kind, question: m.question, skipped, raw, kept });
-  console.log(`${skipped ? 'SKIP' : kept === null ? 'DROP' : 'KEEP'} ${m.question.slice(0, 50).padEnd(50)} | ${raw}`);
+  const verdict = skipped ? { line: null } : explainOpener(raw, [...earlier.slice(-2), m.question]);
+  const kept = verdict.line;
+  rows.push({ id: m.id, kind: m.kind, question: m.question, skipped, raw, kept, ...(verdict.why === undefined ? {} : { why: verdict.why }) });
+  console.log(`${skipped ? 'SKIP' : kept === null ? 'DROP' : 'KEEP'} ${m.question.slice(0, 50).padEnd(50)} | ${raw}${verdict.why === undefined ? '' : `  [${verdict.why}]`}`);
 }
 await h.close();
 const tried = rows.filter((r) => !r.skipped);

@@ -333,9 +333,9 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
     async *generate(prompt: { system: string; user: string }, genOpts: GenerateOptions) {
       if (!genCtx) throw new Error('no generation model loaded');
       // One model call at a time, in the order asked, as on the phone
-      // (device-pack.ts, exclusive): the opener (#130) runs beside the
-      // pipeline, and two calls decoded together in one context changed the
-      // intent check's word ("my wife's feeling dizzy": NOW became CHAT).
+      // (device-pack.ts, exclusive). Two calls decoded together in one
+      // context changed the intent check's word ("my wife's feeling dizzy":
+      // NOW became CHAT) when the opener of #130 ran beside the pipeline.
       let release!: () => void;
       const mine = new Promise<void>((r) => { release = r; });
       const before = genTurn;

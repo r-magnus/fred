@@ -21,7 +21,7 @@ import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
 import { rankSentences } from './sentences.ts';
-import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, QUOTE_INSTEAD } from './grounding.ts';
+import { NOT_FREDS_JOB, numberChecked, QUOTE_BAND, QUOTE_FLOOR, quoteIntro } from './grounding.ts';
 import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
@@ -527,6 +527,8 @@ export interface Diagnostics {
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
+  /** Small talk taken as news about a problem still open in the conversation. */
+  readonly newsNotChat?: boolean;
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
   readonly followUp?: { readonly standaloneTopScore: number; readonly joinedTopScore: number; readonly used: boolean };
   /** Set when the answer was built from a field card rather than the passages. */
@@ -624,6 +626,29 @@ export function tipsInTrustOrder(cs: readonly ScoredChunk[]): ScoredChunk[] {
   return out;
 }
 
+/**
+ * Run the intent check and the understanding step once, on a harmless
+ * message, so their model contexts are set up and their fixed prompts read
+ * before the hiker's first question (#133). Cold, the first message after the
+ * app opened spent 24 s in those two calls on the phone ("there's smoke and
+ * fire coming up the ridge toward us": 26 s to the emergency reply). The same
+ * code and prompts as a real question, so nothing here can drift from them.
+ */
+/** The hiker says something isn't there: "there's no manual", "i don't have a filter", "forgot the poles". */
+/** A message that only acknowledges or reports progress: "ok it's off", "thanks", "ok made camp". */
+export const ACKNOWLEDGES = /^\s*(?:ok(?:ay)?|k|alright|all right|thanks?|thank you|thx|got it|will do|done|cool|great|nice|sounds good|perfect)\b/i;
+
+/** A message of nothing but acknowledgement: "ok thanks", "got it, will do", "cool!". */
+const ACK_WORD = "(?:ok(?:ay)?|k|alright|all right|thanks?(?: (?:so much|a lot|again))?|thank you(?: (?:so much|again))?|thx|ty|got it|will do|cool|great|nice|sounds good|perfect|awesome|appreciate it)";
+export const ONLY_ACKNOWLEDGES = new RegExp(`^\\s*${ACK_WORD}(?:[\\s,.!]+${ACK_WORD})*[\\s.!]*$`, 'i');
+
+export const SAYS_MISSING = /\b(?:there'?s no|there is no|there are no|no (?!(?:longer|more|worries|problem|thanks|way|idea)\b)[a-z]+s?$|(?:i|we) (?:don'?t|do not|didn'?t) (?:have|bring|pack)|without (?:a|an|the|any)|(?:forgot|lost|broke|left) (?:the|my|our|a)|(?:doesn'?t|didn'?t) come with|(?:it'?s|is) (?:missing|broken))\b/i;
+
+export async function warmUp(backend: InferenceBackend): Promise<void> {
+  await classifyIntent('hello there', backend);
+  await understandMessage('it hurts', ['i slipped on the trail'], backend);
+}
+
 export async function ask(
   query: string,
   deps: PipelineDeps,
@@ -634,6 +659,14 @@ export async function ask(
   // and in an emergency (a danger sign, or the intent check reads NOW) the
   // first words must be what to do.
   const res = await askCore(query, deps, opts);
+  // News about an open problem that nothing answered stays small talk: a
+  // decline would read as Fred not listening ("i can hear a river").
+  if (res.kind === 'abstain' && (res.reason === 'low-score' || res.reason === 'insufficient') && res.diagnostics.newsNotChat === true) {
+    return {
+      kind: 'chat', reply: res.offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: res.offer ?? null,
+      diagnostics: res.diagnostics,
+    };
+  }
   if (opts.opener !== true || opts.understand === false || opts.guards === false) return res;
   if (res.kind !== 'answer' || res.diagnostics.cardAnswer !== undefined || res.clarify !== undefined) return res;
   const earlier = opts.history ?? [];
@@ -893,7 +926,15 @@ async function askCore(
   let agreedCard: ScoredChunk | undefined;
   // The leading card of the hiker's own thread, searched as one text.
   let threadCard: ScoredChunk | undefined;
-  if (opts.intent === true) {
+  // Small talk read as news about an open problem (below); ask() turns a decline back into small talk.
+  let newsNotChat = false;
+  // Nothing but thanks or an acknowledgement is small talk, without asking the
+  // model: "ok thanks" after a burn is three words, so it was read in its
+  // conversation, restated as "bubbles on skin, what to do", called NOW, and
+  // answered (20 s on the phone).
+  const onlyThanks = guardsOn && opts.intent === true && ONLY_ACKNOWLEDGES.test(query);
+  if (onlyThanks) intent = 'chat';
+  if (opts.intent === true && !onlyThanks) {
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
     // check rather than adding to it.
@@ -908,8 +949,30 @@ async function askCore(
     // i follow it down" CHAT, and Fred answered "Got it" (phone, 2026-09-30).
     // A danger sign does not overrule CHAT: "he was bleeding badly yesterday
     // but he's fine now" is small talk.
-    if (guardsOn && intent === 'chat' && asksSomething(query)) {
+    // A follow-up that says something is missing asks for another way, whatever
+    // the model calls it: "how do i set up a tent" / "there's no manual" was
+    // restated as "missing tent manual, how to set up a tent" and still called
+    // CHAT, and Fred said "Got it" (Ryan, phone, 2026-10-04). Only then: the
+    // restatement adds "what to do next" to plain news ("ok we made it back"),
+    // which is small talk.
+    const lacks = u !== undefined && SAYS_MISSING.test(query) && asksSomething(u.request);
+    if (guardsOn && intent === 'chat' && (asksSomething(query) || lacks)) {
       intent = 'question';
+      if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
+    // News about a problem still open in the conversation is not small talk:
+    // "a few bubbles came up on the skin" after a burn, "my kid already tried
+    // one" after berries, "yep its a bear" got "Got it" (sealed chat sets).
+    // Unless the hiker says it is over ("he's fine now") or is only
+    // acknowledging ("ok it's off", "ok made camp", "thanks"). If nothing then
+    // answers it, ask() falls back to small talk (newsNotChat): in a lost-hiker
+    // chat "i can hear a river" went from "Got it" to a decline.
+    const openProblem = active.length > 0 || eatingUnknownInThread(query, opts.history ?? []) ||
+      dangerSign([...history, query]);
+    if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem &&
+        !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
+      newsNotChat = true;
+      intent = dangerSign([...history, query]) ? 'now' : 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
     // A message that says something happened to someone (a condition,
@@ -1110,6 +1173,7 @@ async function askCore(
 
   const baseDiag = {
     ...(intent === undefined ? {} : { intent }),
+    ...(newsNotChat ? { newsNotChat } : {}),
     keywords,
     route: routed,
     maxTokens,
@@ -1514,13 +1578,15 @@ async function askCore(
     // The same sentence often sits on two pages ("pick them up if possible so
     // they don't panic and run", three mountain-lion pages): quote it once.
     const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
-    const picked: string[] = [];
+    const picked: { text: string; chunkId: string }[] = [];
     for (const r of ranked) {
       if (r.similarity < Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND) || picked.length === 2) break;
-      if (picked.some((p) => norm(p).includes(norm(r.text)) || norm(r.text).includes(norm(p)))) continue;
-      picked.push(r.text);
+      if (picked.some((p) => norm(p.text).includes(norm(r.text)) || norm(r.text).includes(norm(p.text)))) continue;
+      picked.push({ text: r.text, chunkId: r.chunkId });
     }
-    return picked.join('\n');
+    // Introduced by who said it (#135).
+    const sources = picked.map((p) => blocks.find((b) => b.chunk.id === p.chunkId)?.chunk.source ?? '');
+    return `${quoteIntro(sources)}\n${picked.map((p) => p.text).join('\n')}`;
   };
   const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
@@ -1562,7 +1628,7 @@ async function askCore(
     ? numberChecked(backend.generate(prompt, generateOpts), sourceText, async (shown) => {
       const quoted = await quoteSources();
       answerGuard.replacedBy = 'number';
-      if (quoted !== undefined) return shown ? `\n\n${QUOTE_INSTEAD}\n${quoted}` : quoted;
+      if (quoted !== undefined) return shown ? `\n\n${quoted}` : quoted;
       return shown ? '' : NO_ANSWER_REPLY;
     })
     : backend.generate(prompt, generateOpts));

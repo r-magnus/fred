@@ -10,8 +10,7 @@
  * entirely FTS5, so without that flag every query returns nothing.
  */
 import { open, type DB } from '@op-engineering/op-sqlite';
-import type { Directory } from 'expo-file-system';
-import { File } from 'expo-file-system';
+import { Directory, File } from 'expo-file-system';
 import type { ChunkRecord, DomainTag, EmbeddingSpec, PackManifest, CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
 import type { InferenceBackend, LexicalHit, PackStore, GenerateOptions, PromptParts } from '@fred/rag-core';
 import {
@@ -219,6 +218,11 @@ export class DevicePackStore implements PackStore {
 export interface DeviceBackendOptions {
   readonly modelPath: string;
   /**
+   * Where the intent and understanding prompts are saved once read (#133,
+   * #134). Unset: those prompts are read in full on every call.
+   */
+  readonly sessionDir?: string;
+  /**
    * How to embed queries, chosen from the packs' own EmbeddingSpec so the app
    * can never search a pack with the wrong encoder.
    *
@@ -328,6 +332,16 @@ export type DeviceBackend = InferenceBackend & {
   readonly genInfo: Readonly<Record<string, unknown>>;
 };
 
+/** A short stable hash for file names (FNV-1a, 32-bit). */
+function fnv1a(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+
 export async function createDeviceBackend(
   opts: DeviceBackendOptions,
 ): Promise<DeviceBackend> {
@@ -357,21 +371,57 @@ export async function createDeviceBackend(
     // context and needs retesting on CPU before it means anything.
   });
 
-  // One small context per lane (#101): the intent check and the understanding
-  // step send the same system prompt every time, but in the one shared context
-  // the answer that follows overwrites it, so llama.rn read ~300 tokens of
-  // intent prompt from scratch on every message (2.4 s on this phone). In a
-  // context of their own, only the hiker's new words are read. The model file
-  // is memory-mapped, so a second context costs its KV cache (~120 MB at
-  // 1024 tokens), not another copy of the weights.
-  const lanes = new Map<string, Promise<LlamaContext>>();
-  const laneContext = (lane: string): Promise<LlamaContext> => {
-    let ctx = lanes.get(lane);
-    if (ctx === undefined) {
-      ctx = initLlama({ model: opts.modelPath, n_ctx: 1024, n_batch: 512, n_threads: N_THREADS, n_gpu_layers: opts.gpuLayers ?? 0 });
-      lanes.set(lane, ctx);
+  // The intent check and the understanding step send the same system prompt
+  // every time (#101). They used to get a model context each, so that prompt
+  // stayed read between messages; but each context held its own copy of the
+  // weights, about 0.8 GB, not the KV cache alone (the app at 5.4 GB with
+  // both, #134), and set up cold it cost the first message 24 s (#133). Now
+  // all calls share one context, and each lane's prompt, once read, is saved
+  // to a file and loaded back before the lane's next call: llama.rn then reads
+  // only the part that differs. The file outlives the app, so even the first
+  // message after a restart starts warm. It is named by a hash of the model
+  // and the prompt, so a changed prompt is read afresh, never the old one.
+  //
+  // Every call starts from the same state for the same system prompt, so a
+  // message gets the same reply whatever came before: reusing whatever the
+  // last call left changed the answer to "how should i dress for a cold hike"
+  // (the prompt was read in different pieces, and greedy decoding followed a
+  // different word). An answer starts from an empty context, as on the
+  // desktop where accuracy is graded: a saved answer prompt changed answers'
+  // wording from the desktop's ("Use natural fibers..." for "To make rope from
+  // plant fibers, identify...") to save under a second. A lane starts from its
+  // system prompt alone, read once (a one-token completion of it) and kept in
+  // a file named by the lane and a hash of model and prompt; a new prompt
+  // replaces the lane's old file.
+  const sessionDir = opts.sessionDir;
+  const fileOf = (path: string): File => new File(`file://${path}`);
+  const prepare = async (kind: string | undefined, system: string): Promise<void> => {
+    if (kind === undefined || sessionDir === undefined) {
+      await gen.clearCache();
+      return;
     }
-    return ctx;
+    const prefix = `lane-${kind}-`;
+    const path = `${sessionDir}/${prefix}${fnv1a(`${opts.modelPath}\n${system}`)}.session`;
+    if (fileOf(path).exists) {
+      try {
+        await gen.loadSession(path);
+        return;
+      } catch {
+        // A file from another llama.rn or model build: read the prompt afresh.
+        try { fileOf(path).delete(); } catch { /* already gone */ }
+      }
+    }
+    await gen.clearCache();
+    await gen.completion({
+      messages: [{ role: 'system', content: system }],
+      jinja: true, enable_thinking: false, n_predict: 1, temperature: 0,
+    });
+    await gen.saveSession(path);
+    for (const old of new Directory(`file://${sessionDir}`).list()) {
+      if (old.name.startsWith(prefix) && `${sessionDir}/${old.name}` !== path) {
+        try { old.delete(); } catch { /* in use or gone */ }
+      }
+    }
   };
 
   let embed: (text: string) => Promise<Float32Array>;
@@ -460,7 +510,7 @@ export async function createDeviceBackend(
       // while it waits its turn, stopping would end someone else's.
       let running = false;
       let cancelled = false;
-      let ctx: LlamaContext = gen;
+      const ctx: LlamaContext = gen;
       const onAbort = (): void => {
         cancelled = true;
         if (running) void ctx.stopCompletion();
@@ -474,7 +524,7 @@ export async function createDeviceBackend(
 
       void exclusive(async () => {
         if (cancelled) return;
-        if (genOpts.lane !== undefined) ctx = await laneContext(genOpts.lane);
+        await prepare(genOpts.lane, prompt.system);
         running = true;
         try {
           await ctx.completion(
@@ -518,7 +568,6 @@ export async function createDeviceBackend(
       return stream.iterate();
     },
     async release() {
-      for (const ctx of lanes.values()) await (await ctx).release();
       await gen.release();
       await releaseEmbedder();
     },

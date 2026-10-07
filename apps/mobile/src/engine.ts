@@ -12,7 +12,7 @@
  */
 import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
-import { ask, verifyEmbedderParity, warmUp, type AskResult, type RoutablePack } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, warmUp, SCOPE_MODEL, type AskResult, type RoutablePack } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
 
 const BASE = Paths.document;
@@ -165,6 +165,10 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // Field test: a `devhooks-no-opener` file beside `devhooks` turns it
           // off, to time answers with and without it.
           opener: !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-opener').exists),
+          // A last chance for a message about to be called small talk or
+          // declined (#149, docs/results-scope-scorer.md). Field test: a
+          // `devhooks-no-scope` file beside `devhooks` turns it off.
+          ...(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-scope').exists ? {} : { scope: SCOPE_MODEL }),
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),
@@ -211,7 +215,7 @@ function timed(res: AskResult, t0: number): AskResult {
   const reason = res.kind === 'abstain' ? ` reason=${res.reason}` : '';
   // Round 2 of #98: conditions in the conversation, a card held back, two searches agreeing.
   const d = res.diagnostics;
-  const guards = `${d.conditions === undefined ? '' : ` conditions=${d.conditions.join(',')}`}${d.blocked === undefined ? '' : ` blocked=${JSON.stringify(d.blocked.card)}`}${d.agreedCard === undefined ? '' : ` agreed=${JSON.stringify(d.agreedCard)}`}`;
+  const guards = `${d.scope === undefined || d.scope.used.length === 0 ? '' : ` scope=${d.scope.used.join('+')}`}${d.conditions === undefined ? '' : ` conditions=${d.conditions.join(',')}`}${d.blocked === undefined ? '' : ` blocked=${JSON.stringify(d.blocked.card)}`}${d.agreedCard === undefined ? '' : ` agreed=${JSON.stringify(d.agreedCard)}`}`;
   const tm = res.diagnostics.timing;
   const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {

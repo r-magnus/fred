@@ -98,4 +98,15 @@ const m = train(X, y);
 const model: ScopeModel = { w: m.w.map((x) => Math.round(x * 1e5) / 1e5), b: m.b, scale: SCALE, threshold };
 const out = process.argv[2] ?? 'tools/eval/data/scope-model.json';
 writeFileSync(out, JSON.stringify(model) + '\n');
+// The app reads the weights from a module, so no file has to be shipped beside the bundle.
+if (process.argv[2] === undefined) {
+  writeFileSync('packages/rag-core/src/scope-model.ts', `/**
+ * The scope scorer's weights (scope.ts), written by tools/eval/src/train-scope.ts
+ * from tools/eval/data/scope-train.tsv. Do not edit by hand.
+ */
+import type { ScopeModel } from './scope.ts';
+
+export const SCOPE_MODEL: ScopeModel = ${JSON.stringify(model)};
+`);
+}
 console.log(`wrote ${out}`);

@@ -1,0 +1,52 @@
+ailments: 23 replies, answered 12 -> 12, changed 1
+  ha-knee-swollen-01 [] answer(gen:Sports Injuries: Diagn | Sports Injuries: Diagn | Twisted or sprained an) -> answer(card:Twisted or sprained ankle, or a st) said=Twisted or sprained :0.76[opened]  "my knee swelled up after a long descent"
+breadth: 57 replies, answered 48 -> 48, changed 1
+  br-bugs-01 [] answer(gen:INSECTS | INSECTS | INSECTS) -> answer(gen:Wilderness backpacking | Pests > Bugs > Ticks > | Wilderness backpacking) said=Staying healthy on a:0.49[] everyday 0.33->0.42  "How do I keep bugs from eating me alive out here?"
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 20, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 30 -> 31, changed 2
+  hc-dehyd-01 [] abstain/watch -> answer(card:Dehydration) said=Dehydration:0.91[opened]  "haven't peed all day and my head is pounding"
+  hc-seizure-01 [] answer(card:Shock after an injury) -> answer(card:Seizure) said=Seizure:0.73[card]  "my friend just collapsed and is jerking all over"
+everyday: 40 replies, answered 31 -> 31, changed 2
+  he-layers-01 [] answer(gen:COLD INJURIES | During Extremely Cold  | COLD WEATHER INJURIES) -> answer(gen:Hiking > Prepare > Clo | Wilderness backpacking | Wilderness backpacking) said=none:gear:0.41[] everyday 0.30->0.48  "how should i dress for a cold hike, i always end up sweaty then freezing"
+  he-water-01 [] answer(gen:HYDRATION CONSIDERATIO | WATER SOURCES AND INDI | MOVEMENT CONSIDERATION) -> answer(gen:Hiking > Prepare > Pac | Wilderness backpacking | Wilderness backpacking) said=Dehydration:0.46[] everyday 0.31->0.37  "how much water should i bring on a day hike"
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 15 -> 16, changed 1
+  hz-ledge-route-01 [] chat -> answer(card:Lost: should I stay or keep moving) said=Lost: should I stay :0.77[opened]  "the trail ended at a cliff and we're not sure how we got here"
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 28 -> 28, changed 1
+  hh-water-boil-01 [] answer(gen:Emergency Disinfection | CHEMICAL PURIFICATION | BOILING METHOD) -> answer(gen:Wilderness backpacking | Camping food > Eat > J | Emergency Disinfection) said=Making water safe to:0.46[] everyday 0.31->0.51  "do i need to boil water longer when we're camped up high"
+holdout-card-questions: 40 replies, answered 38 -> 40, changed 6, misses 2 -> 0
+  FIXED cq-burn-butter#1 [answer] decline/low-score -> answer(card:Burns) said=Burns:0.95[opened]  "grabbed the hot skillet handle and my palm is red"
+  FIXED cq-burn-butter#2 [answer] watch/watch -> answer(card:Burns) said=none:fragment:0.22[]  "would butter help"
+  cq-frost-rub#1 [answer] answer(card:Immersion foot (trench foot): cold) -> answer(card:Frostbite and frostnip) said=Frostbite and frostn:0.58[card]  "my toes are white and waxy after the climb"
+  cq-lost-move#1 [answer] answer(card:Finding north without a compass) -> answer(card:Lost: should I stay or keep moving) said=Lost: should I stay :0.89[card]  "no idea where the trail went and the sun is dropping"
+  cq-water-boil#1 [answer] answer(card:Crossing a river or stream) -> answer(card:Making water safe to drink) said=Making water safe to:0.66[card]  "we need to drink from this stream"
+  cq-water-boil#2 [answer] answer(gen:Wilderness backpacking | Making water safe to d | Emergency Disinfection) -> answer(card:Making water safe to drink) said=Making water safe to:0.27[]  "how many minutes does it need on the stove to be safe"
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 2, misses 1 -> 1
+  c2-heat-whatdo#2 [answer] answer(gen:Heat Cramps, Exhaustio | Heat exhaustion and he | HEAT STROKE) -> answer(card:Heat exhaustion and heat stroke) said=Altitude illness:0.20[]  "my brother is super dizzy and nauseous"
+  c2-danger-bleed#1 [any] answer(card:Possible neck or back injury) -> answer(card:A cut or scrape) said=A cut or scrape:0.49[card]  "my friend fell on a sharp branch"
+holdout-chats-3: 37 replies, answered 16 -> 19, changed 6, misses 10 -> 6
+  c3-shin-scrape#1 [answer] answer(card:Twisted or sprained ankle, or a st) -> answer(card:A cut or scrape) said=A cut or scrape:0.69[card]  "my daughter went down on the gravel and her shin is all torn up"
+  FIXED c3-kettle-wrist#1 [answer] watch/watch -> answer(card:Burns) said=Burns:0.74[opened]  "the kettle tipped and the water went over my wrist"
+  c3-kettle-wrist#2 [not-chat] watch/watch -> answer(card:Burns) said=none:fragment:0.17[]  "what about toothpaste on it"
+  FIXED c3-lost-fork#1 [no-dead-end] chat -> answer(card:Lost: should I stay or keep moving) said=Lost: should I stay :0.89[opened]  "we must have missed a junction because none of this matches the map"
+  FIXED c3-lost-fork#2 [answer] decline/low-score -> answer(card:Lost: should I stay or keep moving) said=Lost: should I stay :0.42[]  "do we backtrack or push on"
+  FIXED c3-oos-pills#2 [decline] answer(card:Possible neck or back injury) -> decline/low-score said=none:medicine:0.89[]  "how many naproxen is too many"
+holdout-chats: 162 replies, answered 110 -> 109, changed 6, misses 6 -> 6
+  ct-hypo-rub#1 [answer] answer(card:Shock after an injury) -> answer(card:Hypothermia: shivering, confused, ) said=Hypothermia: shiveri:0.85[card]  "my friend fell in the lake and cant stop shaking"
+  ct-hypo-rub'#3 [answer] answer(card:Frostbite and frostnip) -> answer(card:Hypothermia: shivering, confused, ) said=Hypothermia: shiveri:0.47[card]  "do i massage his arms and legs to get him warm"
+  nu-heel-blister#1 [not-urgent] answer(gen:SOFT TISSUE TRAUMA | TRENCH FOOT | NONFREEZING INJURIES) -> answer(gen:Hiking > Stay healthy  | Hiking > Stay healthy  | SOFT TISSUE TRAUMA) said=none:minor:0.73[] everyday 0.31->0.37  "got a blister on my heel"
+  nu-cholla'#3 [not-urgent] answer(card:Removing a tick) -> watch/watch said=none:medicine:0.28[no-card]  "how do i pull it out"
+  lg-lake-heat#2 [not-chat] answer(gen:HYDRATION CONSIDERATIO | WATER SOURCES AND INDI | Emergency Disinfection) -> answer(gen:Arid region safety > W | Wilderness backpacking | HYDRATION CONSIDERATIO) said=Dehydration:0.52[] everyday 0.30->0.36  "how much water should i bring"
+  lg-mixed#5 [not-chat] answer(gen:FUEL | FIRE STARTING TECHNIQU | Fire > Be fire safe by) -> answer(gen:I Didn't Know That! Le | FUEL | FIRE STARTING TECHNIQU) said=Starting a campfire:0.55[] everyday 0.33->0.38  "how do we put the fire out properly"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 1, misses 1 -> 1
+  l2-statements#2 [answer] answer(card:Shock after an injury) -> answer(card:Suspected broken bone) said=Suspected broken bon:0.52[card]  "my friend tripped and landed on her wrist"
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 68 -> 68, changed 1
+  fa-blister-01 [] answer(gen:SOFT TISSUE TRAUMA | TRENCH FOOT | TRENCH FOOT) -> answer(gen:Hiking > Stay healthy  | Hiking > Stay healthy  | Wilderness backpacking) said=none:minor:0.46[] everyday 0.38->0.58  "I have a bad blister on my heel from hiking. What should I do about it?"
+wildlife: 22 replies, answered 17 -> 17, changed 1
+  hw-feed-01 [] answer(gen:mule deer > Diet | mule deer > Diet | mule deer > Diet) -> answer(gen:Camping Safely Step 3  | Camping Safely Step 3  | During Your Stay - Cam) said=none:other:0.62[] everyday 0.32->0.38  "can we feed the deer that keep coming around camp"
+
+31 replies changed

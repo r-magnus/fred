@@ -1,0 +1,5 @@
+1034 examples, 51 labels (540 examples of 43 cards)
+scored by a model that never saw them: top label right for 825 of 1034
+sure 0.71: 226 card calls, 220 right, 1 the wrong card, 5 no card's; 220 of 540 card examples reached
+leans 0.45: 406 card calls, 370 right, 6 the wrong card, 30 no card's; 370 of 540 card examples reached
+int8 weights: 1 of 1034 examples change label or move more than 0.02

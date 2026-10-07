@@ -1348,8 +1348,10 @@ async function askCore(
     }
     // Sure it is something else, or the card has no share: no card. A message
     // with nothing of its own ("how long should i keep it under the water")
-    // says nothing against the card.
-    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment')) { saidUsed.push('no-card'); return undefined; }
+    // says nothing against the card, and with a danger sign in the thread an
+    // unsure matcher takes no card away ("the shirt i'm holding on it is soaked
+    // through" lost the bleeding card).
+    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment' && !dangerSign([...history, query]))) { saidUsed.push('no-card'); return undefined; }
     return card;
   };
   if (forcedCard !== undefined && forcedOwn && forcedCard.score < effectiveThreshold) {

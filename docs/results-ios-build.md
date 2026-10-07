@@ -291,11 +291,10 @@ parity at cos 0.9997; the engine was ready in 1.1 s with the lane prompts saved.
 | how do I keep mosquitoes away at camp? | its own | model-written, opener shown | **71.1 s** |
 | i’m lost (curly apostrophe) | third of three | map card, basemap and contours drawn | not logged |
 
-- **The model-written answer took 71 s on the simulator** (opening line at
-  24.6 s, answer from 68.9 s, 1,190 tokens) against 15.3 s on the phone. The
-  simulator runs the generator on the CPU and is not the device; this is not an
-  iOS latency figure. It does show the whole path works: intent, opener,
-  answer.
+- **The simulator is not a phone, and none of these times is a measurement.**
+  The model-written answer took 71 s (15.3 s on the Android phone); the
+  generator runs on the Mac's CPU here. What the row shows is that the whole
+  path works on iOS: intent, opener, answer. Timing waits for a real iPhone.
 - **The fish question got the plants card.** On the phone on 2026-10-07 the
   spoiled-fish question was a model-written answer. Old cards are the likely
   cause; check again on the current packs before reading anything into it.
@@ -310,9 +309,23 @@ parity at cos 0.9997; the engine was ready in 1.1 s with the lane prompts saved.
   `xcrun simctl spawn <udid> log stream --level info --predicate 'process == "Fred" AND eventMessage CONTAINS "[fred]"'`
 - **Installing over the app keeps `Documents/`**, so models, map and packs
   survive a rebuild. `simctl uninstall` does not keep them.
+- **`simctl` cannot tap.** `tools/ios/tap.swift` posts a mouse click at a screen
+  point, which Device Hub passes to the app. Check the result with
+  `simctl io screenshot`; `screencapture` raises a Screen Recording prompt that
+  sits over the simulator and takes the clicks.
+
+## The map screen and the download panel
+
+Tapped through in the simulator (`tools/ios/tap.swift`). The "Fred" title opens
+the full map: California basemap, land cover and contours, the position dot,
+"within 5 m · CA". "Offline maps" opens the download panel with the catalog
+fetched from `fred-maps`: every state with its size, and California as
+"Partly downloaded · 146 MB to go" (the simulator has the basemap and a trial
+contour file, not the bundle). "Done" and "Back to chat" return. **No download
+was started**, so fetching, unpacking and swapping a pack on iOS are untested.
 
 ## Still unknown
 
 - Everything on the current twelve packs.
-- The map-download panel on iOS: not opened.
+- A bundle download on iOS, start to finish.
 - A real iPhone, as before.

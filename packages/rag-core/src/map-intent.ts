@@ -50,10 +50,16 @@ const WANTS_SIGNAL: readonly RegExp[] = [
   /\b(?:can'?t|cannot|can not|couldn'?t|unable to)\s+(?:call\s+(?:911|out|for\s+help|anyone|anybody|for\s+rescue)|get\s+(?:a\s+)?(?:call|text)\s+(?:out|through)|get\s+(?:(?:a|any)\s+)?(?:signal|service|reception|bars))\b/i,
 ];
 
+// The iOS keyboard types "I’m" with a curly apostrophe by default, which the
+// patterns' straight ' does not match: "i’m lost" opened no map on iOS.
+const straight = (message: string): string => message.replace(/[‘’ʼ]/g, "'");
+
 export function wantsSignal(message: string): boolean {
-  return WANTS_SIGNAL.some((r) => r.test(message));
+  const m = straight(message);
+  return WANTS_SIGNAL.some((r) => r.test(m));
 }
 
 export function wantsMap(message: string): boolean {
-  return LOST.some((r) => r.test(message)) || wantsSignal(message);
+  const m = straight(message);
+  return LOST.some((r) => r.test(m)) || wantsSignal(m);
 }

@@ -24,6 +24,7 @@ const state = process.env.STATE ?? null;
 for (const turns of chats) {
   const asked: { q: string; kind: string; topScore: number }[] = [];
   let lastCard: string | undefined;
+  let lastWasPet = false;
   for (const q of turns) {
     const last = asked.at(-1);
     const previous = last !== undefined && last.kind === 'answer' ? { question: last.q, topScore: last.topScore } : undefined;
@@ -33,6 +34,7 @@ for (const turns of chats) {
       ...(previous === undefined ? {} : { previous }),
       ...(history.length === 0 ? {} : { history }),
       ...(lastCard === undefined ? {} : { lastCard }),
+      ...(lastWasPet ? { previousWasPet: true } : {}),
     });
     const d = r.diagnostics;
     const what = r.kind === 'answer' ? (d.cardAnswer ? `CARD ${r.citations[0]?.section ?? ''}` : `MODEL from ${r.citations.map((c) => c.section).join(' | ')}`)
@@ -43,12 +45,14 @@ for (const turns of chats) {
     console.log(`  -> ${what}`);
     console.log(`  intent=${d.intent ?? '-'} top=${d.topScore.toFixed(3)} danger=${dangerSign([...history, q])}` +
       `${d.scope ? ` scope=${d.scope.z.toFixed(2)}[${d.scope.used.join(',')}]` : ''}` +
+      `${d.said ? ` said=${d.said.label.slice(0, 24)}:${d.said.p.toFixed(2)}[${d.said.used.join(',')}]${d.said.pet ? ' pet' : ''}` : ''}${d.everyday ? ` everyday=${d.everyday.routedTopScore.toFixed(3)}->${d.everyday.topScore.toFixed(3)}` : ''}` +
       `${d.conditions ? ` conditions=${d.conditions.join(',')}` : ''}${d.agreedCard ? ` agreed=${d.agreedCard}` : ''}` +
       `${d.understood ? ` understood="${d.understood.request}"${d.understood.used ? ' (used)' : ''}` : ''}`);
     for (const c of [...(d.candidates ?? [])].sort((a, b) => b.score - a.score).slice(0, 4)) {
       console.log(`     ${c.score.toFixed(3)} ${c.chunk.packId} | ${c.chunk.section.slice(0, 70)}`);
     }
     asked.push({ q, kind: r.kind, topScore: d.topScore });
+    lastWasPet = d.said?.pet === true;
     lastCard = r.kind === 'answer' && r.citations[0]?.source === 'Fred field card' ? r.citations[0].section : undefined;
   }
 }

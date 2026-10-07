@@ -7,7 +7,7 @@
  * tools/eval.
  */
 import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
-import type { CardSource, ChunkRecord } from '@fred/pack-format';
+import type { CardSource, ChunkRecord, DomainTag } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
 import { isRefusal, DEAD_ENDS, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
@@ -16,7 +16,8 @@ import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient, stuckOnTerrain } from './triage.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
+import { noCardKind, saidAs, type Said, type SaidAsModel } from './said-as.ts';
 import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
@@ -225,6 +226,18 @@ export interface AskOptions {
    * (scope.ts). Off by default until measured.
    */
   readonly scope?: ScopeModel;
+  /**
+   * #152: the matcher that says which field card a message is about
+   * (said-as.ts). A card opened under the gate must be one the message
+   * supports, and a pet or a medicine is known by more than a word list.
+   */
+  readonly saidAs?: SaidAsModel;
+  /**
+   * #152: the matcher called the message just before this one a pet's
+   * (diagnostics.said.pet of that reply). "its bleeding a fair bit" after
+   * "our lab tore a pad on the lava rock" is still about the dog.
+   */
+  readonly previousWasPet?: boolean;
 }
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
@@ -249,6 +262,22 @@ const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|ho
 
 /** The best card counts as leading when it scores at least this share of the top result. */
 export const INTENT_CARD_NEAR_TOP = 0.85;
+/**
+ * #152: a card opened under the gate stays when the matcher gives it at least
+ * this share (said-as.ts), sure of it or not. Below it the message says
+ * something else: "my friend tripped and landed on her wrist" gave the shock
+ * card it opened under 0.01.
+ */
+export const SAID_SOME = 0.05;
+/**
+ * #145: an everyday question is searched in the tips packs too, and that
+ * search is kept when a tip leads it by this much over the routed search.
+ * "how should i dress for a cold hike" was routed to first aid by "cold" and
+ * "freezing", cleared the gate at 0.301 with a survival-manual passage that
+ * opens on hot-weather clothing ("cotton or linen"), and never reached the
+ * tips page on cold-weather clothing at 0.479.
+ */
+export const EVERYDAY_MARGIN = 0.05;
 /** Childbirth and surgery are declined on purpose (tuning set), whatever the scorer says. */
 const BEYOND_FIRST_AID = /\blabou?r\b|\bcontractions\b|\b(?:deliver|delivering) (?:the|a|her|our) baby\b|\bgiv(?:e|ing) birth\b|\bamputat\w*/i;
 
@@ -337,7 +366,7 @@ function fieldCards(store: PackStore, packId: string): Promise<Map<string, Chunk
  */
 const THREAD_CARD_MARGIN = 0.5;
 /** A question about medicine or a clinical procedure: never answered by a condition's card (#101). */
-const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\w*|\bstaple\w*|\b(?:ibuprofen|advil|tylenol|acetaminophen|aspirin|benadryl|antibiotics?|painkillers?|morphine|meds?|medication|medicine|pills?|dose|dosage|mg|milligrams?)\b|\bhow (?:many|much) (?:\w+ )?(?:can|should) (?:i|he|she|they|we) (?:take|give)\b/i;
+const MEDICINE_OR_PROCEDURE = /\bblood type\b|\btransfus\w*|\bstitch\w*|\bsutur\w*|\bstaple\w*|\b(?:ibuprofen|advil|tylenol|acetaminophen|aspirin|benadryl|naproxen|aleve|motrin|excedrin|paracetamol|imodium|diamox|antihistamines?|antibiotics?|painkillers?|morphine|meds?|medication|medicine|pills?|dose|dosage|overdos\w*|mg|milligrams?)\b|\bhow (?:many|much) (?:\w+ )?(?:can|should) (?:i|he|she|they|we) (?:take|give)\b|\bhow (?:many|much) [\w' ]{1,30}? (?:is|are) too (?:many|much)\b/i;
 /** The body, the wound or the care, in a follow-up about a condition (#101). */
 const ABOUT_THE_CARE = /\b(?:legs?|arms?|hands?|fingers?|fingertips?|thumb|wrist|ankle|knees?|foot|feet|toes?|calf|thigh|neck|back|head|face|lips|mouth|throat|chest|skin|wound|bite|sting|burn|blisters?|cut|swelling|bleeding|breathing|rings?|splint|bandage|dressing|ice|cold pack|warm(?: up|ing)?|rub|massage|drink|eat|sleep|nap|rest|walk|move|carry|evacuat\w*|hospital|doctor)\b/i;
 /** A symptom or a worsening condition reported in a statement (#101). Not "fine", "better". */
@@ -538,6 +567,13 @@ export interface Diagnostics {
   readonly intent?: Intent;
   /** The scope scorer's score, and what it changed, when it is on (scope.ts). */
   readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate')[] };
+  /**
+   * The card matcher's top label and its share, what it changed, and whether
+   * it took the message as a pet's (said-as.ts).
+   */
+  readonly said?: { readonly label: string; readonly p: number; readonly pet: boolean; readonly used: readonly ('card' | 'no-card' | 'opened')[] };
+  /** The everyday-tips packs were searched too and led (#145). */
+  readonly everyday?: { readonly routedTopScore: number; readonly topScore: number };
   /** Small talk taken as news about a problem still open in the conversation. */
   readonly newsNotChat?: boolean;
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
@@ -739,7 +775,7 @@ async function askCore(
     // 2026-09-30).
     // Never for a medicine or a procedure: "what blood type can I give them?"
     // after heavy bleeding got the bleeding card (conversation set, #101).
-    if (MEDICINE_OR_PROCEDURE.test(q)) return undefined;
+    if (MEDICINE_OR_PROCEDURE.test(q) || (q === query && medicine)) return undefined;
     // A situation (being lost) is not what a question about the body is
     // about, even one that points back: "I have a bad blister on my heel...
     // what should I do about it?" (conversation set).
@@ -859,11 +895,26 @@ async function askCore(
     }
   }
 
+  // #152 (said-as.ts): which card the message is about, or what kind of
+  // message no card is for, when the matcher is sure. A pet and a medicine
+  // are known by the word lists or by the matcher: "our lab tore a pad on
+  // the lava rock" has no "dog" in it, "how many naproxen is too many" named
+  // a medicine the list lacked.
+  const saidOn = opts.saidAs !== undefined && opts.understand !== false && opts.guards !== false;
+  const saidList: readonly Said[] = saidOn ? saidAs(opts.saidAs!, await queryVector(backend, query)) : [];
+  const saidTop = saidList[0];
+  const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
+  const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
+  const saidUsed: ('card' | 'no-card' | 'opened')[] = [];
+  const saidPet = (saidKind === 'pet' || (opts.previousWasPet === true && saidOn && pointsBackAtPet(query))) && !personIsHurt(query);
+  const aboutPet = ABOUT_A_PET.test(query) || saidPet;
+  const medicine = MEDICINE_OR_PROCEDURE.test(query) || saidKind === 'medicine';
+
   // Experiment (scope.ts): does the message need an answer, by a scorer
   // trained for that question rather than by how well it matches a passage.
   // Never for a medicine or a procedure: those are declined on purpose.
   const scopeZ = opts.scope === undefined ? undefined : scopeScore(opts.scope, await queryVector(backend, query));
-  const inScope = scopeZ !== undefined && scopeZ >= opts.scope!.threshold && !MEDICINE_OR_PROCEDURE.test(query) && !BEYOND_FIRST_AID.test(query);
+  const inScope = scopeZ !== undefined && scopeZ >= opts.scope!.threshold && !medicine && !BEYOND_FIRST_AID.test(query);
   const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate')[] = [];
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
@@ -890,6 +941,8 @@ async function askCore(
   // Intent: what the hiker wants, beside what they are talking about.
   let intent: Intent | undefined;
   let forcedCard: ScoredChunk | undefined;
+  // #152: the forced card is the one that led this message's own search.
+  let forcedOwn = false;
   let offer: CardOffer | undefined;
   const reserve = retrievalOpts.reserve;
   const isCard = (c: ScoredChunk): boolean => reserve !== undefined && c.chunk.packId === reserve.packId && c.chunk.audience !== 'provider';
@@ -946,6 +999,7 @@ async function askCore(
   let threadCard: ScoredChunk | undefined;
   // Small talk read as news about an open problem (below); ask() turns a decline back into small talk.
   let newsNotChat = false;
+  let everyday: { routedTopScore: number; topScore: number } | undefined;
   // Nothing but thanks or an acknowledgement is small talk, without asking the
   // model: "ok thanks" after a burn is three words, so it was read in its
   // conversation, restated as "bubbles on skin, what to do", called NOW, and
@@ -1021,11 +1075,28 @@ async function askCore(
         }
       }
     }
+    // #145: a question that is no emergency is searched in the everyday-tips
+    // packs too when routing left them out, and that search is kept when a tip
+    // leads it clearly (EVERYDAY_MARGIN). Routing picks packs by vocabulary,
+    // and a routed search that just clears the gate is never widened.
+    const tipsLeftOut = [...tipsPackIds].filter((id) => !routed.packIds.includes(id));
+    if (guardsOn && (intent === 'question' || intent === 'prevent') && tipsLeftOut.length > 0 && u === undefined) {
+      const packIds = [...routed.packIds, ...tipsLeftOut];
+      const domains: DomainTag[] = [...new Set<DomainTag>([...routed.domains, 'outdoor-skills'])];
+      const cs = await retrieve(keywords, packIds, store, backend, retrievalOpts, domains, searchText);
+      const lead = cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+      if (lead !== undefined && tipsPackIds.has(lead.chunk.packId) && lead.score >= effectiveThreshold && lead.score >= topScore + EVERYDAY_MARGIN) {
+        everyday = { routedTopScore: topScore, topScore: lead.score };
+        routed = { ...routed, packIds, domains, reason: `${routed.reason}; everyday tips searched too` };
+        candidates = cs;
+        topScore = lead.score;
+      }
+    }
     // An emergency that found nothing, and no card to fall back on, is read
     // again in plain words: "uhh dude there's a bear in front of me".
     const noTipsPool = (): readonly RoutablePack[] => packs.filter((p) => !tipsPackIds.has(p.id));
     if (understandOn && u === undefined && intent === 'now' && topScore < effectiveThreshold &&
-        leadingCard(candidates, isCard, await supportOf(candidates)) === undefined && !ABOUT_A_PET.test(query)) {
+        leadingCard(candidates, isCard, await supportOf(candidates)) === undefined && !aboutPet) {
       u = await understandMessage(query, history, backend, opts.signal);
       if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
       if (u?.intent === 'out') intent = 'question';
@@ -1095,25 +1166,26 @@ async function askCore(
     // question too opened the cuts card for "talk me through stitching a cut
     // closed" on the tuning set. And a pet is never the patient: veterinary
     // care is out of scope, and "my dog cut his paw" opened the human card.
-    if (guardsOn && explainCard !== undefined && intent !== 'prevent' && !ABOUT_A_PET.test(query)) forcedCard = agreedCard = explainCard;
-    else if (topCard !== undefined && intent === 'now' && !ABOUT_A_PET.test(query)) forcedCard = topCard;
+    if (guardsOn && explainCard !== undefined && intent !== 'prevent' && !aboutPet) forcedCard = agreedCard = explainCard;
+    else if (topCard !== undefined && intent === 'now' && !aboutPet) { forcedCard = topCard; forcedOwn = true; }
     // #101: a message that says what happened opens that condition's card when
     // it leads, even read as a question: "i think im lost" led with the lost
     // card at 0.252 and only offered it, folded under "I don't have reliable
     // information on that".
-    else if (guardsOn && topCard !== undefined && setHere.some((c) => c.card === topCard.chunk.section) && !ABOUT_A_PET.test(query)) forcedCard = agreedCard = topCard;
+    else if (guardsOn && topCard !== undefined && setHere.some((c) => c.card === topCard.chunk.section) && !aboutPet) { forcedCard = agreedCard = topCard; forcedOwn = true; }
     // Round 2: two searches agreeing beat one score. An emergency whose card
     // leads the hiker's own search, but under the card floor, opens it when
     // the understanding step's request, searched on its own, puts the same
     // card first. "ok it left. my kid just burned her hand on the stove": the
     // burns card led at 0.139, under 0.15, and the request found it too
     // (phone, 2026-09-30); Fred showed the safety net.
-    else if (guardsOn && topCard === undefined && intent === 'now' && !ABOUT_A_PET.test(query)) {
+    else if (guardsOn && topCard === undefined && intent === 'now' && !aboutPet) {
       const own = candidates.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
       if (own !== undefined && own.score >= AGREED_CARD_FLOOR && requestCard !== undefined &&
           requestCard.score >= AGREED_REQUEST_FLOOR && own.chunk.id === requestCard.chunk.id && ownCard(own) !== undefined) {
         forcedCard = agreedCard = own;
-      } else if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
+        forcedOwn = true;
+      } else if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
@@ -1138,9 +1210,9 @@ async function askCore(
     // A short question with nothing of its own takes its thread's card too:
     // "we lost the trail a while ago" / "sun is setting" / "what now" was read
     // as a question and declined (confirmation chat set).
-    else if (guardsOn && topCard === undefined && intent === 'question' && !ABOUT_A_PET.test(query)) {
+    else if (guardsOn && topCard === undefined && intent === 'question' && !aboutPet) {
       const said = setHere[0];
-      if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !MEDICINE_OR_PROCEDURE.test(query) &&
+      if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
           (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
         forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
@@ -1160,7 +1232,7 @@ async function askCore(
     // Fred must decline ("walk me through stitching a cut"), a safe
     // alternative (the cuts card: clean it and cover it). Only an answer
     // leaves it out; a pet still never gets a human card.
-    else if (topCard !== undefined && !ABOUT_A_PET.test(query)) offer = toOffer(topCard, citeOf(topCard, 0));
+    else if (topCard !== undefined && !aboutPet) offer = toOffer(topCard, citeOf(topCard, 0));
     // A prevention question takes the normal path, cards included: several
     // cards are prevention guidance ("staying warm on a cold night", "staying
     // healthy", "river crossing"), and hiding them cost three tuning answers.
@@ -1175,7 +1247,7 @@ async function askCore(
   }
   // Round 2: a pet that is hurt or sick is outside Fred's scope, and the
   // human cards are wrong for it (triage.ts).
-  const petPatient = guardsOn && petIsPatient(query, opts.history?.at(-1));
+  const petPatient = guardsOn && (petIsPatient(query, opts.history?.at(-1)) || saidPet);
 
   // A card must never be shown, open or folded, after a condition it is not
   // for (conditions.ts). A folded offer becomes the condition's own card.
@@ -1205,13 +1277,15 @@ async function askCore(
     // (sealed chat set).
     const card = /\b(?:berr(?:y|ies)|mushrooms?|fungus|fungi)\b/i.test(query) ? await cardByTitle('Eating wild plants and berries')
       : offer === undefined ? undefined : await cardByTitle(offer.title);
-    if (card !== undefined && forcedCard === undefined) forcedCard = agreedCard = card;
+    if (card !== undefined && forcedCard === undefined) { forcedCard = agreedCard = card; forcedOwn = card.chunk.section === offer?.title; }
   }
 
   const baseDiag = {
     ...(intent === undefined ? {} : { intent }),
     ...(newsNotChat ? { newsNotChat } : {}),
     ...(scopeZ === undefined ? {} : { scope: { z: scopeZ, used: scopeUsed } }),
+    ...(saidTop === undefined ? {} : { said: { label: saidTop.label, p: saidTop.p, pet: saidPet, used: saidUsed } }),
+    ...(everyday === undefined ? {} : { everyday }),
     keywords,
     route: routed,
     maxTokens,
@@ -1235,7 +1309,7 @@ async function askCore(
   // card folded, "it's getting cold fast" (lost overnight) the shelter card.
   if (intent === 'chat' && guardsOn && offer !== undefined && SYMPTOM_REPORT.test(query) && !saysResolved(query) && !petPatient) {
     const card = await cardByTitle(offer.title);
-    if (card !== undefined) { forcedCard = agreedCard = card; intent = 'question'; }
+    if (card !== undefined) { forcedCard = agreedCard = card; forcedOwn = true; intent = 'question'; }
   }
 
   if (intent === 'chat') {
@@ -1243,6 +1317,34 @@ async function askCore(
       kind: 'chat', reply: offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: offer ?? null,
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
+  }
+
+  // #152: a card opened under the gate because it led the message's own search
+  // must be one the message supports (said-as.ts).
+  /**
+   * The card itself; the card the matcher is sure of, or leans to when the
+   * message gives this one no share; or none, when the message is about
+   * something no card is for.
+   */
+  const supportedCard = async (card: ScoredChunk): Promise<ScoredChunk | undefined> => {
+    if (saidTop === undefined || saidTop.label === card.chunk.section) return card;
+    const share = saidList.find((x) => x.label === card.chunk.section)?.p ?? 0;
+    const toKind = noCardKind(saidTop.label);
+    // Another card, sure or leaning: "we need to drink from this stream" led
+    // with the river-crossing card and leaned to the water card at 0.66.
+    if (toKind === undefined && (saidSure !== undefined || saidTop.p >= opts.saidAs!.leans)) {
+      const other = ownCard(await cardByTitle(saidTop.label));
+      if (other !== undefined && blockingCondition(other.chunk.section, active) === undefined) { saidUsed.push('card'); return other; }
+      return card;
+    }
+    // Sure it is something else, or the card has no share: no card.
+    if (saidSure !== undefined || share < SAID_SOME) { saidUsed.push('no-card'); return undefined; }
+    return card;
+  };
+  if (forcedCard !== undefined && forcedOwn && forcedCard.score < effectiveThreshold) {
+    forcedCard = await supportedCard(forcedCard);
+    agreedCard = forcedCard === undefined ? undefined : agreedCard === undefined ? undefined : forcedCard;
+    if (saidUsed.includes('card')) agreedCard = forcedCard;
   }
 
   // A follow-up about a condition already in the conversation that would
@@ -1291,7 +1393,7 @@ async function askCore(
   // second chance where every rule above would decline it or give a fixed
   // reply. Never for a pet, or what the model called out of scope.
   if (inScope && forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold) &&
-      u?.intent !== 'out' && !petPatient && !ABOUT_A_PET.test(query)) {
+      u?.intent !== 'out' && !petPatient && !aboutPet) {
     // A statement ("my husband just sliced his palm on a tin can") matches
     // passages written as instructions poorly. Searched as a request for what
     // to do, the same words reach them; kept only when it scores higher, and
@@ -1300,7 +1402,15 @@ async function askCore(
     // Not a message that leans on earlier ones (currentThread): "everything's soaked
     // though" after a fire question reached the soaked-bandage card, and
     // "he's getting kind of shaky" about a diabetic the hypothermia card.
-    if (!asksSomething(query) && history.length === 0) {
+    // #152: the card the message says, when the matcher is sure, before any
+    // second search: "ran hot water over my wrist by accident" has no card
+    // leading either search.
+    const saidCard = saidSure !== undefined && saidKind === undefined && !saysResolved(query) ? ownCard(await cardByTitle(saidSure.label)) : undefined;
+    if (saidCard !== undefined && blockingCondition(saidCard.chunk.section, active) === undefined) {
+      forcedCard = agreedCard = saidCard;
+      saidUsed.push('opened');
+    }
+    if (forcedCard === undefined && !asksSomething(query) && history.length === 0) {
       const pool = intent === 'now' ? packs.filter((p) => !tipsPackIds.has(p.id)) : packs;
       const text = asRequest(searchText);
       const r0 = intent === 'now' ? route(keywords, pool, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) }) : routed;
@@ -1324,8 +1434,11 @@ async function askCore(
     // normal gate. A lower gate for these messages was measured and rejected:
     // written from passages under it, answers to sore knees, cactus spines and
     // chafing were made up (docs/results-scope-scorer.md).
-    const led = candidates.length === 0 ? undefined : ownCard(leadingCard(candidates, isCard, await supportOf(candidates)));
-    if (led !== undefined && blockingCondition(led.chunk.section, active) === undefined) {
+    const leading = forcedCard !== undefined || candidates.length === 0 ? undefined : ownCard(leadingCard(candidates, isCard, await supportOf(candidates)));
+    const led = leading === undefined ? undefined : await supportedCard(leading);
+    if (forcedCard !== undefined) {
+      // The matcher's card, above.
+    } else if (led !== undefined && blockingCondition(led.chunk.section, active) === undefined) {
       forcedCard = agreedCard = led;
       scopeUsed.push('card');
     } else if (topScore >= effectiveThreshold) {
@@ -1363,7 +1476,7 @@ async function askCore(
     // the highest ground, and the lost card's that moving may be better;
     // both summaries, reviewed text, say what fits (stay put; be seen and
     // heard), with the signalling card folded beneath.
-    if (guardsOn && !ABOUT_A_PET.test(query) && stuckOnTerrain([...history, query])) {
+    if (guardsOn && !aboutPet && stuckOnTerrain([...history, query])) {
       const signal = await cardByTitle('Signalling for rescue');
       const lost = await cardByTitle('Lost: should I stay or keep moving?');
       if (signal !== undefined && lost !== undefined) {
@@ -1375,7 +1488,7 @@ async function askCore(
         };
       }
     }
-    if (understandOn && intent === 'now' && !ABOUT_A_PET.test(query)) {
+    if (understandOn && intent === 'now' && !aboutPet) {
       const danger = !guardsOn || dangerSign([...history, query]);
       return {
         kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,

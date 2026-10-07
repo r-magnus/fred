@@ -11,7 +11,7 @@
  * say how it was produced is not evidence.
  */
 import { readFileSync } from 'node:fs';
-import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type AskOptions, type CardAnswerMode, type RetrievalOptions, type ScopeModel } from '@fred/rag-core';
+import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type AskOptions, type CardAnswerMode, type RetrievalOptions, type SaidAsModel, type ScopeModel } from '@fred/rag-core';
 
 function scopeModelFromFile(path: string, threshold?: string): ScopeModel {
   const m = JSON.parse(readFileSync(path, 'utf8')) as ScopeModel;
@@ -122,5 +122,7 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.OPENER === '1' ? { opener: true } : {}),
     // SCOPE=<model.json>: the scope scorer's second chance (scope.ts). SCOPE_T overrides its threshold.
     ...(env.SCOPE !== undefined && env.SCOPE !== '' ? { scope: scopeModelFromFile(env.SCOPE, env.SCOPE_T) } : {}),
+    // SAID=<model.json>: the card matcher (said-as.ts, #152).
+    ...(env.SAID !== undefined && env.SAID !== '' ? { saidAs: JSON.parse(readFileSync(env.SAID, 'utf8')) as SaidAsModel } : {}),
   };
 }

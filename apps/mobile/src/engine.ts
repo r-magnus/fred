@@ -12,7 +12,7 @@
  */
 import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
-import { ask, verifyEmbedderParity, warmUp, SCOPE_MODEL, type AskResult, type RoutablePack } from '@fred/rag-core';
+import { ask, verifyEmbedderParity, warmUp, SAID_AS_MODEL, SCOPE_MODEL, type AskResult, type RoutablePack } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
 
 const BASE = Paths.document;
@@ -153,9 +153,13 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
       chunks: manifests.reduce((n, m) => n + m.chunkCount, 0),
     });
 
+    // #152: the message the card matcher last took as a pet's, so a follow-up
+    // that only says "its bleeding" is still about the dog.
+    let petMessage: string | undefined;
     return {
       ask: async (question, state, signal, previous, history, lastCard) => {
         const t0 = Date.now();
+        const previousWasPet = petMessage !== undefined && history?.at(-1) === petMessage;
         const res = await ask(question, { backend, store, packs }, {
           state,
           // Decide what the hiker wants, not just the topic: casual emergencies
@@ -169,11 +173,17 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // declined (#149, docs/results-scope-scorer.md). Field test: a
           // `devhooks-no-scope` file beside `devhooks` turns it off.
           ...(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-scope').exists ? {} : { scope: SCOPE_MODEL }),
+          // Which card a message is about, by example (#152,
+          // docs/results-said-as.md). Field test: a `devhooks-no-said` file
+          // beside `devhooks` turns it off.
+          ...(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-said').exists ? {} : { saidAs: SAID_AS_MODEL }),
+          ...(previousWasPet ? { previousWasPet } : {}),
           ...(signal === undefined ? {} : { signal }),
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),
           ...(lastCard === undefined ? {} : { lastCard }),
         });
+        petMessage = res.diagnostics.said?.pet === true ? question : undefined;
         return timed(res, t0);
       },
       availableStates: () => states,
@@ -215,7 +225,7 @@ function timed(res: AskResult, t0: number): AskResult {
   const reason = res.kind === 'abstain' ? ` reason=${res.reason}` : '';
   // Round 2 of #98: conditions in the conversation, a card held back, two searches agreeing.
   const d = res.diagnostics;
-  const guards = `${d.scope === undefined || d.scope.used.length === 0 ? '' : ` scope=${d.scope.used.join('+')}`}${d.conditions === undefined ? '' : ` conditions=${d.conditions.join(',')}`}${d.blocked === undefined ? '' : ` blocked=${JSON.stringify(d.blocked.card)}`}${d.agreedCard === undefined ? '' : ` agreed=${JSON.stringify(d.agreedCard)}`}`;
+  const guards = `${d.scope === undefined || d.scope.used.length === 0 ? '' : ` scope=${d.scope.used.join('+')}`}${d.said === undefined || (d.said.used.length === 0 && !d.said.pet) ? '' : ` said=${[...d.said.used, ...(d.said.pet ? ['pet'] : [])].join('+')}`}${d.everyday === undefined ? '' : ' everyday'}${d.conditions === undefined ? '' : ` conditions=${d.conditions.join(',')}`}${d.blocked === undefined ? '' : ` blocked=${JSON.stringify(d.blocked.card)}`}${d.agreedCard === undefined ? '' : ` agreed=${JSON.stringify(d.agreedCard)}`}`;
   const tm = res.diagnostics.timing;
   const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {

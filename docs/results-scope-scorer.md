@@ -132,6 +132,64 @@ tourniquet"; "all we have is a tarp and some cord"). The two-turn follow-up
 sets were already answered 41 of 41 and did not move. A follow-up whose
 first message Fred still does not answer is still read alone.
 
+## Confirmed on chats nobody had looked at (2026-10-07)
+
+`tools/eval/data/holdout-chats-3.json`: 24 chats (37 messages) written after
+everything above and committed before the scorer was run on any of them.
+Same settings, answers generated. Runs: `scope-scorer/chats-3-runs-{off,on}.jsonl`.
+
+| | Scorer off | Scorer on |
+|---|---:|---:|
+| Chats whose every reply is the right kind (24) | 15 | **17** |
+| Messages with the wrong kind of reply (37) | 13 | **10** |
+| Replies better / worse | | 5 / 0 |
+
+Better: the cuts card for "the knife closed on my thumb while i was whittling
+a stake" and its rinse lines for "do i need to wash it out"; the wild-plants
+card for a bush of dark purple berries (both messages); "stay back" for a bull
+elk pawing the ground. All 6 small-talk messages stayed small talk and none of
+the 7 should-decline messages got a second chance.
+
+The gain is smaller than on the sets that shaped the design. Four more
+messages were scored as needing an answer and still got none, because the
+search led with no card for them: hot water over a wrist (0.14), a missed
+junction, thunder from a canoe, dry bottles beside a scummy tarn. The scorer
+was right about all 37 messages; what it can do with that is limited by the
+search.
+
+Seen on this set and the same with the scorer off: a dog's bleeding paw gets
+the human bleeding card ("its bleeding a fair bit"), a naproxen dose question
+gets the back-injury card, a scraped shin gets the sprain card.
+
+## On the phone (2026-10-07)
+
+Nothing Phone (3), the field-test build of f4d7025 with the scorer on, eight
+chats (18 messages) through the devhooks inbox, each run twice: scorer on,
+then off (`devhooks-no-scope`). Logs: `scope-scorer/phone-chats-{on,off}.txt`.
+
+| Chat | Scorer off | Scorer on |
+|---|---|---|
+| "the knife closed on my thumb while i was whittling a stake" / "do i need to wash it out" | watch reply, watch reply | cuts card, then its rinse lines |
+| "rolled my ankle on a rock" / "can i put ice on it" | "Got it", then a model-written answer at 19.0 s | sprain card at 3.4 s, then its ice line at 2.8 s |
+| "the kids found a bush covered in dark purple berries" / "they look like the ones from the store" | "Got it", "Got it" | wild-plants card, "Got it" |
+| "a bull elk is standing in the trail staring at us and pawing the ground" | "Got it" | "stay back", model-written, 9.3 s |
+| "my husband just sliced his palm on a tin can" / "how do i clean it" | watch reply, watch reply | cuts card, cuts card |
+| "is it safe to stay up here on the ridge" / "we hear thunder" / "all we have is a tarp and some cord" | decline, "Got it", "Got it" | decline, "move to safe shelter immediately", shelter card |
+| three small-talk messages | "Got it" x3 | the same |
+| a stuck truck, a naproxen dose, a dog's torn pad | watch, decline, watch | the same |
+
+9 of 18 replies change, all for the better; the six that should stay small
+talk or be declined are untouched. Two things to note: the second berries
+message stays "Got it" on the phone where the desktop gave the card again,
+and the elk answer adds "avoid direct eye contact" and "use bear spray if
+available", which I have not checked against its source passage.
+
+**Time before the reply is decided:** unchanged where the scorer does
+nothing (1.0-1.9 s for the small talk, either way). Where it searches a
+statement again, about 0.5-1.2 s more (thumb 3.5 → 4.0 s, palm 3.6 → 4.8 s,
+elk 1.2 → 2.0 s). The rolled ankle's follow-up went from 19.0 s to 2.8 s,
+because the first message now has a card for the follow-up to be read from.
+
 ## Tried and rejected
 
 - **A lower gate (0.15) for messages the scorer is sure about.** About 30
@@ -164,8 +222,8 @@ wrote the change, and not blind in practice.
 
 ## Open
 
-- Not in the app. Turning it on needs the weights shipped with the app, a
-  phone build and a phone check, and fresh sealed chats first.
+- In the app since 2026-10-07 (weights in `scope-model.ts`; a
+  `devhooks-no-scope` file turns it off for field tests). Phone check below.
 - Wrong card for a statement (wrist, stream): a search problem. A scorer
   trained per card on example messages is the same idea one step further,
   and it would need about 15 example messages per card.

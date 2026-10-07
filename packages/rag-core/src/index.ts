@@ -22,3 +22,4 @@ export * from './exposures.ts';
 export * from './sentences.ts';
 export * from './opener.ts';
 export * from './scope.ts';
+export * from './scope-model.ts';

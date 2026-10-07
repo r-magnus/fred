@@ -75,6 +75,7 @@ for (const [i, c] of conversations.entries()) {
     topScore: d.topScore,
     intent: d.intent ?? null,
     ...(d.understood === undefined ? {} : { understood: d.understood }),
+    ...(d.scope === undefined ? {} : { scope: d.scope }),
     cardAnswer: d.cardAnswer ?? null,
     citations: res.kind === 'answer'
       ? res.citations.map((x) => `${x.source}${x.page === null ? '' : ` p.${x.page}`} — ${x.section}`)

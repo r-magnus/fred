@@ -26,6 +26,7 @@ import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 import { makeOpener } from './opener.ts';
+import { asRequest, scopeScore, type ScopeModel } from './scope.ts';
 
 /**
  * Abstention threshold on the fused score U_i.
@@ -218,6 +219,12 @@ export interface AskOptions {
    * with guards off. Off by default until measured.
    */
   readonly opener?: boolean;
+  /**
+   * Experiment: a trained scorer on the message's search vector gives a
+   * second chance to messages about to be called small talk or declined
+   * (scope.ts). Off by default until measured.
+   */
+  readonly scope?: ScopeModel;
 }
 
 export type CardAnswerMode = 'off' | 'verbatim' | 'card-only' | 'pick';
@@ -242,6 +249,8 @@ const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|ho
 
 /** The best card counts as leading when it scores at least this share of the top result. */
 export const INTENT_CARD_NEAR_TOP = 0.85;
+/** Childbirth and surgery are declined on purpose (tuning set), whatever the scorer says. */
+const BEYOND_FIRST_AID = /\blabou?r\b|\bcontractions\b|\b(?:deliver|delivering) (?:the|a|her|our) baby\b|\bgiv(?:e|ing) birth\b|\bamputat\w*/i;
 
 /**
  * The understanding step's search is kept only if its best passage is among
@@ -527,6 +536,8 @@ export interface Diagnostics {
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
+  /** The scope scorer's score, and what it changed, when it is on (scope.ts). */
+  readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate')[] };
   /** Small talk taken as news about a problem still open in the conversation. */
   readonly newsNotChat?: boolean;
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
@@ -847,6 +858,13 @@ async function askCore(
       topScore = w.top;
     }
   }
+
+  // Experiment (scope.ts): does the message need an answer, by a scorer
+  // trained for that question rather than by how well it matches a passage.
+  // Never for a medicine or a procedure: those are declined on purpose.
+  const scopeZ = opts.scope === undefined ? undefined : scopeScore(opts.scope, await queryVector(backend, query));
+  const inScope = scopeZ !== undefined && scopeZ >= opts.scope!.threshold && !MEDICINE_OR_PROCEDURE.test(query) && !BEYOND_FIRST_AID.test(query);
+  const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate')[] = [];
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
@@ -1171,9 +1189,29 @@ async function askCore(
     }
   }
 
+  // Experiment (scope.ts): the model's CHAT is overruled when the scorer
+  // says the message needs an answer, after every rule above has had its
+  // say: "rolled my ankle on a rock" got "Got it" with the sprain card
+  // folded. The folded card is opened; with none, the message goes on as a
+  // question, and if nothing then answers it ask() falls back to small talk.
+  // Not when the hiker says it is over or is only acknowledging.
+  if (inScope && intent === 'chat' && !saysResolved(query) && !ACKNOWLEDGES.test(query) && !petPatient) {
+    intent = dangerSign([...history, query]) ? 'now' : 'question';
+    newsNotChat = true;
+    scopeUsed.push('not-chat');
+    // A remark about unnamed berries or mushrooms gets the wild-plants card,
+    // never a species page: "these little red berries look tasty" was answered
+    // "these little red berries are edible" from the red huckleberry page
+    // (sealed chat set).
+    const card = /\b(?:berr(?:y|ies)|mushrooms?|fungus|fungi)\b/i.test(query) ? await cardByTitle('Eating wild plants and berries')
+      : offer === undefined ? undefined : await cardByTitle(offer.title);
+    if (card !== undefined && forcedCard === undefined) forcedCard = agreedCard = card;
+  }
+
   const baseDiag = {
     ...(intent === undefined ? {} : { intent }),
     ...(newsNotChat ? { newsNotChat } : {}),
+    ...(scopeZ === undefined ? {} : { scope: { z: scopeZ, used: scopeUsed } }),
     keywords,
     route: routed,
     maxTokens,
@@ -1248,6 +1286,52 @@ async function askCore(
       diagnostics: { ...baseDiag, candidates, topScore, sufficient: null, tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: opts.cardAnswer ?? 'verbatim' },
     };
   };
+
+  // Experiment (scope.ts): a message the scorer says needs an answer gets a
+  // second chance where every rule above would decline it or give a fixed
+  // reply. Never for a pet, or what the model called out of scope.
+  if (inScope && forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold) &&
+      u?.intent !== 'out' && !petPatient && !ABOUT_A_PET.test(query)) {
+    // A statement ("my husband just sliced his palm on a tin can") matches
+    // passages written as instructions poorly. Searched as a request for what
+    // to do, the same words reach them; kept only when it scores higher, and
+    // never when it leads with a clinical procedure. An emergency keeps to
+    // first aid, as above.
+    // Not a message that leans on earlier ones (currentThread): "everything's soaked
+    // though" after a fire question reached the soaked-bandage card, and
+    // "he's getting kind of shaky" about a diabetic the hypothermia card.
+    if (!asksSomething(query) && history.length === 0) {
+      const pool = intent === 'now' ? packs.filter((p) => !tipsPackIds.has(p.id)) : packs;
+      const text = asRequest(searchText);
+      const r0 = intent === 'now' ? route(keywords, pool, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) }) : routed;
+      let cs = await retrieve(keywords, r0.packIds, store, backend, retrievalOpts, r0.domains, text);
+      let r = r0;
+      if (best(cs) < effectiveThreshold) {
+        const w = await widen(keywords, r0, pool, text);
+        if (w !== undefined && w.top > best(cs)) { cs = w.candidates; r = w.routed; }
+      }
+      const lead = cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+      if (best(cs) > topScore && lead?.chunk.audience !== 'provider') {
+        candidates = cs;
+        routed = r;
+        topScore = best(cs);
+        searchText = text;
+        scopeUsed.push('framed');
+      }
+    }
+    // The card that leads the search is opened (reviewed text). With no card
+    // leading, the model answers only when the request's search clears the
+    // normal gate. A lower gate for these messages was measured and rejected:
+    // written from passages under it, answers to sore knees, cactus spines and
+    // chafing were made up (docs/results-scope-scorer.md).
+    const led = candidates.length === 0 ? undefined : ownCard(leadingCard(candidates, isCard, await supportOf(candidates)));
+    if (led !== undefined && blockingCondition(led.chunk.section, active) === undefined) {
+      forcedCard = agreedCard = led;
+      scopeUsed.push('card');
+    } else if (topScore >= effectiveThreshold) {
+      scopeUsed.push('gate');
+    }
+  }
 
   if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
     const fromCard = await cardLinesReply();
@@ -1374,7 +1458,7 @@ async function askCore(
   // repeated the cuts card: every out-of-scope follow-up in the tuning set was
   // answered that way (docs/plan-memory.md). Without the card, the model
   // answers from the passages and can say the sources do not cover it.
-  if (followUp?.used === true && clear !== undefined &&
+  if (followUp?.used === true && clear !== undefined && !(opts.scope !== undefined && forcedCard?.chunk.section === 'Eating wild plants and berries') &&
       clearCard(standalone, retrievalOpts.reserve, await supportOf(standalone))?.chunk.id !== clear.chunk.id) {
     clear = undefined;
   }

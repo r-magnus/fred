@@ -73,6 +73,7 @@ for (const [i, q] of questions.entries()) {
     ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
     ...(d.widenedTopScore !== undefined ? { widenedTopScore: d.widenedTopScore } : {}),
     ...(d.understood !== undefined ? { understood: d.understood } : {}),
+    ...(d.scope !== undefined ? { scope: d.scope } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);

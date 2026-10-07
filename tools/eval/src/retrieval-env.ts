@@ -10,7 +10,13 @@
  * Every run prints the settings it used, because a results file that does not
  * say how it was produced is not evidence.
  */
-import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type AskOptions, type CardAnswerMode, type RetrievalOptions } from '@fred/rag-core';
+import { readFileSync } from 'node:fs';
+import { DEFAULT_COMPRESSION, DEFAULT_RETRIEVAL, type AskOptions, type CardAnswerMode, type RetrievalOptions, type ScopeModel } from '@fred/rag-core';
+
+function scopeModelFromFile(path: string, threshold?: string): ScopeModel {
+  const m = JSON.parse(readFileSync(path, 'utf8')) as ScopeModel;
+  return threshold === undefined ? m : { ...m, threshold: Number(threshold) };
+}
 
 function int(name: string, fallback: number, min: number): number {
   const raw = process.env[name];
@@ -114,5 +120,7 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.INTENT === '1' ? { intent: true } : {}),
     // OPENER=1: a friendly opening line before model-written answers (#130).
     ...(env.OPENER === '1' ? { opener: true } : {}),
+    // SCOPE=<model.json>: the scope scorer's second chance (scope.ts). SCOPE_T overrides its threshold.
+    ...(env.SCOPE !== undefined && env.SCOPE !== '' ? { scope: scopeModelFromFile(env.SCOPE, env.SCOPE_T) } : {}),
   };
 }

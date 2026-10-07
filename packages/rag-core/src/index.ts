@@ -21,3 +21,4 @@ export * from './type-out.ts';
 export * from './exposures.ts';
 export * from './sentences.ts';
 export * from './opener.ts';
+export * from './scope.ts';

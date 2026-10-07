@@ -118,6 +118,7 @@ for (const [i, c] of conversations.entries()) {
     topScore: d.topScore,
     followUp: d.followUp ?? null,
     ...(d.understood === undefined ? {} : { understood: d.understood }),
+    ...(d.scope === undefined ? {} : { scope: d.scope }),
     cardAnswer: card2,
     cardRepeat: card2 !== null && card2 === card1,
     ...(res.kind === 'answer' && res.card !== undefined ? { offer: res.card.title } : {}),

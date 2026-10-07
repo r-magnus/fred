@@ -114,6 +114,7 @@ for (const set of sets) {
           ...(d.conditions === undefined ? {} : { conditions: d.conditions }),
           ...(d.blocked === undefined ? {} : { blocked: d.blocked }),
           ...(d.agreedCard === undefined ? {} : { agreedCard: d.agreedCard }),
+          ...(d.scope === undefined ? {} : { scope: d.scope }),
           ...(d.answerGuard?.replacedBy === undefined ? {} : { guardedBy: d.answerGuard.replacedBy }),
           keyPoints: turn.keyPoints ?? [], unsafe: c.unsafe,
           decideMs, timing: d.timing ?? null,

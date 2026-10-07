@@ -167,7 +167,9 @@ function Screen() {
   }, []);
 
   const send = useCallback(async (questionText?: string, withState?: string | null) => {
-    const question = (questionText ?? draft).trim();
+    // Straight apostrophes: the iOS keyboard types curly ones ("don’t"), and the
+    // phrase rules downstream are written with '.
+    const question = (questionText ?? draft).trim().replace(/[‘’ʼ]/g, "'");
     const eng = engine.current;
     if (question === '' || eng === null || busy) return;
 

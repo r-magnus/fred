@@ -19,6 +19,10 @@ test('lost, where-am-I and no-signal messages open the map', () => {
     'I have no signal, what should I do?',
     "I don't have any service",
     'where can I get cell signal?',
+    // Curly apostrophes, as the iOS keyboard types them.
+    'i’m lost',
+    'I don’t know where I am',
+    'can’t find the trailhead',
   ]) assert.ok(wantsMap(m), m);
 });
 

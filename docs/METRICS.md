@@ -18,7 +18,7 @@ akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 8
 | KR | What | Due | Now | Grade |
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
-| `A-KR2` | Response accuracy | 2026-10-12 | **72.5%** / 70%<br><sub>67.5% fresh breadth set, graded blind</sub> | 🟡 B |
+| `A-KR2` | Response accuracy | 2026-10-12 | **73.8%** / 70%<br><sub>67.5% fresh breadth set, graded blind</sub> | 🟡 B |
 | `A-KR3` | Response time | 2026-10-19 | **15.4s** / 20s | 🟢 A |
 | `B-KR1` | Location while in service | 2026-10-26 | **9.5m** | 🟢 A |
 | `B-KR2` | Location in Fred's answers | 2026-11-10 | **state only** | 🔴 D |
@@ -28,7 +28,7 @@ akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 8
 | `RC-KR3` | Product page and promo | 2026-12-09 | — | ⚪ not started |
 
 - `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. Plus two everyday-tips packs (2026-09-29, #96): National Park Service articles and Wikivoyage travel topics, 384 passages, 1 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
-- `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
+- `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. -> 73.8% re-measured 2026-10-06 on main (77f3e6b) with the packs in ~/fred-packs-g-all (field cards 0.8.0, health, hazards, wildlife safety and tips packs): 36 of 40 answers word for word those of 2026-09-29; the tick question, which asked for a location, is now answered (0 -> 1, graded full on the question asked, partial if the allergy point is required: 72.5%); CPR and belly-wound answers reworded at the same score, graded blind. No safety failures. Like for like the 2026-09-29 figure is 71.3%, not 72.5%: its GPS-battery answer was graded full in-session on 2026-09-27 and 0.5 blind. The pack folder has not been checked against the phone. A first run that day on the repo's packs/ folder (field cards 0.5.0, none of the newer packs) gave 71.3% and is kept for the record (docs/holdout-runs-2026-10-06.jsonl); it is not this pipeline. Runs and verdicts: docs/holdout-runs-2026-10-06-shipped.jsonl, docs/holdout-verdicts-2026-10-06-shipped.json. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
 - `A-KR3` — Phone mean for model-written answers, Nothing Phone (3), 2026-09-24 (phase 1, range 9.9-24.1 s). Since phase 3, an answer from a field card skips generation: measured on the phone at 0.77-0.88 s end to end (4 of 7 check questions). Model-written answers on the same run took 8.3-19.0 s. Inside the <20 s target (proposal v1.2); the phone mean predates phase 3 and should be re-measured. Since then an intent check (emergency / question / small talk) runs before every answer: on 2026-09-30 it took ~2.5 s on the phone, so card answers now take ~3 s end to end, not ~1 s. Since 2026-10-05 all model calls share one model context on the phone (#136): the app holds 2.9 GB, not 5.4 GB, and an emergency as the first question is answered in 3 s, not 26 s. Since 2026-10-06 a model-written answer opens with one friendly line about the hiker's own question (#130): four check questions showed their first words at 2.0-2.7 s where they had been 8.1-12.3 s; the answer itself starts about 2 s later and the four finished in 17.8 s on average against 15.8 s without (one of the four, at 21.7 s, is over the 20 s target). Card replies are unchanged (1.0-3.3 s). The 15.4 s headline is still the 2026-09-24 measurement.
 - `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened. Proposal v1.2 also asks that the location be served to the LLM: today Fred's prompt gets the state only (see B-KR2).
 - `B-KR2` — Redefined in proposal v1.2: the user's location should shape Fred's answers. Planned (#77): when signal comes up, Fred says how far and which way the nearest reported coverage is, and prompts the user to open the map. Today the prompt names the user's state and picks the state's plant and animal pack. The map already shows the coverage zones and the nearest coverage, but Fred's answers don't use them.
@@ -40,26 +40,27 @@ akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 8
 ## A-KR2 — answer accuracy over time
 
 ```
-baseline (0.6B)                               ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
-+ conditional prompt                          ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
-+ Qwen3-1.7B                                  ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
-+ scope gate, lay lexicon                     ███████████████████░░░░░░░░░   69.1%   1.7B
-+ gate 0.29                                   ████████████████████░░░░░░░░   70.6%   1.7B
-I: routing as a hint (held out)               ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
-rubric: old pipeline regraded (held out)      ██████████████░░░░░░░░░░░░░░   50.0%   Qwen3-1.7B
-phase 1: EmbeddingGemma, cards (held out)     ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
-phase 2: card slot, redactions (held out)     █████████████████░░░░░░░░░░░   61.3%   Qwen3-1.7B
-phase 3: card answers, referral (held out)    ███████████████████░░░░░░░░░   66.3%   Qwen3-1.7B
-re-measured, WHO drug steps out (held out)    ███████████████████░░░░░░░░░   67.5%   Qwen3-1.7B
-forage note, location fix (held out)          ███████████████████░░░░░░░░░   68.8%   Qwen3-1.7B
-cards batch 3: six syllabus cards (held out)  ████████████████████░░░░░░░░   71.3%   Qwen3-1.7B
-+ belly, dehydration, signal (held out)       ████████████████████░░░░░░░░   70.0%   Qwen3-1.7B
-cards batch 4: six more (held out)            ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
-+ tips packs, NPS and Wikivoyage              ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
-TARGET                                        ████████████████████░░░░░░░░   70.0%
+baseline (0.6B)                                   ███████████░░░░░░░░░░░░░░░░░   38.2%   0.6B
++ conditional prompt                              ████████████░░░░░░░░░░░░░░░░   44.1%   0.6B
++ Qwen3-1.7B                                      ██████████████░░░░░░░░░░░░░░   48.5%   1.7B
++ scope gate, lay lexicon                         ███████████████████░░░░░░░░░   69.1%   1.7B
++ gate 0.29                                       ████████████████████░░░░░░░░   70.6%   1.7B
+I: routing as a hint (held out)                   ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
+rubric: old pipeline regraded (held out)          ██████████████░░░░░░░░░░░░░░   50.0%   Qwen3-1.7B
+phase 1: EmbeddingGemma, cards (held out)         ██████████████████░░░░░░░░░░   62.5%   Qwen3-1.7B
+phase 2: card slot, redactions (held out)         █████████████████░░░░░░░░░░░   61.3%   Qwen3-1.7B
+phase 3: card answers, referral (held out)        ███████████████████░░░░░░░░░   66.3%   Qwen3-1.7B
+re-measured, WHO drug steps out (held out)        ███████████████████░░░░░░░░░   67.5%   Qwen3-1.7B
+forage note, location fix (held out)              ███████████████████░░░░░░░░░   68.8%   Qwen3-1.7B
+cards batch 3: six syllabus cards (held out)      ████████████████████░░░░░░░░   71.3%   Qwen3-1.7B
++ belly, dehydration, signal (held out)           ████████████████████░░░░░░░░   70.0%   Qwen3-1.7B
+cards batch 4: six more (held out)                ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
++ tips packs, NPS and Wikivoyage                  ████████████████████░░░░░░░░   72.5%   Qwen3-1.7B
+re-measured 2026-10-06, current packs (held out)  █████████████████████░░░░░░░   73.8%   Qwen3-1.7B
+TARGET                                            ████████████████████░░░░░░░░   70.0%
 ```
 
-**38.2% → 72.5%** (+34.3 points). Target is 70%.
+**38.2% → 73.8%** (+35.6 points). Target is 70%.
 
 > The rows are not all the same measurement. Rows before "rubric" were scored yes/no, all but the last on the tuning set. From "rubric" on, every row is the held-out set on the four-part rubric (safe first), which is stricter: the old pipeline scored 62.5% yes/no and 50.0% on the rubric. Compare within each group.
 
@@ -67,8 +68,8 @@ The score has two halves:
 
 | Half | Score | What it measures |
 |---|---|---|
-| answerable | **16/31** — 51.6% | held-out questions Fred should answer, fully right (7 more partly right, 1 wrong, 6 declined) |
-| decline | **8/9** — 88.9% | held-out questions Fred should decline or ask a location for, handled correctly |
+| answerable | **17/31** — 54.8% | held-out questions Fred should answer, fully right (9 more partly right, 3 wrong, 2 declined), 2026-10-06 |
+| decline | **8/9** — 88.9% | held-out questions Fred should decline or ask a location for, handled correctly, 2026-10-06 |
 
 ### Follow-up questions (conversation memory, 2026-09-26)
 
@@ -94,10 +95,10 @@ Before a model-written answer Fred now writes one short line about what the hike
 
 | Lost | Why | What would fix it |
 |---:|---|---|
-| 6 | declined answerable questions (held out), mostly unusual wording the search does not match | no safe lever yet. A second search in manual wording recovered ~9 on tuning but let 14 out-of-scope questions through (rejected, docs/results-phase3.md step 4) |
-| 7 | partly right (held out): a card that answers without leading with the answer, or a model answer missing a key point | cards could carry a short direct answer per common question; the model misses are generation quality |
-| 1 | unsafe: hff-bulrush-01 treats plants wildlife eat as food for people | no card matches the question; the wild-plants card already says animals eating a plant is not a test |
-| 1 | a card matched a neighbouring topic (map orientation got finding north) | the clear-match rule (0.35, or 0.32 and top) has thin margins; more cards or a tighter bar |
+| 9 | partly right (held out): a card that answers without leading with the answer (airway, head tilt, belly wound, cordage), or a model answer missing a key point (scalp bleeding, falcon, manzanita, GPS battery, insects) | cards could carry a short direct answer per common question; the model misses are generation quality |
+| 3 | wrong but safe (held out): map orientation gets the finding-north card; walking out gets a tips passage about campsites; marsh plants gets "no reliable information" | the clear-match rule (0.35, or 0.32 and top) has thin margins; the tips answer was left unfixed rather than tuned against (docs/results-tips.md) |
+| 2 | declined answerable questions (held out): paracord uses and survival medicine, both low search scores | no safe lever yet. A second search in manual wording recovered ~9 on tuning but let 14 out-of-scope questions through (rejected, docs/results-phase3.md step 4) |
+| 1 | declined where it should ask for a location (hff-nostate-01) | not investigated |
 
 ## A-KR3 — response time
 

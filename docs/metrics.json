@@ -32,7 +32,7 @@
       "id": "A-KR2",
       "name": "Response accuracy",
       "due": "2026-10-12",
-      "value": 72.5,
+      "value": 73.8,
       "unit": "%",
       "target": 70,
       "bands": [
@@ -43,7 +43,7 @@
         "<30"
       ],
       "grade": "B",
-      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating (\"not food for people\"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers \"can I pack a wound in someone's belly?\" with the whole card rather than \"no\" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.",
+      "note": "Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating (\"not food for people\"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers \"can I pack a wound in someone's belly?\" with the whole card rather than \"no\" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. -> 73.8% re-measured 2026-10-06 on main (77f3e6b) with the packs in ~/fred-packs-g-all (field cards 0.8.0, health, hazards, wildlife safety and tips packs): 36 of 40 answers word for word those of 2026-09-29; the tick question, which asked for a location, is now answered (0 -> 1, graded full on the question asked, partial if the allergy point is required: 72.5%); CPR and belly-wound answers reworded at the same score, graded blind. No safety failures. Like for like the 2026-09-29 figure is 71.3%, not 72.5%: its GPS-battery answer was graded full in-session on 2026-09-27 and 0.5 blind. The pack folder has not been checked against the phone. A first run that day on the repo's packs/ folder (field cards 0.5.0, none of the newer packs) gave 71.3% and is kept for the record (docs/holdout-runs-2026-10-06.jsonl); it is not this pipeline. Runs and verdicts: docs/holdout-runs-2026-10-06-shipped.jsonl, docs/holdout-verdicts-2026-10-06-shipped.json. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.",
       "secondary": {
         "value": 67.5,
         "label": "fresh breadth set, graded blind"
@@ -179,7 +179,7 @@
     },
     {
       "label": "rubric: old pipeline regraded (held out)",
-      "overall": 50.0,
+      "overall": 50,
       "model": "Qwen3-1.7B"
     },
     {
@@ -214,7 +214,7 @@
     },
     {
       "label": "+ belly, dehydration, signal (held out)",
-      "overall": 70.0,
+      "overall": 70,
       "model": "Qwen3-1.7B"
     },
     {
@@ -226,45 +226,50 @@
       "label": "+ tips packs, NPS and Wikivoyage",
       "overall": 72.5,
       "model": "Qwen3-1.7B"
+    },
+    {
+      "label": "re-measured 2026-10-06, current packs (held out)",
+      "overall": 73.8,
+      "model": "Qwen3-1.7B"
     }
   ],
   "akr2Breakdown": {
     "answerable": {
-      "pass": 16,
+      "pass": 17,
       "total": 31,
-      "what": "held-out questions Fred should answer, fully right (7 more partly right, 1 wrong, 6 declined)"
+      "what": "held-out questions Fred should answer, fully right (9 more partly right, 3 wrong, 2 declined), 2026-10-06"
     },
     "decline": {
       "pass": 8,
       "total": 9,
-      "what": "held-out questions Fred should decline or ask a location for, handled correctly"
+      "what": "held-out questions Fred should decline or ask a location for, handled correctly, 2026-10-06"
     }
   },
   "remainingLosses": [
     {
-      "n": 6,
-      "what": "declined answerable questions (held out), mostly unusual wording the search does not match",
-      "fix": "no safe lever yet. A second search in manual wording recovered ~9 on tuning but let 14 out-of-scope questions through (rejected, docs/results-phase3.md step 4)"
-    },
-    {
-      "n": 7,
-      "what": "partly right (held out): a card that answers without leading with the answer, or a model answer missing a key point",
+      "n": 9,
+      "what": "partly right (held out): a card that answers without leading with the answer (airway, head tilt, belly wound, cordage), or a model answer missing a key point (scalp bleeding, falcon, manzanita, GPS battery, insects)",
       "fix": "cards could carry a short direct answer per common question; the model misses are generation quality"
     },
     {
-      "n": 1,
-      "what": "unsafe: hff-bulrush-01 treats plants wildlife eat as food for people",
-      "fix": "no card matches the question; the wild-plants card already says animals eating a plant is not a test"
+      "n": 3,
+      "what": "wrong but safe (held out): map orientation gets the finding-north card; walking out gets a tips passage about campsites; marsh plants gets \"no reliable information\"",
+      "fix": "the clear-match rule (0.35, or 0.32 and top) has thin margins; the tips answer was left unfixed rather than tuned against (docs/results-tips.md)"
+    },
+    {
+      "n": 2,
+      "what": "declined answerable questions (held out): paracord uses and survival medicine, both low search scores",
+      "fix": "no safe lever yet. A second search in manual wording recovered ~9 on tuning but let 14 out-of-scope questions through (rejected, docs/results-phase3.md step 4)"
     },
     {
       "n": 1,
-      "what": "a card matched a neighbouring topic (map orientation got finding north)",
-      "fix": "the clear-match rule (0.35, or 0.32 and top) has thin margins; more cards or a tighter bar"
+      "what": "declined where it should ask for a location (hff-nostate-01)",
+      "fix": "not investigated"
     }
   ],
   "latency": {
     "mean": 11.4,
-    "median": 11.0,
+    "median": 11,
     "p95": 17.7,
     "overTenSeconds": 30,
     "ofQueries": 68,
@@ -313,7 +318,7 @@
       }
     ],
     "corpusDerived": 91.5,
-    "independent": 54.0,
+    "independent": 54,
     "reference": "PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived)."
   },
   "corpora": [
@@ -451,7 +456,7 @@
       "singleShot": {
         "samples": [
           64.3,
-          74.0,
+          74,
           75.3,
           75.1,
           76.1
@@ -461,11 +466,11 @@
       },
       "refiningWatch": {
         "samples": [
-          66.0,
+          66,
           33.5,
           33.5,
           32.9,
-          20.0,
+          20,
           35.8,
           76.6,
           21.3
@@ -481,7 +486,7 @@
     "overall": 66.3,
     "correct": 26.5,
     "total": 40,
-    "tuningComparison": 83.0,
+    "tuningComparison": 83,
     "rubric": {
       "full": 16,
       "partial": 7,

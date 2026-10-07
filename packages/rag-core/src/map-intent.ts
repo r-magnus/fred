@@ -28,5 +28,8 @@ const WANTS_MAP: readonly RegExp[] = [
 ];
 
 export function wantsMap(message: string): boolean {
-  return WANTS_MAP.some((r) => r.test(message));
+  // The iOS keyboard types "I’m" with a curly apostrophe by default, which the
+  // patterns' straight ' does not match: "i’m lost" opened no map on iOS.
+  const m = message.replace(/[‘’ʼ]/g, "'");
+  return WANTS_MAP.some((r) => r.test(m));
 }

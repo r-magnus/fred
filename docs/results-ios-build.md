@@ -244,3 +244,75 @@ Native, not Fred.
 4. Fix the `packs/` directory check in `engine.ts` so both platforms show the
    intended message.
 5. A real iOS device: signing, Finder sideload of the models, engine load.
+
+---
+
+# Update, 2026-10-07 — the simulator build brought up to main
+
+Same Mac, Xcode 27.0, the "FredTest" simulator (iPhone 18 Pro, iOS 27.0). Main
+at `fd7c687`, plus the two fixes below (PR #153). The last iOS build before this
+was 2026-09-28, 183 commits back.
+
+**Main builds and runs on the iOS simulator with no native changes.**
+`apps/mobile/package.json`, `app.json`, the lockfile and the patch scripts had
+not moved since the last build; `pod install` left `Podfile.lock` unchanged.
+Release build, installed over the old app, models and map kept.
+
+**The simulator still carries the 2026-09-30 packs**: six, `core-fieldcards`
+0.5.0, no sentence index. The twelve that main was measured on
+(`~/fred-packs-g-all`) are on the Linux machine. Nothing below is comparable
+with the phone or the desktop until they are staged here.
+
+## Two fixes iOS needed
+
+- **op-sqlite's FTS5 setting has to be in the root `package.json`.** Its
+  podspec walks up from `node_modules/@op-engineering/` and reads the first
+  `package.json` it finds, which in this workspace is the root one. The block in
+  `apps/mobile/package.json` is never read on iOS. Without it `pod install`
+  builds SQLite without FTS5 and stage-1 retrieval fails. The earlier builds
+  worked only because the block sat uncommitted in the root file on this Mac.
+- **The iOS keyboard types curly apostrophes.** "i’m lost" opened no map: the
+  phrase rules are written with `'`. The question is now normalised as it is
+  sent, and `wantsMap` normalises its own input.
+
+## What ran
+
+Questions went in through the `devhooks` inbox (`Documents/devhooks` and
+`devhooks-ask.txt`, as `ask-phone.sh` does on Android). All packs passed
+parity at cos 0.9997; the engine was ready in 1.1 s with the lane prompts saved.
+
+| Question | Session | Reply | Time |
+|---|---|---|---:|
+| how do I treat a snake bite? | first of four | snakebite card | 3.3 s |
+| how do I stop heavy bleeding from a leg wound? | third of four | bleeding card | 3.5 s |
+| what is a good sourdough recipe? | fourth of four | **bleeding card again** (`agreed="Heavy bleeding from a wound"`, U=0.000) | 3.3 s |
+| what is a good sourdough recipe? | its own | declined, low score | 0.6 s |
+| is it safe to eat fish that smells a little off? | its own | **the wild-plants card**; fish passages ranked 1-4 | 3.2 s |
+| how do I keep mosquitoes away at camp? | its own | model-written, opener shown | **71.1 s** |
+| i’m lost (curly apostrophe) | third of three | map card, basemap and contours drawn | not logged |
+
+- **The model-written answer took 71 s on the simulator** (opening line at
+  24.6 s, answer from 68.9 s, 1,190 tokens) against 15.3 s on the phone. The
+  simulator runs the generator on the CPU and is not the device; this is not an
+  iOS latency figure. It does show the whole path works: intent, opener,
+  answer.
+- **The fish question got the plants card.** On the phone on 2026-10-07 the
+  spoiled-fish question was a model-written answer. Old cards are the likely
+  cause; check again on the current packs before reading anything into it.
+- **The sourdough question got the bleeding card when asked straight after the
+  bleeding question**, and was declined in its own session. Also to be checked
+  again on the current packs, and on the phone: it was seen only here.
+
+## Traps from this session
+
+- **A Release build's `console.log` is info level, which `log show` does not
+  keep.** Stream it instead, started before the app:
+  `xcrun simctl spawn <udid> log stream --level info --predicate 'process == "Fred" AND eventMessage CONTAINS "[fred]"'`
+- **Installing over the app keeps `Documents/`**, so models, map and packs
+  survive a rebuild. `simctl uninstall` does not keep them.
+
+## Still unknown
+
+- Everything on the current twelve packs.
+- The map-download panel on iOS: not opened.
+- A real iPhone, as before.

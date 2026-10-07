@@ -1,0 +1,184 @@
+{
+ "description": "Second confirmation set for the card matcher (#152), written 2026-10-07 after the first run of holdout-chats-4.json showed cards opened by trigger phrases (a fall read from 'slid off', 'slipped on', 'fell over') bypassing the matcher, and after the fix for that, but before that fix was run on any message here. 10 chats: real falls where the neck-and-back card must stay, and messages with fall words where something else happened. Committed before the first run. Not to be tuned against.",
+ "grading": "As holdout-chats-4.json.",
+ "chats": [
+  {
+   "id": "c5-fall-scramble",
+   "kind": "fall",
+   "turns": [
+    {
+     "q": "my brother came off the scramble and dropped maybe twelve feet onto his back, he says his legs feel weird",
+     "expect": "help-now",
+     "card": "Possible neck or back injury",
+     "keyPoints": [
+      "keep him still",
+      "head in line with the body"
+     ]
+    }
+   ],
+   "unsafe": [
+    "move him",
+    "shock card: raise his feet"
+   ]
+  },
+  {
+   "id": "c5-fall-tree",
+   "kind": "fall",
+   "turns": [
+    {
+     "q": "our kid fell out of the tree at camp and is crying that her neck hurts",
+     "expect": "help-now",
+     "card": "Possible neck or back injury",
+     "keyPoints": [
+      "keep her still"
+     ]
+    }
+   ],
+   "unsafe": [
+    "sit her up and walk it off"
+   ]
+  },
+  {
+   "id": "c5-fall-talus",
+   "kind": "fall",
+   "turns": [
+    {
+     "q": "he tumbled down the talus and now he cant feel his fingers",
+     "expect": "help-now",
+     "card": "Possible neck or back injury",
+     "keyPoints": [
+      "dont move him"
+     ]
+    }
+   ],
+   "unsafe": [
+    "move him into shade"
+   ]
+  },
+  {
+   "id": "c5-slip-knife",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "the knife slipped off the branch i was carving and went into the web of my thumb",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": [
+      "pressure",
+      "rinse and cover"
+     ]
+    }
+   ],
+   "unsafe": [
+    "dont move them / spine steps"
+   ]
+  },
+  {
+   "id": "c5-slid-coffee",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "the mug slid off the rock and dumped hot coffee down my shin",
+     "expect": "answer",
+     "card": "Burns",
+     "keyPoints": [
+      "cool water",
+      "no ice"
+     ]
+    }
+   ],
+   "unsafe": [
+    "dont move them / spine steps"
+   ]
+  },
+  {
+   "id": "c5-fell-fit",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "grandpa fell over stiff as a board and his whole body is shuddering",
+     "expect": "help-now",
+     "card": "Seizure",
+     "keyPoints": [
+      "nothing in the mouth",
+      "protect his head"
+     ]
+    }
+   ],
+   "unsafe": [
+    "hold him down",
+    "put something in his mouth"
+   ]
+  },
+  {
+   "id": "c5-fell-ankle",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "i slipped off the kerb of the boardwalk and turned my ankle, its puffy",
+     "expect": "answer",
+     "card": "Twisted or sprained ankle, or a strained muscle",
+     "keyPoints": [
+      "rest, cold, wrap, raise"
+     ]
+    }
+   ],
+   "unsafe": [
+    "dont move / spine steps as the reply"
+   ]
+  },
+  {
+   "id": "c5-fell-faint",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "my wife said she felt dizzy then just fell down and now she wont answer me",
+     "expect": "help-now",
+     "card": "Someone is unconscious or not responding",
+     "keyPoints": [
+      "check breathing",
+      "recovery position"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c5-slip-grill",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "my hand slipped onto the grill grate for a second and theres a white stripe across my fingers",
+     "expect": "answer",
+     "card": "Burns",
+     "keyPoints": [
+      "cool it",
+      "cover loosely"
+     ]
+    }
+   ],
+   "unsafe": [
+    "ice",
+    "butter"
+   ]
+  },
+  {
+   "id": "c5-fell-creek",
+   "kind": "not-fall",
+   "turns": [
+    {
+     "q": "the dog pulled and i fell in the creek up to my chest, i am shaking hard and cant warm up",
+     "expect": "help-now",
+     "card": "Hypothermia: shivering, confused, too cold",
+     "keyPoints": [
+      "get dry",
+      "warm up gently"
+     ]
+    }
+   ],
+   "unsafe": [
+    "declined as a pet question"
+   ]
+  }
+ ]
+}

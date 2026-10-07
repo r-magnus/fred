@@ -269,6 +269,8 @@ export const INTENT_CARD_NEAR_TOP = 0.85;
  * card it opened under 0.01.
  */
 export const SAID_SOME = 0.05;
+/** A card the matcher only leans to replaces the one that led when its share is at least twice as large (frostbite 0.58 against trench foot 0.20 for white, waxy toes). */
+export const SAID_CLEARLY = 2;
 /**
  * #145: an everyday question is searched in the tips packs too, and that
  * search is kept when a tip leads it by this much over the routed search.
@@ -1204,7 +1206,10 @@ async function askCore(
         // model has no part in it.
         const said = setHere[0];
         const card = said === undefined ? undefined : await cardByTitle(said.card);
-        if (card !== undefined) forcedCard = agreedCard = card;
+        // #152: the trigger phrases are a guess too, so the matcher checks the
+        // card (forcedOwn): "the pot of soup slid off the stove into my lap"
+        // read as a fall and opened the neck-and-back card.
+        if (card !== undefined) { forcedCard = agreedCard = card; forcedOwn = true; }
       }
     }
     // A short question with nothing of its own takes its thread's card too:
@@ -1219,7 +1224,7 @@ async function askCore(
         // "splashed hot coffee all over my wrist" was read as a question and
         // declined; the message says what happened, and that card answers it.
         const card = await cardByTitle(said.card);
-        if (card !== undefined) forcedCard = agreedCard = card;
+        if (card !== undefined) { forcedCard = agreedCard = card; forcedOwn = true; }
       }
     }
     // Otherwise the card is offered, folded, wherever Fred would say nothing
@@ -1332,13 +1337,19 @@ async function askCore(
     const toKind = noCardKind(saidTop.label);
     // Another card, sure or leaning: "we need to drink from this stream" led
     // with the river-crossing card and leaned to the water card at 0.66.
-    if (toKind === undefined && (saidSure !== undefined || saidTop.p >= opts.saidAs!.leans)) {
+    // Leaning is not enough against a card with a real share of its own:
+    // "he's not moving and I can't tell if he's breathing at all" leaned to
+    // the CPR card at 0.52 over the unresponsive card, whose first step is to
+    // check the breathing.
+    if (toKind === undefined && (saidSure !== undefined || (saidTop.p >= opts.saidAs!.leans && saidTop.p >= SAID_CLEARLY * share))) {
       const other = ownCard(await cardByTitle(saidTop.label));
       if (other !== undefined && blockingCondition(other.chunk.section, active) === undefined) { saidUsed.push('card'); return other; }
       return card;
     }
-    // Sure it is something else, or the card has no share: no card.
-    if (saidSure !== undefined || share < SAID_SOME) { saidUsed.push('no-card'); return undefined; }
+    // Sure it is something else, or the card has no share: no card. A message
+    // with nothing of its own ("how long should i keep it under the water")
+    // says nothing against the card.
+    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment')) { saidUsed.push('no-card'); return undefined; }
     return card;
   };
   if (forcedCard !== undefined && forcedOwn && forcedCard.score < effectiveThreshold) {

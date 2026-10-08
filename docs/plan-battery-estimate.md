@@ -97,26 +97,11 @@ battery steps over 20 runs. A written answer of 100-150 tokens is then
 same size as the Android arithmetic above. The "percent plus answers left"
 display fits both platforms.
 
-**How the plan changes for iPhone**
-
-- Step 1 (go/no-go) becomes: on a real iPhone, read `task_energy` before and
-  after a card answer and a written answer. Check it grows, that a written
-  answer costs clearly more than a card, and that the size is plausible
-  (tens of joules). If it reads zero or nonsense, the iPhone gets the table
-  below and no meter.
-- Step 2 (measure): the same runs recorded with the Power Profiler on the
-  phone, to see how far the counter is from Apple's own figure and how much
-  the screen adds.
-- Step 3 (built-in meter): the same idea as Android with a different source.
-  If the counter fails or disappears, fall back to time: seconds the model
-  ran times a watts figure per iPhone model measured in step 2.
-- Steps 4-6 are unchanged. The long-session check in step 6 is weaker on an
-  iPhone: 5% battery steps mean a session of several hundred answers to see
-  the sum of the estimates against the real fall.
-- Low Power Mode and a hot phone slow the chip, so an answer takes longer at
-  lower power. A meter read per answer follows that by itself; a time-based
-  fallback would not, and should say less when either is on
-  (`ProcessInfo.isLowPowerModeEnabled`, `thermalState`).
+**In the plan:** each step of "Plan" below now has its iPhone part. One point
+behind the fallback: Low Power Mode and a hot phone slow the chip, so an
+answer takes longer at lower power. A meter read per answer follows that by
+itself; a time-based fallback would not, and should say less when either is
+on (`ProcessInfo.isLowPowerModeEnabled`, `thermalState`).
 
 **Risks specific to iPhone**
 
@@ -138,23 +123,48 @@ measurements (step 2). **Open question for Ryan.**
 
 ## Plan
 
-1. **Quick check on the phone (about an hour, go/no-go).** Off the cable,
-   read current, voltage and the charge counter while Fred gives a card answer
-   and a written answer. Confirm the units and sign, that the refresh rate can
-   time a 10 s answer, and that the size of the reading is plausible. If the
-   Nothing Phone's readings are not usable, stop and report.
+Updated 2026-10-07 to cover both platforms. Android can start now; every
+iPhone step waits on Fred running on a real iPhone (#28).
+
+1. **Quick check on the phone (about an hour each, go/no-go).**
+   - *Android:* off the cable, read current, voltage and the charge counter
+     while Fred gives a card answer and a written answer. Confirm the units
+     and sign, that the refresh rate can time a 10 s answer, and that the
+     size of the reading is plausible. If the Nothing Phone's readings are
+     not usable, stop and report.
+   - *iPhone:* read the app's own energy counter (`task_info`,
+     `TASK_POWER_INFO_V2`) before and after a card answer and a written
+     answer. Check it grows, that a written answer costs clearly more than a
+     card, and that the size is plausible (tens of joules). If it reads zero
+     or nonsense, the iPhone gets the time-based fallback in step 3 and no
+     meter.
 2. **Measure.** Energy for card vs written answers, short vs long, cool vs
    warm phone, and the idle draw with the screen on. Fit the simplest model
-   that holds, starting from energy = power while the model runs × model time,
-   with prompt and generated tokens as the finer split if it earns its place.
-   This is #80's first "done when" and gives the shipped defaults.
-3. **Built-in meter (Android).** A small native module that samples current
-   and voltage during each real answer, subtracts the idle draw sampled just
-   before, and keeps a running average for that phone, so the estimate follows
-   the device, its battery wear and its temperature. Skipped while charging;
-   readings outside a plausible range are thrown away and the defaults from
-   step 2 used. `apps/mobile/android` is generated, so this is a local Expo
-   module, not an edit there.
+   that holds, starting from energy = power while the model runs × model
+   time, with prompt and generated tokens as the finer split if it earns its
+   place. This is #80's first "done when" and gives the shipped defaults.
+   - *iPhone:* the same runs recorded with Xcode's Power Profiler on the
+     phone, unplugged, to see how far the counter is from Apple's own figure
+     and how much the screen adds; and a watts figure for the fallback.
+3. **Built-in meter.** One small local Expo module per platform behind the
+   same interface (start, stop, joules used, or "no reading"), keeping a
+   running average for that phone so the estimate follows the device and its
+   temperature. Readings outside a plausible range are thrown away and the
+   defaults from step 2 used.
+   - *Android:* samples current and voltage during each real answer and
+     subtracts the idle draw sampled just before. Skipped while charging.
+     `apps/mobile/android` is generated, so this is a local module, not an
+     edit there.
+   - *iPhone:* the energy counter read before and after each answer. It
+     counts the processor only, so the screen is added from the step 2
+     figure or left out and the line worded as "for the answer itself".
+     Works while charging. **Fallback**, if the counter fails the check, is
+     rejected in review or disappears in an iOS release: seconds the model
+     ran × the measured watts for that iPhone model, reduced when Low Power
+     Mode or a hot phone slows the chip.
+   - Joules become a percentage from the battery's capacity: read from the
+     system on Android, from a small table by model on iPhone (which ignores
+     battery wear).
 4. **Predict before sending.** When the user pauses typing, run the search
    step only (under a second, no generation) to tell whether this will be a
    card answer, a written answer or a decline, and keep the result so sending
@@ -162,13 +172,17 @@ measurements (step 2). **Open question for Ryan.**
    on. The intent and understanding steps use the model and are not run early,
    so the prediction is of the likely path, not a guarantee. Measured on the
    desktop first, against the existing run files (which path each question
-   actually took), before it goes near the phone.
+   actually took), before it goes near a phone. The same on both platforms.
 5. **Show it.** One quiet line under the text box. No estimate until the
-   pause; none while Fred is answering.
+   pause; none while Fred is answering. "Answers left on this charge" uses
+   the battery level, which an iPhone reports only in 5% steps, so there it
+   is worded as a rough figure.
 6. **Check it is honest.** Per answer: estimate against the meter's reading.
    Over a long unplugged session: the sum of the estimates plus idle draw
-   against the real fall in the charge counter. Results doc, `metrics.json`,
-   board.
+   against the real fall in charge (Android: the charge counter; iPhone: the
+   battery level, which needs a session of several hundred answers to move
+   enough, and a Power Profiler recording beside it). Results doc,
+   `metrics.json`, board.
 
 ## Limits and risks
 
@@ -176,14 +190,18 @@ measurements (step 2). **Open question for Ryan.**
   is written, so the estimate is a range, widest for long answers.
 - **Other phones are unverified.** Only the Nothing Phone is measured. Other
   Androids rely on the built-in meter and its sanity checks.
+- **The iPhone meter rests on an undocumented counter** and has never been
+  run on a real iPhone; see "Risks specific to iPhone" above. The fallback
+  keeps the feature alive without it.
 - **The early search has a cost** in battery and in code: `ask()` has to
   accept a search already done. If reuse is not clean, the estimate falls back
   to the phone's average written-answer cost with no early search.
 - **No ground-truth meter.** Without a hardware power monitor the check in
   step 6 is the phone's fuel gauge against itself over a long session.
 - **Needs the phone**, off the cable and on Wi-Fi, for steps 1, 2 and 6: a few
-  hours in total.
-- **Size.** A guess of two to three working days, for a stretch item due with
+  hours in total. The iPhone half needs a real iPhone and the Mac.
+- **Size.** A guess of two to three working days for Android, and one to
+  two more for the iPhone once Fred runs on one, for a stretch item due with
   the RC release (2026-12-09), competing with the A-KR2 work due 2026-10-12.
 
 ## Open questions for Ryan
@@ -191,6 +209,10 @@ measurements (step 2). **Open question for Ryan.**
 - Go-ahead, or changes.
 - "Percent plus answers left" in place of a bare percentage?
 - Start now, or after the 2026-10-12 accuracy work?
+- Build Android first and the iPhone when #28 lands, or hold both until
+  then?
+- Is an undocumented counter acceptable in the iPhone app, or should the
+  iPhone ship with the time-based fallback only?
 
 ## Sources
 

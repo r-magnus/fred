@@ -30,6 +30,7 @@ import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, W
 async function* oneShot(text: string): AsyncIterable<string> { yield text; }
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
+import { beginAnswer, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
@@ -95,6 +96,8 @@ function Screen() {
   const [draft, setDraft] = useState('');
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // US-13: the battery estimate for the message being typed.
+  const [costLine, setCostLine] = useState<string | null>(null);
   const [fix, setFix] = useState<LocationFix | null>(null);
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
@@ -205,8 +208,17 @@ function Screen() {
 
     const ctrl = new AbortController();
     abort.current = ctrl;
+    // US-13: measure what this answer costs the battery (battery.ts).
+    setCostLine(null);
+    let written = false;
+    let finished = false;
+    // An estimate still searching finishes first: one use of the search model at a time.
+    await estimating.current?.catch(() => undefined);
+    beginAnswer();
     try {
       const res = await eng.ask(question, askState, ctrl.signal, previous, history, shown);
+      written = res.kind === 'answer' && res.diagnostics.cardAnswer === undefined;
+      finished = res.kind !== 'answer';
       if (res.kind === 'needs-location') {
         update(id, {
           kind: 'needs-location', done: true,
@@ -249,6 +261,7 @@ function Screen() {
         const opener = res.opener?.text;
         update(id, { text, waiting: opener != null && text.trim() === opener });
       }
+      finished = !ctrl.signal.aborted;
       // The model can decline even when retrieval scored above the gate. Showing
       // that with sources and a medical disclaimer would read as a sourced
       // answer, so it is rendered as the abstention it is.
@@ -261,10 +274,41 @@ function Screen() {
       console.log(`[fred] error ${e instanceof Error ? `${e.message} ${JSON.stringify(e.stack ?? '')}` : String(e)}`);
       update(id, { kind: 'error', text: e instanceof Error ? e.message : String(e), done: true });
     } finally {
+      endAnswer(written ? 'written' : 'quick', finished);
       abort.current = null;
       setBusy(false);
     }
   }, [draft, state, busy, update, fix, locating, locate]);
+
+  /**
+   * US-13: the battery estimate for a message not yet sent. Reads the idle
+   * draw, then runs the search only (no model) to tell a written answer from
+   * a quick reply. The line is logged for the honesty check.
+   */
+  const estimating = useRef<Promise<unknown> | null>(null);
+  const prepare = useCallback((text: string, st: string | null): Promise<string | null> => {
+    const run = (async (): Promise<string | null> => {
+      const eng = engine.current;
+      if (eng === null) return null;
+      await sampleIdle();
+      const kind = await eng.predict(text, st);
+      const e = estimateFor(kind);
+      console.log(`[fred] estimate kind=${kind} ${e === undefined ? 'none' : `percent=${e.percent.toFixed(4)} left=${e.answersLeft ?? 'none'} measured=${e.measured}`}`);
+      return e?.text ?? null;
+    })();
+    estimating.current = run;
+    return run;
+  }, []);
+  // Shown once typing pauses; never while Fred is answering.
+  useEffect(() => {
+    const q = draft.trim();
+    if (busy || q.length < 4) { setCostLine(null); return; }
+    let live = true;
+    const t = setTimeout(() => {
+      prepare(q, state).then((line) => { if (live) setCostLine(line); }, () => undefined);
+    }, 800);
+    return () => { live = false; clearTimeout(t); };
+  }, [draft, busy, state, prepare]);
 
   /**
    * A clarifying-question button (#50). The choice becomes the hiker's reply
@@ -302,12 +346,15 @@ function Screen() {
   sendRef.current = send;
   const busyRef = useRef(busy);
   busyRef.current = busy;
+  const prepareRef = useRef(prepare);
+  const preparing = useRef(false);
+  prepareRef.current = prepare;
   useEffect(() => {
     if (!new File(Paths.document, 'devhooks').exists) return;
     setVerboseLogging(true);
     const inbox = new File(Paths.document, 'devhooks-ask.txt');
     const timer = setInterval(() => {
-      if (!inbox.exists || engine.current === null || busyRef.current) return;
+      if (!inbox.exists || engine.current === null || busyRef.current || preparing.current) return;
       const lines = inbox.textSync().split('\n').filter((l) => l.trim() !== '');
       inbox.delete();
       const [first, ...rest] = lines;
@@ -315,7 +362,12 @@ function Screen() {
       if (first === undefined) return;
       const [question, st] = first.split('\t');
       console.log(`[fred] devhook ask: ${question}`);
-      void sendRef.current(question, st === undefined || st === '' ? null : st);
+      const askIn = st === undefined || st === '' ? null : st;
+      // As a typed message: the estimate first, then the send.
+      preparing.current = true;
+      void prepareRef.current(question!, askIn).catch(() => null)
+        .then(() => sendRef.current(question, askIn))
+        .finally(() => { preparing.current = false; });
     }, 2000);
     return () => clearInterval(timer);
   }, []);
@@ -597,6 +649,8 @@ function Screen() {
           no longer resizes for the keyboard — the first build buried the
           composer under it. */}
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
+        {/* US-13: what sending this will cost the battery, once typing pauses. */}
+        {costLine !== null && !busy && <Text style={styles.costLine}>{costLine}</Text>}
         <View style={[styles.composer, { paddingBottom: insets.bottom + 12 }]}>
           <TextInput
             ref={input}
@@ -699,6 +753,7 @@ const styles = StyleSheet.create({
     flex: 1, color: '#eaf2ef', fontSize: 15, maxHeight: 120,
     backgroundColor: '#161b1e', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10,
   },
+  costLine: { color: '#7d8c88', fontSize: 12, paddingHorizontal: 16, paddingTop: 6 },
   send: { backgroundColor: '#2f7d63', borderRadius: 10, paddingHorizontal: 18, paddingVertical: 12 },
   sendOff: { backgroundColor: '#243029' },
   sendStop: { backgroundColor: '#7d3a2f' },

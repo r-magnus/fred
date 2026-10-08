@@ -12,7 +12,7 @@
  */
 import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
-import { ask, verifyEmbedderParity, warmUp, SAID_AS_MODEL, SCOPE_MODEL, type AskResult, type RoutablePack } from '@fred/rag-core';
+import { ask, predictCost, verifyEmbedderParity, warmUp, SAID_AS_MODEL, SCOPE_MODEL, type AskResult, type ReplyCost, type RoutablePack } from '@fred/rag-core';
 import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
 
 const BASE = Paths.document;
@@ -45,6 +45,12 @@ export interface Engine {
     history?: readonly string[],
     lastCard?: string,
   ): Promise<AskResult>;
+  /**
+   * US-13: whether this message will likely get a written answer or a quick
+   * reply, from the search alone, for the battery estimate. Its search vector
+   * is kept, so sending the same words does not make it again.
+   */
+  predict(question: string, state: string | null): Promise<ReplyCost>;
   /** States with a flora-fauna pack installed, for the location picker. */
   availableStates(): readonly string[];
   release(): Promise<void>;
@@ -156,11 +162,28 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     // #152: the message the card matcher last took as a pet's, so a follow-up
     // that only says "its bleeding" is still about the dog.
     let petMessage: string | undefined;
+    // US-13: the estimate searches while the hiker is still typing; the vector
+    // it made is kept for the send that follows (an embedding costs ~0.7 s).
+    const vectors = new Map<string, Promise<Float32Array>>();
+    const remembering = {
+      ...backend,
+      embed: (text: string): Promise<Float32Array> => {
+        let v = vectors.get(text);
+        if (v === undefined) {
+          v = backend.embed(text);
+          vectors.set(text, v);
+          v.catch(() => vectors.delete(text));
+          if (vectors.size > 4) vectors.delete(vectors.keys().next().value!);
+        }
+        return v;
+      },
+    };
     return {
+      predict: (question, state) => predictCost(question, { backend: remembering, store, packs }, { state, saidAs: SAID_AS_MODEL }),
       ask: async (question, state, signal, previous, history, lastCard) => {
         const t0 = Date.now();
         const previousWasPet = petMessage !== undefined && history?.at(-1) === petMessage;
-        const res = await ask(question, { backend, store, packs }, {
+        const res = await ask(question, { backend: remembering, store, packs }, {
           state,
           // Decide what the hiker wants, not just the topic: casual emergencies
           // open their card, small talk gets a reply (docs/results-intent-probe.md).

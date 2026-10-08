@@ -18,6 +18,7 @@ import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from
 import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, saidAs, type Said, type SaidAsModel } from './said-as.ts';
+import type { ReplyCost } from './energy.ts';
 import { joinNeighbours } from './join.ts';
 import { cosineInt8, dequantizeInt8 } from './score.ts';
 import { exposureConditions, withExposures } from './exposures.ts';
@@ -1999,4 +2000,40 @@ function toCitation(c: ScoredChunk, i: number): Citation {
     licenseId: c.chunk.licenseId,
     score: c.score,
   };
+}
+
+/**
+ * US-13 (#80): will this message get a written answer, which runs the model
+ * for seconds, or a quick reply (a field card, small talk, a decline)? For
+ * the battery estimate shown before sending. The search only, on the message
+ * alone: no model call, so the intent and understanding steps, and the
+ * conversation, have no say. It predicts the likely path, not a guarantee
+ * (measured in docs/results-battery-estimate.md).
+ */
+export async function predictCost(
+  query: string,
+  deps: PipelineDeps,
+  opts: Pick<AskOptions, 'state' | 'retrieval' | 'abstainThreshold' | 'saidAs'>,
+): Promise<ReplyCost> {
+  const { store, packs, backend } = deps;
+  if (query.trim() === '' || ONLY_ACKNOWLEDGES.test(query)) return 'quick';
+  const retrievalOpts = opts.retrieval ?? DEFAULT_RETRIEVAL;
+  const keywords = extractKeywords(withExposures(query));
+  const unscoped = packs.filter((p) => p.scope.kind !== 'us-state' || p.scope.state === opts.state);
+  const routed = route(keywords, packs, { state: opts.state });
+  // Every pack the pipeline could end up searching (a weak routed search is
+  // widened, an everyday question reaches the tips): the best it can find.
+  const ids = [...new Set([...routed.packIds, ...unscoped.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
+  const domains = [...new Set([...routed.domains, ...unscoped.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
+  const candidates = await retrieve(keywords, ids, store, backend, retrievalOpts, domains, query);
+  const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
+  if (top < (opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD)) return 'quick';
+  // A card that clearly matches, or one the matcher is sure of, is shown as it is.
+  const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
+  if (clearCard(usable, retrievalOpts.reserve) !== undefined) return 'quick';
+  if (opts.saidAs !== undefined) {
+    const said = saidAs(opts.saidAs, await queryVector(backend, query))[0];
+    if (said !== undefined && said.p >= opts.saidAs.sure && noCardKind(said.label) !== 'other' && noCardKind(said.label) !== 'gear' && noCardKind(said.label) !== 'minor') return 'quick';
+  }
+  return 'written';
 }

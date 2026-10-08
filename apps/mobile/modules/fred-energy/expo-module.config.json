@@ -1,0 +1,5 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": { "modules": ["FredEnergyModule"] },
+  "android": { "modules": ["dev.fred.energy.FredEnergyModule"] }
+}

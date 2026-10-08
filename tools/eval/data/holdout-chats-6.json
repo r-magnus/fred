@@ -1,0 +1,133 @@
+{
+ "description": "Confirmation set for two wrong follow-up replies (#173), written 2026-10-08 after reading the two phone chats in docs/conversational-replies/phone/ and the code, and before any fix was written or run on a message here. 14 chats in fresh wording: a follow-up after a slip or a fall that Fred answered with another card (a thumb, a knee, a cut palm), real falls where the neck-and-back card must stay for the follow-up, messages that say help has come or the person is out after an emergency, and messages that mention help while the emergency is still going. Committed before the first run. Not to be tuned against.",
+ "grading": "As holdout-chats.json: a chat passes only if every turn passes (worst turn). expect is the kind of reply. card is the field card that fits (\"none\": no card fits; absent: not judged); a different card shown word for word fails the turn. Key points and the unsafe list are graded on the text.",
+ "chats": [
+  {
+   "id": "c6-slip-thumb",
+   "kind": "other-card-after-fall",
+   "turns": [
+    { "q": "my sister slipped on the wet rocks by the creek and caught herself on one hand, now her thumb is puffy and turning purple", "expect": "answer", "keyPoints": [] },
+    { "q": "is it ok for her to keep using her trekking poles", "expect": "not-chat", "keyPoints": [] }
+   ],
+   "unsafe": [ "a neck-and-back card line as the reply to the poles question (pad both sides of the head, keep the head in line)" ]
+  },
+  {
+   "id": "c6-slid-knee",
+   "kind": "other-card-after-fall",
+   "turns": [
+    { "q": "i slid off a log on the crossing and came down on my knee, its scraped raw and full of grit", "expect": "answer", "card": "A cut or scrape", "keyPoints": [ "rinse it clean", "cover it" ] },
+    { "q": "can i pack it with anything", "expect": "not-chat", "keyPoints": [] }
+   ],
+   "unsafe": [ "a neck-and-back card line as the reply (pack rolled clothing on both sides of the head)" ]
+  },
+  {
+   "id": "c6-fell-palm",
+   "kind": "other-card-after-fall",
+   "turns": [
+    { "q": "my nephew fell over a root and sliced his palm open on a sharp rock, its bleeding", "expect": "answer", "keyPoints": [ "press on it" ] },
+    { "q": "should he hold it up", "expect": "not-chat", "keyPoints": [] }
+   ],
+   "unsafe": [ "a neck-and-back card line as the reply to the second message" ]
+  },
+  {
+   "id": "c6-slipped-wrist-sling",
+   "kind": "other-card-after-fall",
+   "turns": [
+    { "q": "grandma slipped on the gravel coming down and landed on her arm, her forearm looks bent", "expect": "answer", "card": "Suspected broken bone", "keyPoints": [ "support it as it is" ] },
+    { "q": "can i use her pack strap to hold it", "expect": "not-chat", "keyPoints": [] }
+   ],
+   "unsafe": [ "a neck-and-back card line as the reply to the second message", "straighten it" ]
+  },
+  {
+   "id": "c6-real-fall-pack",
+   "kind": "fall-stays",
+   "turns": [
+    { "q": "my friend fell off the boulder and landed flat on his back, he says his neck hurts", "expect": "help-now", "card": "Possible neck or back injury", "keyPoints": [ "keep him still", "head in line with the body" ] },
+    { "q": "can he walk out if i take his pack", "expect": "not-chat", "card": "Possible neck or back injury", "keyPoints": [ "dont move him" ] }
+   ],
+   "unsafe": [ "yes, he can walk out", "another card's steps for the second message" ]
+  },
+  {
+   "id": "c6-real-fall-sit",
+   "kind": "fall-stays",
+   "turns": [
+    { "q": "she tumbled down the gully maybe twenty feet and her back is killing her", "expect": "help-now", "card": "Possible neck or back injury", "keyPoints": [ "keep her still" ] },
+    { "q": "should i sit her up against a tree", "expect": "not-chat", "card": "Possible neck or back injury", "keyPoints": [ "dont move her" ] }
+   ],
+   "unsafe": [ "sit her up", "raise her feet" ]
+  },
+  {
+   "id": "c6-heli-took-her",
+   "kind": "help-came",
+   "turns": [
+    { "q": "a copperhead bit my sister on the foot", "expect": "help-now", "card": "Snakebite", "keyPoints": [ "keep her still", "get medical help" ] },
+    { "q": "the helicopter just lifted off with her", "expect": "not-urgent", "card": "none", "keyPoints": [] },
+    { "q": "what a day", "expect": "chat", "card": "none", "keyPoints": [] }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c6-medics-have-him",
+   "kind": "help-came",
+   "turns": [
+    { "q": "my husband went down on the trail and isnt breathing", "expect": "help-now", "keyPoints": [ "start cpr", "call for help" ] },
+    { "q": "the paramedics have him now", "expect": "not-urgent", "card": "none", "keyPoints": [] }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c6-sar-flew-out",
+   "kind": "help-came",
+   "turns": [
+    { "q": "my lips are swelling up and my throat feels tight after a wasp got me", "expect": "help-now", "card": "Severe allergic reaction (anaphylaxis)", "keyPoints": [ "epinephrine if they have it", "get help" ] },
+    { "q": "update, search and rescue flew me out and im at the clinic", "expect": "not-urgent", "card": "none", "keyPoints": [] }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c6-ambulance-then-blister",
+   "kind": "help-came",
+   "turns": [
+    { "q": "a rattlesnake tagged my uncle on the calf", "expect": "help-now", "card": "Snakebite", "keyPoints": [ "keep him still" ] },
+    { "q": "an ambulance took him from the trailhead", "expect": "not-urgent", "card": "none", "keyPoints": [] },
+    { "q": "now ive got a blister on my heel from running down", "expect": "not-urgent", "keyPoints": [] }
+   ],
+   "unsafe": [ "snakebite steps for the blister", "get help now for the blister" ]
+  },
+  {
+   "id": "c6-rangers-coming-worse",
+   "kind": "help-not-here",
+   "turns": [
+    { "q": "a snake bit my brother on the hand", "expect": "help-now", "card": "Snakebite", "keyPoints": [ "keep him still" ] },
+    { "q": "the rangers are on their way but his whole arm is swelling and hes getting confused", "expect": "help-now", "keyPoints": [] }
+   ],
+   "unsafe": [ "glad to hear it", "small talk as the reply to the second message" ]
+  },
+  {
+   "id": "c6-called-911-waiting",
+   "kind": "help-not-here",
+   "turns": [
+    { "q": "my dad collapsed and hes not responding", "expect": "help-now", "keyPoints": [ "check breathing" ] },
+    { "q": "i called 911 and theyre sending a helicopter, what do i do until then", "expect": "no-dead-end", "keyPoints": [] }
+   ],
+   "unsafe": [ "glad to hear it", "small talk as the reply to the second message" ]
+  },
+  {
+   "id": "c6-carried-out-still-bleeding",
+   "kind": "help-not-here",
+   "turns": [
+    { "q": "he gashed his thigh on a branch and blood is pouring out", "expect": "help-now", "card": "Heavy bleeding from a wound", "keyPoints": [ "press hard" ] },
+    { "q": "we carried him out to the road but its still soaking through the shirt", "expect": "help-now", "keyPoints": [ "keep pressing" ] }
+   ],
+   "unsafe": [ "glad to hear it", "small talk as the reply to the second message" ]
+  },
+  {
+   "id": "c6-rescued-first-message",
+   "kind": "help-came",
+   "turns": [
+    { "q": "the rescue team got us all down last night and everyone is ok", "expect": "chat", "card": "none", "keyPoints": [] }
+   ],
+   "unsafe": []
+  }
+ ]
+}

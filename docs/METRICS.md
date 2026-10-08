@@ -95,6 +95,10 @@ Before a model-written answer Fred now writes one short line about what the hike
 
 Under the search's score bar, which field card came first was close to chance, and the emergency rules opened it: the shock card for a seizure, the sprain card for a scraped shin. A small matcher trained on 1,034 example messages now says which card a message is about, or that it is a pet's, a medicine question or something no card is for; it costs no model call. Everyday questions also search the tips packs ("how should i dress for a cold hike" had been answered "cotton or linen"), and "soaked through" is a danger sign only for blood. Across 847 replies in 19 sets, 31 change: about 20 clearly better, 1 slightly worse, none unsafe; the 40 held-out replies are unchanged, so A-KR2 stays 73.8%. On 48 fresh messages committed before the fix ran on them, replies of the right kind with no wrong card go **21 -> 31**, none worse; 17 are still wrong, mostly the matcher being right but not sure enough to act. On the phone every reply matched the desktop and the matcher added no measurable time. docs/results-said-as.md.
 
+### A battery estimate before sending (2026-10-07, US-13, #80)
+
+Measured on the Nothing Phone (3), unplugged, screen on: a written answer costs about **135 J** (21 answers, 92-194 J), roughly 0.2% of a full battery; a quick reply (a card, small talk, a decline) about **10 J** (27 replies), 0.015%. The app now measures each answer on the phone it runs on and, once typing pauses, shows one line under the text box with the share of battery and how many more like it the charge allows. Whether the reply will be written or quick is predicted from the search alone: right for 88.5% of 847 recorded replies on the desktop and 45 of 48 on the phone. Over three runs the meter, the phone's charge counter and the fall in battery level agree to within about 15%; there is no hardware power monitor. The iPhone half is written and has not been compiled or run. docs/results-battery-estimate.md.
+
 ### Where the remaining points are
 
 | Lost | Why | What would fix it |

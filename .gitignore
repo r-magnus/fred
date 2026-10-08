@@ -30,3 +30,6 @@ apps/mobile/ios/
 # Drive-test tracks contain real coordinates; they live in ~/fred-tracks.
 bkr1-*.csv
 docs/tracks/
+
+# Local Expo modules: Gradle output
+apps/mobile/modules/*/android/build/

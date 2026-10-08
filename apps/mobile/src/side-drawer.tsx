@@ -9,10 +9,11 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated, BackHandler, Easing, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View,
+  Animated, BackHandler, Easing, Image, PanResponder, PixelRatio, Platform, Pressable, ScrollView, StyleSheet, Text, View,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Edge from '../modules/fred-edge';
 import { describeWhen, type SavedChat } from './chat-log.ts';
 import { Crossfade, radius, sheetFor, useThemed, type Palette } from './theme.tsx';
 
@@ -23,30 +24,80 @@ const TRASH = require('../assets/ui/trash.png');
 const CHECK = require('../assets/ui/check.png');
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
-/** The bookmark on the edge of the chat. */
-export function SideTab({ top, onPress }: { top: number; onPress: () => void }): React.JSX.Element {
+/** The tab's size, and how far round it a touch still counts. */
+const TAB_WIDTH = 30;
+const TAB_HEIGHT = 52;
+const TAB_SLOP = 12;
+/** How wide the drawer is on a screen this wide. */
+const panelWidth = (screen: number): number => Math.min(340, screen * 0.84);
+/** A pull this far across the drawer's width, or a flick this fast, opens it; less lets it fall back. */
+const PULL_OPENS = 0.3;
+const FLICK_OPENS = 0.4;
+
+/**
+ * The bookmark on the edge of the chat. A tap opens the drawer, and so does
+ * pulling it to the right: the drawer then follows the finger (`slide` is the
+ * drawer's own position, 0 shut to 1 open, shared with SideDrawer) and
+ * `onPeek` keeps the drawer on screen while it is being pulled.
+ */
+export function SideTab(
+  { top, slide, onPress, onPeek }: { top: number; slide: Animated.Value; onPress: () => void; onPeek: (on: boolean) => void },
+): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
+  const { width } = useWindowDimensions();
+  // The gesture is made once, so it reads what changes through this.
+  const now = useRef({ panel: panelWidth(width), onPress, onPeek });
+  now.current = { panel: panelWidth(width), onPress, onPeek };
+  const pull = useRef(PanResponder.create({
+    // Only a sideways pull to the right; a tap stays the button's.
+    onMoveShouldSetPanResponderCapture: (_, g) => g.dx > 6 && g.dx > Math.abs(g.dy),
+    onPanResponderGrant: () => now.current.onPeek(true),
+    onPanResponderMove: (_, g) => slide.setValue(Math.max(0, Math.min(1, g.dx / now.current.panel))),
+    onPanResponderRelease: (_, g) => {
+      if (g.dx > now.current.panel * PULL_OPENS || g.vx > FLICK_OPENS) { now.current.onPress(); now.current.onPeek(false); return; }
+      fallBack();
+    },
+    onPanResponderTerminate: () => fallBack(),
+  })).current;
+  // Android reads a swipe that starts at the screen's edge as "back", which
+  // would close the app: keep that gesture off the tab and the margin round it.
+  useEffect(() => {
+    const px = (points: number): number => Math.round(PixelRatio.getPixelSizeForLayoutSize(points));
+    Edge?.keepFromBackGesture(0, px(top - TAB_SLOP), px(TAB_WIDTH + TAB_SLOP), px(top + TAB_HEIGHT + TAB_SLOP));
+    return () => Edge?.keepFromBackGesture(0, 0, 0, 0);
+  }, [top]);
+  const fallBack = (): void => {
+    Animated.timing(slide, { toValue: 0, duration: 160, easing: Easing.in(Easing.cubic), useNativeDriver: true })
+      .start(() => now.current.onPeek(false));
+  };
   return (
-    <Pressable style={[styles.tabBox, { top }]} onPress={onPress} hitSlop={12}
-      accessibilityRole="button" accessibilityLabel="Open the menu: map and past chats">
-      {/* In both colour sets at once: it sits above the veil, so it has to turn with the sky. */}
-      <Crossfade render={(p) => {
-        const s = sheetFor(makeStyles, p);
-        return (
-          <View style={s.tab}>
-            <View style={s.tabLine} />
-            <View style={s.tabLine} />
-            <View style={s.tabLine} />
-          </View>
-        );
-      }} />
-    </Pressable>
+    // The pull is on a box around the button: a Pressable keeps its own touch handlers.
+    <View {...pull.panHandlers} style={[styles.tabBox, { top }]} hitSlop={TAB_SLOP}>
+      <Pressable onPress={onPress} hitSlop={TAB_SLOP}
+        accessibilityRole="button" accessibilityLabel="Open the menu: map and past chats">
+        {/* In both colour sets at once: it sits above the veil, so it has to turn with the sky. */}
+        <Crossfade render={(p) => {
+          const s = sheetFor(makeStyles, p);
+          return (
+            <View style={s.tab}>
+              <View style={s.tabLine} />
+              <View style={s.tabLine} />
+              <View style={s.tabLine} />
+            </View>
+          );
+        }} />
+      </Pressable>
+    </View>
   );
 }
 
 export function SideDrawer<T>(
-  { open, chats, current, onClose, onMap, onNewChat, onOpenChat, onRemoveChat }: {
+  { open, peek, slide, chats, current, onClose, onMap, onNewChat, onOpenChat, onRemoveChat }: {
     open: boolean;
+    /** True while the tab is being pulled: the drawer is shown part-way, not yet open. */
+    peek: boolean;
+    /** Where the drawer is, 0 shut to 1 open. Shared with SideTab, which moves it during a pull. */
+    slide: Animated.Value;
     chats: readonly SavedChat<T>[];
     /** The chat on screen, marked in the list. */
     current: number | null;
@@ -60,8 +111,7 @@ export function SideDrawer<T>(
   const insets = useSafeAreaInsets();
   const { palette, styles } = useThemed(makeStyles);
   const { width } = useWindowDimensions();
-  const panel = Math.min(340, width * 0.84);
-  const slide = useRef(new Animated.Value(0)).current;
+  const panel = panelWidth(width);
   // Kept mounted until the closing slide has finished.
   const [shown, setShown] = useState(open);
   // Removing asks first, like removing a map: the first tap arms it.
@@ -80,7 +130,7 @@ export function SideDrawer<T>(
     return () => sub.remove();
   }, [open, onClose]);
 
-  if (!shown) return null;
+  if (!shown && !peek && !open) return null;
   return (
     <View style={[StyleSheet.absoluteFill, styles.over]} pointerEvents={open ? 'auto' : 'none'}>
       <Animated.View style={[styles.scrim, { opacity: slide }]}>
@@ -152,7 +202,7 @@ export function SideDrawer<T>(
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
   // A bookmark on the page's left edge: rounded where it sticks out, flat where it meets the edge.
-  tabBox: { position: 'absolute', left: 0, width: 30, height: 52, zIndex: 3 },
+  tabBox: { position: 'absolute', left: 0, width: TAB_WIDTH, height: TAB_HEIGHT, zIndex: 3 },
   tab: {
     width: 30, height: 52, gap: 5,
     alignItems: 'center', justifyContent: 'center', paddingRight: 3,

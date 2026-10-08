@@ -1,7 +1,0 @@
-dev.fred.energy.fred-energy-pngs-0 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/build/generated/res/pngs/release
-dev.fred.energy.fred-energy-resValues-1 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/build/generated/res/resValues/release
-dev.fred.energy.fred-energy-mergeReleaseResources-2 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
-dev.fred.energy.fred-energy-mergeReleaseResources-3 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
-dev.fred.energy.fred-energy-release-4 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/build/intermediates/merged_res/release/mergeReleaseResources
-dev.fred.energy.fred-energy-main-5 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/src/main/res
-dev.fred.energy.fred-energy-release-6 /home/odysseus/code/fred/apps/mobile/modules/fred-energy/android/src/release/res

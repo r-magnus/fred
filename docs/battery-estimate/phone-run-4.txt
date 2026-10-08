@@ -1,0 +1,64 @@
+[fred] devhook ask: my friend just collapsed and is jerking all over
+[fred] estimate kind=quick percent=0.0159 left=4910 measured=true
+[fred] answer retrieval=474ms first=474ms total=3002ms chars=783 U=0.172 tokens=0 intent=now said=card model=274ms embed=0ms top=Shock after an injury | Seizure | UNCONSCIOUS CASUALTY | Someone is unconscious or not responding
+[fred] energy kind=quick joules=6.6 expected=11.2 gross=10.7 seconds=3.0 watts=3.55 idleW=1.35 samples=16 charging=false level=0.78 chargeUAh=3981000 rawCurrent=-395000 mv=4129 thermal=1 learned=true
+[fred] devhook ask: how do i dry out wet boots overnight
+[fred] estimate kind=written percent=0.1884 left=414 measured=true
+[fred] answer retrieval=485ms first=10511ms total=13120ms chars=193 U=0.300 tokens=949 intent=prevent model=301ms embed=0ms top=Wilderness backpacking > Wear > Footwear | Immersion foot (trench foot): cold, wet, numb feet | Cold weather > Overnight stay | Wilderness backpacking > Wear > Clothing
+[fred] energy kind=written joules=119.1 expected=133.2 gross=136.8 seconds=13.1 watts=10.43 idleW=1.35 samples=66 charging=false level=0.78 chargeUAh=3981000 rawCurrent=-2736000 mv=4061 thermal=1 learned=true
+[fred] devhook ask: there's a tick stuck in my leg
+[fred] estimate kind=quick percent=0.0146 left=5350 measured=true
+[fred] answer retrieval=1357ms first=1357ms total=3892ms chars=1070 U=0.399 followUp=no(0.399/0.366) tokens=0 intent=now model=260ms embed=697ms top=Removing a tick | What to Do After a Tick Bite > Key points | What to Do After a Tick Bite > How to remove a tick | TICKS
+[fred] energy kind=quick joules=11.5 expected=10.3 gross=16.7 seconds=3.9 watts=4.29 idleW=1.35 samples=20 charging=false level=0.78 chargeUAh=3981000 rawCurrent=-439000 mv=4061 thermal=1 learned=true
+[fred] devhook ask: how much water should i bring on a day hike
+[fred] estimate kind=written percent=0.1844 left=423 measured=true
+[fred] answer retrieval=1047ms first=8576ms total=11109ms chars=207 U=0.373 followUp=no(0.311/0.321) tokens=748 intent=prevent everyday model=0ms embed=640ms top=Hiking > Prepare > Packing and equipment | Wilderness backpacking > Pack > Water | Wilderness backpacking > Drink | Wilderness backpacking > Drink
+[fred] energy kind=written joules=91.6 expected=130.4 gross=106.6 seconds=11.1 watts=9.59 idleW=1.35 samples=56 charging=false level=0.78 chargeUAh=3981000 rawCurrent=-2640000 mv=4055 thermal=1 learned=true
+[fred] devhook ask: i burned my hand on the stove
+[fred] estimate kind=quick percent=0.0150 left=5197 measured=true
+[fred] answer retrieval=1465ms first=1465ms total=3999ms chars=1358 U=0.207 followUp=no(0.207/0.309) tokens=0 intent=now conditions=burn model=274ms embed=661ms top=Burns | During Extremely Cold Weather > Frostbite First Aid | TIER 1 SKILLS FOR THE TREATMENT OF BURNS | BURNS REQUIRING RAPID HANDOVER/TRANSFER: SHOCK
+[fred] energy kind=quick joules=11.4 expected=10.5 gross=16.8 seconds=4.0 watts=4.19 idleW=1.35 samples=21 charging=false level=0.78 chargeUAh=3954000 rawCurrent=-446000 mv=4100 thermal=1 learned=true
+[fred] devhook ask: what should i do if lightning starts while i'm on a ridge
+[fred] estimate kind=written percent=0.1746 left=446 measured=true
+[fred] answer retrieval=587ms first=8756ms total=14388ms chars=320 U=0.490 tokens=745 intent=now conditions=burn model=304ms embed=0ms top=Lightning Tips > Last Resort Outdoor Risk Reduction Tips | Lightning Tips > Lightning: What You Need to Know | When a Safe Building or Vehicle is Nearby > Camping, Climbing and Other Wilderness Activities | When a Safe Building or Vehicle is Nearby
+[fred] energy kind=written joules=122.6 expected=122.7 gross=142.0 seconds=14.4 watts=9.87 idleW=1.35 samples=72 charging=false level=0.78 chargeUAh=3954000 rawCurrent=-1358000 mv=4056 thermal=1 learned=true
+[fred] devhook ask: we had lunch by the creek and the kids skipped stones for an hour
+[fred] estimate kind=quick percent=0.0152 left=5114 measured=true
+[fred] chat retrieval=1414ms U=0.007 followUp=no(0.007/0.419) intent=question conditions=burn model=301ms embed=709ms top=Crossing a river or stream | Dehydration | Eating wild plants and berries | Staying healthy on a long trip
+[fred] energy kind=quick joules=5.6 expected=10.7 gross=7.5 seconds=1.4 watts=5.31 idleW=1.35 samples=8 charging=false level=0.78 chargeUAh=3954000 rawCurrent=-1704000 mv=4056 thermal=1 learned=true
+[fred] devhook ask: how do i keep bugs from eating me alive out here
+[fred] estimate kind=written percent=0.1745 left=446 measured=true
+[fred] answer retrieval=257ms first=12679ms total=20750ms chars=637 U=0.409 tokens=918 intent=prevent everyday conditions=burn model=0ms embed=0ms top=Wilderness backpacking > Stay healthy > Pests | Pests > Bugs > Ticks > How to prevent tick bites | Wilderness backpacking > Stay healthy > Pests | Pests > Bugs > Mosquitoes
+[fred] energy kind=written joules=171.8 expected=122.6 gross=199.8 seconds=20.8 watts=9.63 idleW=1.35 samples=102 charging=false level=0.78 chargeUAh=3954000 rawCurrent=-1789000 mv=4028 thermal=1 learned=true
+[fred] devhook ask: how do i purify water
+[fred] estimate kind=quick percent=0.0138 left=5655 measured=true
+[fred] answer retrieval=1203ms first=1203ms total=3736ms chars=1352 U=0.462 followUp=no(0.462/0.355) tokens=0 intent=prevent conditions=burn model=277ms embed=647ms top=Making water safe to drink | PURIFICATION | CHEMICAL PURIFICATION | BOILING METHOD
+[fred] energy kind=quick joules=11.2 expected=9.7 gross=16.2 seconds=3.7 watts=4.34 idleW=1.35 samples=20 charging=false level=0.78 chargeUAh=3954000 rawCurrent=-529000 mv=4073 thermal=1 learned=true
+[fred] devhook ask: can we feed the deer that keep coming around camp
+[fred] estimate kind=written percent=0.1885 left=413 measured=true
+[fred] answer retrieval=1495ms first=25063ms total=30586ms chars=359 U=0.382 followUp=no(0.000/0.293) tokens=809 intent=question conditions=burn model=519ms embed=684ms top=Camping Safely Step 3 - During Your Stay > Respect Wildlife | Camping Safely Step 3 - During Your Stay > Respect Wildlife | During Your Stay - Camping | Encountering Wildlife - Zion National Park
+[fred] energy kind=written joules=193.9 expected=132.5 gross=235.1 seconds=30.6 watts=7.69 idleW=1.35 samples=149 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-1272000 mv=4079 thermal=1 learned=true
+[fred] devhook ask: i think i sprained my ankle
+[fred] estimate kind=quick percent=0.0142 left=5437 measured=true
+[fred] answer retrieval=1139ms first=1139ms total=3625ms chars=679 U=0.443 followUp=no(0.443/0.173) tokens=0 intent=now conditions=burn model=309ms embed=627ms top=Twisted or sprained ankle, or a strained muscle | Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Factors > Symptoms of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Fac
+[fred] energy kind=quick joules=12.0 expected=10.0 gross=16.8 seconds=3.6 watts=4.64 idleW=1.35 samples=19 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-448000 mv=4099 thermal=1 learned=true
+[fred] devhook ask: how do we put the fire out properly
+[fred] estimate kind=written percent=0.2052 left=375 measured=true
+[fred] answer retrieval=1300ms first=13924ms total=16056ms opener=yes answerFirst=14274ms chars=271 U=0.382 followUp=no(0.328/0.339) tokens=849 intent=prevent everyday conditions=burn model=298ms embed=639ms top=I Didn't Know That! Leave No Trace Principle #5 - Minimize Campfire Impacts > Put Your Fire Completely Out | FUEL | FIRE STARTING TECHNIQUES | Fire > Be fire safe by doing the following:
+[fred] energy kind=written joules=124.5 expected=144.7 gross=146.2 seconds=16.1 watts=9.10 idleW=1.35 samples=80 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-446000 mv=4047 thermal=1 learned=true
+[fred] devhook ask: who won the world series last year
+[fred] estimate kind=quick percent=0.0147 left=5231 measured=true
+[fred] abstain retrieval=1159ms U=0.000 followUp=no(0.000/0.020) intent=question conditions=burn reason=low-score model=267ms embed=650ms top=Someone is unconscious or not responding | Eating wild plants and berries | Lost: should I stay or keep moving? | A bear close by, charging or attacking
+[fred] energy kind=quick joules=4.4 expected=10.4 gross=6.0 seconds=1.2 watts=5.14 idleW=1.35 samples=7 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-1629000 mv=4047 thermal=1 learned=true
+[fred] devhook ask: what should i think about before crossing a river tomorrow
+[fred] estimate kind=quick percent=0.0130 left=5912 measured=true
+[fred] answer retrieval=1253ms first=1253ms total=3745ms chars=1342 U=0.553 tokens=0 intent=prevent conditions=burn model=1053ms embed=0ms top=Crossing a river or stream | Safe River Crossings > Plan for River Crossings | Safe River Crossings > Plan for River Crossings | Safe River Crossings > Check Any Last Minute Details
+[fred] energy kind=quick joules=14.4 expected=9.2 gross=19.5 seconds=3.8 watts=5.19 idleW=1.35 samples=20 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-423000 mv=4047 thermal=1 learned=true
+[fred] devhook ask: someone is choking
+[fred] estimate kind=quick percent=0.0145 left=5308 measured=true
+[fred] answer retrieval=1093ms first=1093ms total=3615ms chars=1581 U=0.481 followUp=no(0.481/0.445) tokens=0 intent=now conditions=burn model=204ms embed=636ms top=Someone is choking | AIRWAY SKILL STATION: MANAGEMENT OF CHOKING | AIRWAY SKILL STATION: MANAGEMENT OF CHOKING | MANAGEMENT OF CHOKING
+[fred] energy kind=quick joules=9.4 expected=10.2 gross=14.3 seconds=3.6 watts=3.95 idleW=1.35 samples=19 charging=false level=0.77 chargeUAh=3918000 rawCurrent=-480000 mv=4101 thermal=1 learned=true
+[fred] devhook ask: is it ok to have a small campfire when it's really windy and dry
+[fred] estimate kind=quick percent=0.0142 left=5354 measured=true
+[fred] answer retrieval=1268ms first=8811ms total=13167ms chars=307 U=0.300 followUp=no(0.300/0.247) tokens=721 intent=question model=311ms embed=656ms top=Wild camping > Sleep | Cold weather > Overnight stay | Camping > Prepare > Equipment | I Didn't Know That! Leave No Trace Principle #5 - Minimize Campfire Impacts > What Can You Do?
+[fred] energy kind=written joules=113.3 expected=140.7 gross=131.1 seconds=13.2 watts=9.96 idleW=1.35 samples=66 charging=false level=0.76 chargeUAh=3889000 rawCurrent=-2631000 mv=4028 thermal=1 learned=true

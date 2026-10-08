@@ -1,0 +1,6 @@
+[fred] estimate kind=quick percent=0.0113 left=7245 measured=false
+[fred] answer retrieval=539ms first=539ms total=3058ms chars=783 U=0.172 tokens=0 intent=now said=card model=357ms embed=0ms top=Shock after an injury | Seizure | UNCONSCIOUS CASUALTY | Someone is unconscious or not responding
+[fred] energy kind=quick joules=none expected=8.0 gross=5.2 seconds=3.1 watts=1.69 idleW=none samples=16 charging=true level=0.82 chargeUAh=4182000 rawCurrent=154000 mv=4175 thermal=0 learned=false
+[fred] estimate kind=written percent=0.1273 left=644 measured=false
+[fred] answer retrieval=526ms first=10727ms total=13488ms chars=193 U=0.300 tokens=949 intent=prevent model=346ms embed=0ms top=Wilderness backpacking > Wear > Footwear | Immersion foot (trench foot): cold, wet, numb feet | Cold weather > Overnight stay | Wilderness backpacking > Wear > Clothing
+[fred] energy kind=written joules=none expected=90.0 gross=124.5 seconds=13.5 watts=9.23 idleW=none samples=67 charging=true level=0.82 chargeUAh=4173000 rawCurrent=-2129000 mv=4092 thermal=0 learned=false

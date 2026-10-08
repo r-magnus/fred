@@ -70,11 +70,12 @@ export interface EnergyBook {
 }
 
 /**
- * Shipped starting figures, used until this phone has measured its own.
- * PLACEHOLDERS from the plan's arithmetic (a written answer 8-19 s at 5-10 W),
- * to be replaced by the step 2 measurements on the Nothing Phone (3).
+ * Shipped starting figures, used until this phone has measured its own:
+ * the Nothing Phone (3), unplugged, screen on, 2026-10-07. 21 written answers
+ * averaged 135 J (92-194) and 27 quick replies 10 J (5-17), idle draw taken
+ * off (docs/results-battery-estimate.md).
  */
-export const DEFAULT_BOOK: EnergyBook = { written: { joules: 90, n: 0 }, quick: { joules: 8, n: 0 } };
+export const DEFAULT_BOOK: EnergyBook = { written: { joules: 135, n: 0 }, quick: { joules: 10, n: 0 } };
 
 /** Recent answers count for more: battery wear and temperature drift. */
 const BOOK_WEIGHT = 0.2;

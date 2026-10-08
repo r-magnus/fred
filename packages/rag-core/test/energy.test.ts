@@ -85,5 +85,6 @@ test('estimate: a percentage and how many more the charge allows', () => {
   const q = estimate('quick', DEFAULT_BOOK, { ...battery, coarse: true })!;
   assert.equal(q.measured, false);
   assert.equal(q.text, 'A quick reply: about 0.01% of battery · very roughly over 1,000 more like it on this charge');
+  assert.ok(Math.abs(q.percent - (10 / 70_000) * 100) < 1e-9);
   assert.equal(estimate('written', DEFAULT_BOOK, undefined), undefined);
 });

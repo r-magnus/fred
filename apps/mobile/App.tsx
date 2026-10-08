@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Image, KeyboardAvoidingView, Linking, Platform, Pressable,
+  Animated, Image, KeyboardAvoidingView, Linking, Platform, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -183,6 +183,9 @@ function Screen() {
 
   // Past chats (src/chat-log.ts) and the drawer that lists them.
   const [drawer, setDrawer] = useState(false);
+  // The drawer's position, shared so that pulling the side tab drags it out (src/side-drawer.tsx).
+  const drawerSlide = useRef(new Animated.Value(0)).current;
+  const [drawerPeek, setDrawerPeek] = useState(false);
   const [chats, setChats] = useState<SavedChat<Turn>[]>(() => loadChats<Turn>());
   const chatsRef = useRef(chats);
   chatsRef.current = chats;
@@ -834,9 +837,11 @@ function Screen() {
 
       <Veil />
       {/* The bookmark on the left edge, hanging under the logo, and its drawer. */}
-      <SideTab top={insets.top + 50} onPress={() => setDrawer(true)} />
+      <SideTab top={insets.top + 50} slide={drawerSlide} onPress={() => setDrawer(true)} onPeek={setDrawerPeek} />
       <SideDrawer
         open={drawer}
+        peek={drawerPeek}
+        slide={drawerSlide}
         chats={chats}
         current={chatId.current}
         onClose={() => setDrawer(false)}

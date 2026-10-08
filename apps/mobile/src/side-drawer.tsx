@@ -19,6 +19,8 @@ import { Crossfade, radius, sheetFor, useThemed, type Palette } from './theme.ts
 const LOGO = require('../assets/ui/fred-logo.png');
 const LEAF = require('../assets/ui/leaf.png');
 const TREE = require('../assets/ui/tree.png');
+const TRASH = require('../assets/ui/trash.png');
+const CHECK = require('../assets/ui/check.png');
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
 /** The bookmark on the edge of the chat. */
@@ -125,13 +127,16 @@ export function SideDrawer<T>(
                   {c.id === current ? ' · open now' : ''}
                 </Text>
               </Pressable>
+              {/* A bin; tapped once it turns into a tick to confirm. */}
               <Pressable hitSlop={10} accessibilityRole="button"
+                style={[styles.remove, confirm === c.id && styles.removeSure]}
+                accessibilityLabel={confirm === c.id ? 'Yes, remove this chat' : 'Remove this chat'}
                 onPress={() => {
                   if (confirm !== c.id) { setConfirm(c.id); return; }
                   setConfirm(null);
                   onRemoveChat(c.id);
                 }}>
-                <Text style={styles.remove}>{confirm === c.id ? 'Remove now' : 'Remove'}</Text>
+                <Image source={confirm === c.id ? CHECK : TRASH} resizeMode="contain" style={styles.removeMark} />
               </Pressable>
             </View>
           ))}
@@ -196,7 +201,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   chatOpen: { flex: 1 },
   chatTitle: { fontFamily: JOURNAL, color: palette.ink, fontSize: 16, lineHeight: 22 },
   chatNote: { color: palette.moss, fontSize: 12, marginTop: 3 },
-  remove: { color: palette.clay, fontSize: 12, fontWeight: '600' },
+  remove: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  removeSure: { backgroundColor: palette.blush },
+  removeMark: { width: 20, height: 20, tintColor: palette.clay },
 
   foot: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: palette.sand },
   footGlyph: { width: 16, height: 16, tintColor: palette.fir },

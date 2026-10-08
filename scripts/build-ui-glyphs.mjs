@@ -1,4 +1,4 @@
-// Draws the app's small shapes (leaf, tree, the Ask arrow) and copies the logo
+// Draws the app's small shapes (leaf, tree, the Ask arrow, the bin and tick) and copies the logo
 // into apps/mobile/assets/ui. The shapes are white on transparent so the app
 // can tint them (src/calm-loader.tsx); edit the drawings here and re-run:
 //
@@ -40,6 +40,9 @@ const GLYPHS = {
   'tree-trunk': TRUNK,
   // The Ask button: an arrow pointing up.
   'arrow-up': '<path d="M48 76 L48 22 M24 44 L48 20 L72 44" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+  // Removing a past chat: a bin, then a tick to confirm (src/side-drawer.tsx).
+  trash: '<path d="M18 28 H78 M38 28 V21 Q38 15 44 15 H52 Q58 15 58 21 V28 M27 28 L31 77 Q32 85 40 85 H56 Q64 85 65 77 L69 28 M41 43 V70 M55 43 V70" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+  check: '<path d="M20 51 L40 71 L77 27" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
 };
 
 const SIZE = 192; // Shown at up to 84 points, so sharp on a 2x screen.

@@ -37,6 +37,7 @@ import { CalmLoader } from './src/calm-loader.tsx';
 import { Scene } from './src/scene.tsx';
 import { SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { GREETINGS, TOPICS, pick } from './src/words.ts';
 import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
 
 /** The logo is 900 x 415; sized by height wherever it is shown. */
@@ -151,6 +152,16 @@ function Screen() {
   // send() reads the latest turns without re-creating itself on every token.
   const turnsRef = useRef(turns);
   turnsRef.current = turns;
+  // An empty chat's title, and what the text box suggests (src/words.ts):
+  // a new greeting for each fresh page, a new topic whenever the chat moves on.
+  const [greeting, setGreeting] = useState<string>(() => pick(GREETINGS));
+  const [topic, setTopic] = useState<string>(() => pick(TOPICS));
+  const started = useRef(false);
+  useEffect(() => {
+    if (!started.current) { started.current = true; return; }
+    setTopic((was) => pick(TOPICS, was));
+    if (turns.length === 0) setGreeting((was) => pick(GREETINGS, was));
+  }, [turns.length]);
   const [draft, setDraft] = useState('');
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -562,11 +573,9 @@ function Screen() {
       >
         {turns.length === 0 && (
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyLead}>
-              Ask about first aid, survival, or the plants and animals around you.
-            </Text>
+            <Text style={styles.emptyLead}>{greeting}</Text>
             <Text style={styles.empty}>
-              Fred works offline and will say when he doesn&apos;t know.
+              Fred is here, with or without signal. He&apos;ll say when he doesn&apos;t know.
             </Text>
           </View>
         )}
@@ -795,7 +804,7 @@ function Screen() {
             style={styles.input}
             value={draft}
             onChangeText={setDraft}
-            placeholder="Ask Fred…"
+            placeholder={`Ask about ${topic}…`}
             placeholderTextColor={palette.moss}
             editable={!busy}
             multiline
@@ -865,7 +874,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   thread: { flex: 1 },
   threadInner: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8 },
   emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
-  emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 25, lineHeight: 34 },
+  emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 32, lineHeight: 40 },
   empty: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 14 },
 
   // The trail runs through the middle of the waypoints (14 in, 28 wide, 6 thick).

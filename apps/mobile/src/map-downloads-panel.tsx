@@ -6,18 +6,21 @@
  * because a state is 20 MB to 1.3 GB and a hiker may be on mobile data.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { STATE_NAMES } from '@fred/rag-core';
 import {
   downloadState, fetchIndex, installState, remainingBytes, removeState,
   type MapIndex, type Progress,
 } from './map-downloads.ts';
+import { CalmLoader } from './calm-loader.tsx';
+import { radius, useThemed, type Palette } from './theme.tsx';
 
 const size = (b: number): string => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
 
 export function MapDownloads(
   { here, onClose, onChanged }: { here: string | null; onClose: () => void; onChanged: () => void },
 ): React.JSX.Element {
+  const { styles } = useThemed(makeStyles);
   const [idx, setIdx] = useState<MapIndex | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -66,7 +69,7 @@ export function MapDownloads(
         Download on Wi-Fi if you can.
       </Text>
       {error !== null && <Text style={styles.error}>{error}</Text>}
-      {idx === null && error === null && <ActivityIndicator color="#6ca" style={{ marginVertical: 16 }} />}
+      {idx === null && error === null && <CalmLoader size={40} style={styles.loading} />}
       <ScrollView style={styles.list}>
         {states.map((s) => {
           const bundle = idx!.states[s]!;
@@ -123,24 +126,25 @@ export function MapDownloads(
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   panel: {
     position: 'absolute', top: 100, bottom: 30, left: 12, right: 12,
-    backgroundColor: '#161b1e', borderRadius: 14, borderWidth: 1, borderColor: '#2a3a35', padding: 14,
+    backgroundColor: palette.paper, borderRadius: radius.card, borderWidth: 1, borderColor: palette.sand, padding: 16,
   },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { color: '#e6edf3', fontSize: 17, fontWeight: '700' },
-  close: { color: '#6ca', fontSize: 14, fontWeight: '600' },
-  hint: { color: '#8b9a96', fontSize: 12, lineHeight: 17, marginTop: 6, marginBottom: 8 },
-  error: { color: '#e88', fontSize: 13, marginBottom: 8 },
+  title: { color: palette.ink, fontSize: 17, fontWeight: '700' },
+  close: { color: palette.pine, fontSize: 14, fontWeight: '700' },
+  hint: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 6, marginBottom: 8 },
+  error: { color: palette.clay, fontSize: 13, marginBottom: 8 },
+  loading: { alignSelf: 'center', marginVertical: 16 },
   list: { flex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#22302b' },
-  name: { color: '#e6edf3', fontSize: 14 },
-  meta: { color: '#8b9a96', fontSize: 12, marginTop: 2 },
-  confirm: { color: '#e0c98a', fontSize: 12, marginTop: 4 },
-  bar: { height: 4, backgroundColor: '#22302b', borderRadius: 2, marginTop: 6, overflow: 'hidden' },
-  fill: { height: 4, backgroundColor: '#4fd1a5' },
-  action: { color: '#6ca', fontSize: 14, fontWeight: '600' },
-  remove: { color: '#d99', fontSize: 13 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
+  name: { color: palette.ink, fontSize: 15 },
+  meta: { color: palette.moss, fontSize: 12, marginTop: 2 },
+  confirm: { color: palette.amber, fontSize: 12, marginTop: 4 },
+  bar: { height: 6, backgroundColor: palette.oat, borderRadius: 3, marginTop: 6, overflow: 'hidden' },
+  fill: { height: 6, borderRadius: 3, backgroundColor: palette.leaf },
+  action: { color: palette.pine, fontSize: 14, fontWeight: '700' },
+  remove: { color: palette.clay, fontSize: 13 },
   dim: { opacity: 0.4 },
 });

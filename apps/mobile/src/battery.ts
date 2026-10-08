@@ -68,6 +68,14 @@ export function estimateFor(kind: ReplyCost): Estimate | undefined {
   return estimate(kind, theBook(), batteryNow());
 }
 
+/**
+ * The line for a message still being typed, before any search: a written
+ * answer's cost as the most it can be. Costs one battery reading, no model.
+ */
+export function ceilingEstimate(): Estimate | undefined {
+  return estimate('written', theBook(), batteryNow(), true);
+}
+
 /** Start measuring an answer. */
 export function beginAnswer(): void {
   Energy?.start(SAMPLE_MS);

@@ -6,9 +6,9 @@ prediction check: `battery-estimate/`.
 **Short version: on the Nothing Phone (3) a written answer costs about 135
 joules, roughly 0.2% of a full battery, and a quick reply (a field card,
 small talk, a decline) about 10 joules, 0.015%. The app now measures every
-answer on the phone it runs on, and once typing pauses it shows one line
-under the text box, such as "A written answer: about 0.2% of battery ·
-roughly 400 more like it on this charge". The iPhone half is written but has
+answer on the phone it runs on, and shows one line under the text box while
+a message is typed, such as "~0.2% battery · ~400 more like it". The iPhone
+half is written but has
 never been compiled or run.**
 
 ## What was built
@@ -26,8 +26,17 @@ never been compiled or run.**
   search alone (no model) says whether the reply will be written or quick.
   The search vector is kept, so sending the same words does not make it
   again.
-- **The line** under the text box, 0.8 s after typing pauses, never while
-  Fred is answering.
+- **The line** under the text box, never while Fred is answering. Since
+  2026-10-08 (#161) it is there from the first character as a ceiling with
+  no search ("up to ~0.2% battery · at least ~300 more", a written answer's
+  cost), and narrows to the predicted kind 0.3 s after typing pauses (it was
+  0.8 s). The two figures are set larger and in green; the words are fewer.
+  Only one search runs at a time, and a message typed over is not searched.
+  Send waits for a search in progress: on the phone, plugged in, one send
+  tapped mid-search waited 0.86 s and then searched in 0.35 s with the
+  vector reused, about what a search from scratch takes. Not checked
+  unplugged, where the first estimate in five minutes also reads the idle
+  draw for 1.5 s.
 - Nothing is learned while charging on Android (the current is then the
   charger's), from an answer that was stopped, or from a reading no phone
   could give.

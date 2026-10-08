@@ -146,6 +146,12 @@ export function iphoneCapacityJoules(model: string | null): number {
   return (model === null ? IPHONE_DEFAULT_WATT_HOURS : IPHONE_WATT_HOURS[model] ?? IPHONE_DEFAULT_WATT_HOURS) * 3600;
 }
 
+/** A piece of the line under the text box; a figure is set to stand out. */
+export interface LinePart {
+  readonly text: string;
+  readonly figure: boolean;
+}
+
 export interface Estimate {
   /** Share of a full battery this answer is expected to use, in percent. */
   readonly percent: number;
@@ -153,36 +159,49 @@ export interface Estimate {
   readonly answersLeft: number | undefined;
   /** True once this phone has measured an answer of this kind itself. */
   readonly measured: boolean;
-  /** The line shown under the text box. */
+  /** The line shown under the text box, in pieces so the figures can stand out. */
+  readonly line: readonly LinePart[];
+  /** The same line as plain text. */
   readonly text: string;
 }
 
-/** 437 -> "about 400", 83 -> "about 80", 7 -> "about 7": no false precision. */
-function roughly(n: number): string {
-  if (n >= 1000) return 'over 1,000';
+/** 437 -> 400, 83 -> 80, 7 -> 7: no false precision. */
+function rounded(n: number): number {
   const step = n >= 100 ? 100 : n >= 20 ? 10 : 1;
-  return `about ${Math.max(1, Math.floor(n / step) * step)}`;
+  return Math.max(1, Math.floor(n / step) * step);
 }
 
-/** "0.1%", "0.03%", "under 0.01%". */
+/** "~0.1%", "~0.03%", "<0.01%". */
 function percentText(p: number): string {
-  if (p < 0.01) return 'under 0.01%';
-  return `${p < 0.1 ? p.toFixed(2) : p < 10 ? p.toFixed(1) : p.toFixed(0)}%`;
+  if (p < 0.01) return '<0.01%';
+  return `~${p < 0.1 ? p.toFixed(2) : p < 10 ? p.toFixed(1) : p.toFixed(0)}%`;
 }
 
 /**
  * The estimate for a reply of this kind on this phone, now. One answer is a
  * tenth of a percent or less, so the line also says how many more like it
  * the charge left allows (docs/plan-battery-estimate.md, "What to show").
+ *
+ * `atMost` is the line for a message still being typed, before the search
+ * has said which kind of reply it will get: pass 'written', the dearer kind,
+ * and the line reads as a ceiling ("up to ... at least ... more").
  */
-export function estimate(kind: ReplyCost, book: EnergyBook, battery: BatteryNow | undefined): Estimate | undefined {
+export function estimate(kind: ReplyCost, book: EnergyBook, battery: BatteryNow | undefined, atMost = false): Estimate | undefined {
   if (battery === undefined || !(battery.capacityJoules > 0)) return undefined;
   const joules = book[kind].joules;
   const percent = (joules / battery.capacityJoules) * 100;
   const left = battery.level > 0 ? Math.floor((battery.level * battery.capacityJoules) / joules) : undefined;
-  const what = kind === 'written' ? 'A written answer' : 'A quick reply';
-  const more = left === undefined ? '' : ` · ${battery.coarse ? 'very roughly' : 'roughly'} ${roughly(left).replace('about ', '')} more like it on this charge`;
-  return { percent, answersLeft: left, measured: book[kind].n > 0, text: `${what}: about ${percentText(percent)} of battery${more}` };
+  const word = (text: string): LinePart => ({ text, figure: false });
+  const figure = (text: string): LinePart => ({ text, figure: true });
+  const line: LinePart[] = [...(atMost ? [word('up to ')] : []), figure(percentText(percent)), word(' battery')];
+  if (left !== undefined) {
+    const many = left >= 1000;
+    // An iPhone's level comes in 5% steps: the words carry the doubt, not a "~".
+    const lead = battery.coarse ? 'very roughly ' : atMost ? 'at least ' : '';
+    const n = many ? (atMost || battery.coarse ? '1,000' : '1,000+') : `${battery.coarse ? '' : '~'}${rounded(left)}`;
+    line.push(word(` · ${lead}`), figure(n), word(atMost ? ' more' : ' more like it'));
+  }
+  return { percent, answersLeft: left, measured: book[kind].n > 0, line, text: line.map((p) => p.text).join('') };
 }
 
 /**

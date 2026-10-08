@@ -216,9 +216,9 @@ const STARTS = {
   worry: ['Take a deep breath', 'Hey'],
 } as const;
 /** The hiker says they are frightened or uneasy. */
-const WORRY = /\b(?:scared|afraid|nervous|worried|worrying|anxious|panick\w*|freaking|terrified|frightened|spooked|uneasy|creeped)\b/i;
+export const WORRY = /\b(?:scared|afraid|nervous|worried|worrying|anxious|panick\w*|freaking|terrified|frightened|spooked|uneasy|creeped)\b/i;
 /** Something hurts, is broken, is missing or has gone wrong. */
-const PROBLEM = /\b(?:hurt\w*|ach(?:e|es|ing)|sore|pain\w*|broke\w*|forgot\w*|dropped|soaked|numb|exhausted|sick|diarrhea|threw up|throwing up|vomit\w*|nause\w*|bitten|stung|scraped|burn(?:ed|t)|blister\w*|splinter|died|won'?t|can'?t|ran out|stuck|itch\w*|swollen|swelling|bleeding|cramp\w*|headache|dizzy|cracked|snapped|ripped|torn|leak\w*|ugh|killing me|throbbing|stiff|bruised|sunburn\w*|rash|lost (?:my|a|our|the)|miserable|freezing|twisted|rubbed|raw)\b/i;
+export const PROBLEM = /\b(?:hurt\w*|ach(?:e|es|ing)|sore|pain\w*|broke\w*|forgot\w*|dropped|soaked|numb|exhausted|sick|diarrhea|threw up|throwing up|vomit\w*|nause\w*|bitten|stung|scraped|burn(?:ed|t)|blister\w*|splinter|died|won'?t|can'?t|ran out|stuck|itch\w*|swollen|swelling|bleeding|cramp\w*|headache|dizzy|cracked|snapped|ripped|torn|leak\w*|ugh|killing me|throbbing|stiff|bruised|sunburn\w*|rash|lost (?:my|a|our|the)|miserable|freezing|twisted|rubbed|raw)\b/i;
 /** A question somewhere after a statement: "..., how do i keep it burning". */
 const ASKS_LATER = /\b(?:how (?:do|can|should|long|much|many) |what (?:should|do|can|helps) |where (?:do|should|can) |any (?:tips|advice))/i;
 function hashOf(message: string): number {
@@ -226,7 +226,7 @@ function hashOf(message: string): number {
   for (const c of message.trim().toLowerCase()) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
   return h >>> 0;
 }
-function kindOf(message: string): keyof typeof STARTS | null {
+export function kindOf(message: string): keyof typeof STARTS | null {
   if (ASKS_YES_NO.test(message)) return 'yesNo';
   if (ASKS.test(message)) return 'question';
   if (WORRY.test(message)) return 'worry';

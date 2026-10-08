@@ -28,6 +28,7 @@ import { route, type RoutablePack, type RouteResult } from './router.ts';
 import { buildPickParts, cardLines, matchCardLines, parseCard, pickChoice, readPick, renderCard, renderCardSteps } from './card-answer.ts';
 import { STATE_NAMES } from './states.ts';
 import { makeOpener } from './opener.ts';
+import { chatReply, declineReply, leadLine, type DeclineReply } from './voice.ts';
 import { asRequest, scopeScore, type ScopeModel } from './scope.ts';
 
 /**
@@ -221,6 +222,14 @@ export interface AskOptions {
    * with guards off. Off by default until measured.
    */
   readonly opener?: boolean;
+  /**
+   * #172: Fred's side of the conversation around his fixed replies
+   * (voice.ts): small-talk replies that fit what was said, a first line from
+   * the hiker's own words before a card or a fixed reply, and declines that
+   * say what would help. Fixed wording picked by rules, no model call. Off by
+   * default so earlier runs compare word for word; left off with guards off.
+   */
+  readonly voice?: boolean;
   /**
    * Experiment: a trained scorer on the message's search vector gives a
    * second chance to messages about to be called small talk or declined
@@ -623,6 +632,7 @@ export type AskResult =
       /**
        * #130: the opening line streamed before the answer, filled in once it
        * is decided (null: none was shown). Undefined when no opener was tried.
+       * #172: also the rule-picked first line before a card or a fixed reply.
        */
       readonly opener?: { text?: string | null };
       readonly diagnostics: Diagnostics;
@@ -656,6 +666,10 @@ export type AskResult =
       readonly nearest: readonly Citation[];
       /** The field card that led the search, when one did: shown folded under the decline. */
       readonly offer?: CardOffer;
+      /** #172: a first line before the safety-net or watch reply. */
+      readonly lead?: string;
+      /** #172: what to say for a plain decline, in place of the one fixed sentence. */
+      readonly decline?: DeclineReply;
       readonly diagnostics: Diagnostics;
     };
 
@@ -704,6 +718,39 @@ export async function ask(
   deps: PipelineDeps,
   opts: AskOptions,
 ): Promise<AskResult> {
+  const res = await askUnvoiced(query, deps, opts);
+  return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
+}
+
+/**
+ * #172: the reply with Fred's side of the conversation added (voice.ts).
+ * What is decided, and every word of a card or an answer, stays as it was.
+ */
+function voiced(res: AskResult, query: string, history: readonly string[]): AskResult {
+  if (res.kind === 'needs-location') return res;
+  if (res.kind === 'chat') return { ...res, reply: chatReply(query, history, res.offer !== null) };
+  const moment = dangerSign([...history, query]) ? 'danger' : res.diagnostics.intent === 'now' ? 'now' : 'calm';
+  if (res.kind === 'abstain') {
+    if (res.reason === 'provider-only') return res;
+    if (res.reason === 'safety-net' || res.reason === 'watch') {
+      const lead = leadLine(query, history, res.reason === 'safety-net' ? 'danger' : moment, ['urgent', 'problem', 'worry']);
+      return lead === null ? res : { ...res, lead };
+    }
+    return { ...res, decline: declineReply(query, history, res.reason === 'out-of-scope') };
+  }
+  // A model-written answer with the opener on: the line is settled there.
+  if (res.opener !== undefined) return res;
+  const lead = leadLine(query, history, moment);
+  if (lead === null) return res;
+  const inner = res.stream;
+  return { ...res, stream: (async function* () { yield `${lead}\n`; yield* inner; })(), opener: { text: lead } };
+}
+
+async function askUnvoiced(
+  query: string,
+  deps: PipelineDeps,
+  opts: AskOptions,
+): Promise<AskResult> {
   // The opener goes only in front of a model-written answer: a card or a
   // reviewed reply is already quick and in Fred's voice, a decline gets none,
   // and in an emergency (a danger sign, or the intent check reads NOW) the
@@ -728,6 +775,8 @@ export async function ask(
   const inner = res.stream;
   async function* withOpener(): AsyncGenerator<string> {
     holder.text = await makeOpener(query, earlier, deps.backend, opts.signal).catch(() => null);
+    // #172: a line the check dropped is replaced by one picked by rules.
+    if (holder.text === null && opts.voice === true) holder.text = leadLine(query, earlier, 'calm');
     if (holder.text !== null) yield `${holder.text}\n`;
     yield* inner;
   }

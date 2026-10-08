@@ -120,6 +120,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.INTENT === '1' ? { intent: true } : {}),
     // OPENER=1: a friendly opening line before model-written answers (#130).
     ...(env.OPENER === '1' ? { opener: true } : {}),
+    // VOICE=1: Fred's side of the conversation around fixed replies (#172, voice.ts).
+    ...(env.VOICE === '1' ? { voice: true } : {}),
     // SCOPE=<model.json>: the scope scorer's second chance (scope.ts). SCOPE_T overrides its threshold.
     ...(env.SCOPE !== undefined && env.SCOPE !== '' ? { scope: scopeModelFromFile(env.SCOPE, env.SCOPE_T) } : {}),
     // SAID=<model.json>: the card matcher (said-as.ts, #152).

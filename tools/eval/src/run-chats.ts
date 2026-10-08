@@ -108,6 +108,8 @@ for (const set of sets) {
           ...(opener == null ? {} : { opener }),
           ...(r.kind === 'chat' ? { reply: r.reply } : {}),
           ...(r.kind === 'abstain' ? { abstainReason: r.reason } : {}),
+          ...(r.kind === 'abstain' && r.lead !== undefined ? { lead: r.lead } : {}),
+          ...(r.kind === 'abstain' && r.decline !== undefined ? { decline: r.decline } : {}),
           ...(offer === undefined ? {} : { offer }),
           citations: r.kind === 'answer' ? r.citations.map((x) => `${x.source} — ${x.section}`) : [],
           cardAnswer: d.cardAnswer ?? null,

@@ -32,6 +32,12 @@ const NAMED = new RegExp(`\\bmy ${PEOPLE}\\b|\\bour ${PEOPLE}\\b`, 'i');
 const SELF = /\bmy own\b|\b(?:i|i've|i'm)\s+(?:just\s+)?(?:twisted|rolled|sprained|cut|sliced|burned|burnt|scalded|got|hurt|slipped|fell|broke|banged|hit|stepped|have|feel|am)\b|\bmy (?:leg|legs|arm|arms|hand|hands|finger|fingers|fingertips|thumb|wrist|ankle|ankles|knee|knees|foot|feet|toe|toes|calf|thigh|back|neck|head|face|eye|eyes|chest|stomach|belly|hip|shoulder|lips|skin)\b|\bme\b/i;
 const PRONOUN = /\b(?:he|she|him|her|his|hers|he's|she's|they|them|their)\b/i;
 
+/** Everyone a message names ("my mom", "my son"), in the order said. */
+export function namedIn(message: string): string[] {
+  const out = [...message.matchAll(new RegExp(NAMED.source, 'gi'))].map((m) => m[0].toLowerCase().replace(/^our /, 'my '));
+  return out.filter((n, i) => out.indexOf(n) === i);
+}
+
 /** Who a message is about, from its own words. */
 export function whoIn(message: string): Who {
   const named = NAMED.exec(message);

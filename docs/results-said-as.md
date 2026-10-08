@@ -125,11 +125,34 @@ socks get a card; a mare is not taken as a pet; "the dog pulled and i fell
 in the creek" is declined because of the word "dog"; "can i take three
 aleve" is answered by the model after the understanding step.
 
+## On the phone (2026-10-07)
+
+Nothing Phone (3), field-test build of this branch, the 12 packs unchanged.
+Twelve chats with the matcher on, five again with it off
+(`said-as/phone-chats-{on,off}.txt`). Every reply is the kind the desktop
+gave.
+
+| Message | Matcher off | Matcher on |
+|---|---|---|
+| my friend just collapsed and is jerking all over | shock card, 3.8 s | **seizure card**, 3.6 s |
+| ...her shin is all torn up | sprain card, 5.5 s | **cuts card**, 5.7 s |
+| our pointer ran through barbed wire... / its oozing blood | watch reply, then the soaked-bandage card | **declined as a pet's**, both |
+| grabbed the hot skillet handle and my palm is red / how long... | watch reply, twice | **burns card**, twice |
+| my back is wrecked from the pack / how many naproxen is too many | spine card, then declined | the same (the word list now knows naproxen) |
+
+With it on only: the wrist gets the broken-bone card (6.1 s), "we need to
+drink from this stream" the water card (4.4 s), hot water over a wrist the
+burns card (3.7 s); the lunch-by-the-creek remark stays small talk. #145:
+the cold-hike answer says "Avoid cotton clothing" (written from the tips
+pages, 14.9 s, first words 2.6 s); soaked boots get drying advice, not an
+emergency (12.4 s); the nervous hiker gets river-crossing steps (15.9 s).
+The matcher adds no measurable time: card replies took 3.6-6.4 s with it on
+and 3.4-5.5 s with it off.
+
 ## Open
 
-- **Not checked on the phone** (it was not connected). The app has the
-  matcher on with a `devhooks-no-said` off switch; #145 asks for a phone
-  check.
+- "my back is wrecked from the pack" still gets the neck-and-back card.
+
 - More examples per card is the lever for confidence: most cards have 8-15.
 - The survival manual's cold-injuries passage still opens with the
   hot-weather clothing sentence (a chunk that straddles two sections).

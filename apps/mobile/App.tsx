@@ -20,9 +20,10 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, KeyboardAvoidingView, Linking, Pressable,
-  ScrollView, StyleSheet, Text, TextInput, View,
+  Image, KeyboardAvoidingView, Linking, Platform, Pressable,
+  ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
 
@@ -32,6 +33,50 @@ import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { beginAnswer, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
+import { CalmLoader } from './src/calm-loader.tsx';
+import { Scene } from './src/scene.tsx';
+import { SideDrawer, SideTab } from './src/side-drawer.tsx';
+import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
+
+/** The logo is 900 x 415; sized by height wherever it is shown. */
+const LOGO = require('./assets/ui/fred-logo.png');
+const LOGO_RATIO = 900 / 415;
+const LEAF = require('./assets/ui/leaf.png');
+const TREE = require('./assets/ui/tree.png');
+const ARROW = require('./assets/ui/arrow-up.png');
+const TRAIL_DOT = require('./assets/ui/trail-dot.png');
+/** The hiker's own words are set like a journal entry; Fred's stay in the plain reading face. */
+const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
+
+/**
+ * A waypoint on the trail down the chat: a leaf where the hiker asked, the
+ * logo's tree where Fred replied.
+ */
+function Waypoint({ who }: { who: 'hiker' | 'fred' }): React.JSX.Element {
+  const { palette, styles } = useThemed(makeStyles);
+  return (
+    <View style={[styles.waypoint, who === 'fred' && styles.waypointFred]}
+      accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Image source={who === 'fred' ? TREE : LEAF} resizeMode="contain"
+        style={[styles.waypointGlyph, { tintColor: who === 'fred' ? palette.pine : palette.leaf }]} />
+    </View>
+  );
+}
+
+/**
+ * The index tab on a reply, like the tab on a field-guide page. It names the
+ * kind of reply, so a card from the guides, a field card and "not in my
+ * guides" can be told apart before a word is read.
+ */
+function Tab({ label, tone }: { label: string; tone?: string }): React.JSX.Element {
+  const { palette, styles } = useThemed(makeStyles);
+  return (
+    <View style={[styles.tab, { backgroundColor: tone ?? palette.sage }]}>
+      <Text style={styles.tabText}>{label}</Text>
+    </View>
+  );
+}
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
 
@@ -66,6 +111,8 @@ interface Turn {
   clarifyUsed?: boolean;
   /** The opening line (#130) is shown and the answer has not started: a wait of about 10 s. */
   waiting?: boolean;
+  /** Asked by the desktop test hook, not typed: such a chat is not kept in past chats. */
+  hook?: boolean;
 }
 
 /**
@@ -81,13 +128,24 @@ function describeBasis(basis: NonNullable<Citation['basis']>): string {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <Screen />
+      <ThemeProvider>
+        <Bar />
+        <Screen />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
+/** The clock and icons at the top: dark on the day sky, light on the night one. */
+function Bar(): React.JSX.Element {
+  const { mode } = useTheme();
+  return <StatusBar style={mode === 'night' ? 'light' : 'dark'} />;
+}
+
 function Screen() {
+  const { palette, styles } = useThemed(makeStyles);
   const insets = useSafeAreaInsets();
+  const window = useWindowDimensions();
   const [load, setLoad] = useState<LoadPhase>({ phase: 'idle' });
   const [turns, setTurns] = useState<Turn[]>([]);
   // send() reads the latest turns without re-creating itself on every token.
@@ -111,6 +169,35 @@ function Screen() {
   const engine = useRef<Engine | null>(null);
   const scroller = useRef<ScrollView | null>(null);
   const nextId = useRef(1);
+
+  // Past chats (src/chat-log.ts) and the drawer that lists them.
+  const [drawer, setDrawer] = useState(false);
+  const [chats, setChats] = useState<SavedChat<Turn>[]>(() => loadChats<Turn>());
+  const chatsRef = useRef(chats);
+  chatsRef.current = chats;
+  // The chat on screen: its id once it has one, and the turns as last saved or
+  // opened, so opening an old chat to read it does not count as changing it.
+  const chatId = useRef<number | null>(null);
+  const savedTurns = useRef<readonly Turn[] | null>(null);
+  useEffect(() => {
+    if (busy || turns.length === 0 || turns === savedTurns.current) return;
+    if (turns.some((t) => !t.done || t.hook === true)) return;
+    chatId.current ??= turns[0]!.askedAt;
+    savedTurns.current = turns;
+    setChats(saveChat(chatsRef.current, chatId.current, turns));
+  }, [turns, busy]);
+  /** Puts another chat on screen: a saved one, or a fresh page. */
+  const showChat = useCallback((chat: SavedChat<Turn> | null): void => {
+    abort.current?.abort();
+    const next = chat === null ? [] : [...chat.turns];
+    chatId.current = chat?.id ?? null;
+    savedTurns.current = next;
+    // New questions must not reuse an id from the chat just opened.
+    nextId.current = Math.max(nextId.current, ...next.map((t) => t.id + 1));
+    setTurns(next);
+    setDraft('');
+    setDrawer(false);
+  }, []);
 
   // Bumped to reload the engine after a state's packs are downloaded or
   // removed on the map screen, so a new plant and animal guide is searched
@@ -169,7 +256,7 @@ function Screen() {
     setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   }, []);
 
-  const send = useCallback(async (questionText?: string, withState?: string | null) => {
+  const send = useCallback(async (questionText?: string, withState?: string | null, viaHook = false) => {
     const question = (questionText ?? draft).trim();
     const eng = engine.current;
     if (question === '' || eng === null || busy) return;
@@ -199,6 +286,7 @@ function Screen() {
     setTurns((ts) => [...ts, {
       id, question, askedAt: now, state: askState, text: '', kind: 'answer',
       citations: [], medical: false, candidateStates: [], done: false, stopped: false, map,
+      ...(viaHook ? { hook: true } : {}),
     }]);
     // A map with no position is no use to someone who is lost: find one now,
     // alongside the answer, instead of waiting to be asked.
@@ -366,19 +454,52 @@ function Screen() {
       // As a typed message: the estimate first, then the send.
       preparing.current = true;
       void prepareRef.current(question!, askIn).catch(() => null)
-        .then(() => sendRef.current(question, askIn))
+        .then(() => sendRef.current(question, askIn, true))
         .finally(() => { preparing.current = false; });
     }, 2000);
     return () => clearInterval(timer);
   }, []);
 
+  /**
+   * The drive-test recording, armed by a long-press on the map's location
+   * button rather than a visible control: it writes coordinates to disk and
+   * exists for verifying B-KR1/2/3, not for daily use.
+   */
+  const toggleRecording = (): void => {
+    if (recording) {
+      const s = stopRecording();
+      setRecording(false);
+      // Rounded: the platform reports full float precision, and
+      // "27.40999984741211 m" is not a number anyone reads in a car.
+      const m = (v: number | null): string => (v === null ? '?' : v.toFixed(1));
+      setLocNote(s === null ? 'Recording stopped.'
+        : `Track: ${s.samples} samples, best ${m(s.bestAccuracyMeters)} m, `
+          + `median ${m(s.medianAccuracyMeters)} m`
+          + `${s.timeToTargetMs === null ? ', target never met' : `, target in ${(s.timeToTargetMs / 1000).toFixed(1)} s`}`
+          + `${s.watchSamples > 0 ? `, ${s.watchSamples} auto over ${(s.durationMs / 60000).toFixed(1)} min` : ''}`
+          + `${s.states.length > 0 ? `, ${s.states.join('/')}` : ''}`
+          + `${s.anyMocked ? ' — MOCKED' : ''}`);
+    } else {
+      setRecording(true);
+      setLocNote('Recording…');
+      void startRecording().then((path) => {
+        setLocNote(`Recording to ${path.split('/').pop() ?? path} — no need to touch the phone`);
+      });
+    }
+  };
+
   if (load.phase !== 'ready') {
     const failed = load.phase === 'failed';
     return (
-      <View style={[styles.root, styles.centre]}>
-        <Text style={styles.wordmark}>Fred</Text>
-        {!failed && <ActivityIndicator color="#6ca" style={{ marginVertical: 18 }} />}
-        <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
+      <View style={styles.root}>
+        <Scene height={window.height * 0.44} top={insets.top} />
+        <Veil />
+        <View style={styles.loading}>
+          <Image source={LOGO} style={styles.wordmark} resizeMode="contain" accessibilityLabel="Fred" />
+          {!failed && <CalmLoader size={72} style={styles.loadShapes} />}
+          <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
+          {!failed && <Text style={styles.loadHint}>Getting the guides ready. This takes a moment.</Text>}
+        </View>
       </View>
     );
   }
@@ -392,6 +513,14 @@ function Screen() {
           setMapOpen(false);
           if (packsChanged.current) { packsChanged.current = false; setEngineGen((g) => g + 1); }
         }}
+        // B-KR1. The accuracy is on the map's sheet rather than in a log: the
+        // key result is verified by standing somewhere and reading it, and a
+        // ±2 km fix and a ±8 m one should not look the same to a reader
+        // deciding whether to trust the local guide.
+        where={{
+          locating, progress: locProgress, note: locNote, recording,
+          locate: () => void locate(), dismissNote: () => setLocNote(null), toggleRecording,
+        }}
       />
     );
   }
@@ -401,51 +530,17 @@ function Screen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+      {/* The horizon stands in for a header bar: wide open before the first
+          question, a slim strip once the chat needs the room. */}
+      <Scene height={insets.top + (turns.length === 0 ? 236 : 112)} top={insets.top}>
+       <View style={[styles.header, { paddingTop: insets.top + 10 }]} pointerEvents="box-none">
         <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
-          <Text style={styles.wordmarkSmall}>Fred</Text>
+          <Crossfade render={(p) => (
+            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. Open the map" />
+          )} />
         </Pressable>
-        {/* B-KR1. The accuracy is on screen rather than in a log because the
-            key result is verified by standing somewhere and reading it, and
-            because a ±2 km fix and a ±8 m one should not look the same to a
-            reader deciding whether to trust the local guide. */}
-        <Pressable
-          onPress={() => void locate()}
-          onLongPress={() => {
-            // Long-press rather than a visible control: this writes coordinates
-            // to disk and exists for verifying B-KR1/2/3, not for daily use.
-            if (recording) {
-              const s = stopRecording();
-              setRecording(false);
-              // Rounded: the platform reports full float precision, and
-              // "27.40999984741211 m" is not a number anyone reads in a car.
-              const m = (v: number | null): string => (v === null ? '?' : v.toFixed(1));
-              setLocNote(s === null ? 'Recording stopped.'
-                : `Track: ${s.samples} samples, best ${m(s.bestAccuracyMeters)} m, `
-                  + `median ${m(s.medianAccuracyMeters)} m`
-                  + `${s.timeToTargetMs === null ? ', target never met' : `, target in ${(s.timeToTargetMs / 1000).toFixed(1)} s`}`
-                  + `${s.watchSamples > 0 ? `, ${s.watchSamples} auto over ${(s.durationMs / 60000).toFixed(1)} min` : ''}`
-                  + `${s.states.length > 0 ? `, ${s.states.join('/')}` : ''}`
-                  + `${s.anyMocked ? ' — MOCKED' : ''}`);
-            } else {
-              setRecording(true);
-              setLocNote('Recording…');
-              void startRecording().then((path) => {
-                setLocNote(`Recording to ${path.split('/').pop() ?? path} — no need to touch the phone`);
-              });
-            }
-          }}
-          hitSlop={8}
-          disabled={locating}
-        >
-          <Text style={[styles.stateChip, recording && styles.stateChipRecording]}>
-            {locating ? (locProgress === null ? 'locating…' : `±${Math.round(locProgress)} m…`)
-              : state === null ? 'use location'
-              : fix !== null && fix.state === state ? `${state} ${describeAccuracy(fix)}`
-              : state}
-          </Text>
-        </Pressable>
-      </View>
+       </View>
+      </Scene>
 
       {locNote !== null && (
         <Pressable onPress={() => setLocNote(null)}>
@@ -460,18 +555,38 @@ function Screen() {
         onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
       >
         {turns.length === 0 && (
-          <Text style={styles.empty}>
-            Ask about first aid, survival, or the plants and animals around you.
-            {'\n\n'}Fred works offline and will say when he doesn&apos;t know.
-          </Text>
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyLead}>
+              Ask about first aid, survival, or the plants and animals around you.
+            </Text>
+            <Text style={styles.empty}>
+              Fred works offline and will say when he doesn&apos;t know.
+            </Text>
+          </View>
+        )}
+
+        {/* The trail: a dotted path down the left edge that the waypoints sit on. */}
+        {turns.length > 0 && (
+          // An image takes its file's height unless told otherwise, so the
+          // box sets the length and the dots fill it.
+          <View style={styles.trail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+            <Image source={TRAIL_DOT} resizeMode="repeat" style={styles.trailDots} />
+          </View>
         )}
 
         {turns.map((t) => (
           <View key={t.id} style={styles.turn}>
-            <Text style={styles.question}>{t.question}</Text>
+            <View style={styles.asked}>
+              <Waypoint who="hiker" />
+              <Text style={styles.question}>{t.question}</Text>
+            </View>
+            <View style={styles.replied}>
+            <Waypoint who="fred" />
+            <View style={styles.cards}>
 
             {t.kind === 'needs-location' && (
               <View style={styles.card}>
+                <Tab label="Where are you?" tone={palette.skyWash} />
                 <Text style={styles.body}>
                   That depends on where you are. Which state?
                 </Text>
@@ -502,12 +617,14 @@ function Screen() {
 
             {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
+                <Tab label="Fred" />
                 <Text style={styles.body}>{t.text}</Text>
               </View>
             )}
 
             {t.kind === 'abstain' && t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY && (
               <View style={styles.card}>
+                {t.map === true ? <Tab label="Fred" /> : <Tab label="Not in my guides" tone={palette.butter} />}
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
@@ -525,12 +642,14 @@ function Screen() {
 
             {t.kind === 'chat' && (
               <View style={styles.card}>
+                <Tab label="Fred" />
                 <Text style={styles.body}>{t.text}</Text>
               </View>
             )}
 
             {t.offer !== undefined && t.done && (
               <View style={styles.card}>
+                <Tab label="Field card" />
                 <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} hitSlop={8}
                   accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}>
                   <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
@@ -549,17 +668,22 @@ function Screen() {
             )}
 
             {t.kind === 'error' && (
-              <View style={styles.card}><Text style={styles.error}>{t.text}</Text></View>
+              <View style={styles.card}>
+                <Tab label="Something went wrong" tone={palette.blush} />
+                <Text style={styles.error}>{t.text}</Text>
+              </View>
             )}
 
             {t.kind === 'answer' && (
               <View style={styles.card}>
-                {t.text === '' && !t.done && <ActivityIndicator color="#6ca" />}
+                <Tab label={t.citations[0]?.source === 'Fred field card' ? 'Field card' : t.citations.length > 0 ? 'From the guides' : 'Fred'}
+                  tone={t.citations.length > 0 && t.citations[0]?.source !== 'Fred field card' ? palette.skyWash : palette.sage} />
+                {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
                 {t.text !== '' && <Text style={styles.body}>{t.waiting === true ? t.text.trimEnd() : t.text}</Text>}
                 {t.waiting === true && !t.done && (
                   <View style={styles.waiting} accessibilityRole="progressbar" accessibilityLabel="Fred is working on your answer">
-                    <ActivityIndicator color="#6ca" size="small" />
+                    <CalmLoader size={24} />
                     <Text style={styles.waitingText}>Working on your answer…</Text>
                   </View>
                 )}
@@ -630,7 +754,8 @@ function Screen() {
             )}
 
             {t.map === true && (
-              <View style={[styles.card, styles.mapCard]}>
+              <View style={styles.card}>
+                <Tab label="Map" tone={palette.skyWash} />
                 {t.id === liveMap
                   ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} />
                   : (
@@ -640,6 +765,8 @@ function Screen() {
                   )}
               </View>
             )}
+            </View>
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -651,19 +778,20 @@ function Screen() {
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
         {/* US-13: what sending this will cost the battery, once typing pauses. */}
         {costLine !== null && !busy && <Text style={styles.costLine}>{costLine}</Text>}
-        <View style={[styles.composer, { paddingBottom: insets.bottom + 12 }]}>
+        <View style={[styles.composer, { paddingBottom: insets.bottom + 10 }]}>
+         <View style={styles.composerPill}>
           <TextInput
             ref={input}
             style={styles.input}
             value={draft}
             onChangeText={setDraft}
             placeholder="Ask Fred…"
-            placeholderTextColor="#667"
+            placeholderTextColor={palette.moss}
             editable={!busy}
             multiline
             onSubmitEditing={() => void send()}
           />
-          {/* US-07. One button: Ask, then Stop while an answer is running. A
+          {/* US-07. One button: ask, then stop while an answer is running. A
               separate control would be dead weight most of the time, and at ~15 s
               per answer the reader needs the exit where their thumb already is. */}
           <Pressable
@@ -674,91 +802,138 @@ function Screen() {
             ]}
             onPress={() => (busy ? abort.current?.abort() : void send())}
             disabled={!busy && draft.trim() === ''}
+            accessibilityRole="button" accessibilityLabel={busy ? 'Stop' : 'Ask'}
           >
-            <Text style={styles.sendText}>{busy ? 'Stop' : 'Ask'}</Text>
+            {/* An arrow to send, a square to stop. */}
+            {busy ? <View style={styles.stopMark} />
+              : <Image source={ARROW} resizeMode="contain"
+                  style={[styles.sendMark, draft.trim() === '' && styles.sendMarkOff]} />}
           </Pressable>
+         </View>
         </View>
       </KeyboardAvoidingView>
+
+      <Veil />
+      {/* The bookmark on the left edge, hanging under the logo, and its drawer. */}
+      <SideTab top={insets.top + 50} onPress={() => setDrawer(true)} />
+      <SideDrawer
+        open={drawer}
+        chats={chats}
+        current={chatId.current}
+        onClose={() => setDrawer(false)}
+        onMap={() => { setDrawer(false); setMapOpen(true); }}
+        onNewChat={() => showChat(null)}
+        onOpenChat={showChat}
+        onRemoveChat={(id) => {
+          setChats(removeChat(chatsRef.current, id));
+          // Removing the chat on screen clears the page too.
+          if (id === chatId.current) showChat(null);
+        }}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  offerTitle: { color: '#6ca', fontSize: 15, fontWeight: '600' },
-  mapCard: { marginTop: 8 },
-  clarify: { marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d', paddingTop: 10 },
-  clarifyQ: { color: '#eaf2ef', fontSize: 14, fontWeight: '600' },
-  clarifyOther: { color: '#8b9a95', fontSize: 13, fontWeight: '600' },
-  root: { flex: 1, backgroundColor: '#0e1113' },
-  centre: { alignItems: 'center', justifyContent: 'center' },
-  wordmark: { color: '#eaf2ef', fontSize: 40, fontWeight: '700', letterSpacing: 1 },
-  wordmarkSmall: { color: '#eaf2ef', fontSize: 20, fontWeight: '700' },
-  loadNote: { color: '#8b9a95', fontSize: 14 },
-  loadFailed: { color: '#e88', fontSize: 13, textAlign: 'center', paddingHorizontal: 32, lineHeight: 19 },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  offerTitle: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  clarify: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 12 },
+  clarifyQ: { color: palette.ink, fontSize: 14, fontWeight: '600' },
+  clarifyOther: { color: palette.moss, fontSize: 13, fontWeight: '600' },
+  root: { flex: 1, backgroundColor: palette.cream },
+  loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
+  wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
+  wordmarkSmall: { height: 28, width: 28 * LOGO_RATIO, tintColor: palette.logo },
+  loadShapes: { marginTop: 30, marginBottom: 20 },
+  loadNote: { color: palette.ink, fontSize: 15, fontWeight: '600' },
+  loadHint: { color: palette.moss, fontSize: 13, marginTop: 6 },
+  loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
 
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 18, paddingBottom: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#232a2d',
+    paddingHorizontal: 18,
   },
-  stateChip: {
-    color: '#6ca', fontSize: 12, fontWeight: '600',
-    borderWidth: 1, borderColor: '#2a3a35', borderRadius: 12,
-    paddingHorizontal: 10, paddingVertical: 4, overflow: 'hidden',
-  },
-  // Armed recording has to be obvious at a glance: it writes coordinates, and
-  // nobody should drive home unaware it is still running.
-  stateChipRecording: { color: '#e88', borderColor: '#5a2a2a' },
-
   thread: { flex: 1 },
-  threadInner: { padding: 18, paddingBottom: 8 },
-  empty: { color: '#6b7a76', fontSize: 15, lineHeight: 22, marginTop: 40, textAlign: 'center' },
+  threadInner: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8 },
+  emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
+  emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 25, lineHeight: 34 },
+  empty: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 14 },
 
-  turn: { marginBottom: 22 },
-  question: { color: '#eaf2ef', fontSize: 16, fontWeight: '600', marginBottom: 10 },
-  card: { backgroundColor: '#161b1e', borderRadius: 12, padding: 14 },
-  body: { color: '#d7e0dd', fontSize: 15, lineHeight: 22 },
-  hint: { color: '#6b7a76', fontSize: 12, lineHeight: 17, marginTop: 8 },
-  error: { color: '#e88', fontSize: 13, lineHeight: 18 },
+  // The trail runs through the middle of the waypoints (14 in, 28 wide, 6 thick).
+  trail: { position: 'absolute', top: 10, bottom: 0, left: 25, width: 6 },
+  trailDots: { width: 6, height: '100%', tintColor: palette.trail },
+  waypoint: {
+    width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: palette.cream, borderWidth: 1.5, borderColor: palette.trail,
+  },
+  waypointFred: { backgroundColor: palette.sage, borderColor: palette.sage },
+  waypointGlyph: { width: 15, height: 15 },
+
+  turn: { marginBottom: 26 },
+  asked: { flexDirection: 'row', gap: 12, marginBottom: 10 },
+  // The hiker's own words, written large in the journal face beside a leaf.
+  question: { flex: 1, fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, paddingTop: 1 },
+  replied: { flexDirection: 'row', gap: 12 },
+  // Room above each card for its tab, which sits half over the top edge.
+  cards: { flex: 1, gap: 22, paddingTop: 12 },
+  card: {
+    backgroundColor: palette.paper, borderRadius: radius.card, borderTopLeftRadius: 6,
+    paddingHorizontal: 16, paddingTop: 22, paddingBottom: 16,
+    borderWidth: 1, borderColor: palette.sand,
+    boxShadow: `0 3 12 ${palette.shade}`,
+  },
+  tab: {
+    position: 'absolute', top: -12, left: 12, borderRadius: radius.pill,
+    paddingHorizontal: 11, paddingVertical: 4,
+  },
+  tabText: { color: palette.ink, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
+  thinking: { alignSelf: 'flex-start' },
+  body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
+  hint: { color: palette.moss, fontSize: 13, lineHeight: 18, marginTop: 8 },
+  error: { color: palette.clay, fontSize: 14, lineHeight: 20 },
   disclaimer: {
-    color: '#c9a', fontSize: 12, lineHeight: 17, marginTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#2a2430', paddingTop: 10,
+    color: palette.plum, fontSize: 12, lineHeight: 17, marginTop: 14,
+    borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 10,
   },
 
-  sources: { marginTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d', paddingTop: 10 },
-  sourcesTitle: { color: '#6ca', fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
-  source: { color: '#8b9a95', fontSize: 12, lineHeight: 18 },
-  sourceBasis: { color: '#6b7a76', fontSize: 12, lineHeight: 18, marginLeft: 12 },
-  sourceLink: { color: '#6ca', textDecorationLine: 'underline' },
+  sources: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 10 },
+  sourcesTitle: { color: palette.pine, fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
+  source: { color: palette.moss, fontSize: 12, lineHeight: 18 },
+  sourceBasis: { color: palette.moss, fontSize: 12, lineHeight: 18, marginLeft: 12 },
+  sourceLink: { color: palette.pine, textDecorationLine: 'underline' },
 
   locNote: {
-    color: '#e0c98a', fontSize: 13, backgroundColor: '#241f16',
-    paddingHorizontal: 16, paddingVertical: 10,
+    color: palette.amber, fontSize: 13, lineHeight: 18, backgroundColor: palette.butter,
+    paddingHorizontal: 20, paddingVertical: 10,
   },
   locateButton: {
-    alignSelf: 'flex-start', marginTop: 12, borderRadius: 8,
-    borderWidth: 1, borderColor: '#2f4a42', paddingHorizontal: 12, paddingVertical: 8,
+    alignSelf: 'flex-start', marginTop: 12, borderRadius: radius.control,
+    backgroundColor: palette.pine, paddingHorizontal: 14, paddingVertical: 10,
   },
-  locateButtonText: { color: '#6ca', fontSize: 13, fontWeight: '600' },
+  locateButtonText: { color: palette.paper, fontSize: 14, fontWeight: '700' },
   stateRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  stateButton: { backgroundColor: '#1d2529', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
-  stateButtonText: { color: '#d7e0dd', fontSize: 13, fontWeight: '600' },
+  stateButton: { backgroundColor: palette.oat, borderRadius: radius.control, paddingHorizontal: 14, paddingVertical: 10 },
+  stateButtonText: { color: palette.ink, fontSize: 14, fontWeight: '600' },
 
-  composer: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 10,
-    paddingHorizontal: 14, paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#232a2d',
+  composer: { paddingHorizontal: 12, paddingTop: 8 },
+  // One floating pill: the text box with the Ask button inside it.
+  composerPill: {
+    flexDirection: 'row', alignItems: 'flex-end', gap: 6, padding: 6,
+    backgroundColor: palette.paper, borderRadius: 30,
+    borderWidth: 1, borderColor: palette.sand,
+    boxShadow: `0 4 16 ${palette.shade}`,
   },
   input: {
-    flex: 1, color: '#eaf2ef', fontSize: 15, maxHeight: 120,
-    backgroundColor: '#161b1e', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10,
+    flex: 1, color: palette.ink, fontSize: 16, maxHeight: 120, minHeight: 44,
+    paddingHorizontal: 14, paddingVertical: 10,
   },
-  costLine: { color: '#7d8c88', fontSize: 12, paddingHorizontal: 16, paddingTop: 6 },
-  send: { backgroundColor: '#2f7d63', borderRadius: 10, paddingHorizontal: 18, paddingVertical: 12 },
-  sendOff: { backgroundColor: '#243029' },
-  sendStop: { backgroundColor: '#7d3a2f' },
-  waiting: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 },
-  waitingText: { color: '#9ab', fontSize: 13, fontStyle: 'italic' },
-  stoppedNote: { color: '#d9a', fontSize: 12, marginTop: 10, fontStyle: 'italic' },
-  sendText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  costLine: { color: palette.moss, fontSize: 12, paddingHorizontal: 26, paddingTop: 6 },
+  send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  sendOff: { backgroundColor: palette.sand },
+  sendStop: { backgroundColor: palette.clay },
+  waiting: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
+  waitingText: { color: palette.moss, fontSize: 13, fontStyle: 'italic' },
+  stoppedNote: { color: palette.clay, fontSize: 12, marginTop: 10, fontStyle: 'italic' },
+  sendMark: { width: 22, height: 22, tintColor: palette.paper },
+  sendMarkOff: { tintColor: palette.moss },
+  stopMark: { width: 14, height: 14, borderRadius: 3, backgroundColor: palette.paper },
 });

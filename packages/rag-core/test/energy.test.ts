@@ -81,10 +81,20 @@ test('estimate: a percentage and how many more the charge allows', () => {
   assert.ok(Math.abs(e.percent - 0.1) < 1e-9);
   assert.equal(e.answersLeft, 500);
   assert.equal(e.measured, true);
-  assert.equal(e.text, 'A written answer: about 0.1% of battery · roughly 500 more like it on this charge');
+  assert.equal(e.text, '~0.1% battery · ~500 more like it');
+  assert.deepEqual(e.line.filter((p) => p.figure).map((p) => p.text), ['~0.1%', '~500']);
   const q = estimate('quick', DEFAULT_BOOK, { ...battery, coarse: true })!;
   assert.equal(q.measured, false);
-  assert.equal(q.text, 'A quick reply: about 0.01% of battery · very roughly over 1,000 more like it on this charge');
+  assert.equal(q.text, '~0.01% battery · very roughly 1,000 more like it');
+  assert.equal(estimate('quick', DEFAULT_BOOK, battery)!.text, '~0.01% battery · 1,000+ more like it');
   assert.ok(Math.abs(q.percent - (10 / 70_000) * 100) < 1e-9);
   assert.equal(estimate('written', DEFAULT_BOOK, undefined), undefined);
+});
+
+test('estimate: a ceiling while the message is still being typed', () => {
+  const battery = { level: 0.5, capacityJoules: 70_000, coarse: false };
+  const e = estimate('written', DEFAULT_BOOK, battery, true)!;
+  assert.equal(e.text, 'up to ~0.2% battery · at least ~200 more');
+  assert.deepEqual(e.line.filter((p) => p.figure).map((p) => p.text), ['~0.2%', '~200']);
+  assert.equal(estimate('written', DEFAULT_BOOK, { ...battery, level: 0 }, true)!.text, 'up to ~0.2% battery');
 });

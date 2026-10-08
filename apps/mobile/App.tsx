@@ -25,13 +25,13 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView } from '@fred/rag-core';
+import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView, type LinePart } from '@fred/rag-core';
 
 /** One piece of fixed text as a stream, for typeOut. */
 async function* oneShot(text: string): AsyncIterable<string> { yield text; }
 import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
-import { beginAnswer, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
+import { beginAnswer, ceilingEstimate, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { Scene } from './src/scene.tsx';
@@ -155,7 +155,7 @@ function Screen() {
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // US-13: the battery estimate for the message being typed.
-  const [costLine, setCostLine] = useState<string | null>(null);
+  const [costLine, setCostLine] = useState<readonly LinePart[] | null>(null);
   const [fix, setFix] = useState<LocationFix | null>(null);
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
@@ -374,27 +374,33 @@ function Screen() {
    * a quick reply. The line is logged for the honesty check.
    */
   const estimating = useRef<Promise<unknown> | null>(null);
-  const prepare = useCallback((text: string, st: string | null): Promise<string | null> => {
-    const run = (async (): Promise<string | null> => {
+  const prepare = useCallback((text: string, st: string | null, wanted: () => boolean = () => true): Promise<readonly LinePart[] | null> => {
+    const before = estimating.current;
+    const run = (async (): Promise<readonly LinePart[] | null> => {
+      // One use of the search model at a time; a message typed over since is not searched.
+      await before?.catch(() => undefined);
       const eng = engine.current;
-      if (eng === null) return null;
+      if (eng === null || !wanted()) return null;
       await sampleIdle();
       const kind = await eng.predict(text, st);
       const e = estimateFor(kind);
       console.log(`[fred] estimate kind=${kind} ${e === undefined ? 'none' : `percent=${e.percent.toFixed(4)} left=${e.answersLeft ?? 'none'} measured=${e.measured}`}`);
-      return e?.text ?? null;
+      return e?.line ?? null;
     })();
     estimating.current = run;
     return run;
   }, []);
-  // Shown once typing pauses; never while Fred is answering.
+  // Shown from the first character as a ceiling (no search), narrowed to the
+  // predicted kind of reply once typing pauses; never while Fred is answering.
   useEffect(() => {
     const q = draft.trim();
-    if (busy || q.length < 4) { setCostLine(null); return; }
+    if (busy || q === '') { setCostLine(null); return; }
+    setCostLine((was) => was ?? ceilingEstimate()?.line ?? null);
+    if (q.length < 4) return;
     let live = true;
     const t = setTimeout(() => {
-      prepare(q, state).then((line) => { if (live) setCostLine(line); }, () => undefined);
-    }, 800);
+      prepare(q, state, () => live).then((line) => { if (live && line !== null) setCostLine(line); }, () => undefined);
+    }, 300);
     return () => { live = false; clearTimeout(t); };
   }, [draft, busy, state, prepare]);
 
@@ -776,8 +782,12 @@ function Screen() {
           no longer resizes for the keyboard — the first build buried the
           composer under it. */}
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={0}>
-        {/* US-13: what sending this will cost the battery, once typing pauses. */}
-        {costLine !== null && !busy && <Text style={styles.costLine}>{costLine}</Text>}
+        {/* US-13: what sending this will cost the battery, with the figures standing out. */}
+        {costLine !== null && !busy && (
+          <Text style={styles.costLine} accessibilityLabel={`Battery estimate: ${costLine.map((p) => p.text).join('')}`}>
+            {costLine.map((p, i) => (p.figure ? <Text key={i} style={styles.costFigure}>{p.text}</Text> : p.text))}
+          </Text>
+        )}
         <View style={[styles.composer, { paddingBottom: insets.bottom + 10 }]}>
          <View style={styles.composerPill}>
           <TextInput
@@ -927,6 +937,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 10,
   },
   costLine: { color: palette.moss, fontSize: 12, paddingHorizontal: 26, paddingTop: 6 },
+  costFigure: { color: palette.pine, fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
   send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   sendOff: { backgroundColor: palette.sand },
   sendStop: { backgroundColor: palette.clay },

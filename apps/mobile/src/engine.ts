@@ -30,6 +30,8 @@ export type LoadPhase =
   | { readonly phase: 'failed'; readonly message: string };
 
 export interface Engine {
+  /** #172: Fred's side of the conversation is on (voice.ts). */
+  readonly voice: boolean;
   /**
    * `signal` aborts generation; see US-07. `previous` is the question just
    * answered and its search score, for a follow-up (docs/plan-memory.md).
@@ -178,8 +180,12 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
         return v;
       },
     };
+    // #172: Fred's side of the conversation (voice.ts). Field test: a
+    // `devhooks-no-voice` file beside `devhooks` turns it off.
+    const voice = !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-voice').exists);
     return {
       predict: (question, state) => predictCost(question, { backend: remembering, store, packs }, { state, saidAs: SAID_AS_MODEL }),
+      voice,
       ask: async (question, state, signal, previous, history, lastCard) => {
         const t0 = Date.now();
         const previousWasPet = petMessage !== undefined && history?.at(-1) === petMessage;
@@ -192,6 +198,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // Field test: a `devhooks-no-opener` file beside `devhooks` turns it
           // off, to time answers with and without it.
           opener: !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-opener').exists),
+          voice,
           // A last chance for a message about to be called small talk or
           // declined (#149, docs/results-scope-scorer.md). Field test: a
           // `devhooks-no-scope` file beside `devhooks` turns it off.
@@ -252,6 +259,9 @@ function timed(res: AskResult, t0: number): AskResult {
   const tm = res.diagnostics.timing;
   const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {
+    // #172: what Fred says, for the phone check of the conversation lines.
+    const said = res.kind === 'chat' ? res.reply : res.kind === 'abstain' ? [res.lead, res.decline?.text, res.decline?.hint].filter((x) => x !== undefined).join(' / ') : '';
+    if (verbose && said !== '') console.log(`[fred] text ${JSON.stringify(said)}`);
     console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${guards}${reason}${offered}${timing} top=${top}`);
     return res;
   }

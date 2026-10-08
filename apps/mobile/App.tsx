@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView, type LinePart } from '@fred/rag-core';
+import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, declineReply, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView, type DeclineReply, type LinePart } from '@fred/rag-core';
 
 /** One piece of fixed text as a stream, for typeOut. */
 async function* oneShot(text: string): AsyncIterable<string> { yield text; }
@@ -114,6 +114,10 @@ interface Turn {
   waiting?: boolean;
   /** Asked by the desktop test hook, not typed: such a chat is not kept in past chats. */
   hook?: boolean;
+  /** #172: a first line before the safety-net or watch reply. */
+  lead?: string;
+  /** #172: what a plain decline says, fitted to the message. */
+  decline?: DeclineReply;
 }
 
 /**
@@ -344,6 +348,8 @@ function Screen() {
           kind: 'abstain', done: true,
           text: res.reason === 'provider-only' ? REFER_REPLY : res.reason === 'safety-net' ? SAFETY_NET_REPLY : res.reason === 'watch' ? WATCH_REPLY : '',
           ...(res.offer === undefined ? {} : { offer: res.offer }),
+          ...(res.lead === undefined ? {} : { lead: res.lead }),
+          ...(res.decline === undefined ? {} : { decline: res.decline }),
         });
         return;
       }
@@ -361,14 +367,17 @@ function Screen() {
         // After the opening line the model reads its sources before the
         // answer's first word: show that Fred is still working.
         const opener = res.opener?.text;
-        update(id, { text, waiting: opener != null && text.trim() === opener });
+        // Only a written answer has that wait: a card follows its line at once.
+        update(id, { text, waiting: written && opener != null && text.trim() === opener });
       }
       finished = !ctrl.signal.aborted;
       // The model can decline even when retrieval scored above the gate. Showing
       // that with sources and a medical disclaimer would read as a sourced
       // answer, so it is rendered as the abstention it is.
-      update(id, isRefusal(text)
-        ? { kind: 'abstain', done: true, waiting: false }
+      // A decline after an opening line is still a decline.
+      const line = res.opener?.text;
+      update(id, isRefusal(line != null && text.startsWith(line) ? text.slice(line.length) : text)
+        ? { kind: 'abstain', done: true, waiting: false, ...(eng.voice ? { decline: declineReply(question, history) } : {}) }
         : { done: true, stopped: ctrl.signal.aborted, waiting: false });
     } catch (e) {
       // Logged too, so a harness waiting on the log sees the question end and
@@ -636,7 +645,7 @@ function Screen() {
             {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
                 <Tab label="Fred" />
-                <Text style={styles.body}>{t.text}</Text>
+                <Text style={styles.body}>{t.lead === undefined ? t.text : `${t.lead}\n${t.text}`}</Text>
               </View>
             )}
 
@@ -646,11 +655,11 @@ function Screen() {
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
-                  {t.map === true ? 'Here\u2019s where you are.' : 'I don\u2019t have that in my guides, and I\u2019d rather not guess.'}
+                  {t.map === true ? 'Here\u2019s where you are.' : t.decline?.text ?? 'I don\u2019t have that in my guides, and I\u2019d rather not guess.'}
                 </Text>
                 {t.map === true && t.offer === undefined ? null : t.offer === undefined ? (
                   <Text style={styles.hint}>
-                    Try asking another way, or tell me a bit more about what&apos;s going on.
+                    {t.decline?.hint ?? 'Try asking another way, or tell me a bit more about what\u2019s going on.'}
                   </Text>
                 ) : (
                   <Text style={styles.hint}>The closest field card, in case it&apos;s what you need:</Text>

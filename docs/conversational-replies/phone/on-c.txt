@@ -1,0 +1,34 @@
+/home/odysseus/fred-runs/voice-phone/c.tsv: 1 file pushed, 0 skipped. 0.6 MB/s (87 bytes in 0.000s)
+[fred] load packs
+[fred] load models
+[fred] generator {"gpu":true,"devices":["GPUOpenCL","HTP0"],"reasonNoGPU":"","androidLib":"rnllama_jni_v8_2_dotprod_i8mm_hexagon_opencl"}
+[fred] load verifying
+[fred] parity core-fieldcards cos=0.9996 ok
+[fred] parity core-firstaid-army cos=0.9996 ok
+[fred] parity core-firstaid cos=0.9996 ok
+[fred] parity core-hazards cos=0.9996 ok
+[fred] parity core-health cos=0.9996 ok
+[fred] parity core-signaling cos=0.9996 ok
+[fred] parity core-survival cos=0.9996 ok
+[fred] parity core-tips-nps cos=0.9996 ok
+[fred] parity core-tips-wikivoyage cos=0.9996 ok
+[fred] parity core-wildlife-safety cos=0.9996 ok
+[fred] parity state-CA-flora-fauna cos=0.9996 ok
+[fred] parity state-OR-flora-fauna cos=0.9996 ok
+[fred] engine ready in 3058ms, encoder google/embeddinggemma-300m
+[fred] warm-up not needed: lane prompts saved
+[fred] load ready: 12 packs, 12791 passages
+[fred] devhook ask: a rattler got my dads hand
+[fred] estimate kind=quick percent=0.0133 left=5406 measured=true
+[fred] text "I'm here with you.\nKeep them still and calm, and get to medical care. Antivenom is the real treatment.\n1. Keep the person as still and calm as you can. Moving around and panicking speed up how fast the venom spreads.\n2. Take off rings, watches and anything tight near the bite before it swells.\n3. Keep the bitten arm or leg slightly below the level of the heart if you can.\n4. Wash the bite gently with mild soap and water.\n5. Cover it with a clean bandage that is snug but not tight, and splint the limb so it stays still.\n6. Note the time of the bite. Watch their breathing and be ready to do CPR.\nDon't cut the bite open or try to suck out the venom.\nDon't put a tourniquet on the limb.\nDon't put ice on it.\nDon't try to catch or kill the snake. You risk a second bite. A photo from a safe distance is fine.\nGet medical help right away. Most snakebites are not deadly, but hospitals have the antivenom and you don't."
+[fred] answer retrieval=2457ms first=2457ms total=5113ms opener=yes answerFirst=2587ms chars=920 U=0.044 tokens=0 intent=now understood=unused("rattler bitten hand, what to do right now") conditions=snakebite agreed="Snakebite" model=1380ms embed=676ms top=SNAKE BITES | OVERVIEW OF BITES AND STINGS | About Hantavirus > Overview | Hantavirus Prevention > Who is at risk
+[fred] energy kind=quick joules=none expected=9.5 gross=23.6 seconds=5.1 watts=4.62 idleW=none samples=26 charging=true level=0.72 chargeUAh=3709000 rawCurrent=-78000 mv=4083 thermal=0 learned=false
+[fred] devhook ask: can i put ice on it
+[fred] estimate kind=quick percent=0.0133 left=5406 measured=true
+[fred] text "Keep them still and calm, and get to medical care. Antivenom is the real treatment.\nDon't put ice on it."
+[fred] answer retrieval=3102ms first=3102ms total=4039ms chars=104 U=0.312 tokens=0 intent=now understood=used("rattler bit dad's hand, what to do right now") conditions=snakebite model=1084ms embed=1305ms top=Rattlesnakes - Yosemite National Park > If a Bite Occurs | Rattlesnakes - Yosemite National Park > What to Avoid if a Bit Occurs | Rabies Prevention and Control > When to seek medical care > When immediate care is needed | Rattlesnakes - Great Basin National Park
+[fred] energy kind=quick joules=none expected=9.5 gross=23.6 seconds=4.0 watts=5.84 idleW=none samples=21 charging=true level=0.72 chargeUAh=3709000 rawCurrent=-187000 mv=4054 thermal=0 learned=false
+[fred] devhook ask: ok the rangers carried him out
+[fred] estimate kind=quick percent=0.0133 left=5406 measured=true
+[fred] abstain retrieval=4172ms U=0.017 followUp=no(0.017/0.271) intent=now understood=unused("rattler bit dad's hand, ice on it needed to reduce swelling") reason=safety-net model=1368ms embed=1955ms top=Safety - Yellowstone National Park > Bears > Know what to do if you encounter a bear | Safety - Yellowstone National Park > Elk > Run away if an elk charges | CASUALTY HANDLING | A bear close by, charging or attacking
+[fred] energy kind=quick joules=none expected=9.5 gross=28.1 seconds=4.2 watts=6.74 idleW=none samples=22 charging=true level=0.72 chargeUAh=3709000 rawCurrent=-1032000 mv=4054 thermal=0 learned=false

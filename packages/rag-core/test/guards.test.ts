@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
@@ -246,4 +246,12 @@ test('"soaked through" is a danger sign for blood, not for wet gear (#145)', asy
     assert.ok(!dangerSign([m]), m);
     assert.deepEqual(ids([m]), [], m);
   }
+});
+
+test('a danger sign stands until the hiker says it is over; an open snakebite stands anyway (#173)', () => {
+  assert.ok(dangerStands(['a snake struck my buddy', 'its on his ankle'], conditionsIn(['a snake struck my buddy'])));
+  assert.ok(!dangerStands(['a snake struck my buddy', 'ok the rangers carried him out', 'now ive got a blister on my heel'], []));
+  assert.ok(dangerStands(['he gashed his thigh', 'we carried him out to the road but its still soaking through the shirt'], []));
+  // Someone else's ankle feeling fine does not close the friend's snakebite, which the record keeps open.
+  assert.ok(dangerStands(['a snake struck my buddy', 'my own ankle feels fine now', 'his arm is going numb'], conditionsIn(['a snake struck my buddy'])));
 });

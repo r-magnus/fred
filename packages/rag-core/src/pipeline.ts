@@ -15,8 +15,8 @@ import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions,
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
-import { buildRecord, conditionsFor, latestFor, saysResolved } from './record.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
+import { buildRecord, conditionsFor, latestFor, saysHandedOver, saysResolved, sinceResolved } from './record.ts';
+import { asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, saidAs, type Said, type SaidAsModel } from './said-as.ts';
 import type { ReplyCost } from './energy.ts';
 import { joinNeighbours } from './join.ts';
@@ -729,7 +729,7 @@ export async function ask(
 function voiced(res: AskResult, query: string, history: readonly string[]): AskResult {
   if (res.kind === 'needs-location') return res;
   if (res.kind === 'chat') return { ...res, reply: chatReply(query, history, res.offer !== null) };
-  const moment = dangerSign([...history, query]) ? 'danger' : res.diagnostics.intent === 'now' ? 'now' : 'calm';
+  const moment = dangerSign(sinceResolved([...history, query])) ? 'danger' : res.diagnostics.intent === 'now' ? 'now' : 'calm';
   if (res.kind === 'abstain') {
     if (res.reason === 'provider-only') return res;
     if (res.reason === 'safety-net' || res.reason === 'watch') {
@@ -767,7 +767,7 @@ async function askUnvoiced(
   if (opts.opener !== true || opts.understand === false || opts.guards === false) return res;
   if (res.kind !== 'answer' || res.diagnostics.cardAnswer !== undefined || res.clarify !== undefined) return res;
   const earlier = opts.history ?? [];
-  if (res.diagnostics.intent === 'now' || dangerSign([...earlier, query])) return res;
+  if (res.diagnostics.intent === 'now' || dangerSign(sinceResolved([...earlier, query]))) return res;
   // Generated after the search, just before the answer. Started as the
   // message arrives instead, beside the search, it made answers 15-25 s
   // slower on the phone (docs/results-friendly-opener.md).
@@ -818,6 +818,12 @@ async function askCore(
   const conditionCardFor = async (q: string): Promise<ScoredChunk | undefined> => {
     const lc = latestFor(record, q, here);
     if (lc === undefined || lc.inLast) return undefined;
+    // #173: the message that set the condition was the one just before, and
+    // Fred answered it with another card: the follow-up is about that card.
+    // "my mom slipped on the wet boardwalk... her wrist is swollen" got the
+    // broken-bone card, and "can she still carry her pack" a line of the
+    // spine card ("Pack rolled clothing ... on both sides of the head").
+    if (q === query && lc.at === here - 1 && lastShown !== undefined && lastShown.chunk.section !== lc.condition.card) return undefined;
     const card = await cardByTitle(lc.condition.card);
     if (card === undefined) return undefined;
     // A question in the middle of a condition is about it when it names the
@@ -1040,6 +1046,8 @@ async function askCore(
   const lastShown = ownCard(guardsOn && opts.lastCard !== undefined ? await cardByTitle(opts.lastCard) : undefined);
   // A condition that explains this message's symptom (altitude, heat, low
   // blood sugar): its card leads over a card that only shares the words.
+  // A danger sign in the thread, unless the hiker has since said it is over (#173).
+  const dangerNow = guardsOn ? dangerStands([...history, query], active) : dangerSign([...history, query]);
   const explaining = setHere.find((c) => c.explains === true);
   const explainCard = explaining === undefined ? undefined : await cardByTitle(explaining.card);
   let understood: UnderstoodDiag | undefined;
@@ -1052,11 +1060,15 @@ async function askCore(
   // Small talk read as news about an open problem (below); ask() turns a decline back into small talk.
   let newsNotChat = false;
   let everyday: { routedTopScore: number; topScore: number } | undefined;
+  // #173: news that help has taken over, with nothing new in it and nothing
+  // asked, is small talk too: "ok the rangers carried him out" after a
+  // snakebite was called NOW and got the get-help-now reply.
+  const helpHasThem = saysHandedOver(query) && setHere.length === 0 && !asksSomething(query) && !dangerSign([query]);
   // Nothing but thanks or an acknowledgement is small talk, without asking the
   // model: "ok thanks" after a burn is three words, so it was read in its
   // conversation, restated as "bubbles on skin, what to do", called NOW, and
   // answered (20 s on the phone).
-  const onlyThanks = guardsOn && opts.intent === true && ONLY_ACKNOWLEDGES.test(query);
+  const onlyThanks = guardsOn && opts.intent === true && (ONLY_ACKNOWLEDGES.test(query) || helpHasThem);
   if (onlyThanks) intent = 'chat';
   if (opts.intent === true && !onlyThanks) {
     // A weak search that follows earlier messages is read in its conversation.
@@ -1092,11 +1104,11 @@ async function askCore(
     // answers it, ask() falls back to small talk (newsNotChat): in a lost-hiker
     // chat "i can hear a river" went from "Got it" to a decline.
     const openProblem = active.length > 0 || eatingUnknownInThread(query, opts.history ?? []) ||
-      dangerSign([...history, query]);
+      dangerNow;
     if (guardsOn && intent === 'chat' && (opts.history?.length ?? 0) > 0 && openProblem &&
         !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
       newsNotChat = true;
-      intent = dangerSign([...history, query]) ? 'now' : 'question';
+      intent = dangerNow ? 'now' : 'question';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
     }
     // A message that says something happened to someone (a condition,
@@ -1323,7 +1335,7 @@ async function askCore(
   // question, and if nothing then answers it ask() falls back to small talk.
   // Not when the hiker says it is over or is only acknowledging.
   if (inScope && intent === 'chat' && !saysResolved(query) && !ACKNOWLEDGES.test(query) && !petPatient) {
-    intent = dangerSign([...history, query]) ? 'now' : 'question';
+    intent = dangerNow ? 'now' : 'question';
     newsNotChat = true;
     scopeUsed.push('not-chat');
     // A remark about unnamed berries or mushrooms gets the wild-plants card,
@@ -1401,7 +1413,7 @@ async function askCore(
     // says nothing against the card, and with a danger sign in the thread an
     // unsure matcher takes no card away ("the shirt i'm holding on it is soaked
     // through" lost the bleeding card).
-    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment' && !dangerSign([...history, query]))) { saidUsed.push('no-card'); return undefined; }
+    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment' && !dangerNow)) { saidUsed.push('no-card'); return undefined; }
     return card;
   };
   if (forcedCard !== undefined && forcedOwn && forcedCard.score < effectiveThreshold) {
@@ -1552,7 +1564,7 @@ async function askCore(
       }
     }
     if (understandOn && intent === 'now' && !aboutPet) {
-      const danger = !guardsOn || dangerSign([...history, query]);
+      const danger = !guardsOn || dangerNow;
       return {
         kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
         ...(offer === undefined ? {} : { offer }),
@@ -1853,7 +1865,7 @@ async function askCore(
   // information": "we cleaned out a mousy cabin last week and now i have a
   // fever and it's getting hard to breathe" found the hantavirus passages and
   // the model declined (health set).
-  const emergency = guardsOn && dangerSign([...history, query]);
+  const emergency = guardsOn && dangerNow;
   const guardCard = async (text: string): Promise<string> => {
     // A refusal in the middle of a condition is a dead end too.
     if (isRefusal(text) && followed !== undefined) {

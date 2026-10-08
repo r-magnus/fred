@@ -14,7 +14,8 @@
  * stop, confusion, chest pain, stroke signs, a swelling throat, heat stroke,
  * a snakebite, seizures, cold water, a big animal close by. Written as phrases a hiker types.
  */
-import { conditionsIn, soakedWithBlood } from './conditions.ts';
+import { conditionsIn, soakedWithBlood, type Condition } from './conditions.ts';
+import { sinceResolved } from './record.ts';
 
 const SIGNS: readonly RegExp[] = [
   // Breathing (cpr, choking, anaphylaxis).
@@ -75,6 +76,15 @@ export function dangerSign(messages: readonly string[]): boolean {
   if (ANIMAL.test(all) && CLOSE.test(all)) return true;
   if (HEAD.test(all) && DROWSY.test(all)) return true;
   return conditionsIn(messages).some((c) => c.id === 'snakebite');
+}
+
+/**
+ * A danger sign that still stands (#173): said since the hiker last said
+ * something was over, or a snakebite the record still has open (someone
+ * else's ankle feeling fine does not close it).
+ */
+export function dangerStands(messages: readonly string[], open: readonly Condition[]): boolean {
+  return dangerSign(sinceResolved(messages)) || open.some((c) => c.id === 'snakebite');
 }
 
 /**

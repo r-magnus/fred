@@ -22,6 +22,7 @@ import type { LocationFix } from './location.ts';
 import { MapDownloads } from './map-downloads-panel.tsx';
 import { Compass, useHeading, type Heading } from './compass.tsx';
 import { CalmLoader } from './calm-loader.tsx';
+import { useReduceMotion } from './motion.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
 /**
@@ -162,6 +163,28 @@ function useCoverage(fix: LocationFix | null, reload = 0) {
   [fix, pack, carrier]);
   const reloadCarrier = (): void => { void loadCarrier().then(setCarrier); };
   return { pack, carrier, coverage, reloadCarrier };
+}
+
+/**
+ * The dots after "Finding you": one, two, three, and round again, so the wait
+ * visibly moves. All three are always laid out and the ones not yet lit are
+ * clear, so the words beside them stay put. Three still dots when the phone
+ * has animations turned off.
+ */
+function Dots(): React.JSX.Element {
+  const { styles } = useThemed(makeStyles);
+  const still = useReduceMotion();
+  const [lit, setLit] = useState(1);
+  useEffect(() => {
+    if (still) return;
+    const t = setInterval(() => setLit((n) => (n % 3) + 1), 450);
+    return () => clearInterval(t);
+  }, [still]);
+  return (
+    <>
+      {[1, 2, 3].map((n) => <Text key={n} style={!still && n > lit ? styles.dotOff : undefined}>.</Text>)}
+    </>
+  );
 }
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
@@ -418,8 +441,9 @@ export function MapScreen(
             accessibilityLabel={folded ? 'Show the map details' : 'Hide the map details'}>
           <View style={styles.grip} />
           <View style={styles.where}>
-            <Text style={styles.whereTitle}>
-              {where.locating ? 'Finding you…' : fix === null ? 'Where are you?' : 'You are here'}
+            <Text style={[styles.whereTitle, where.locating && styles.whereTitleBusy]}
+              accessibilityLabel={where.locating ? 'Finding you' : undefined}>
+              {where.locating ? <>Finding you<Dots /></> : fix === null ? 'Where are you?' : 'You are here'}
             </Text>
             {(fix !== null || where.progress !== null) && (
               <View style={styles.wherePill}>
@@ -604,6 +628,9 @@ const makeStyles = (palette: Palette) => {
   grip: { alignSelf: 'center', width: 38, height: 4, borderRadius: 2, backgroundColor: palette.trail, marginBottom: 12 },
   where: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   whereTitle: { fontFamily: JOURNAL, color: palette.ink, fontSize: 22 },
+  whereTitleBusy: { color: palette.pine, fontSize: 26 },
+  // Not 'transparent': inside a line of text Android drew a fully clear dot in the title's colour.
+  dotOff: { color: 'rgba(0, 0, 0, 0.01)' },
   wherePill: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
     backgroundColor: palette.oat, borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 5,

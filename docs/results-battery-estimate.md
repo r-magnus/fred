@@ -95,6 +95,12 @@ figure, a factor of about 13.
 **Not compiled, not run**: this machine has no Xcode, and the simulator
 reports no energy. To test on a real iPhone once Fred runs on one (#28):
 
+0. Switch it on. So that untested Swift cannot break the iOS build, the
+   module is linked into Android builds only. In
+   `apps/mobile/modules/fred-energy/expo-module.config.json` set
+   `"platforms": ["apple", "android"]` and add
+   `"apple": { "modules": ["FredEnergyModule"] }`, then `pod install`.
+   Until then the iPhone shows no estimate.
 1. Build. If the Swift does not compile, the module is the first suspect.
 2. Ask a card question and a written one. The log line
    `[fred] energy kind=... joules=...` should show a few joules for the card

@@ -30,35 +30,52 @@ const TAB_HEIGHT = 52;
 const TAB_SLOP = 12;
 /** How wide the drawer is on a screen this wide. */
 const panelWidth = (screen: number): number => Math.min(340, screen * 0.84);
-/** A pull this far across the drawer's width, or a flick this fast, opens it; less lets it fall back. */
-const PULL_OPENS = 0.3;
-const FLICK_OPENS = 0.4;
+/** A pull this far across the drawer's width, or a flick this fast, opens or shuts it; less lets it fall back. */
+const PULL_MOVES = 0.3;
+const FLICK_MOVES = 0.4;
 
 /**
- * The bookmark on the edge of the chat. A tap opens the drawer, and so does
- * pulling it to the right: the drawer then follows the finger (`slide` is the
- * drawer's own position, 0 shut to 1 open, shared with SideDrawer) and
- * `onPeek` keeps the drawer on screen while it is being pulled.
+ * The bookmark on the edge of the chat. It rides on the drawer's edge: at the
+ * screen's edge while the drawer is shut, on the drawer's right side while it
+ * is open. A tap opens or shuts the drawer, and so does pulling the tab: the
+ * drawer follows the finger (`slide` is the drawer's own position, 0 shut to
+ * 1 open, shared with SideDrawer) and `onPeek` keeps the drawer on screen
+ * while it is being pulled out.
  */
 export function SideTab(
-  { top, slide, onPress, onPeek }: { top: number; slide: Animated.Value; onPress: () => void; onPeek: (on: boolean) => void },
+  { top, open, slide, onOpen, onClose, onPeek }: {
+    top: number; open: boolean; slide: Animated.Value;
+    onOpen: () => void; onClose: () => void; onPeek: (on: boolean) => void;
+  },
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const { width } = useWindowDimensions();
+  const panel = panelWidth(width);
   // The gesture is made once, so it reads what changes through this.
-  const now = useRef({ panel: panelWidth(width), onPress, onPeek });
-  now.current = { panel: panelWidth(width), onPress, onPeek };
+  const now = useRef({ panel, open, onOpen, onClose, onPeek });
+  now.current = { panel, open, onOpen, onClose, onPeek };
   const pull = useRef(PanResponder.create({
-    // Only a sideways pull to the right; a tap stays the button's.
-    onMoveShouldSetPanResponderCapture: (_, g) => g.dx > 6 && g.dx > Math.abs(g.dy),
-    onPanResponderGrant: () => now.current.onPeek(true),
-    onPanResponderMove: (_, g) => slide.setValue(Math.max(0, Math.min(1, g.dx / now.current.panel))),
+    // Only a sideways pull the way the drawer can go; a tap stays the button's.
+    onMoveShouldSetPanResponderCapture: (_, g) =>
+      Math.abs(g.dx) > 6 && Math.abs(g.dx) > Math.abs(g.dy) && (now.current.open ? g.dx < 0 : g.dx > 0),
+    onPanResponderGrant: () => { if (!now.current.open) now.current.onPeek(true); },
+    onPanResponderMove: (_, g) =>
+      slide.setValue(Math.max(0, Math.min(1, (now.current.open ? 1 : 0) + g.dx / now.current.panel))),
     onPanResponderRelease: (_, g) => {
-      if (g.dx > now.current.panel * PULL_OPENS || g.vx > FLICK_OPENS) { now.current.onPress(); now.current.onPeek(false); return; }
-      fallBack();
+      const far = Math.abs(g.dx) > now.current.panel * PULL_MOVES || Math.abs(g.vx) > FLICK_MOVES;
+      if (!far) { settle(); return; }
+      // The drawer finishes the slide from wherever the finger left it.
+      if (now.current.open) now.current.onClose();
+      else { now.current.onOpen(); now.current.onPeek(false); }
     },
-    onPanResponderTerminate: () => fallBack(),
+    onPanResponderTerminate: () => settle(),
   })).current;
+  /** A pull too short to count: back to where it started. */
+  const settle = (): void => {
+    const wasOpen = now.current.open;
+    Animated.timing(slide, { toValue: wasOpen ? 1 : 0, duration: 160, easing: Easing.out(Easing.cubic), useNativeDriver: true })
+      .start(() => { if (!wasOpen) now.current.onPeek(false); });
+  };
   // Android reads a swipe that starts at the screen's edge as "back", which
   // would close the app: keep that gesture off the tab and the margin round it.
   useEffect(() => {
@@ -66,15 +83,15 @@ export function SideTab(
     Edge?.keepFromBackGesture(0, px(top - TAB_SLOP), px(TAB_WIDTH + TAB_SLOP), px(top + TAB_HEIGHT + TAB_SLOP));
     return () => Edge?.keepFromBackGesture(0, 0, 0, 0);
   }, [top]);
-  const fallBack = (): void => {
-    Animated.timing(slide, { toValue: 0, duration: 160, easing: Easing.in(Easing.cubic), useNativeDriver: true })
-      .start(() => now.current.onPeek(false));
-  };
   return (
     // The pull is on a box around the button: a Pressable keeps its own touch handlers.
-    <View {...pull.panHandlers} style={[styles.tabBox, { top }]} hitSlop={TAB_SLOP}>
-      <Pressable onPress={onPress} hitSlop={TAB_SLOP}
-        accessibilityRole="button" accessibilityLabel="Open the menu: map and past chats">
+    <Animated.View {...pull.panHandlers} hitSlop={TAB_SLOP}
+      style={[styles.tabBox, { top, transform: [{ translateX: slide.interpolate({
+        // The drawer starts 20 points off screen, so the tab waits at the edge until the drawer reaches it.
+        inputRange: [0, 20 / (panel + 20), 1], outputRange: [0, 0, panel],
+      }) }] }]}>
+      <Pressable onPress={open ? onClose : onOpen} hitSlop={TAB_SLOP}
+        accessibilityRole="button" accessibilityLabel={open ? 'Close the menu' : 'Open the menu: map and past chats'}>
         {/* In both colour sets at once: it sits above the veil, so it has to turn with the sky. */}
         <Crossfade render={(p) => {
           const s = sheetFor(makeStyles, p);
@@ -87,7 +104,7 @@ export function SideTab(
           );
         }} />
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -202,7 +219,8 @@ export function SideDrawer<T>(
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
   // A bookmark on the page's left edge: rounded where it sticks out, flat where it meets the edge.
-  tabBox: { position: 'absolute', left: 0, width: TAB_WIDTH, height: TAB_HEIGHT, zIndex: 3 },
+  // Above the drawer (4), whose edge it rides on.
+  tabBox: { position: 'absolute', left: 0, width: TAB_WIDTH, height: TAB_HEIGHT, zIndex: 5 },
   tab: {
     width: 30, height: 52, gap: 5,
     alignItems: 'center', justifyContent: 'center', paddingRight: 3,

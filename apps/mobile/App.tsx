@@ -837,7 +837,8 @@ function Screen() {
 
       <Veil />
       {/* The bookmark on the left edge, hanging under the logo, and its drawer. */}
-      <SideTab top={insets.top + 50} slide={drawerSlide} onPress={() => setDrawer(true)} onPeek={setDrawerPeek} />
+      <SideTab top={insets.top + 50} open={drawer} slide={drawerSlide}
+        onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
       <SideDrawer
         open={drawer}
         peek={drawerPeek}

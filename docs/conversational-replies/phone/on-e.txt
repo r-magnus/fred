@@ -1,0 +1,30 @@
+/home/odysseus/fred-runs/voice-phone/e.tsv: 1 file pushed, 0 skipped. 0.4 MB/s (93 bytes in 0.000s)
+[fred] load packs
+[fred] load models
+[fred] generator {"gpu":true,"devices":["GPUOpenCL","HTP0"],"reasonNoGPU":"","androidLib":"rnllama_jni_v8_2_dotprod_i8mm_hexagon_opencl"}
+[fred] load verifying
+[fred] parity core-fieldcards cos=0.9996 ok
+[fred] parity core-firstaid-army cos=0.9996 ok
+[fred] parity core-firstaid cos=0.9996 ok
+[fred] parity core-hazards cos=0.9996 ok
+[fred] parity core-health cos=0.9996 ok
+[fred] parity core-signaling cos=0.9996 ok
+[fred] parity core-survival cos=0.9996 ok
+[fred] parity core-tips-nps cos=0.9996 ok
+[fred] parity core-tips-wikivoyage cos=0.9996 ok
+[fred] parity core-wildlife-safety cos=0.9996 ok
+[fred] parity state-CA-flora-fauna cos=0.9996 ok
+[fred] parity state-OR-flora-fauna cos=0.9996 ok
+[fred] engine ready in 3145ms, encoder google/embeddinggemma-300m
+[fred] warm-up not needed: lane prompts saved
+[fred] load ready: 12 packs, 12791 passages
+[fred] devhook ask: my knee is killing me going downhill
+[fred] estimate kind=quick percent=0.0134 left=5365 measured=true
+[fred] text "Sorry about your knee."
+[fred] abstain retrieval=3055ms U=0.245 intent=now understood=unused("knee pain when going downhill, what to do right now") reason=watch model=1181ms embed=673ms top=Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Factors > Who Gets Sports Injuries? | Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries
+[fred] energy kind=quick joules=none expected=9.5 gross=22.2 seconds=3.1 watts=7.27 idleW=none samples=16 charging=true level=0.72 chargeUAh=3679000 rawCurrent=-1016000 mv=4059 thermal=0 learned=false
+[fred] devhook ask: can you recommend a good restaurant near yosemite
+[fred] estimate kind=quick percent=0.0134 left=5360 measured=true
+[fred] text "I don't have that in my guides, and I'd rather not guess. / Ask it another way, or tell me what's going on around it, and I'll look again."
+[fred] abstain retrieval=501ms U=0.097 intent=question reason=low-score model=287ms embed=0ms top=Rattlesnakes - Yosemite National Park | Rattlesnakes - Yosemite National Park > Other Yosemite Snakes | Safety - Yellowstone National Park > Bears > Store All Food & Attractants | California buckeye > General Distribution
+[fred] energy kind=quick joules=none expected=9.5 gross=2.0 seconds=0.5 watts=4.05 idleW=none samples=4 charging=true level=0.72 chargeUAh=3678000 rawCurrent=-1142000 mv=4081 thermal=0 learned=false

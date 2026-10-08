@@ -10,7 +10,8 @@ friendly start for plain questions only, and says what would help when he has
 no answer. All of it is fixed wording picked by rules: no model call, so no
 added wait. On nine chat sets (454 turns, 190 chats) no decision and no card
 changed, and the chats where Fred repeats himself word for word fell from 61
-to 25. Not yet read by Ryan, and not yet run on the phone.**
+to 25. On the phone the lines show as on the desktop, with no change in time
+to first words. Not yet read by Ryan.**
 
 ## What was built
 
@@ -104,12 +105,41 @@ test now.
 - "Let's take care of that." in front of "I don't have steps for that": the
   line no longer promises help it may not have.
 
+## On the phone
+
+2026-10-08, Nothing Phone (3), this branch as a field-test build. Five short
+chats (14 messages) with the switch on, three of them again with it off
+(a `devhooks-no-voice` file). Logs: `conversational-replies/phone/`. One run
+each.
+
+| Hiker | Fred, with the switch on | First words, off / on |
+|---|---|---:|
+| "my mom slipped on the wet boardwalk... her wrist is swollen..." | "Sorry about your mom's wrist." then the broken-bone card | 2.7 / 2.8 s |
+| "ok thanks" | "Glad to help. I'm here if you need me." | 1.8 / 2.8 s |
+| "a rattler got my dads hand" | "I'm here with you." then the snakebite card | 2.2 / 2.5 s |
+| "can i put ice on it" | the card's summary and "Don't put ice on it." (no line: the emergency's was said) | 3.2 / 3.1 s |
+| "hello" | "Hi, I'm Fred. Ask me about first aid, finding your way, or the plants and animals around you." | 0.4 / 0.4 s |
+| "nice breeze up here" | "Okay. Just say the word if something comes up." | 0.4 / 0.4 s |
+| "my knee is killing me going downhill" | "Sorry about your knee." then the warning-signs reply | 3.2 / 3.2 s |
+| "can you recommend a good restaurant near yosemite" | "I don't have that in my guides, and I'd rather not guess." / "Ask it another way, or tell me what's going on around it, and I'll look again." | 0.5 / 0.5 s |
+| "found the trail again" | "Glad to hear it. I'm here if anything changes." | 0.5 / 0.5 s |
+| "how do i make rope from plant fibers" | "Good question about making rope from plant fibers." (the model's opener, as before), then the written answer | 1.6 s on |
+
+Times differ by run-to-run noise only (the 1.8 against 2.8 s on "ok thanks"
+is the search model's time, 1.3 against 2.3 s; the reply itself costs
+nothing). Two wordings were changed after reading these and checked on the
+phone again: a hurt part is always met with "Sorry about...", not "Okay, your
+knee."; and "can you recommend..." is treated as a request, not a yes/no
+question.
+
+Seen on the way, both there with the switch off too: "can she still carry her
+pack" after the wrist gets the spine card's line "Pack rolled clothing...";
+"ok the rangers carried him out" after a snakebite gets the emergency reply.
+
 ## Still open
 
 - **Ryan has not read a sample**, and tone is his call. The lines are short
-  and plain on purpose; some may read as flat ("Okay, your son's face.").
-- **Not on the phone yet.** No model call was added, so no change in speed is
-  expected, but that is not measured.
+  and plain on purpose; some may read as flat.
 - **Only chat sets, decisions only.** The single-question sets and generated
   answers were not re-run: with the switch off the code path is the old one,
   and with it on only wording is added.

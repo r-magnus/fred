@@ -1,0 +1,35 @@
+/home/odysseus/fred-runs/voice-phone/b.tsv: 1 file pushed, 0 skipped. 1.3 MB/s (94 bytes in 0.000s)
+[fred] load packs
+[fred] load models
+[fred] generator {"gpu":true,"devices":["GPUOpenCL","HTP0"],"reasonNoGPU":"","androidLib":"rnllama_jni_v8_2_dotprod_i8mm_hexagon_opencl"}
+[fred] load verifying
+[fred] parity core-fieldcards cos=0.9996 ok
+[fred] parity core-firstaid-army cos=0.9996 ok
+[fred] parity core-firstaid cos=0.9996 ok
+[fred] parity core-hazards cos=0.9996 ok
+[fred] parity core-health cos=0.9996 ok
+[fred] parity core-signaling cos=0.9996 ok
+[fred] parity core-survival cos=0.9996 ok
+[fred] parity core-tips-nps cos=0.9996 ok
+[fred] parity core-tips-wikivoyage cos=0.9996 ok
+[fred] parity core-wildlife-safety cos=0.9996 ok
+[fred] parity state-CA-flora-fauna cos=0.9996 ok
+[fred] parity state-OR-flora-fauna cos=0.9996 ok
+[fred] engine ready in 3173ms, encoder google/embeddinggemma-300m
+[fred] warm-up not needed: lane prompts saved
+[fred] load ready: 12 packs, 12791 passages
+[fred] devhook ask: how do i make rope from plant fibers
+[fred] estimate kind=quick percent=0.0132 left=5438 measured=true
+[fred] text "Good question about making rope from plant fibers.\nTo make rope from plant fibers, identify natural fibers such as hemp, cotton, or manila. Moisten the fibers and twist them into a continuous strand. For stronger lashing, braiden several strands together. Use abrasion to cut sections if needed."
+[fred] answer retrieval=643ms first=1562ms total=16212ms opener=yes answerFirst=12482ms chars=295 U=0.402 tokens=1020 intent=prevent model=284ms embed=0ms top=NATURAL FIBER TYPES | BRAIDING TECHNIQUES | ROPE CONSTRUCTION | NATURAL CORDAGE SELECTION
+[fred] energy kind=written joules=none expected=145.6 gross=139.6 seconds=16.2 watts=8.61 idleW=none samples=81 charging=true level=0.72 chargeUAh=3731000 rawCurrent=-2189000 mv=4026 thermal=0 learned=false
+[fred] devhook ask: how do i keep my feet dry on a long hike
+[fred] estimate kind=written percent=0.2027 left=355 measured=true
+[fred] text "Happy to help you keep your feet dry on a long hike.\nUse water-resistant footwear and socks. Dry clothes frequently, especially at campfires. Avoid wearing heavy cotton garments that absorb moisture."
+[fred] answer retrieval=1579ms first=3084ms total=15490ms opener=yes answerFirst=13694ms chars=199 U=0.434 followUp=no(0.283/0.339) tokens=963 intent=prevent model=407ms embed=713ms top=Hiking > Prepare > Clothing | Wilderness backpacking > Wear > Footwear | Wilderness backpacking > Wear > Footwear | Wilderness backpacking > Wear > Clothing
+[fred] energy kind=written joules=none expected=145.6 gross=113.2 seconds=15.5 watts=7.31 idleW=none samples=77 charging=true level=0.72 chargeUAh=3718000 rawCurrent=-2149000 mv=4006 thermal=0 learned=false
+[fred] devhook ask: thanks
+[fred] estimate kind=quick percent=0.0133 left=5419 measured=true
+[fred] text "Glad to help. I'm here if you need me."
+[fred] chat retrieval=1780ms U=0.000 followUp=no(0.000/0.286) intent=chat model=0ms embed=1356ms top=INTRODUCTION | Camp Etiquette - Camping > Don't Steal a Campsite | A cut or scrape | Knots and cord
+[fred] energy kind=quick joules=none expected=9.5 gross=4.1 seconds=1.8 watts=2.31 idleW=none samples=10 charging=true level=0.72 chargeUAh=3718000 rawCurrent=-794000 mv=4006 thermal=0 learned=false

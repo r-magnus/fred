@@ -124,6 +124,7 @@ test('small talk about a problem names it, and offers the card when one matched'
 test('a decline says what it could not answer and what would help', () => {
   const yesNo = declineReply('can i take ibuprofen with this', []);
   assert.match(yesNo.text, /can't say either way/);
+  assert.match(declineReply('can you recommend a good restaurant near yosemite', []).text, /isn't in my guides/);
   assert.equal(declineReply('what is the best tent to buy', [], true).text, "That's outside what my guides cover.");
   assert.equal(declineReply('a bee stung my dog on the nose', [], true).text, "Sorry you're dealing with that. That's outside what my guides cover.");
   const hurt = declineReply('my knee is sore after that descent', []);

@@ -259,6 +259,9 @@ function timed(res: AskResult, t0: number): AskResult {
   const tm = res.diagnostics.timing;
   const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {
+    // #172: what Fred says, for the phone check of the conversation lines.
+    const said = res.kind === 'chat' ? res.reply : res.kind === 'abstain' ? [res.lead, res.decline?.text, res.decline?.hint].filter((x) => x !== undefined).join(' / ') : '';
+    if (verbose && said !== '') console.log(`[fred] text ${JSON.stringify(said)}`);
     console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${guards}${reason}${offered}${timing} top=${top}`);
     return res;
   }

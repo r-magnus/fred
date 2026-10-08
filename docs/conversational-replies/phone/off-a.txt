@@ -1,0 +1,35 @@
+/home/odysseus/fred-runs/voice-phone/a.tsv: 1 file pushed, 0 skipped. 2.4 MB/s (160 bytes in 0.000s)
+[fred] load packs
+[fred] load models
+[fred] generator {"gpu":true,"devices":["GPUOpenCL","HTP0"],"reasonNoGPU":"","androidLib":"rnllama_jni_v8_2_dotprod_i8mm_hexagon_opencl"}
+[fred] load verifying
+[fred] parity core-fieldcards cos=0.9996 ok
+[fred] parity core-firstaid-army cos=0.9996 ok
+[fred] parity core-firstaid cos=0.9996 ok
+[fred] parity core-hazards cos=0.9996 ok
+[fred] parity core-health cos=0.9996 ok
+[fred] parity core-signaling cos=0.9996 ok
+[fred] parity core-survival cos=0.9996 ok
+[fred] parity core-tips-nps cos=0.9996 ok
+[fred] parity core-tips-wikivoyage cos=0.9996 ok
+[fred] parity core-wildlife-safety cos=0.9996 ok
+[fred] parity state-CA-flora-fauna cos=0.9996 ok
+[fred] parity state-OR-flora-fauna cos=0.9996 ok
+[fred] engine ready in 3065ms, encoder google/embeddinggemma-300m
+[fred] warm-up not needed: lane prompts saved
+[fred] load ready: 12 packs, 12791 passages
+[fred] devhook ask: my mom slipped on the wet boardwalk and put her hand out, now her wrist is swollen and she wont let me touch it
+[fred] estimate kind=quick percent=0.0134 left=5390 measured=true
+[fred] text "Splint it the way you find it, so the joints above and below the break can't move, and check the blood flow before and after.\n1. Signs of a break include a lot of pain and swelling, a snap heard or felt, a limb that looks the wrong shape or length, and a crackling feeling under the skin.\n2. Take off rings and watches before swelling starts.\n3. If bone is poking through the skin, cover the wound with a clean dressing before splinting.\n4. Check the blood flow below the injury: feel for a pulse, check they can feel your touch, compare its warmth with the other side, and look for pale, white or bluish-gray skin.\n5. Use sticks, branches or rolled-up material as splints. Put one on each side, long enough to hold the joint above and the joint below the break still.\n6. Pad the splints wherever they touch bony spots like the wrist, elbow, knee or ankle.\n7. Tie them in place with strips of cloth, above and below the break but not on top of it.\n8. Check the pulse, feeling, warmth and color again after splinting.\nDon't tie the splint so tight that the fingers or toes go numb, tingle, or turn pale or bluish. Loosen it if they do.\nDon't move the broken bone more than you have to.\nGet medical help, and keep checking the blood flow below the break while you wait."
+[fred] answer retrieval=2656ms first=2656ms total=5190ms chars=1267 U=0.112 tokens=0 intent=now understood=unused("wrist swollen after slipping on wet boardwalk, what to do") said=card conditions=fall agreed="Possible neck or back injury" model=1585ms embed=671ms top=Twisted or sprained ankle, or a strained muscle | Sports Injuries: Diagnosis, Treatment, and Steps to Take > Treatment of Sports Injuries > Treatment for Serious Injuries | Sports Injuries: Diagnosis, Treatment, and Steps to Take > Treatment of Sports Injuries > Treatment of Minor Injuries | During Extremely Cold Weather > Frostbite First Aid
+[fred] energy kind=quick joules=none expected=9.5 gross=26.3 seconds=5.2 watts=5.07 idleW=none samples=27 charging=true level=0.72 chargeUAh=3698000 rawCurrent=-75000 mv=4083 thermal=1 learned=false
+[fred] devhook ask: can she still carry her pack
+[fred] estimate kind=written percent=0.2045 left=352 measured=true
+[fred] text "After a fall, a crash or a hard blow to the head, treat any neck or back pain as a spine injury: keep them still, keep the head in line with the body, and get help.\nPack rolled clothing or anything similar on both sides of the head so the neck can't move."
+[fred] answer retrieval=488ms first=488ms total=2963ms chars=255 U=0.343 tokens=0 intent=question conditions=fall model=215ms embed=0ms top=Wilderness backpacking > Carry | Wilderness backpacking > Carry | Hiking > Prepare > Packing and equipment | Wilderness backpacking > Pack > Clothing
+[fred] energy kind=quick joules=none expected=9.5 gross=6.3 seconds=3.0 watts=2.12 idleW=none samples=16 charging=true level=0.72 chargeUAh=3698000 rawCurrent=-53000 mv=4083 thermal=1 learned=false
+[fred] devhook ask: ok thanks
+[fred] estimate kind=quick percent=0.0134 left=5390 measured=true
+[fred] text "Got it. I'm right here whenever you need me, whether it's first aid, finding your way, or the plants and animals around you."
+[fred] chat retrieval=1849ms U=0.311 followUp=yes(0.000/0.311) intent=chat conditions=fall model=0ms embed=1296ms top=Wilderness backpacking > Carry | Hiking > Prepare > Packing and equipment | Wilderness backpacking > Carry | Hike Smart > Know Your Limits
+[fred] energy kind=quick joules=none expected=9.5 gross=4.8 seconds=1.8 watts=2.60 idleW=none samples=11 charging=true level=0.72 chargeUAh=3698000 rawCurrent=-885000 mv=4083 thermal=1 learned=false

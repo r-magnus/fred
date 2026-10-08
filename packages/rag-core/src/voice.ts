@@ -130,7 +130,7 @@ function candidate(message: string, history: readonly string[], moment: Moment):
   if (saysResolved(message) || LONG_PAST.test(message) || !(says(PROBLEM, message) || says(HURT, message))) return null;
   const part = hurtPart(message, history);
   if (part !== null) {
-    return { kind: 'problem', key: `p:${part}`, text: pick([`Sorry about ${part}.`, `Okay, ${part}.`], n) };
+    return { kind: 'problem', key: `p:${part}`, text: `Sorry about ${part}.` };
   }
   const named = namedIn(message);
   if (named.length === 1) {
@@ -225,7 +225,8 @@ export function declineReply(message: string, history: readonly string[], outOfS
       hint: "I'm good for first aid, finding your way, and the plants and animals around you.",
     };
   }
-  const kind = kindOf(message);
+  // "can you recommend a restaurant" asks for something; it is not a yes/no question.
+  const kind = /^\s*(?:can|could|would|will) you\b/i.test(message) ? 'question' : kindOf(message);
   if (kind === 'yesNo') {
     return {
       text: pick(["I can't say either way from my guides, and I'd rather not guess.", "My guides don't settle that one, and I'd rather not guess."], n),

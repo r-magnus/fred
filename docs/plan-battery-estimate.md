@@ -30,9 +30,9 @@ short vs long) and the app shows an estimate from that before sending.
 - **Nothing can be measured while charging.** Current then is the charger's.
   Every measurement has to be taken off the cable (adb over Wi-Fi, or the app
   logging to a file).
-- **iPhone has no equivalent.** An app sees only the battery level, in coarse
-  steps. An iPhone estimate would come from time and a table, not from live
-  measurement. Fred is not on an iPhone yet (#28).
+- **iPhone: no battery current, but the app can read its own CPU energy.**
+  Corrected 2026-10-07; this line used to say "iPhone has no equivalent".
+  See "iPhone" below.
 - **Cost depends mostly on which kind of answer Fred gives.** On the Nothing
   Phone (3) a card answer takes about 1 s and a model-written answer 8-19 s
   (`docs/METRICS.md`). Studies of llama.cpp on phones find generating a token
@@ -44,6 +44,88 @@ short vs long) and the app shows an estimate from that before sending.
   40-190 J, against a battery of roughly 20 Wh: around a tenth of a percent
   for a written answer, and a small fraction of that for a card. "This will
   use X%" would read "under 1%" every time.
+
+## iPhone (research, 2026-10-07)
+
+Asked for by Ryan after the first version of this note wrote the iPhone off.
+Nothing here has been run: Fred has only launched on the simulator (#28), and
+the simulator reports no energy.
+
+**What an iPhone app can and cannot see**
+
+| Source | What it gives | Use for the estimate |
+|---|---|---|
+| `UIDevice.batteryLevel` | The charge, rounded to 5% steps since iOS 17. Apple: "expected and intended behavior." | Too coarse to measure an answer (about 0.1%). Good enough for "answers left on this charge". |
+| Battery current or voltage | Not available to an app. No equivalent of Android's `BatteryManager`. | None. |
+| The kernel's energy counter for the app's own threads | Energy in nanojoules, kept per thread on Apple chips (A14 and later tested) and readable for the app's own process without special permission: `task_info(TASK_POWER_INFO_V2).task_energy`, or per thread through `proc_pidinfo(PROC_PIDTHREADCOUNTS)`. | **The iPhone's meter.** Read before and after an answer; the difference is that answer's CPU energy. |
+| MetricKit | Daily totals of CPU time and similar, delivered about once a day. | Too slow and too coarse. A cross-check at best. |
+| Xcode's Power Profiler (2025) | CPU, GPU, display and network "power impact" for the app, recorded on the phone itself from Developer settings, unplugged, for hours. | Development only: the reference to check our own numbers against. Not available inside a shipped app. |
+
+**The energy counter, in more detail**
+
+- It is an estimate the chip's power controller keeps (Apple's "digital power
+  estimator"), not a current sensor. The open-source PowerMetricsKit package
+  reads it on iOS and reports that with one app in the foreground, and the
+  idle draw subtracted, it "correlate[s] well with wall power"; on a Mac it
+  is "almost identical" to Apple's `powermetrics` tool.
+- **It counts CPU work in the app's own threads only.** Not the screen, not
+  the GPU, not work the kernel does on the app's behalf. Fred runs the model
+  on the CPU (GPU offload is off, `device-pack.ts`), so the model's energy is
+  the part it does count. The screen is the larger miss: it would be added
+  from a fixed figure per second, or left out and the estimate described as
+  "for the answer itself".
+- **It is undocumented.** The structures are in the public part of Apple's
+  open-source kernel headers, but Apple's developer support said of
+  `task_energy` on iOS: "In the absence of detailed documentation, I think
+  the only thing you can safely do is compare values between runs on the same
+  hardware", and a second Apple engineer was "surprised to hear that this
+  worked on iOS". So: usable, could change or go to zero in any iOS release,
+  and not confirmed to pass App Store review. The per-thread route needs the
+  header copied into the app, which is a larger review risk than `task_info`,
+  a long-standing public call.
+- Turning joules into a percentage needs the battery's capacity, which iOS
+  does not report: a small table by iPhone model, and it ignores battery
+  wear. The Android meter does not have this problem.
+
+**What it would cost on an iPhone, roughly**
+
+Published figures, none measured on Fred: about 0.7 J per generated token
+for llama.cpp on a phone CPU (PowerInfer-2, an Android phone); one benchmark
+on an iPhone 16 Pro reports about 0.15 J per token on the GPU, taken from
+battery steps over 20 runs. A written answer of 100-150 tokens is then
+15-100 J against roughly 45-60 kJ in an iPhone battery: 0.03% to 0.2%, the
+same size as the Android arithmetic above. The "percent plus answers left"
+display fits both platforms.
+
+**How the plan changes for iPhone**
+
+- Step 1 (go/no-go) becomes: on a real iPhone, read `task_energy` before and
+  after a card answer and a written answer. Check it grows, that a written
+  answer costs clearly more than a card, and that the size is plausible
+  (tens of joules). If it reads zero or nonsense, the iPhone gets the table
+  below and no meter.
+- Step 2 (measure): the same runs recorded with the Power Profiler on the
+  phone, to see how far the counter is from Apple's own figure and how much
+  the screen adds.
+- Step 3 (built-in meter): the same idea as Android with a different source.
+  If the counter fails or disappears, fall back to time: seconds the model
+  ran times a watts figure per iPhone model measured in step 2.
+- Steps 4-6 are unchanged. The long-session check in step 6 is weaker on an
+  iPhone: 5% battery steps mean a session of several hundred answers to see
+  the sum of the estimates against the real fall.
+- Low Power Mode and a hot phone slow the chip, so an answer takes longer at
+  lower power. A meter read per answer follows that by itself; a time-based
+  fallback would not, and should say less when either is on
+  (`ProcessInfo.isLowPowerModeEnabled`, `thermalState`).
+
+**Risks specific to iPhone**
+
+- No real iPhone has run Fred yet, so every figure above is from other
+  people's hardware and models.
+- An undocumented counter in a shipped app: Apple could reject it or change
+  it. The fallback keeps the feature alive either way.
+- Whether an Expo app can call `task_info` from a small local module is
+  untested; it is plain C, so it should.
 
 ## What to show
 
@@ -121,3 +203,10 @@ measurements (step 2). **Open question for Ryan.**
 - PowerInfer-2 (llama.cpp 0.672 J/token on a phone): https://arxiv.org/pdf/2406.06282
 - Apple, analyzing your app's battery use: https://developer.apple.com/documentation/xcode/analyzing-your-app-s-battery-use
 - Apple developer forum, energy monitoring for iOS apps: https://developer.apple.com/forums/thread/777046
+- Apple developer forum, `task_info` and `TASK_POWER_INFO_V2` on iOS (Apple's replies): https://developer.apple.com/forums/thread/738608
+- Apple developer forum, battery level in 5% steps is intended: https://developer.apple.com/forums/thread/788911
+- xnu, `task_info.h` (`task_power_info_v2`, public part of the header): https://fergofrog.com/code/codebrowser/xnu/osfmk/mach/task_info.h.html
+- xnu, how the kernel counts energy per thread ("recount"): https://newosxbook.com/src.php?file=%2Fdoc%2Fobservability%2Frecount.md&tree=xnu
+- PowerMetricsKit, per-thread CPU energy on Apple platforms: https://github.com/Androp0v/PowerMetricsKit
+- Apple, WWDC 2025, Profile and optimize power usage in your app (Power Profiler): https://developer.apple.com/videos/play/wwdc2025/226
+- iPhone on-device LLM benchmarks and the limits of measuring energy on an iPhone: https://github.com/john-rocky/apple-silicon-llm-bench

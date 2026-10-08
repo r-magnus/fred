@@ -23,3 +23,5 @@ export * from './sentences.ts';
 export * from './opener.ts';
 export * from './scope.ts';
 export * from './scope-model.ts';
+export * from './said-as.ts';
+export * from './said-as-model.ts';

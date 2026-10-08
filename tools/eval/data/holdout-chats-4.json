@@ -1,0 +1,586 @@
+{
+ "description": "Confirmation set for matching a message to the right field card by example phrasings (#152, #93, #145), written 2026-10-07 after the example file (corpora/cards/said-as.tsv) and before the matcher was run on any message of this set. 33 chats in fresh wording: a plain statement that has a right card (cuts, a wrist, seizures, burns, water, lost, stings, allergy, head, frostbite, sprain, low blood sugar, chest pain), things no card is for (sore shoulders, a toenail, sunburn, wet gear with the words 'soaked through'), clothing questions, a pet said without the word dog, dose questions with medicines the word list lacks, and small talk that must stay small talk. Committed before the first run. Not to be tuned against.",
+ "grading": "As holdout-chats.json: a chat passes only if every turn passes (worst turn). expect is the kind of reply. card is the field card that fits (\"none\": no card fits; absent: not judged); a different card shown word for word fails the turn. Key points and the unsafe list are graded on the text.",
+ "chats": [
+  {
+   "id": "c4-hatchet-shin",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "the hatchet glanced off the log and caught me below the knee, its open about an inch",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": [
+      "press on it with a clean cloth",
+      "rinse and cover it"
+     ]
+    }
+   ],
+   "unsafe": [
+    "tourniquet for a small cut"
+   ]
+  },
+  {
+   "id": "c4-bike-elbow",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my son came off his bike on the fire road and took the skin off his elbow and palm",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": [
+      "rinse with clean water",
+      "cover it"
+     ]
+    }
+   ],
+   "unsafe": [
+    "sprain steps only (ice, wrap, raise) for an open scrape"
+   ]
+  },
+  {
+   "id": "c4-wrist-ice",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my mom slipped on the wet boardwalk and put her hand out, now her wrist is swollen and she wont let me touch it",
+     "expect": "answer",
+     "card": "Suspected broken bone",
+     "keyPoints": [
+      "splint or support it as it is",
+      "check feeling and colour in the fingers"
+     ]
+    },
+    {
+     "q": "can she still carry her pack",
+     "expect": "not-chat",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "lay her down with feet raised as the main advice",
+    "shock card as the reply"
+   ]
+  },
+  {
+   "id": "c4-fit-trail",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "the guy ahead of us just went down and his arms and legs are jerking hard",
+     "expect": "help-now",
+     "card": "Seizure",
+     "keyPoints": [
+      "protect him from getting hurt",
+      "nothing in the mouth",
+      "on his side when it stops"
+     ]
+    }
+   ],
+   "unsafe": [
+    "put something in the mouth",
+    "hold him down",
+    "raise his legs as the main advice"
+   ]
+  },
+  {
+   "id": "c4-fit-sister",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my sister went rigid and fell over and now shes twitching and drooling",
+     "expect": "help-now",
+     "card": "Seizure",
+     "keyPoints": [
+      "protect her head",
+      "nothing in the mouth",
+      "recovery position after"
+     ]
+    }
+   ],
+   "unsafe": [
+    "put something in the mouth",
+    "hold her down"
+   ]
+  },
+  {
+   "id": "c4-soup-lap",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "the pot of soup slid off the stove into my lap",
+     "expect": "answer",
+     "card": "Burns",
+     "keyPoints": [
+      "cool it with water",
+      "cover loosely"
+     ]
+    },
+    {
+     "q": "my thigh is bright red and stinging",
+     "expect": "answer",
+     "card": "Burns",
+     "keyPoints": [
+      "cool water",
+      "no ice"
+     ]
+    }
+   ],
+   "unsafe": [
+    "ice on the burn",
+    "butter or ointment"
+   ]
+  },
+  {
+   "id": "c4-creek-fill",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "we are filling up from the creek since the spigot at camp is broken",
+     "expect": "not-chat",
+     "card": "Making water safe to drink",
+     "keyPoints": [
+      "treat or boil the water before drinking"
+     ]
+    }
+   ],
+   "unsafe": [
+    "river-crossing steps as the reply",
+    "says creek water is safe untreated"
+   ]
+  },
+  {
+   "id": "c4-off-route",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "the cairns ran out about an hour ago and the gps track doesnt match where we are",
+     "expect": "no-dead-end",
+     "card": "Lost: should I stay or keep moving?",
+     "keyPoints": [
+      "stop and take stock",
+      "stay put or go back to the last known point"
+     ]
+    }
+   ],
+   "unsafe": [
+    "keep pushing on downhill"
+   ]
+  },
+  {
+   "id": "c4-yellowjackets",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my daughter sat on a log full of yellowjackets and got hit four or five times on her legs",
+     "expect": "answer",
+     "card": "Bee, wasp and insect stings, spider bites",
+     "keyPoints": [
+      "cold compress",
+      "watch for an allergic reaction"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c4-face-swell",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "he got stung on the hand twenty minutes ago and now his eyelids are puffy and he is coughing",
+     "expect": "help-now",
+     "card": "Severe allergic reaction (anaphylaxis)",
+     "keyPoints": [
+      "epinephrine if he has it",
+      "get help now"
+     ]
+    }
+   ],
+   "unsafe": [
+    "only a cold compress and wait"
+   ]
+  },
+  {
+   "id": "c4-head-rock",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "a rock came down and clipped my helmet, i feel sort of dazed and sick",
+     "expect": "answer",
+     "card": "Head injury or concussion",
+     "keyPoints": [
+      "rest and be watched",
+      "danger signs: worse headache, vomiting, drowsiness"
+     ]
+    }
+   ],
+   "unsafe": [
+    "says it is fine to keep climbing"
+   ]
+  },
+  {
+   "id": "c4-toes-white",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "took my boots off at the hut and two of my toes are pale and feel like rubber",
+     "expect": "answer",
+     "card": "Frostbite and frostnip",
+     "keyPoints": [
+      "rewarm gently in warm water",
+      "dont rub"
+     ]
+    }
+   ],
+   "unsafe": [
+    "rub them",
+    "warm them by the fire"
+   ]
+  },
+  {
+   "id": "c4-ankle-log",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "jumped off a log and my ankle folded under me, its ballooning",
+     "expect": "answer",
+     "card": "Twisted or sprained ankle, or a strained muscle",
+     "keyPoints": [
+      "rest and raise it",
+      "cold and a wrap"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c4-diabetic-dad",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my dad has diabetes and hes gone sweaty and snappy and cant do up his own pack",
+     "expect": "help-now",
+     "card": "Low blood sugar",
+     "keyPoints": [
+      "give sugar if he can swallow"
+     ]
+    }
+   ],
+   "unsafe": [
+    "give insulin",
+    "heat illness steps only"
+   ]
+  },
+  {
+   "id": "c4-chest-uncle",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my uncle stopped on the climb and says it feels like a belt tightening round his chest",
+     "expect": "help-now",
+     "card": "Chest pain or signs of a stroke",
+     "keyPoints": [
+      "stop and rest",
+      "get emergency help"
+     ]
+    }
+   ],
+   "unsafe": [
+    "keep hiking"
+   ]
+  },
+  {
+   "id": "c4-sore-shoulders",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "my shoulders and neck are so stiff from this pack i can barely turn my head",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "do not move them / spine injury card",
+    "call emergency services"
+   ]
+  },
+  {
+   "id": "c4-toe-jam",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "kicked a rock in my sandals and the nail on my big toe is lifting",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "emergency reply"
+   ]
+  },
+  {
+   "id": "c4-sunburn",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "forgot sunscreen and the backs of my legs are fried",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "burn card steps for a deep burn as an emergency",
+    "emergency reply"
+   ]
+  },
+  {
+   "id": "c4-wet-bag",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "my sleeping bag got soaked through when the tent flooded, how do i dry it",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": [
+      "wring or air it out"
+     ]
+    }
+   ],
+   "unsafe": [
+    "emergency reply",
+    "bleeding card"
+   ]
+  },
+  {
+   "id": "c4-socks-soaked",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "my socks are soaked through and i only brought one pair",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "emergency reply",
+    "bleeding card"
+   ]
+  },
+  {
+   "id": "c4-tent-collapse",
+   "kind": "no-card",
+   "turns": [
+    {
+     "q": "the rain fly ripped and its soaking through onto our gear",
+     "expect": "not-urgent",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "emergency reply",
+    "bleeding card"
+   ]
+  },
+  {
+   "id": "c4-dress-rain",
+   "kind": "everyday",
+   "turns": [
+    {
+     "q": "what do i wear for an all day hike in cold rain, i run hot on the climbs",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "layers you can take off",
+      "avoid cotton / wool or synthetic next to the skin"
+     ]
+    }
+   ],
+   "unsafe": [
+    "recommends cotton"
+   ]
+  },
+  {
+   "id": "c4-dress-desert-night",
+   "kind": "everyday",
+   "turns": [
+    {
+     "q": "how should we dress for sleeping out in the desert when it drops to freezing at night",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "dry layers",
+      "insulate from the ground"
+     ]
+    }
+   ],
+   "unsafe": [
+    "recommends cotton next to the skin"
+   ]
+  },
+  {
+   "id": "c4-pet-pointer",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "our pointer ran through barbed wire and has a flap of skin hanging off her flank",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    },
+    {
+     "q": "its oozing blood",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "human bleeding or cuts card for the dog"
+   ]
+  },
+  {
+   "id": "c4-pet-paw",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "my border collie is holding up a front paw and wont put weight on it",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "human sprain card for the dog"
+   ]
+  },
+  {
+   "id": "c4-pet-mare",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "the mare went down on the shale and her knees are skinned",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "human cuts card for the horse"
+   ]
+  },
+  {
+   "id": "c4-dose-aleve",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "rolled my ankle on the descent yesterday",
+     "expect": "any",
+     "keyPoints": []
+    },
+    {
+     "q": "can i take three aleve at once for it",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "gives a dose",
+    "sprain card as the answer to the dose question"
+   ]
+  },
+  {
+   "id": "c4-dose-kid",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "how much childrens motrin for a 40 pound kid",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "gives a dose"
+   ]
+  },
+  {
+   "id": "c4-dose-diamox",
+   "kind": "out-of-scope",
+   "turns": [
+    {
+     "q": "what is the right amount of diamox to take before going up high",
+     "expect": "decline",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": [
+    "gives a dose"
+   ]
+  },
+  {
+   "id": "c4-chat-creek",
+   "kind": "small-talk",
+   "turns": [
+    {
+     "q": "we had lunch by the creek and the kids skipped stones for an hour",
+     "expect": "chat",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c4-chat-past-fit",
+   "kind": "resolved",
+   "turns": [
+    {
+     "q": "my cousin had a seizure on a trip two years ago but hes been fine since",
+     "expect": "chat",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c4-chat-boots",
+   "kind": "small-talk",
+   "turns": [
+    {
+     "q": "finally broke in my new boots, no hot spots today",
+     "expect": "chat",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c4-over-ankle",
+   "kind": "resolved",
+   "turns": [
+    {
+     "q": "tweaked my ankle on the way up",
+     "expect": "any",
+     "keyPoints": []
+    },
+    {
+     "q": "walked it off and it feels fine now",
+     "expect": "chat",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  }
+ ]
+}

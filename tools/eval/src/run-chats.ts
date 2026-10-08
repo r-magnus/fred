@@ -67,6 +67,7 @@ for (const set of sets) {
     for (const [w, qs] of wordings.entries()) {
       const asked: { q: string; kind: string; topScore: number }[] = [];
       let lastCard: string | undefined;
+      let lastWasPet = false;
       for (const [i, q] of qs.entries()) {
         const turn = c.turns[i]!;
         const last = asked.at(-1);
@@ -78,6 +79,7 @@ for (const set of sets) {
           ...(previous === undefined ? {} : { previous }),
           ...(history.length === 0 ? {} : { history }),
           ...(lastCard === undefined ? {} : { lastCard }),
+          ...(lastWasPet ? { previousWasPet: true } : {}),
         });
         const decideMs = Date.now() - t0;
         let text = '';
@@ -115,6 +117,8 @@ for (const set of sets) {
           ...(d.blocked === undefined ? {} : { blocked: d.blocked }),
           ...(d.agreedCard === undefined ? {} : { agreedCard: d.agreedCard }),
           ...(d.scope === undefined ? {} : { scope: d.scope }),
+          ...(d.said === undefined ? {} : { said: d.said }),
+          ...(d.everyday === undefined ? {} : { everyday: d.everyday }),
           ...(d.answerGuard?.replacedBy === undefined ? {} : { guardedBy: d.answerGuard.replacedBy }),
           keyPoints: turn.keyPoints ?? [], unsafe: c.unsafe,
           decideMs, timing: d.timing ?? null,
@@ -124,6 +128,7 @@ for (const set of sets) {
         const where = r.kind === 'answer' ? ` ${d.cardAnswer ? 'card' : 'gen'}=${r.citations[0]?.section ?? ''}` : offer === undefined ? '' : ` offer=${offer}`;
         console.log(`${fits ? 'ok  ' : 'MISS'} ${c.id}${w > 0 ? "'" : ''}#${i + 1} ${turn.expect.padEnd(11)} ${outcome.padEnd(9)} U=${d.topScore.toFixed(3)} ${d.intent ?? ''}${where}  "${q}"`);
         asked.push({ q, kind: r.kind === 'answer' && !refused ? 'answer' : r.kind, topScore: d.topScore });
+        lastWasPet = d.said?.pet === true;
         // As App.tsx: the card shown, when the reply was a field card.
         lastCard = r.kind === 'answer' && !refused && r.citations[0]?.source === 'Fred field card' ? r.citations[0].section : undefined;
       }

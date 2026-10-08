@@ -14,15 +14,16 @@
  * stop, confusion, chest pain, stroke signs, a swelling throat, heat stroke,
  * a snakebite, seizures, cold water, a big animal close by. Written as phrases a hiker types.
  */
-import { conditionsIn } from './conditions.ts';
+import { conditionsIn, soakedWithBlood } from './conditions.ts';
 
 const SIGNS: readonly RegExp[] = [
   // Breathing (cpr, choking, anaphylaxis).
   /\b(?:not|isn'?t|is not|aren'?t|stopped|quit|no longer|barely) breathing\b|\bcan'?t (?:breathe|breath)\b|\b(?:trouble|struggling|hard|difficulty) (?:to )?breath(?:e|ing)?\b|\bgasping\b|\bchoking\b|\bcan'?t (?:talk|speak|make a sound)\b/i,
   // Waking and responding (unresponsive, head-injury, seizure).
   /\b(?:won'?t|will not|can'?t|cannot) (?:wake|be woken|respond)\b|\bnot (?:waking|responding|responsive|moving)\b|\bunresponsive\b|\bunconscious\b|\bpassed out\b|\bknocked out\b|\bseizure\b|\bjerking\b|\bconvuls/i,
-  // Bleeding that won't stop (bleeding-severe, bleeding-soaked).
-  /\bblood (?:is )?(?:everywhere|spurting|pouring|gushing|pumping|pushing|keeps|won'?t stop)\b|\bbleeding (?:a lot|badly|bad|heavily|won'?t stop|wont stop|like crazy)\b|\bwon'?t stop bleeding\b|\bsoak(?:ed|ing) (?:through|thru)\b|\bkeeps? (?:pouring|gushing|spurting|pushing) out\b/i,
+  // Bleeding that won't stop (bleeding-severe, bleeding-soaked). Blood soaking
+  // through a dressing is read apart (soakedWithBlood): wet boots are not it.
+  /\bblood (?:is )?(?:everywhere|spurting|pouring|gushing|pumping|pushing|keeps|won'?t stop)\b|\bbleeding (?:a lot|badly|bad|heavily|won'?t stop|wont stop|like crazy)\b|\bwon'?t stop bleeding\b|\bkeeps? (?:pouring|gushing|spurting|pushing) out\b/i,
   // Confusion and changed behaviour (head-injury, heat-illness, hypothermia, altitude, low-blood-sugar).
   /\bconfus(?:ed|ion)\b|\bnot making (?:any )?sense\b|\bdoesn'?t (?:know|recognize) (?:where|who)\b|\bslurr(?:ing|ed|y)\b|\bstumbling\b|\bdisoriented\b|\bdelirious\b|\bout of it\b/i,
   // Heart and stroke (heart-stroke).
@@ -69,7 +70,7 @@ const DROWSY = /\bsleepy\b|\bdrowsy\b|\b(?:keep|keeping) (?:his|her|their|my) ey
 
 /** True when the hiker's messages (the current thread, oldest first) show a danger sign. */
 export function dangerSign(messages: readonly string[]): boolean {
-  if (messages.some((m) => SIGNS.some((s) => s.test(m)) || (COLLAPSED.test(m) && !THINGS.test(m)))) return true;
+  if (messages.some((m) => SIGNS.some((s) => s.test(m)) || (COLLAPSED.test(m) && !THINGS.test(m)) || soakedWithBlood(m))) return true;
   const all = messages.join(' / ');
   if (ANIMAL.test(all) && CLOSE.test(all)) return true;
   if (HEAD.test(all) && DROWSY.test(all)) return true;
@@ -140,7 +141,15 @@ const PERSON_HURT = new RegExp(`\\b${HARM}\\s+(?:me|us|my (?!dog|cat|puppy|kitte
 export function petIsPatient(message: string, previous?: string): boolean {
   if (PERSON_HURT.test(message)) return false;
   if (PET_PATIENT.test(message)) return true;
-  return previous !== undefined && PET_PATIENT.test(previous) && PRONOUN.test(message) && !PERSON.test(message);
+  return previous !== undefined && PET_PATIENT.test(previous) && pointsBackAtPet(message);
+}
+/** A person is hurt in this message, whatever else it says. */
+export function personIsHurt(message: string): boolean {
+  return PERSON_HURT.test(message);
+}
+/** "its bleeding a fair bit" after a message about a pet: a pronoun, and no person. */
+export function pointsBackAtPet(message: string): boolean {
+  return PRONOUN.test(message) && !PERSON.test(message) && !PERSON_HURT.test(message);
 }
 
 /**

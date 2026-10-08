@@ -233,3 +233,17 @@ test('nothing but thanks is small talk; thanks with a question is not (#142)', a
   for (const m of ['ok thanks', 'got it, will do', 'cool!', 'thank you so much', 'ok']) assert.ok(ONLY_ACKNOWLEDGES.test(m), m);
   for (const m of ["ok it's off", 'thanks, how long should i keep it cool', 'ok made camp', 'ok now what']) assert.ok(!ONLY_ACKNOWLEDGES.test(m), m);
 });
+
+test('"soaked through" is a danger sign for blood, not for wet gear (#145)', async () => {
+  const { dangerSign } = await import('../src/triage.ts');
+  for (const m of ["i'm pressing but it's soaking through", 'im pressing on it but its soaking through the shirt', "the shirt i'm holding on it is soaked through",
+    'the bandage on her arm is soaking through', 'The bandage is soaked through now. What do I do?', 'blood soaked through my pants leg']) {
+    assert.ok(dangerSign([m]), m);
+    assert.deepEqual(ids([m]), ['bleeding'], m);
+  }
+  for (const m of ['my boots are soaked through, how do i dry them by morning', 'we got caught in the rain and everything is soaked through',
+    'my jacket soaked through in about ten minutes', 'the tent floor is soaking through']) {
+    assert.ok(!dangerSign([m]), m);
+    assert.deepEqual(ids([m]), [], m);
+  }
+});

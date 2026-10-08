@@ -113,7 +113,20 @@ const inSetting = (setting: RegExp, sign: RegExp) => (ms: readonly string[]): bo
 const DIABETIC = /\bdiabet\w*|\btype (?:1|one|2|two)\b|\binsulin\b|\bblood sugar\b/i;
 const LOW_SUGAR_SIGN = /\bshak(?:y|ing)\b|\bsweat(?:y|ing)\b|\bconfused\b|\bacting (?:really |kind of |kinda )?(?:strange|weird|odd|off|funny)\b|\bnot making (?:much |any )?sense\b|\bout of it\b|\bpale\b|\bdizzy\b/i;
 /** Heavy bleeding (#101): the tourniquet stays on. "If bleeding has stopped, remove the tourniquet immediately" (model-written, sealed long set). */
-const HEAVY_BLEEDING = /\btourniquet\b|\bblood (?:is )?(?:everywhere|spurting|pouring|gushing|pumping)\b|\bbleeding (?:a lot|badly|heavily|like crazy)\b|\bwon'?t stop bleeding\b|\bblood won'?t stop\b|\bsoak(?:ed|ing) (?:through|thru)\b/i;
+const HEAVY_BLEEDING = /\btourniquet\b|\bblood (?:is )?(?:everywhere|spurting|pouring|gushing|pumping)\b|\bbleeding (?:a lot|badly|heavily|like crazy)\b|\bwon'?t stop bleeding\b|\bblood won'?t stop\b/i;
+/**
+ * "soaked through" is blood through a dressing ("i'm pressing but it's soaking
+ * through"), unless the message is about wet gear or the weather and names no
+ * blood or wound: "my boots are soaked through, how do i dry them by morning"
+ * read as heavy bleeding, and the bleeding card went to the model (#145).
+ */
+const SOAKED = /\bsoak(?:ed|ing) (?:through|thru)\b/i;
+const WET_GEAR = /\b(?:boots?|shoes?|socks?|sneakers|clothes|clothing|layers|jackets?|coat|pants|shorts|gloves|mittens|sleeping bags?|bag|quilt|tent|fly|tarp|gear|pack|backpack|map|matches|wood|firewood|rain\w*|storm|drizzle|sweat\w*|dew|snow|river|creek|puddles?|flooded)\b/i;
+const BLOOD_OR_WOUND = /\b(?:blood\w*|bleed\w*|bled|bandage\w*|gauze|dressing|wound\w*|cut|gash\w*|press(?:ing|ed)?|pressure|tourniquet)\b/i;
+/** Blood soaking through, not rain or a river through gear. */
+export function soakedWithBlood(message: string): boolean {
+  return SOAKED.test(message) && (!WET_GEAR.test(message) || BLOOD_OR_WOUND.test(message));
+}
 
 /**
  * Lost (#101): "i think i took a wrong fork", "we lost the trail", "i think im
@@ -148,7 +161,7 @@ export const CONDITIONS: readonly Condition[] = [
   // Low blood sugar: "If they are unconscious or can't swallow, give nothing by mouth."
   { id: 'low-sugar', label: 'low blood sugar', card: 'Low blood sugar', said: inSetting(DIABETIC, LOW_SUGAR_SIGN), explains: true },
   // Heavy bleeding: "Don't loosen or remove a tourniquet once it's on."
-  { id: 'bleeding', label: 'bleeding', card: 'Heavy bleeding from a wound', said: (ms) => ms.some((m) => HEAVY_BLEEDING.test(m)),
+  { id: 'bleeding', label: 'bleeding', card: 'Heavy bleeding from a wound', said: (ms) => ms.some((m) => HEAVY_BLEEDING.test(m) || soakedWithBlood(m)),
     forbidden: /\b(?:remove|loosen|take off|release|undo|untie)\w*\b[^.]*\btourniquet\b|\btourniquet\b[^.]*\b(?:remove|loosen|take it off|release)\w*/i },
   // Hypothermia: "handle them gently", "Don't give alcohol".
   { id: 'hypothermia', label: 'cold', card: 'Hypothermia: shivering, confused, too cold', said: (ms) => ms.some((m) => HYPOTHERMIA.test(m)),

@@ -4,10 +4,16 @@
     "slug": "fred",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "newArchEnabled": true,
     "android": {
       "package": "dev.fred.app",
-      "largeHeap": false
+      "largeHeap": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#316C33"
+      }
     },
     "ios": {
       "bundleIdentifier": "dev.fred.app",

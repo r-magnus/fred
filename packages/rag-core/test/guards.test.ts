@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
+import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
@@ -254,4 +254,12 @@ test('a danger sign stands until the hiker says it is over; an open snakebite st
   assert.ok(dangerStands(['he gashed his thigh', 'we carried him out to the road but its still soaking through the shirt'], []));
   // Someone else's ankle feeling fine does not close the friend's snakebite, which the record keeps open.
   assert.ok(dangerStands(['a snake struck my buddy', 'my own ankle feels fine now', 'his arm is going numb'], conditionsIn(['a snake struck my buddy'])));
+});
+
+test('a question that asks for a dose or which medicine to take (#24)', () => {
+  for (const m of ['what antibiotic and what dose should i take for lyme', 'whats the max dose of naproxen', 'how many ibuprofen can i take at once',
+    'how much benadryl do i give a toddler', 'which painkiller is best for a toothache', 'is 800 mg of advil ok', 'how often can she take tylenol',
+    'what kind of antibiotic clears up a uti']) assert.ok(asksDose(m), m);
+  for (const m of ['should i chew an aspirin', 'how many iodine tablets go in a quart of water', 'can i give him ibuprofen', 'how much water should i carry',
+    'i think he overdosed', 'how many miles to the trailhead', 'she took her pills this morning and feels dizzy']) assert.ok(!asksDose(m), m);
 });

@@ -88,6 +88,22 @@ export function dangerStands(messages: readonly string[], open: readonly Conditi
 }
 
 /**
+ * A question that asks for a dose, or which medicine to take (#24): never
+ * written by the model. "what antibiotic and what dose should i take for
+ * lyme" was answered with tetracycline, two 500-milligram tablets four times
+ * a day, from a survival manual's passage. Not "should i chew an aspirin"
+ * (a card answers that) or "how many purification tablets for a liter".
+ */
+const MED = '(?:ibuprofen|advil|tylenol|acetaminophen|aspirin|benadryl|naproxen|aleve|motrin|excedrin|paracetamol|imodium|loperamide|diamox|zyrtec|claritin|pepto|doxycycline|doxy|amoxicillin|cipro|tetracycline|penicillin|epinephrine|epi ?pens?|antihistamines?|antibiotics?|painkillers?|pain relievers?|morphine|meds|medications?|medicines?|pills?|drugs?)';
+const DOSE = new RegExp(
+  '\\b(?:dose|doses|dosage|dosing|milligrams?|mg|mcg)\\b' +
+  `|\\bhow (?:many|much|often)\\b[^.?!]*\\b${MED}\\b|\\b${MED}\\b[^.?!]*\\bhow (?:many|much|often)\\b` +
+  `|\\b(?:which|what)(?: kind of| type of| sort of)? ${MED}\\b`, 'i');
+export function asksDose(message: string): boolean {
+  return DOSE.test(message);
+}
+
+/**
  * A message that asks something is never small talk. The start of the message
  * or of a clause ("ok she's feeling better. unrelated but what's this plant"),
  * a question mark, or a request for help. Round 1's understanding step called

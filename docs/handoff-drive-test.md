@@ -38,9 +38,10 @@ One trip checks three goals:
 
 - California map, terrain and signal coverage; carrier set to T-Mobile.
 - All knowledge packs, including California plants and animals.
-- A field-test build from the branch `drive-keep-awake`: today's two merges,
-  and the screen now stays on while recording. Before this the position
-  watch stopped when the phone locked.
+- A field-test build from the branch `drive-live-position` (installed
+  2026-10-09): the screen stays on while recording, and the position on the
+  map and in answers follows you while recording. Before this the position
+  watch stopped when the phone locked, and the dot moved only on a tap.
 
 ### On the road
 
@@ -53,7 +54,9 @@ One trip checks three goals:
    written.
 4. **At stops in different kinds of place** (town, highway pullout, coast,
    canyon or forest; five or more over the trip):
-   - screenshot Fred's map, and note where you really are (a pin in another
+   - screenshot Fred's map (while recording it follows you by itself; with
+     no recording running, tap the location button first), and note where
+     you really are (a pin in another
      maps app, or a named landmark);
    - with WiFi off, ask one or two questions that depend on the place ("what
      snakes are around here?", "what plants should I avoid here?") and
@@ -137,6 +140,6 @@ Things that go wrong:
 
 - Run notes and standing instructions are in the memory folder
   (`MEMORY.md`); eval and sweep scripts are in `~/fred-runs/`.
-- `drive-keep-awake` is an open branch until merged; the build on the phone
-  was made from it with `tools/eval/build-apk.sh --field-test`.
+- The build on the phone was made from `drive-live-position` with
+  `tools/eval/build-apk.sh --field-test`.
 - Never run `expo prebuild` without backing up `apps/mobile/android/` first.

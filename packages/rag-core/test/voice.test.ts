@@ -95,6 +95,8 @@ test('small talk is answered by what was said, not one line for everything', () 
   assert.equal(chatReply('thanks', ['how do i treat a blister'], false), "You're welcome.");
   assert.equal(chatReply('ok', ['how do i treat a blister', 'thanks'], false), 'Okay.');
   assert.equal(chatReply('he seems better now', ['my buddy is dizzy'], false), "Good to hear. Tell me if anything changes.");
+  // #173: help has the person, which is not "glad to hear it".
+  assert.equal(chatReply('ok the rangers carried him out', ['a snake struck my buddy'], false), "Good, I'm glad help came. I'm here if you need anything.");
   // What Fred does is listed once, at the start, never again.
   for (let n = 1; n < 6; n++) assert.ok(!/plants and animals/.test(chatReply('nice breeze up here', Array(n).fill('x'), false)));
 });

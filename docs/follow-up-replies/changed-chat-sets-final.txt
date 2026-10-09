@@ -1,0 +1,23 @@
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 20, changed 0, misses 2 -> 2
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 19 -> 19, changed 0, misses 6 -> 6
+holdout-chats-4: 38 replies, answered 19 -> 19, changed 1, misses 6 -> 6
+  c4-wrist-ice#2 [not-chat] answer(card:Possible neck or back injury) -> answer(gen:Suspected broken bone | Wilderness backpacking | Wilderness backpacking) said=none:gear:0.22[]  "can she still carry her pack"
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 23 -> 19, changed 7, misses 2 -> 1
+  c6-slid-knee#2 [not-chat] answer(card:Possible neck or back injury) -> answer(card:A cut or scrape) said=none:gear:0.57[]  "can i pack it with anything"
+  c6-slipped-wrist-sling#2 [not-chat] answer(card:Possible neck or back injury) -> answer(card:Suspected broken bone) said=none:gear:0.42[]  "can i use her pack strap to hold it"
+  c6-heli-took-her#2 [not-urgent] answer(card:Snakebite) -> chat said=none:chat:0.47[]  "the helicopter just lifted off with her"
+  c6-heli-took-her#3 [chat] answer(card:Snakebite) -> decline/low-score said=none:chat:0.95[]  "what a day"
+  c6-medics-have-him#2 [not-urgent] answer(card:Altitude illness) -> chat said=Someone is unconscio:0.22[]  "the paramedics have him now"
+  c6-ambulance-then-blister#2 [not-urgent] answer(gen:Rattlesnakes - Yosemit | Rattlesnakes - Great B | Rattlesnakes - Yosemit) -> chat said=Someone is unconscio:0.21[]  "an ambulance took him from the trailhead"
+  FIXED c6-ambulance-then-blister#3 [not-urgent] help-now/safety-net -> watch/watch said=none:minor:0.73[]  "now ive got a blister on my heel from running down"
+holdout-chats: 162 replies, answered 109 -> 109, changed 3, misses 6 -> 6
+  ct-head-sleep'#2 [help-now] answer(card:Possible neck or back injury) -> answer(card:Head injury or concussion) said=Someone is unconscio:0.33[]  "he can barely keep his eyes open"
+  ct-head-sleep'#3 [answer] answer(card:Possible neck or back injury) -> answer(card:Head injury or concussion) said=Someone is unconscio:0.57[]  "can he just take a nap"
+  ct-snake-then-own-ankle#2 [any] help-now/safety-net -> chat said=none:chat:0.53[]  "ok the rangers carried him out"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+
+11 replies changed

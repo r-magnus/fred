@@ -48,17 +48,59 @@ export function whoIn(message: string): Who {
 }
 
 /**
+ * Help has the person now (#173): "ok the rangers carried him out" after a
+ * snakebite got the get-help-now reply, and "the paramedics have him now" the
+ * card again. Rescuers as the ones acting, or the person at a hospital; "we
+ * carried him out to the road" is the hiker still on their own.
+ */
+const RESCUERS = "(?:rangers?|paramedics?|emts?|ems|medics?|rescuers?|rescue (?:team|crew)|search and rescue|sar|(?:the|a|an) (?:helicopter|chopper|ambulance|medevac)|life ?flight)";
+const HANDED_OVER = new RegExp(
+  `\\b${RESCUERS}\\s+(?:just\\s+|already\\s+|finally\\s+)?(?:have|has|took|carried|got|flew|picked up|took over|lifted off with|left with|airlifted|evacuated|loaded)\\b` +
+  "|\\bthey (?:just\\s+|already\\s+)?(?:carried|flew|took|airlifted|evacuated|drove)\\s+(?:him|her|them|me|us)\\s+(?:out|away|to|off)\\b" +
+  "|\\b(?:he|she|they|i|we)(?:'s|\u2019s|'re|'m| is| are| am|s|m|re)?\\s+(?:now\\s+|safe\\s+)?(?:at|in) (?:the|a) (?:hospital|clinic|er|emergency room|ambulance|helicopter)\\b", 'i');
+
+/** The hiker says help has taken over: rescuers have the person, or they are at a hospital. */
+export function saysHandedOver(message: string): boolean {
+  return HANDED_OVER.test(message);
+}
+
+/**
+ * Help has taken over and the message says nothing else: every other part of
+ * it is a word or two or thanks. "ok paramedics have him. unrelated but i
+ * sliced my finger whittling" carries a new problem and is read as one.
+ */
+export function onlyHandedOver(message: string): boolean {
+  if (!HANDED_OVER.test(message)) return false;
+  return message.split(/[.;!?,]+|\bbut\b/i).every((part) => {
+    const rest = part.trim().replace(/^(?:ok(?:ay)?|alright|all right)\b\s*/i, '');
+    return HANDED_OVER.test(rest) || rest.split(/\s+/).filter(Boolean).length <= 2 || /^(?:thanks?|thank you|thx|ty)\b/i.test(rest);
+  });
+}
+
+/**
  * The hiker saying a condition is over. Only their own words, and only these:
  * a resolution is never inferred. "he seems better now" after low blood sugar
  * is over; "it left" after a bear. A body part that is fine is not: "he says
  * his neck is fine" after a fall is exactly what the spine card says not to
  * trust.
  */
-const RESOLVED = /\b(?:he|she|they|i|we|everyone|everybody)(?:'s|’s|'m|'re| is| are| was| seems| looks| feels| am)?\s+(?:now\s+|much\s+|a lot\s+)?(?:feeling\s+|doing\s+)?(?:fine|ok|okay|better|good|alright|all right)\b|\bfine now\b|\b(?:rangers?|paramedics|ems|medics|rescuers?|search and rescue|sar|the helicopter|an ambulance)\s+(?:have|has|took|carried|got|flew|picked up|took over)\b|\b(?:carried|flew|took)\s+(?:him|her|them)\s+(?:out|away|to)\b|\bit (?:left|went away|ran off|wandered off)\b|\bit'?s gone\b|\bbleeding (?:has )?stopped\b|\ball patched up\b|\b(?:it|it's|its|it is)\s+(?:feels?\s+)?(?:fine|ok|okay|better)(?:\s+now)?\b|\bfeels better\b|\bfeeling (?:ok|okay|fine|better|good|alright|all right)\b|\bfound (?:the|our|my) (?:trail|way|path|car)\b|\bback (?:on the trail|at the car|at camp)\b/i;
+const OVER = /\b(?:he|she|they|i|we|everyone|everybody)(?:'s|’s|'m|'re| is| are| was| seems| looks| feels| am)?\s+(?:now\s+|much\s+|a lot\s+)?(?:feeling\s+|doing\s+)?(?:fine|ok|okay|better|good|alright|all right)\b|\bfine now\b|\b(?:carried|flew|took)\s+(?:him|her|them)\s+(?:out|away|to)\b|\bit (?:left|went away|ran off|wandered off)\b|\bit'?s gone\b|\bbleeding (?:has )?stopped\b|\ball patched up\b|\b(?:it|it's|its|it is)\s+(?:feels?\s+)?(?:fine|ok|okay|better)(?:\s+now)?\b|\bfeels better\b|\bfeeling (?:ok|okay|fine|better|good|alright|all right)\b|\bfound (?:the|our|my) (?:trail|way|path|car)\b|\bback (?:on the trail|at the car|at camp)\b/i;
+const RESOLVED = new RegExp(`${HANDED_OVER.source}|${OVER.source}`, 'i');
 
 /** The hiker says something is over ("he is fine now", "found the trail"). */
 export function saysResolved(message: string): boolean {
   return RESOLVED.test(message);
+}
+
+/**
+ * The messages from the last one that says something is over, itself
+ * included: a danger sign said before it is past (#173). "now ive got a
+ * blister on my heel" after an ambulance took a snakebitten uncle got the
+ * get-help-now reply.
+ */
+export function sinceResolved(messages: readonly string[]): readonly string[] {
+  for (let i = messages.length - 1; i > 0; i--) if (RESOLVED.test(messages[i]!)) return messages.slice(i);
+  return messages;
 }
 
 /**
@@ -121,9 +163,9 @@ export function conditionsFor(record: ConversationRecord, message: string): Cond
 }
 
 /** The latest open condition that bears on this message, and whether this message set it. */
-export function latestFor(record: ConversationRecord, message: string, index: number): { condition: Condition; inLast: boolean } | undefined {
+export function latestFor(record: ConversationRecord, message: string, index: number): { condition: Condition; inLast: boolean; at: number } | undefined {
   const ids = new Set(conditionsFor(record, message).map((c) => c.id));
   const open = record.conditions.filter((r) => !r.resolved && ids.has(r.condition.id));
   const last = open.at(-1);
-  return last === undefined ? undefined : { condition: last.condition, inLast: last.at === index };
+  return last === undefined ? undefined : { condition: last.condition, inLast: last.at === index, at: last.at };
 }

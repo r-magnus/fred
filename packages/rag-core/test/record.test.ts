@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRecord, conditionsFor, whoIn } from '../src/record.ts';
+import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysHandedOver, saysResolved, sinceResolved, whoIn } from '../src/record.ts';
 import { conditionsIn } from '../src/conditions.ts';
 
 const ids = (ms: string[]): string[] => conditionsFor(buildRecord(ms), ms.at(-1)!).map((c) => c.id);
@@ -38,4 +38,31 @@ test('low blood sugar from a diabetic and a later sign; bleeding; pale fingers',
 
 test('a message can close what it sets', () => {
   assert.deepEqual(ids(['my friend was bleeding badly yesterday but he is fine now']), []);
+});
+
+test('help has taken over: rescuers have the person, or they are at a hospital (#173)', () => {
+  for (const m of ['ok the rangers carried him out', 'the helicopter just lifted off with her', 'the paramedics have him now',
+    'an ambulance took him from the trailhead', 'they took her to the hospital', 'search and rescue flew me out and im at the clinic']) {
+    assert.ok(saysHandedOver(m), m);
+    assert.ok(saysResolved(m), m);
+  }
+  for (const m of ['the rangers are on their way but his arm is swelling', 'i called 911 and theyre sending a helicopter',
+    'we carried him out to the road', 'he says his neck is fine', 'can the rangers find us here']) assert.ok(!saysHandedOver(m), m);
+});
+
+test('help taking over with a new problem beside it is not only that (#173)', () => {
+  for (const m of ['ok the rangers carried him out', 'the paramedics have him now', 'update, search and rescue flew me out and im at the clinic',
+    'the rangers carried him out, thanks for everything', 'ok. the helicopter just lifted off with her. thank you so much']) assert.ok(onlyHandedOver(m), m);
+  for (const m of ['ok paramedics have him. unrelated but i sliced my finger whittling', 'ems took over. different thing, i cut my thumb with my knife',
+    'the medics took him. ok now my foot is bleeding', 'thanks for everything', 'we carried him out to the road']) assert.ok(!onlyHandedOver(m), m);
+});
+
+test('what was said before something was over is past (#173)', () => {
+  assert.deepEqual(sinceResolved(['a rattlesnake tagged my uncle', 'an ambulance took him', 'now ive got a blister']), ['an ambulance took him', 'now ive got a blister']);
+  assert.deepEqual(sinceResolved(['a snake bit my brother', 'his arm is swelling']), ['a snake bit my brother', 'his arm is swelling']);
+});
+
+test('the latest condition comes with the message that set it', () => {
+  const ms = ['my mom slipped on the wet boardwalk and her wrist is swollen', 'can she still carry her pack'];
+  assert.equal(latestFor(buildRecord(ms), ms[1]!, 1)?.at, 0);
 });

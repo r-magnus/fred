@@ -16,7 +16,7 @@
  */
 import { kindOf, PROBLEM, WORRY } from './opener.ts';
 import { CHAT_REPLY, CHAT_REPLY_WITH_OFFER } from './prompt.ts';
-import { namedIn, saysResolved } from './record.ts';
+import { namedIn, saysHandedOver, saysResolved } from './record.ts';
 import { dangerSign } from './triage.ts';
 
 const BODY = 'legs?|arms?|hands?|fingers?|fingertips|thumbs?|wrists?|ankles?|knees?|foot|feet|toes?|heels?|shins?|calf|calves|thighs?|back|neck|head|face|eyes?|chest|stomach|belly|hips?|shoulders?|elbows?|palms?|ears?|nose|lips?|paws?';
@@ -193,6 +193,8 @@ export function chatReply(message: string, history: readonly string[], offered: 
     return pick([CHAT_REPLY_WITH_OFFER, 'Okay. This might be what you need:', "Understood. Here's what to do if you need it:"], n);
   }
   if (GREETING.test(message)) return "Hi, I'm Fred. Ask me about first aid, finding your way, or the plants and animals around you.";
+  // Help has the person (#173): not "glad to hear it", which fits "he's fine now".
+  if (saysHandedOver(message)) return pick(["I'm glad help got there. I'm here if you need me.", "Good, I'm glad help came. I'm here if you need anything."], n);
   if (saysResolved(message)) return pick(["Glad to hear it. I'm here if anything changes.", 'Good to hear. Tell me if anything changes.'], n);
   if (THANKS.test(message)) return pick(['Anytime.', "You're welcome.", "Glad to help. I'm here if you need me."], n);
   if (ONLY_ACK.test(message)) return pick(["Okay. I'm here if you need me.", 'Got it.', 'Okay.'], n);

@@ -84,7 +84,11 @@ class TrackRecorder {
   /** The always-on subscription. Null until the continuous watch attaches. */
   private watch: Location.LocationSubscription | null = null;
 
-  constructor(readonly name: string) {
+  constructor(
+    readonly name: string,
+    /** Told of every continuous reading, so the screen can follow the drive. */
+    private readonly onSample?: (fix: LocationFix) => void,
+  ) {
     this.file = new File(Paths.document, name);
     if (!this.file.exists) {
       this.file.create();
@@ -103,7 +107,10 @@ class TrackRecorder {
   startWatch(): void {
     void Location.watchPositionAsync(
       { accuracy: Location.Accuracy.Highest, timeInterval: 2000, distanceInterval: 0 },
-      (loc) => { this.add(loc, 0, false, 'watch'); },
+      (loc) => {
+        this.add(loc, 0, false, 'watch');
+        this.onSample?.(toFix(loc, false, 0));
+      },
       () => { /* a dropped reading must not end the recording */ },
     ).then((sub) => {
       // stopWatch() may already have run, in which case nothing removes this.
@@ -170,12 +177,20 @@ function defaultTrackName(d = new Date()): string {
  *
  * USB is the point: `adb pull` works with the radios off, so the airplane-mode
  * run that tests whether GPS holds up without a signal can still be retrieved.
+ *
+ * `onSample` hears every continuous reading as it is written. Without it the
+ * position on screen is the last one asked for, so a map screenshot taken at a
+ * stop showed the stop before.
  */
-export async function startRecording(name = defaultTrackName()): Promise<string> {
+export async function startRecording(
+  { name = defaultTrackName(), onSample }: {
+    name?: string; onSample?: (fix: LocationFix) => void;
+  } = {},
+): Promise<string> {
   // The continuous watch needs the same permission the tap path asks for, and
   // asking here means a drive cannot silently record nothing.
   const perm = await Location.requestForegroundPermissionsAsync();
-  recorder = new TrackRecorder(name);
+  recorder = new TrackRecorder(name, onSample);
   if (perm.granted) recorder.startWatch();
   return `${Paths.document.uri}${name}`;
 }

@@ -516,7 +516,13 @@ function Screen() {
       // The position watch stops when the screen locks, so a drive would
       // record only its first minute. The screen stays on until it is stopped.
       void activateKeepAwakeAsync('drive-test').catch(() => {});
-      void startRecording().then((path) => {
+      // The map and the answers follow the drive: every reading the recorder
+      // writes is also the position on screen, with no tap at each stop.
+      const follow = (f: LocationFix): void => {
+        setFix(f);
+        if (f.state !== null) setState(f.state);
+      };
+      void startRecording({ onSample: follow }).then((path) => {
         setLocNote(`Recording to ${path.split('/').pop() ?? path} — no need to touch the phone`);
       });
     }

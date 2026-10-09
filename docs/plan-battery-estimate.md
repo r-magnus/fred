@@ -4,7 +4,7 @@
 just in general. Do some research on how to do this/if this is possible, and
 if things look doable in a wise way, build a plan."
 
-**Status: approved by Ryan 2026-10-07 and built for Android; an iPhone build is written beside it and not yet run. Results: `results-battery-estimate.md`.**
+**Status: approved by Ryan 2026-10-07 and built for Android; the iPhone build runs in the simulator (2026-10-09) and has not run on a real iPhone. Results: `results-battery-estimate.md`.**
 
 Read here as: the estimate should be specific to the user's own phone and to
 the question they typed, not a general average. Not confirmed with Ryan.

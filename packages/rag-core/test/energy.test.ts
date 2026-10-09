@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   answerJoules, capacityFromChargeCounter, currentMicroA, DEFAULT_BOOK, estimate, iphoneCapacityJoules,
-  joulesFromSamples, readBook, record, type PowerSample,
+  joulesFromSamples, readBook, record, timedJoules, type PowerSample,
 } from '../src/energy.ts';
 
 const steady = (n: number, current: number, voltageMv = 4000, stepMs = 200): PowerSample[] =>
@@ -73,6 +73,17 @@ test('iphoneCapacityJoules: by model, with a default', () => {
   assert.equal(iphoneCapacityJoules('iPhone17,3'), 13.82 * 3600);
   assert.equal(iphoneCapacityJoules('iPhone99,9'), 13 * 3600);
   assert.equal(iphoneCapacityJoules(null), 13 * 3600);
+});
+
+test('timedJoules: seconds times watts, less when the chip is slowed', () => {
+  const phone = { model: 'iPhone17,3', lowPower: false, thermal: 0 };
+  assert.equal(timedJoules(12, phone), 120);
+  assert.equal(timedJoules(12, { ...phone, model: null }), 120);
+  assert.equal(timedJoules(12, { ...phone, lowPower: true }), 72);
+  assert.equal(timedJoules(12, { ...phone, thermal: 2 }), 72);
+  assert.equal(timedJoules(12, { ...phone, thermal: 1 }), 120);
+  assert.equal(timedJoules(0, phone), undefined);
+  assert.equal(timedJoules(3600, phone), undefined);
 });
 
 test('estimate: a percentage and how many more the charge allows', () => {

@@ -7,10 +7,15 @@
  * device, its battery wear and its temperature. Nothing is measured while
  * charging on Android: the current then is the charger's. With no reading
  * the shipped figures are used; with no native module nothing is shown.
+ *
+ * An iPhone whose counter gives nothing is costed by time instead
+ * (timedJoules). Field test, beside `devhooks`: `devhooks-battery` holds a
+ * level from 0 to 1 for a phone that reports none (the simulator), and
+ * `devhooks-no-counter` hides the iPhone's counter so the timed figure runs.
  */
 import { File, Paths } from 'expo-file-system';
 import {
-  answerJoules, capacityFromChargeCounter, estimate, iphoneCapacityJoules, joulesFromSamples, readBook, record,
+  answerJoules, capacityFromChargeCounter, estimate, iphoneCapacityJoules, joulesFromSamples, readBook, record, timedJoules,
   NOMINAL_VOLTS, type BatteryNow, type EnergyBook, type Estimate, type PowerSample, type ReplyCost,
 } from '@fred/rag-core';
 import Energy, { type EnergyRun } from '../modules/fred-energy';
@@ -26,6 +31,18 @@ const ANDROID_DEFAULT_JOULES = 5 * NOMINAL_VOLTS * 3600;
 const file = (): File => new File(Paths.document, 'energy.json');
 let book: EnergyBook | undefined;
 let idle: { watts: number; at: number } | undefined;
+let startedAt: number | undefined;
+
+const devFile = (name: string): File | undefined => {
+  const f = new File(Paths.document, name);
+  return new File(Paths.document, 'devhooks').exists && f.exists ? f : undefined;
+};
+
+/** The level a field test set for a phone that reports none. */
+function devLevel(): number | null {
+  const n = Number(devFile('devhooks-battery')?.textSync().trim());
+  return n > 0 && n <= 1 ? n : null;
+}
 
 function theBook(): EnergyBook {
   if (book === undefined) {
@@ -42,9 +59,10 @@ const samplesOf = (run: EnergyRun): PowerSample[] =>
 export function batteryNow(): BatteryNow | undefined {
   if (Energy === null) return undefined;
   const r = Energy.read();
-  if (r.level === null) return undefined;
-  if (r.platform === 'ios') return { level: r.level, capacityJoules: iphoneCapacityJoules(r.model), coarse: true };
-  return { level: r.level, capacityJoules: capacityFromChargeCounter(r.chargeMicroAh, r.level) ?? ANDROID_DEFAULT_JOULES, coarse: false };
+  const level = r.level ?? devLevel();
+  if (level === null) return undefined;
+  if (r.platform === 'ios') return { level, capacityJoules: iphoneCapacityJoules(r.model), coarse: true };
+  return { level, capacityJoules: capacityFromChargeCounter(r.chargeMicroAh, level) ?? ANDROID_DEFAULT_JOULES, coarse: false };
 }
 
 /**
@@ -78,6 +96,7 @@ export function ceilingEstimate(): Estimate | undefined {
 
 /** Start measuring an answer. */
 export function beginAnswer(): void {
+  startedAt = Date.now();
   Energy?.start(SAMPLE_MS);
 }
 
@@ -92,11 +111,17 @@ export function endAnswer(kind: ReplyCost, completed: boolean): void {
   const samples = samplesOf(run);
   const raw = joulesFromSamples(samples);
   const fresh = idle !== undefined && Date.now() - idle.at < IDLE_FRESH_MS ? idle.watts : undefined;
-  const joules = answerJoules({
-    ...(run.counterJoules === null ? { samples } : { counterJoules: run.counterJoules }),
+  const seconds = startedAt === undefined ? undefined : (Date.now() - startedAt) / 1000;
+  startedAt = undefined;
+  const counter = now.platform === 'ios' && devFile('devhooks-no-counter') !== undefined ? null : run.counterJoules;
+  // An iPhone with no counter reading: the time the answer took, at that phone's draw.
+  const timed = now.platform === 'ios' && counter === null && seconds !== undefined ? timedJoules(seconds, now) : undefined;
+  const joules = timed ?? answerJoules({
+    ...(counter === null ? { samples } : { counterJoules: counter }),
     ...(fresh === undefined ? {} : { idleWatts: fresh }),
     charging: now.charging,
   });
+  const source = joules === undefined ? 'none' : timed !== undefined ? 'time' : counter !== null ? 'counter' : 'gauge';
   const expected = theBook()[kind].joules;
   // Only a finished answer, measured against a known idle draw, teaches the average.
   const learn = completed && joules !== undefined && (now.platform === 'ios' || fresh !== undefined);
@@ -108,5 +133,5 @@ export function endAnswer(kind: ReplyCost, completed: boolean): void {
     ` gross=${raw === undefined ? 'none' : raw.joules.toFixed(1)} seconds=${raw === undefined ? 'none' : raw.seconds.toFixed(1)}` +
     ` watts=${raw === undefined ? 'none' : raw.watts.toFixed(2)} idleW=${fresh === undefined ? 'none' : fresh.toFixed(2)}` +
     ` samples=${samples.length} charging=${now.charging} level=${now.level ?? 'none'} chargeUAh=${now.chargeMicroAh ?? 'none'}` +
-    ` rawCurrent=${now.current ?? 'none'} mv=${now.voltageMv ?? 'none'} thermal=${now.thermal ?? 'none'} learned=${learn}`);
+    ` rawCurrent=${now.current ?? 'none'} mv=${now.voltageMv ?? 'none'} thermal=${now.thermal ?? 'none'} learned=${learn} source=${source}`);
 }

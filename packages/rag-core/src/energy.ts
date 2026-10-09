@@ -146,6 +146,34 @@ export function iphoneCapacityJoules(model: string | null): number {
   return (model === null ? IPHONE_DEFAULT_WATT_HOURS : IPHONE_WATT_HOURS[model] ?? IPHONE_DEFAULT_WATT_HOURS) * 3600;
 }
 
+/**
+ * The iPhone without its counter (it read nothing, or an iOS release took it
+ * away): the seconds the answer ran times the watts the phone draws while Fred
+ * works. No iPhone has been measured, so the table is empty and every model
+ * gets the Nothing Phone's net draw while the model writes: about 10 W
+ * (9-13 W gross less about 1 W idle, docs/results-battery-estimate.md). That
+ * is likely high for an iPhone, which errs towards claiming more battery
+ * rather than less. Fill the table from a Power Profiler recording per model.
+ */
+export const IPHONE_ACTIVE_WATTS: Readonly<Record<string, number>> = {};
+export const IPHONE_DEFAULT_ACTIVE_WATTS = 10;
+/**
+ * Low Power Mode and a hot phone slow the chip: the answer takes longer at a
+ * lower draw, so seconds alone would overstate it. The size of the cut is a
+ * guess until it is measured on a phone.
+ */
+export const SLOWED_WATTS_FACTOR = 0.6;
+/** ProcessInfo.ThermalState: 0 nominal, 1 fair, 2 serious, 3 critical. */
+const THERMAL_SERIOUS = 2;
+
+/** Joules for an answer from how long it ran. Undefined for a time that is not an answer's. */
+export function timedJoules(seconds: number, phone: { readonly model: string | null; readonly lowPower: boolean; readonly thermal: number | null }): number | undefined {
+  if (!(seconds > 0 && seconds <= 600)) return undefined;
+  const watts = (phone.model === null ? undefined : IPHONE_ACTIVE_WATTS[phone.model]) ?? IPHONE_DEFAULT_ACTIVE_WATTS;
+  const slowed = phone.lowPower || (phone.thermal ?? 0) >= THERMAL_SERIOUS;
+  return seconds * watts * (slowed ? SLOWED_WATTS_FACTOR : 1);
+}
+
 /** A piece of the line under the text box; a figure is set to stand out. */
 export interface LinePart {
   readonly text: string;

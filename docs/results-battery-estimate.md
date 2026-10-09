@@ -8,8 +8,8 @@ joules, roughly 0.2% of a full battery, and a quick reply (a field card,
 small talk, a decline) about 10 joules, 0.015%. The app now measures every
 answer on the phone it runs on, and shows one line under the text box while
 a message is typed, such as "~0.2% battery · ~400 more like it". The iPhone
-half is written but has
-never been compiled or run.**
+half builds and meters answers in the simulator (2026-10-09); it has never
+run on a real iPhone.**
 
 ## What was built
 
@@ -101,27 +101,62 @@ figure, a factor of about 13.
 
 `modules/fred-energy/ios` reads `task_info(TASK_POWER_INFO_V2).task_energy`
 (the app's own processor energy, nanojoules) and the battery level.
-**Not compiled, not run**: this machine has no Xcode, and the simulator
-reports no energy. To test on a real iPhone once Fred runs on one (#28):
 
-0. Switch it on. So that untested Swift cannot break the iOS build, the
-   module is linked into Android builds only. In
-   `apps/mobile/modules/fred-energy/expo-module.config.json` set
-   `"platforms": ["apple", "android"]` and add
-   `"apple": { "modules": ["FredEnergyModule"] }`, then `pod install`.
-   Until then the iPhone shows no estimate.
-1. Build. If the Swift does not compile, the module is the first suspect.
-2. Ask a card question and a written one. The log line
-   `[fred] energy kind=... joules=...` should show a few joules for the card
-   and clearly more for the written answer. `joules=none` means the counter
-   gave nothing: the line then uses the shipped figures.
-3. Compare with Xcode's Power Profiler recorded on the phone.
+### In the simulator, 2026-10-09
 
-Known gaps: the counter covers the processor only, not the screen; the
-battery sizes are published figures by model and ignore wear; the level
-comes in 5% steps, so "answers left" is worded "very roughly". The
-time-based fallback in the plan (seconds × watts per model) is not built:
-with no reading the iPhone shows the Android-measured figures.
+Branch `ios-main-2026-10-09`, Xcode 27.0, the "FredTest" simulator (iOS 27.0)
+on an Apple M5 Mac. **Nothing here is an iPhone's figure**: the simulator runs
+the model on the Mac's processor. It shows that the code works, not what an
+answer costs.
+
+- **The simulator does report energy.** This note used to say it does not. A
+  3 s one-core loop read 14.7 J inside the simulator. On the Mac the same
+  call returned exactly what `proc_pid_rusage` gives as `ri_energy_nj`
+  (16.055 J both ways), and the kernel accepted the struct as written (26
+  words), so the layout in the Swift is right.
+- **`task_info` is the call to keep.** It compiles against the public iOS
+  SDK. `proc_pid_rusage` does not: its header is not in the SDK.
+- **The module is now linked into iOS builds** (`expo-module.config.json`:
+  `apple` beside `android`). The Swift compiled unchanged; Release build
+  succeeded.
+- **Answers were metered.** Snakebite card (9.1 s of model time on the Mac):
+  87.9 J. A written answer (about 46 s): 446.5 J.
+- **A fallback by time is built** (`timedJoules`, `energy.ts`): when the
+  iPhone's counter gives nothing, the answer is costed as the seconds it took
+  times 10 W, times 0.6 in Low Power Mode or when the phone reports a serious
+  thermal state. **Both figures are placeholders.** 10 W is the Nothing
+  Phone's net draw while writing; 0.6 is a guess. The table by iPhone model
+  is empty until one is measured. Run in the simulator with the counter
+  hidden: a 3.3 s card was costed at 32.7 J, `source=time`.
+- **Two field-test switches**, beside `devhooks`: `devhooks-battery` (a level
+  from 0 to 1, for a phone that reports none) and `devhooks-no-counter`
+  (hides the iPhone's counter). With the level set to 0.8 the estimate was
+  computed (`percent=0.0214 left=3744`). **The line itself has not been seen
+  on an iOS screen**: typing into the simulator from the command line did
+  not reach the text box.
+- The log line now ends with `source=counter|gauge|time|none`.
+
+### Still to do on a real iPhone (#28)
+
+1. Ask a card question and a written one. `[fred] energy ... source=counter`
+   should show a few joules for the card and clearly more for the written
+   answer. `source=time` means the counter gave nothing.
+2. One unplugged session to calibrate. The counter is the processor only:
+   no screen, no GPU, no kernel work. Android's figure is the whole phone
+   less idle, so the iPhone will read low until scaled. Either record with
+   Xcode's Power Profiler on the phone, or time the gaps between the 5%
+   battery steps over a long run (one public iPhone 17 Pro benchmark does
+   this and claims about ±10%).
+3. From the same session, the watts for `IPHONE_ACTIVE_WATTS` and the real
+   cut in Low Power Mode.
+
+Known gaps: the battery sizes are published figures by model, stop at the
+iPhone 16 family and ignore wear; the level comes in 5% steps, so "answers
+left" is worded "very roughly"; if Metal offload is ever switched on for the
+iPhone, the counter misses the GPU and only the timed figure applies. The
+counter is undocumented (Apple's staff: "the only thing you can safely do is
+compare values between runs on the same hardware"), and no public replacement
+was found for iOS 26 or 27.
 
 ## Open
 

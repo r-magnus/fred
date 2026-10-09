@@ -6,9 +6,8 @@ import UIKit
  The iPhone's own energy readings, for the estimate shown before a question is
  sent (US-13, #80, docs/plan-battery-estimate.md).
 
- NOT YET RUN ON A DEVICE (2026-10-07): written beside the Android module so it
- can be tested when Fred runs on a real iPhone (#28). The simulator reports no
- energy.
+ NOT YET RUN ON A DEVICE: built and read in the simulator on 2026-10-09, where
+ the counter is the Mac's. To be tested when Fred runs on a real iPhone (#28).
 
  An iPhone app cannot read battery current. What it can read is the kernel's
  energy counter for its own processor work: task_info(TASK_POWER_INFO_V2),

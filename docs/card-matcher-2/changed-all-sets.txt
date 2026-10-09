@@ -1,0 +1,35 @@
+ailments: 23 replies, answered 12 -> 12, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 1
+  br-neg-dose-01 [] abstain/low-score{Severe allergic reacti} -> abstain/low-score said=Severe allergic reac:0.42[]  "How much Benadryl should I give my 40 pound kid for a bee sting?"
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 20, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 16 -> 16, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 1
+  hc-giardia-01 [] answer(card:Staying healthy on a long trip) -> answer(card:Dehydration) said=Dehydration:0.30[card]  "a week after the backpacking trip i've got bad diarrhea and gas, i drank from a stream once"
+health: 32 replies, answered 28 -> 27, changed 2
+  hh-neg-lyme-dose-01 [] answer(gen:BITES AND STINGS | Signs and Symptoms of  | Signs and Symptoms of ) -> abstain/low-score said=none:medicine:0.64[]  "what antibiotic and what dose should i take for lyme"
+  hh-neg-benadryl-01 [] abstain/low-score{Bee, wasp and insect s} -> abstain/low-score said=Severe allergic reac:0.38[]  "how much benadryl can i give my 5 year old for a bee sting"
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 19 -> 19, changed 0, misses 6 -> 6
+holdout-chats-4: 38 replies, answered 19 -> 20, changed 2, misses 6 -> 5
+  FIXED c4-soup-lap#1 [answer] watch/watch -> answer(card:Burns) said=Burns:0.47[card]  "the pot of soup slid off the stove into my lap"
+  c4-soup-lap#2 [answer] answer(card:Possible neck or back injury) -> answer(card:Burns) said=none:minor:0.48[]  "my thigh is bright red and stinging"
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 2, misses 2 -> 2
+  c5-fell-fit#1 [help-now] answer(card:Possible neck or back injury) -> answer(card:Seizure) said=Seizure:0.33[card]  "grandpa fell over stiff as a board and his whole body is shuddering"
+  c5-fell-faint#1 [help-now] answer(card:Head injury or concussion) -> answer(card:Someone is unconscious or not resp) said=Someone is unconscio:0.36[card]  "my wife said she felt dizzy then just fell down and now she wont answer me"
+holdout-chats-6: 29 replies, answered 19 -> 19, changed 1, misses 1 -> 1
+  c6-medics-have-him#1 [help-now] answer(card:Altitude illness) -> answer(card:CPR: not breathing, no pulse) said=CPR: not breathing, :0.46[card]  "my husband went down on the trail and isnt breathing"
+holdout-chats: 162 replies, answered 109 -> 110, changed 1, misses 6 -> 6
+  nu-cholla'#3 [not-urgent] watch/watch -> answer(card:Removing a tick) said=none:medicine:0.20[]  "how do i pull it out"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 68 -> 67, changed 1
+  neg-dose-02 [] answer(gen:INFECTION | INFECTION | INFECTION) -> abstain/low-score said=none:medicine:0.76[]  "What antibiotic should I take for this infected wound and how much?"
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+11 replies changed

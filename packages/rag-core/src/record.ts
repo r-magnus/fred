@@ -65,6 +65,19 @@ export function saysHandedOver(message: string): boolean {
 }
 
 /**
+ * Help has taken over and the message says nothing else: every other part of
+ * it is a word or two or thanks. "ok paramedics have him. unrelated but i
+ * sliced my finger whittling" carries a new problem and is read as one.
+ */
+export function onlyHandedOver(message: string): boolean {
+  if (!HANDED_OVER.test(message)) return false;
+  return message.split(/[.;!?,]+|\bbut\b/i).every((part) => {
+    const rest = part.trim().replace(/^(?:ok(?:ay)?|alright|all right)\b\s*/i, '');
+    return HANDED_OVER.test(rest) || rest.split(/\s+/).filter(Boolean).length <= 2 || /^(?:thanks?|thank you|thx|ty)\b/i.test(rest);
+  });
+}
+
+/**
  * The hiker saying a condition is over. Only their own words, and only these:
  * a resolution is never inferred. "he seems better now" after low blood sugar
  * is over; "it left" after a bear. A body part that is fine is not: "he says

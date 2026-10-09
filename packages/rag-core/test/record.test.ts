@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRecord, conditionsFor, latestFor, saysHandedOver, saysResolved, sinceResolved, whoIn } from '../src/record.ts';
+import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysHandedOver, saysResolved, sinceResolved, whoIn } from '../src/record.ts';
 import { conditionsIn } from '../src/conditions.ts';
 
 const ids = (ms: string[]): string[] => conditionsFor(buildRecord(ms), ms.at(-1)!).map((c) => c.id);
@@ -48,6 +48,13 @@ test('help has taken over: rescuers have the person, or they are at a hospital (
   }
   for (const m of ['the rangers are on their way but his arm is swelling', 'i called 911 and theyre sending a helicopter',
     'we carried him out to the road', 'he says his neck is fine', 'can the rangers find us here']) assert.ok(!saysHandedOver(m), m);
+});
+
+test('help taking over with a new problem beside it is not only that (#173)', () => {
+  for (const m of ['ok the rangers carried him out', 'the paramedics have him now', 'update, search and rescue flew me out and im at the clinic',
+    'the rangers carried him out, thanks for everything', 'ok. the helicopter just lifted off with her. thank you so much']) assert.ok(onlyHandedOver(m), m);
+  for (const m of ['ok paramedics have him. unrelated but i sliced my finger whittling', 'ems took over. different thing, i cut my thumb with my knife',
+    'the medics took him. ok now my foot is bleeding', 'thanks for everything', 'we carried him out to the road']) assert.ok(!onlyHandedOver(m), m);
 });
 
 test('what was said before something was over is past (#173)', () => {

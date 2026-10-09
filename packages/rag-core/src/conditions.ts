@@ -50,6 +50,14 @@ export interface Condition {
    */
   readonly situation?: boolean;
   /**
+   * How someone got hurt, not what is hurt (a fall): its card is a precaution.
+   * A follow-up to a message Fred answered with another card stays on that
+   * card (#173). A condition that names what is wrong keeps its own card:
+   * "my toes went white and numb" got the immersion-foot card, and "should i
+   * rub them with snow" is still about frostbite.
+   */
+  readonly cause?: boolean;
+  /**
    * For a risk with no field card of its own (#51, exposures.ts): the reviewed
    * reply that replaces an answer giving forbidden advice, in the sources'
    * words. With it, `card` is empty.
@@ -166,7 +174,7 @@ export const CONDITIONS: readonly Condition[] = [
   // Hypothermia: "handle them gently", "Don't give alcohol".
   { id: 'hypothermia', label: 'cold', card: 'Hypothermia: shivering, confused, too cold', said: (ms) => ms.some((m) => HYPOTHERMIA.test(m)),
     forbidden: /\b(?:rub|massag)\w*|\balcohol\b|\bhot (?:bath|shower)\b/i },
-  { id: 'fall', label: 'fall', card: 'Possible neck or back injury', said: (ms) => ms.some((m) => FALL.test(m)) },
+  { id: 'fall', label: 'fall', card: 'Possible neck or back injury', said: (ms) => ms.some((m) => FALL.test(m)), cause: true },
   { id: 'belly-wound', label: 'belly wound', card: 'Wound to the belly', said: (ms) => ms.some((m) => BELLY.test(m)) },
 ];
 

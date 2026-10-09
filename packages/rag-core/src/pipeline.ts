@@ -15,7 +15,7 @@ import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions,
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
-import { buildRecord, conditionsFor, latestFor, saysHandedOver, saysResolved, sinceResolved } from './record.ts';
+import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysResolved, sinceResolved } from './record.ts';
 import { asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, saidAs, type Said, type SaidAsModel } from './said-as.ts';
 import type { ReplyCost } from './energy.ts';
@@ -818,12 +818,12 @@ async function askCore(
   const conditionCardFor = async (q: string): Promise<ScoredChunk | undefined> => {
     const lc = latestFor(record, q, here);
     if (lc === undefined || lc.inLast) return undefined;
-    // #173: the message that set the condition was the one just before, and
+    // #173: the message just before said how someone got hurt (a fall), and
     // Fred answered it with another card: the follow-up is about that card.
     // "my mom slipped on the wet boardwalk... her wrist is swollen" got the
     // broken-bone card, and "can she still carry her pack" a line of the
     // spine card ("Pack rolled clothing ... on both sides of the head").
-    if (q === query && lc.at === here - 1 && lastShown !== undefined && lastShown.chunk.section !== lc.condition.card) return undefined;
+    if (q === query && lc.condition.cause === true && lc.at === here - 1 && lastShown !== undefined && lastShown.chunk.section !== lc.condition.card) return undefined;
     const card = await cardByTitle(lc.condition.card);
     if (card === undefined) return undefined;
     // A question in the middle of a condition is about it when it names the
@@ -1062,8 +1062,9 @@ async function askCore(
   let everyday: { routedTopScore: number; topScore: number } | undefined;
   // #173: news that help has taken over, with nothing new in it and nothing
   // asked, is small talk too: "ok the rangers carried him out" after a
-  // snakebite was called NOW and got the get-help-now reply.
-  const helpHasThem = saysHandedOver(query) && setHere.length === 0 && !asksSomething(query) && !dangerSign([query]);
+  // snakebite was called NOW and got the get-help-now reply. Not "ok
+  // paramedics have him. unrelated but i sliced my finger whittling".
+  const helpHasThem = onlyHandedOver(query) && setHere.length === 0 && !asksSomething(query) && !dangerSign([query]);
   // Nothing but thanks or an acknowledgement is small talk, without asking the
   // model: "ok thanks" after a burn is three words, so it was read in its
   // conversation, restated as "bubbles on skin, what to do", called NOW, and

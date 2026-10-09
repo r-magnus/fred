@@ -78,6 +78,7 @@ function Tab({ label, tone }: { label: string; tone?: string }): React.JSX.Eleme
     </View>
   );
 }
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
 
@@ -498,6 +499,7 @@ function Screen() {
     if (recording) {
       const s = stopRecording();
       setRecording(false);
+      void deactivateKeepAwake('drive-test').catch(() => {});
       // Rounded: the platform reports full float precision, and
       // "27.40999984741211 m" is not a number anyone reads in a car.
       const m = (v: number | null): string => (v === null ? '?' : v.toFixed(1));
@@ -511,6 +513,9 @@ function Screen() {
     } else {
       setRecording(true);
       setLocNote('Recording…');
+      // The position watch stops when the screen locks, so a drive would
+      // record only its first minute. The screen stays on until it is stopped.
+      void activateKeepAwakeAsync('drive-test').catch(() => {});
       void startRecording().then((path) => {
         setLocNote(`Recording to ${path.split('/').pop() ?? path} — no need to touch the phone`);
       });

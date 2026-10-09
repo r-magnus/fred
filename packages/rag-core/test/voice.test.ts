@@ -135,3 +135,9 @@ test('a decline says what it could not answer and what would help', () => {
   // Nothing that reads as an answer to a yes/no question.
   assert.ok(!/\b(?:yes|no|fine|safe|ok|okay|sure)\b/i.test(`${yesNo.text} ${yesNo.hint}`));
 });
+
+test('a dose question is declined in its own words (#24)', () => {
+  const d = declineReply('how many ibuprofen can i take at once', []);
+  assert.match(d.text, /which medicine|how much/i);
+  assert.match(d.hint, /label|pharmacist/);
+});

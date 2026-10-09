@@ -17,7 +17,7 @@
 import { kindOf, PROBLEM, WORRY } from './opener.ts';
 import { CHAT_REPLY, CHAT_REPLY_WITH_OFFER } from './prompt.ts';
 import { namedIn, saysHandedOver, saysResolved } from './record.ts';
-import { dangerSign } from './triage.ts';
+import { asksDose, dangerSign } from './triage.ts';
 
 const BODY = 'legs?|arms?|hands?|fingers?|fingertips|thumbs?|wrists?|ankles?|knees?|foot|feet|toes?|heels?|shins?|calf|calves|thighs?|back|neck|head|face|eyes?|chest|stomach|belly|hips?|shoulders?|elbows?|palms?|ears?|nose|lips?|paws?';
 /** "my wrist", "her left ankle", "my son's elbow", "the dog's paw": a body part and whose it is. */
@@ -225,6 +225,13 @@ export function declineReply(message: string, history: readonly string[], outOfS
     return {
       text: `${sorry === null ? '' : `${sorry} `}${pick(["That's outside what my guides cover.", "My guides don't reach that far."], n)}`,
       hint: "I'm good for first aid, finding your way, and the plants and animals around you.",
+    };
+  }
+  // #24: a dose, or which medicine to take, is not for Fred to say.
+  if (asksDose(message)) {
+    return {
+      text: pick(["I can't tell you which medicine to take or how much.", "Which medicine and how much isn't something I can tell you."], n),
+      hint: "Go by the label, or ask a pharmacist or a doctor. Tell me what's wrong and I'll look for what else helps.",
     };
   }
   // "can you recommend a restaurant" asks for something; it is not a yes/no question.

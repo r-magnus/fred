@@ -1,0 +1,59 @@
+query=question densePool=20 topK=4 alpha=1 compress=off  model=Qwen3-1.7B-Q4_K_M.gguf  packs=/home/odysseus/fred-packs-g-all
+60 packs, embedder parity OK
+
+
+"our lab tore a pad on the lava rock"
+  -> WATCH
+  intent=now top=0.000 danger=false scope=-0.11[] said=none:pet:0.30[] understood="pad torn on lava rock, what to do right now"
+     0.000 core-fieldcards | Setting up a shelter for the night
+     0.000 core-fieldcards | A bandage soaking through with blood
+     0.000 core-fieldcards | Hip or pelvis injury after a fall
+     0.000 core-fieldcards | Staying warm on a cold night
+
+"its bleeding a fair bit"  (turn 2)
+  -> CARD Heavy bleeding from a wound
+  intent=now top=0.313 danger=false scope=0.23[] said=Heavy bleeding from a wo:0.39[]
+     0.313 core-survival | BLEEDING
+     0.302 core-fieldcards | Heavy bleeding from a wound
+     0.276 core-fieldcards | A bandage soaking through with blood
+     0.269 core-firstaid | SIGNS AND SYMPTOMS
+
+"i can see a stream below me"
+  -> CARD Crossing a river or stream
+  intent=question top=0.309 danger=false scope=1.67[not-chat,framed,card] said=none:other:0.56[]
+     0.309 core-hazards | Safe River Crossings > Pick the Time and Place
+     0.303 core-fieldcards | Crossing a river or stream
+     0.290 core-hazards | Flash Floods: Tread Safely > Stay Safe On Your Next Adventure
+     0.289 core-hazards | Safe River Crossings > Check Any Last Minute Details
+
+"we missed the junction a while back"
+  -> CHAT
+  intent=chat top=0.000 danger=false scope=-1.93[] said=Lost: should I stay or k:0.49[]
+     0.000 core-fieldcards | Possible neck or back injury
+     0.000 core-fieldcards | Wound to the chest
+     0.000 core-fieldcards | Someone is choking
+     0.000 core-fieldcards | Heat exhaustion and heat stroke
+
+"my back is wrecked from the pack"
+  -> CARD Possible neck or back injury
+  intent=now top=0.187 danger=false scope=1.04[] said=none:minor:0.42[]
+     0.187 core-fieldcards | Possible neck or back injury
+     0.132 core-firstaid-army | IMMOBILIZING A FRACTURE
+     0.129 core-firstaid-army | IMMOBILIZING A FRACTURE
+     0.124 core-firstaid | Module 2: Approach to trauma
+
+"how many naproxen is too many"  (turn 2)
+  -> LOW-SCORE
+  intent=question top=0.090 danger=false scope=-1.32[] said=none:medicine:0.92[]
+     0.090 core-firstaid | AND
+     0.090 core-firstaid | [see ABCDE, DIB]
+     0.042 core-firstaid | IN BREATHING]
+     0.034 core-firstaid | INDICATION
+
+"my sister slipped on the wet rocks by the creek and caught herself on one hand, now her thumb is puffy and turning purple"
+  -> WATCH
+  intent=now top=0.147 danger=false scope=3.31[framed] said=A cut or scrape:0.23[no-card] conditions=fall agreed=Possible neck or back injury understood="thumb puffy and turning purple after slipping on wet rocks"
+     0.147 core-health | During Extremely Cold Weather > Frostbite First Aid
+     0.125 core-firstaid-army | NONFREEZING INJURIES
+     0.116 core-firstaid-army | FROSTBITE
+     0.113 core-fieldcards | A cut or scrape

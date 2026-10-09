@@ -527,7 +527,6 @@ none:chat	heading back to the car now
 none:chat	we are all fine now
 none:chat	it stopped raining finally
 none:chat	dinner was great
-none:chat	what a long day
 none:chat	good morning fred
 none:chat	lol ok
 none:chat	the stars are amazing tonight
@@ -1032,3 +1031,456 @@ snow-blindness	my eyes are gritty and burning after the glacier
 eye-injury	i got dirt in my eye and it keeps tearing up
 none:minor	my legs keep cramping up on the climb
 dehydration	i havent had anything to drink in hours and feel weak
+bleeding-severe	blood is spurting from his wrist every time his heart beats
+bleeding-severe	she stepped on a broken bottle and her foot is gushing
+bleeding-severe	the saw kicked back into his shin and blood is running down into his boot
+bleeding-severe	there is a deep gash in her calf and the blood keeps coming
+bleeding-severe	he fell on a sharp stump and his arm is bleeding hard
+bleeding-severe	blood all over the tent floor from his leg
+bleeding-severe	my hand got caught in the winch and its bleeding heavily
+bleeding-severe	do i need a tourniquet for a leg that wont stop bleeding
+bleeding-severe	a branch went through his forearm and its bleeding a lot
+bleeding-severe	the cut on her thigh is deep and bright red blood is pulsing out
+bleeding-soaked	the gauze is red all the way through already
+bleeding-soaked	blood is coming through the bandage i put on
+bleeding-soaked	i wrapped it but the wrap is dripping red
+bleeding-soaked	the towel i am pressing with is full of blood
+bleeding-soaked	second dressing is bleeding through too
+bleeding-soaked	do i take the bloody bandage off and start over
+bleeding-soaked	the pad is drenched with blood, what now
+bleeding-soaked	blood keeps seeping through the cloth no matter how hard i press
+bleeding-soaked	the bandana on his cut is wet with blood again
+sprain	stepped in a hole and my ankle is the size of a grapefruit
+sprain	rolled it on a loose rock and now i can barely put weight on that foot
+sprain	her ankle bent sideways on a root and its swelling up
+sprain	i felt a pop in my calf going uphill
+sprain	twisted my knee coming down and it feels wobbly
+sprain	pulled something in my thigh jumping the creek
+sprain	my ankle turned over on the scree and its puffy and sore
+sprain	should i keep my boot on with a twisted ankle
+sprain	how do i wrap a sprained ankle
+sprain	i tweaked my wrist catching myself and it aches when i turn it
+snakebite	something with a rattle got her on the shin
+snakebite	two little holes on his hand and its swelling, he reached under a log
+snakebite	a copperhead nailed me above the boot
+snakebite	my daughter was bitten by a snake we didnt see well
+snakebite	he got struck by a cottonmouth by the water
+snakebite	fang marks on my ankle and it burns
+snakebite	should i suck the venom out of a snake bite
+snakebite	do i tie something above a rattlesnake bite
+snakebite	a snake latched onto his finger while he was gathering wood
+snakebite	bitten by a coral snake i think
+choking	he cant get any air, a piece of jerky is stuck
+choking	she is grabbing her throat and cant talk
+choking	my son swallowed a hard candy wrong and is turning red and silent
+choking	food is lodged in his windpipe
+choking	she is coughing weakly and making a high squeak after a bite of apple
+choking	how do i do the heimlich on myself
+choking	the toddler has a grape stuck and cant cry
+choking	he is clutching his neck at dinner and no sound is coming out
+choking	something went down the wrong way and she cant breathe
+hypothermia	he is shivering so hard he cant hold his cup
+hypothermia	she is slurring her words and stumbling after hours in the rain
+hypothermia	my friend stopped shivering and just wants to lie down in the snow
+hypothermia	he got soaked in the storm and now he is confused and clumsy
+hypothermia	her skin is ice cold and she is mumbling
+hypothermia	we pulled him out of the lake and he is shaking and blue
+hypothermia	my kid is cold, quiet and wont stop trembling
+hypothermia	how do i warm up someone who is dangerously cold
+hypothermia	he keeps saying he is fine but he cant zip his own jacket
+cold-night	how do i stay warm tonight with a thin sleeping bag
+cold-night	its going to drop below freezing and i only have a summer bag
+cold-night	my feet get so cold at night i cant sleep
+cold-night	what should i wear to bed when its freezing out
+cold-night	how do i keep from freezing in my tent
+cold-night	i keep waking up cold at 3am
+cold-night	is it warmer to sleep in all my layers or just a few
+cold-night	the ground is sucking the heat out of me at night
+cold-night	tips for sleeping warm in the cold
+immersion-foot	my feet have been wet for three days and are white and wrinkled
+immersion-foot	feet are numb and pruney after days in soaked boots
+immersion-foot	my toes tingle and burn after slogging through the bog all week
+immersion-foot	the skin on my soles is pale, soggy and painful
+immersion-foot	feet look gray and swollen after days in wet socks
+immersion-foot	how do i look after feet that never dry out
+immersion-foot	my feet hurt like pins and needles when i take off the wet boots
+immersion-foot	his feet are cold, blotchy and numb from wading all day for days
+frostbite	my fingertips are white and hard like wax
+frostbite	her nose has gone pale and she cant feel it
+frostbite	my toes are numb and look gray after the summit push
+frostbite	his ears are white and stiff from the wind
+frostbite	fingers are frozen solid and wont bend
+frostbite	the skin on my cheek is waxy and has no feeling
+frostbite	should i rub snow on frozen fingers
+frostbite	how do i thaw out frozen toes
+frostbite	blisters came up on my fingers after they froze
+burns	he grabbed the pot handle and his fingers are blistering
+burns	the stove flared up and singed her forearm
+burns	my leg touched the exhaust pipe and the skin is red and raw
+burns	hot grease splashed on my hand
+burns	she fell against the fire ring and her arm is blistered
+burns	a spark landed on my neck and it stings
+burns	how long do i run cold water on a burn
+burns	steam from the kettle got my wrist
+burns	do i pop the blister from a burn
+heat-illness	he is red, hot and has stopped sweating
+heat-illness	she is dizzy and sick to her stomach after hours in the sun
+heat-illness	my buddy is cramping and feels faint in this heat
+heat-illness	he is hot to the touch and talking nonsense on the desert trail
+heat-illness	im lightheaded and my head is pounding from the heat
+heat-illness	she collapsed in the sun and her skin is burning hot
+heat-illness	my son is flushed, weak and throwing up on this hot hike
+heat-illness	how do i cool down someone who overheated
+heat-illness	we are baking out here and my friend stopped making sense
+water-purify	is it safe to drink straight from this lake
+water-purify	how long do i boil water to make it safe
+water-purify	we ran out and the only water is a murky pond
+water-purify	can i drink from a mountain spring without treating it
+water-purify	my filter broke, how do i make water safe
+water-purify	do i need to treat snow melt before drinking it
+water-purify	the stream looks clear, do i still have to purify it
+water-purify	how do i clean cloudy water to drink
+water-purify	all we have is river water, how do we make it drinkable
+fracture	his forearm is bent where it shouldnt bend
+fracture	she heard a crack in her leg and cant stand on it
+fracture	my wrist is swollen and crooked after i caught myself
+fracture	the bone is poking against the skin on his shin
+fracture	her collarbone has a lump and she cant lift her arm
+fracture	i think i broke my finger, its pointing the wrong way
+fracture	his ankle is deformed and he screams when it moves
+fracture	she landed on her hand and her wrist ballooned and wont move
+fracture	my lower leg snapped, i heard it
+unresponsive	he is breathing but wont wake up
+unresponsive	she passed out and i cant rouse her
+unresponsive	my friend is out cold but still breathing
+unresponsive	he fainted and isnt answering me
+unresponsive	she is limp and doesnt react when i shake her shoulder
+unresponsive	found a man lying by the trail who wont respond, he has a pulse
+unresponsive	my dad slumped over and wont open his eyes
+unresponsive	she blacked out and is still not awake
+cpr	she isnt breathing and i cant find a pulse
+cpr	my wife went limp and her chest is not rising
+cpr	he is blue and not taking any breaths
+cpr	no breath, no heartbeat, what do i do
+cpr	my friend keeled over and stopped breathing
+cpr	she was pulled from the river and has no breath
+cpr	how fast do i do compressions
+cpr	his heart stopped
+cpr	do i keep pushing on the chest until help comes
+cpr	the old man collapsed and isnt breathing or moving
+shock	he is pale, sweaty and his pulse is racing after the crash
+shock	she is cold and clammy and breathing fast after losing blood
+shock	after the accident he went gray and says he feels faint
+shock	her lips are pale and she is restless and thirsty after the injury
+shock	he is shaky, white as a sheet and his skin is damp since he got hurt
+shock	how do i treat someone for shock
+shock	she got hurt badly and now she is weak, clammy and confused
+shock	his skin is cold and sweaty and he is breathing quick and shallow after the wound
+find-north	how do i tell direction from the sun
+find-north	which way is north if i have no compass
+find-north	how do i find north with a stick and its shadow
+find-north	can i use the stars to find north
+find-north	how do i use my watch to find south
+find-north	my compass is broken, how do i work out east and west
+find-north	which star points north
+find-north	how do i know which way im facing at night
+lost-stay-or-move	we missed our turn and i dont know where the trail went
+lost-stay-or-move	i think we passed the cutoff a long way back and now im not sure where we are
+lost-stay-or-move	we went past the trail split and this doesnt match the map
+lost-stay-or-move	i should have reached the lake by now and i havent
+lost-stay-or-move	we followed the wrong creek and dont know how to get back
+lost-stay-or-move	none of these landmarks are on my map
+lost-stay-or-move	i lost the cairns and dont know which way the trail goes
+lost-stay-or-move	we came down the wrong side of the ridge
+lost-stay-or-move	i cant tell where i am anymore
+lost-stay-or-move	the path petered out and i have no idea which way to go
+lost-stay-or-move	i left the trail to take a photo and now i cant find it again
+fire	whats the best way to lay a campfire
+fire	i cant get my kindling to catch
+fire	how do i start a fire without matches
+fire	what do i use for tinder when everything is wet
+fire	my fire keeps going out
+fire	how do i light a fire in the wind
+fire	how big should i build the fire to stay warm
+shelter	its getting dark and we have no tent, where do we sleep
+shelter	how do i rig a tarp for the night
+shelter	we are stuck out overnight with no gear, how do we make a shelter
+shelter	whats the fastest shelter i can put up before the storm
+shelter	how do i make a lean to
+shelter	where is the best spot to hunker down for the night
+shelter	can i dig a snow cave to sleep in
+stings-bites	a wasp got me on the neck and its swelling
+stings-bites	i stepped on a yellowjacket nest and got stung a dozen times
+stings-bites	a bee stung my kid on the hand and the stinger is still in
+stings-bites	something bit me in my sleeping bag and there is a red welt
+stings-bites	i think a spider bit my leg, its red and sore
+stings-bites	got stung by a scorpion on my toe
+stings-bites	hornets got me all over my arms
+stings-bites	fire ants swarmed my ankle
+stings-bites	how do i get a stinger out
+stings-bites	there is a painful bite on my arm with two red dots
+ticks	there is a tick stuck in the back of my knee
+ticks	found a tick buried in my scalp
+ticks	how do i pull out a tick
+ticks	a tick is latched on my sons belly
+ticks	i pulled a tick off but the head stayed in
+ticks	theres a tiny tick dug in behind my ear
+ticks	found one of those little ticks attached to my thigh this morning
+anaphylaxis	his face is puffing up and he is wheezing after a bee sting
+anaphylaxis	she ate a trail mix with nuts and her tongue is swelling
+anaphylaxis	hives all over and he says his throat is closing
+anaphylaxis	my friend got stung and now she cant breathe well and her lips are huge
+anaphylaxis	he is allergic to wasps and just got stung, he is going pale and gasping
+anaphylaxis	how do i use an epipen
+anaphylaxis	her eyes are swelling shut and she is short of breath after a sting
+anaphylaxis	my son broke out in welts and is struggling to breathe after eating
+anaphylaxis	i got stung and my chest is tight and im itching everywhere
+plant-rash	i walked through poison ivy and my legs are itching like mad
+plant-rash	red itchy streaks on my arms after clearing brush
+plant-rash	my kid touched a shiny three leaf plant and has a rash
+plant-rash	blisters in lines on my shin after bushwhacking
+plant-rash	i think i sat in poison oak
+plant-rash	how do i stop a poison ivy rash from spreading
+plant-rash	my hands are bumpy and itchy since i pulled those vines
+plant-rash	the rash from the plants is oozing
+head-injury	he hit his head on a branch and seems dazed
+head-injury	she whacked her head on the rock and has a big lump
+head-injury	my son fell and bumped his head and now he is throwing up
+head-injury	i banged my head and i have a headache and feel foggy
+head-injury	he got knocked out for a few seconds after hitting his head
+head-injury	she doesnt remember falling and keeps asking the same thing
+head-injury	a rock came down and clipped his helmet, he is dizzy
+head-injury	can i let him sleep after a knock on the head
+head-injury	one of her pupils looks bigger since she hit her head
+wild-plants	are these mushrooms ok to eat
+wild-plants	found some wild onions, are they safe
+wild-plants	my kid ate a few red berries off a bush
+wild-plants	how do i tell if a plant is edible
+wild-plants	is this mushroom poisonous
+wild-plants	i tasted a leaf and my mouth is tingling
+cut-minor	i nicked my finger with my knife
+cut-minor	scraped my knee on the granite
+cut-minor	she skinned her elbow on the trail
+cut-minor	got a small gash on my shin from a branch
+cut-minor	my palm is grazed and has dirt in it
+cut-minor	i sliced my thumb opening a can
+cut-minor	the hatchet glanced off and cut the side of my hand, not deep
+cut-minor	how do i clean out a scrape
+cut-minor	his knee is torn up from sliding on gravel
+cut-minor	a thorn ripped a line down my forearm
+cut-minor	my shin is all scratched and bleeding a little
+spinal-injury	he landed on his back off the rock and cant feel his legs
+spinal-injury	she came off the bike on her head and her neck hurts badly
+spinal-injury	he fell out of the tree stand and says his back is on fire
+spinal-injury	her hands went numb after she fell on her back
+spinal-injury	he hit the ground hard from the cliff and it hurts to turn his head
+spinal-injury	can i roll someone over who hurt their back in a fall
+spinal-injury	after the fall his arms feel weak and tingly
+spinal-injury	she slid down the snowfield into the rocks and has pain down her spine
+spinal-injury	do i take his helmet off, he crashed and his neck hurts
+chest-wound	there is a hole in his chest and it bubbles when he breathes
+chest-wound	she fell on a branch and it punctured between her ribs
+chest-wound	he was stabbed in the side of the chest and is gasping
+chest-wound	air is sucking in through the wound on his chest
+chest-wound	the arrow went into her chest, do i pull it out
+chest-wound	his ribs caved in on one side after the fall and he cant breathe right
+chest-wound	how do i cover a sucking chest wound
+chest-wound	a stick went into his chest and frothy blood is coming out
+pelvis-injury	he fell and now his hip hurts too much to stand
+pelvis-injury	she crashed and cant move her legs for the pain in her pelvis
+pelvis-injury	my hip took the whole fall and one leg looks shorter
+pelvis-injury	he landed on his side on the rocks and his groin and hip are agony
+pelvis-injury	after the fall she cant sit up, the pain is deep in her hips
+pelvis-injury	the horse rolled on him and his pelvis hurts badly
+pelvis-injury	how do i bind a broken pelvis
+pelvis-injury	his hip is bruised black and he cant bear any weight since he fell
+altitude-illness	i have a splitting headache and feel sick at 11000 feet
+altitude-illness	she is short of breath even resting since we got above the tree line
+altitude-illness	we climbed to 12000 ft today and my buddy is dizzy and nauseous
+altitude-illness	he is coughing up pink froth high on the mountain
+altitude-illness	i cant sleep and my head pounds since we got to the high camp
+altitude-illness	she is staggering and confused at the pass
+altitude-illness	should we go down if he feels worse up high
+altitude-illness	we drove up to 10000 feet and my kid has a headache and is vomiting
+seizure	he is on the ground shaking all over and foaming
+seizure	her arms and legs are jerking and she doesnt respond
+seizure	my son went stiff and then started twitching
+seizure	she is having a fit
+seizure	his eyes rolled back and his whole body is convulsing
+seizure	he just had a seizure and now he is sleepy and confused
+seizure	do i put something in his mouth during a seizure
+seizure	she fell down rigid and is shuddering hard
+seizure	his body is thrashing and he bit his tongue
+low-blood-sugar	he is diabetic and is sweaty, shaky and confused
+low-blood-sugar	she took her insulin but skipped lunch and is acting strange
+low-blood-sugar	my friend with diabetes is pale and trembling
+low-blood-sugar	she is diabetic and slurring and cant focus
+low-blood-sugar	do i give sugar to a diabetic who is acting drunk
+low-blood-sugar	my dad has type 1 and he is drenched in sweat and irritable
+low-blood-sugar	he is a diabetic and nearly passed out on the climb
+belly-wound	there is a deep stab wound in her abdomen
+belly-wound	something is bulging out of the cut on his belly
+belly-wound	she fell on a stake and it went into her gut
+belly-wound	his intestines are showing
+belly-wound	do i push it back in, his belly is cut open
+belly-wound	he took a knife to the stomach
+belly-wound	a branch tore open her side below the ribs and its deep
+dehydration	my mouth is bone dry and my pee is dark brown
+dehydration	i havent peed since morning and i feel dizzy
+dehydration	we ran out of water hours ago and my head is pounding
+dehydration	she is very thirsty, weak and her lips are cracked
+dehydration	he has had diarrhea all day and now he is lightheaded
+dehydration	how much water should i be drinking on a hot hike
+dehydration	i feel faint when i stand and i barely drank today
+dehydration	my kid is listless and has not had a wet diaper all day
+dehydration	how do i tell if im dehydrated
+signal-rescue	how do i get someone to notice us from the air
+signal-rescue	we need rescue and have no phone signal
+signal-rescue	how do i make an sos on the ground
+signal-rescue	whats the best way to be seen by searchers
+signal-rescue	i can see a plane, how do i get its attention
+eye-injury	a branch whipped across her eye and she cant open it
+eye-injury	bug spray got in my eyes
+eye-injury	there is a splinter stuck in his eyeball
+eye-injury	her eye is bloodshot and tearing after ash blew into it
+eye-injury	he got poked in the eye by a tent pole and his vision is blurry
+snow-blindness	my eyes feel full of grit after a day on the glacier
+snow-blindness	i cant stand the light and my eyes are streaming after skiing without goggles
+snow-blindness	her eyes are red and burning after the snowfield
+snow-blindness	both eyes hurt and everything is blurry since the snow hike
+snow-blindness	i lost my sunglasses on the snow and now my eyes are on fire
+snow-blindness	how do i treat snow blindness
+snow-blindness	his eyes are swollen shut after a sunny day on the ice
+river-crossing	where is the safest place to wade this creek
+river-crossing	the stream is knee deep and fast, how do we get over
+river-crossing	we need to get across the river with our packs
+river-crossing	should i take my boots off to ford
+river-crossing	the water is pushing hard, is it safe to cross here
+river-crossing	how do i cross a stream with a kid
+river-crossing	the log bridge washed away and we have to wade
+river-crossing	do i face upstream when crossing
+river-crossing	the river is between us and the trailhead, how do we cross it
+knots-cordage	how do i tie a bowline
+knots-cordage	what knot holds a tarp line tight
+knots-cordage	whats a good knot for hanging a bear bag
+knots-cordage	how do i make rope from plants
+knots-cordage	my guyline keeps slipping, what knot do i use
+knots-cordage	how do i lash two poles together
+knots-cordage	what is the strongest way to tie off to a tree
+staying-healthy	how do i keep from getting sick on a two week trek
+staying-healthy	how do i keep clean with no shower for days
+staying-healthy	how should i look after my feet on a long hike
+staying-healthy	where do i go to the bathroom out here
+staying-healthy	how do i avoid stomach bugs in camp
+staying-healthy	how do i wash dishes in the backcountry
+staying-healthy	how do i keep my teeth clean on a long trip
+heart-stroke	his chest hurts and the pain is going down his arm
+heart-stroke	she has crushing pressure in her chest and is sweating
+heart-stroke	one side of his face is drooping and his speech is slurred
+heart-stroke	my dad suddenly cant lift his right arm or talk straight
+heart-stroke	tightness in my chest and my jaw aches
+heart-stroke	she went numb down one side all of a sudden
+heart-stroke	i think he is having a heart attack
+heart-stroke	how do i tell if its a stroke
+bear-encounter	there is a grizzly about thirty yards away staring at me
+bear-encounter	a black bear is following us down the trail
+bear-encounter	the bear is huffing and popping its jaw at us
+bear-encounter	a bear is charging
+bear-encounter	do i play dead or fight a bear
+bear-encounter	mama bear and cubs right in front of us
+bear-encounter	a bear is tearing at our tent
+none:pet	our lab split a nail on the rocks
+none:pet	my spaniel cut her pad on a shell
+none:pet	the beagle got into a wasp nest and his muzzle is swelling
+none:pet	my pointer is limping after the run
+none:pet	our border collie has a gash on her flank
+none:pet	my malamute collapsed in the heat
+none:pet	our poodle ate a mushroom
+none:pet	the hound got bit on the nose by a snake
+none:pet	my gelding has a cut on his hock
+none:pet	our pack llama is limping
+none:pet	my corgi has a burr in her paw and wont walk
+none:pet	the dachshund hurt his back jumping off the log
+none:pet	my boxer is bleeding from the ear
+none:pet	our mutt drank stagnant water and has the runs
+none:pet	the dogs paws are raw from the hot rock
+none:pet	my shepherd got sprayed by a skunk in the face
+none:pet	her paw is swollen between the toes
+none:pet	his muzzle is full of quills
+none:pet	the donkey cut his fetlock on barbed wire
+none:pet	my pit bull has a deep cut on his chest
+none:pet	our setter is shivering after swimming
+none:pet	the kitten got stung
+none:minor	the hip belt rubbed my hips raw
+none:minor	shoulder straps dug in and my shoulders are bruised
+none:minor	my neck is stiff from looking up at the route all day
+none:minor	my back is tight and sore from the long carry
+none:minor	i tweaked my back lifting my pack this morning
+none:minor	my shoulders burn from the heavy load
+none:minor	my calves are sore from the climb
+none:minor	my quads are wrecked from the descent
+none:minor	the straps left welts on my collarbones
+none:minor	sore neck from sleeping on a rolled up jacket
+none:minor	my arches ache
+none:minor	i have a hangnail that hurts
+none:minor	sore muscles everywhere after yesterday
+none:minor	my back gets achy by mile ten with this load
+none:minor	bug bites on my ankles are driving me crazy
+none:other	i can see a creek at the bottom of the canyon
+none:other	there is a river off in the distance
+none:other	sounds like a river over the hill
+none:other	we are camped beside a stream
+none:other	theres a waterfall across the valley
+none:other	the lake is right below our campsite
+none:other	we passed a spring a mile back
+none:other	the trail follows the river for a while
+none:other	i can see a road way down there
+none:other	there is a cabin on the far side of the meadow
+none:other	i see smoke from a campfire across the lake
+none:other	the map shows a pond just north of here
+none:other	a creek runs along the edge of camp
+none:other	we can hear a waterfall from the tent
+none:chat	phew that was a climb
+none:chat	the view from up here is incredible
+none:chat	beautiful sunrise this morning
+none:chat	that was a tough one
+none:chat	just stopped for a snack by the creek
+none:chat	the kids are having a blast
+none:chat	wow what a morning
+none:medicine	which antibiotic works for a sinus infection
+none:medicine	what is the dose of cipro for an adult
+none:medicine	how many milligrams of amoxicillin for an infected cut
+none:medicine	how much childrens advil for a toddler
+none:medicine	can i double up on ibuprofen
+none:medicine	how often can i take acetaminophen
+none:medicine	what dose of zyrtec for hives
+none:medicine	how many aspirin is too many
+none:medicine	what antibiotic treats strep and how much do i take
+none:medicine	is it ok to take two aleve and a tylenol together
+none:medicine	how much prednisone for poison oak
+none:medicine	what is the right amount of diamox per day
+none:medicine	how many allergy pills can i give a ten year old
+none:medicine	which pills should i take for a tooth infection
+none:fragment	should he keep his arm up
+none:fragment	is it ok to carry on
+none:fragment	how long should i wait
+none:fragment	can i use tape on it
+none:fragment	what if it gets worse overnight
+none:fragment	should i wrap it tighter
+none:fragment	can he sleep like that
+none:fragment	do i leave it uncovered
+none:fragment	is that normal
+none:fragment	and then what
+none:fragment	can she use her hand
+burns	the soup pot tipped and scalded my shin
+fracture	how do i make a splint for a forearm
+fire	what is the trick to lighting wet kindling
+shelter	how do i throw together a shelter from sticks and leaves
+wild-plants	are the berries on this bush ok to snack on
+signal-rescue	how do i wave down a rescue chopper
+eye-injury	grit blew into my eye and i cant blink it out
+bear-encounter	a bear just wandered up to our picnic table
+none:minor	my back is stiff this morning from the hard ground
+none:minor	banged my little toe on the tent stake
+none:chat	we finally rolled into camp
+none:medicine	how many loperamide is safe per day

@@ -16,7 +16,7 @@ import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
 import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysResolved, sinceResolved } from './record.ts';
-import { asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
+import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, saidAs, type Said, type SaidAsModel } from './said-as.ts';
 import type { ReplyCost } from './energy.ts';
 import { joinNeighbours } from './join.ts';
@@ -1415,8 +1415,10 @@ async function askCore(
     // with nothing of its own ("how long should i keep it under the water")
     // says nothing against the card, and with a danger sign in the thread an
     // unsure matcher takes no card away ("the shirt i'm holding on it is soaked
-    // through" lost the bleeding card).
-    if (saidSure !== undefined ? toKind !== undefined : (share < SAID_SOME && toKind !== 'fragment' && !dangerNow)) { saidUsed.push('no-card'); return undefined; }
+    // through" lost the bleeding card). A follow-up fragment, however sure,
+    // takes none away either: "is it safer to keep going or stop" after
+    // "the light is fading" lost the lost-hiker card (#152).
+    if (saidSure !== undefined ? (toKind !== undefined && toKind !== 'fragment') : (share < SAID_SOME && toKind !== 'fragment' && !dangerNow)) { saidUsed.push('no-card'); return undefined; }
     return card;
   };
   if (forcedCard !== undefined && forcedOwn && forcedCard.score < effectiveThreshold) {
@@ -1433,6 +1435,14 @@ async function askCore(
   const followed = guardsOn && !petPatient && u?.intent !== 'out' ? await conditionCardFor(query) : undefined;
   if (forcedCard === undefined && followed !== undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
     forcedCard = agreedCard = followed;
+  }
+  // #24: a question that asks for a dose, or which medicine to take, is
+  // declined on purpose, with its own wording (voice.ts). It was declined
+  // only when the search happened to be weak. With a danger sign in the
+  // thread a card may still answer; the model never writes it (below).
+  const dose = guardsOn && asksDose(query);
+  if (dose && !dangerNow) {
+    return { kind: 'abstain', reason: 'low-score', nearest: [], diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 } };
   }
   // #101: an update on what Fred just showed a card for ("its swelling pretty
   // bad" after the sprain card) that would be declined or get the watch
@@ -1776,6 +1786,11 @@ async function askCore(
   {
     const fromCard = await cardLinesReply();
     if (fromCard !== undefined) return fromCard;
+  }
+
+  // #24: no card answered a dose question in an emergency.
+  if (dose) {
+    return { kind: 'abstain', reason: 'safety-net', nearest: [], diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 } };
   }
 
   // Stage 3 — compress before prefill.

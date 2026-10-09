@@ -823,8 +823,10 @@ async function askCore(
     // "my mom slipped on the wet boardwalk... her wrist is swollen" got the
     // broken-bone card, and "can she still carry her pack" a line of the
     // spine card ("Pack rolled clothing ... on both sides of the head").
-    if (q === query && lc.condition.cause === true && lc.at === here - 1 && lastShown !== undefined && lastShown.chunk.section !== lc.condition.card) return undefined;
-    const card = await cardByTitle(lc.condition.card);
+    // So that card is the one a decline falls back to: with no card, "can she
+    // still carry her pack" got "I don't have reliable information on that".
+    const shown = q === query && lc.condition.cause === true && lc.at === here - 1 && lastShown !== undefined && lastShown.chunk.section !== lc.condition.card;
+    const card = shown ? lastShown : await cardByTitle(lc.condition.card);
     if (card === undefined) return undefined;
     // A question in the middle of a condition is about it when it names the
     // body, the wound or the care: "should i prop my leg up on my pack" after

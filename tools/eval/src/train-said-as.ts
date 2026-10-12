@@ -15,13 +15,15 @@
  * check fails the run on a near copy.
  */
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { applyQueryTemplate, saidAs, type SaidAsModel } from '@fred/rag-core';
+import { applyQueryTemplate, noCardShare, saidAs, type SaidAsModel } from '@fred/rag-core';
 import { openHarness } from './harness.ts';
 
 const SCALE = 4;
 /** Card calls at or above `sure` are right this often on examples the model never saw. */
 const SURE_PRECISION = 0.97;
 const LEANS_PRECISION = 0.9;
+/** "No card is for this", by the no-card labels' share together, is right this often. */
+const NO_CARD_PRECISION = 0.99;
 
 const titles = new Map((JSON.parse(readFileSync('corpora/cards/cards.json', 'utf8')) as { id: string; title: string }[]).map((c) => [c.id, c.title]));
 const rows = readFileSync('corpora/cards/said-as.tsv', 'utf8').trim().split('\n').map((l) => {
@@ -103,6 +105,14 @@ function train(keep: (i: number) => boolean, l2 = 1e-3, epochs = 300, lr = 2): {
   }
   return { W, B };
 }
+/** Every label's share. */
+function shares(m: { W: Float64Array[]; B: Float64Array }, x: Float64Array): { label: string; p: number }[] {
+  const z = m.W.map((w, k) => { let s = m.B[k]!; for (let j = 0; j < D; j++) s += w[j]! * x[j]!; return s; });
+  const max = Math.max(...z);
+  const ex = z.map((q) => Math.exp(q - max));
+  const sum = ex.reduce((a, b) => a + b, 0);
+  return labels.map((label, k) => ({ label, p: ex[k]! / sum }));
+}
 function top(m: { W: Float64Array[]; B: Float64Array }, x: Float64Array): { k: number; p: number } {
   const z = m.W.map((w, k) => { let s = m.B[k]!; for (let j = 0; j < D; j++) s += w[j]! * x[j]!; return s; });
   const max = Math.max(...z);
@@ -113,13 +123,13 @@ function top(m: { W: Float64Array[]; B: Float64Array }, x: Float64Array): { k: n
 }
 
 const FOLDS = 10;
-const held: { right: boolean; card: boolean; p: number; i: number; k: number }[] = [];
+const held: { right: boolean; card: boolean; p: number; i: number; k: number; none: number }[] = [];
 for (let f = 0; f < FOLDS; f++) {
   const m = train((i) => i % FOLDS !== f);
   rows.forEach((_, i) => {
     if (i % FOLDS !== f) return;
     const t = top(m, X[i]!);
-    held.push({ right: t.k === Y[i], card: !labels[t.k]!.startsWith('none:'), p: t.p, i, k: t.k });
+    held.push({ right: t.k === Y[i], card: !labels[t.k]!.startsWith('none:'), p: t.p, i, k: t.k, none: noCardShare(shares(m, X[i]!)) });
   });
 }
 const isCard = (l: string): boolean => !l.startsWith('none:');
@@ -136,6 +146,18 @@ function thresholdFor(precision: number): number {
 }
 const sure = thresholdFor(SURE_PRECISION);
 const leans = thresholdFor(LEANS_PRECISION);
+// The no-card labels together: the lowest share at which "no card is for
+// this" is right NO_CARD_PRECISION of the time. A fragment on top is not a call.
+const noneCalls = held.filter((r) => labels[r.k] !== 'none:fragment').sort((a, b) => b.none - a.none);
+let noCard = 1;
+{
+  let right = 0;
+  noneCalls.forEach((r, n) => {
+    if (!isCard(rows[r.i]!.label)) right++;
+    if (right / (n + 1) >= NO_CARD_PRECISION) noCard = r.none;
+  });
+  noCard = Math.ceil(noCard * 100) / 100;
+}
 const cards = rows.filter((r) => isCard(r.label)).length;
 console.log(`${rows.length} examples, ${labels.length} labels (${cards} examples of ${labels.filter(isCard).length} cards)`);
 console.log(`scored by a model that never saw them: top label right for ${held.filter((r) => r.right).length} of ${rows.length}`);
@@ -144,6 +166,11 @@ for (const [name, t] of [['sure', sure], ['leans', leans]] as const) {
   console.log(`${name} ${t}: ${at.length} card calls, ${at.filter((r) => r.right).length} right, ` +
     `${at.filter((r) => !r.right && isCard(rows[r.i]!.label)).length} the wrong card, ${at.filter((r) => !isCard(rows[r.i]!.label)).length} no card's; ` +
     `${at.filter((r) => r.right).length} of ${cards} card examples reached`);
+}
+{
+  const at = noneCalls.filter((r) => r.none >= noCard);
+  console.log(`no card ${noCard}: ${at.length} calls, ${at.filter((r) => !isCard(rows[r.i]!.label)).length} right; ` +
+    `${at.filter((r) => r.p < sure).length} of them with the top label unsure`);
 }
 if (process.env.VERBOSE === '1') {
   for (const r of held.filter((r) => !r.right && r.p >= leans)) console.log(`  [${rows[r.i]!.label}] ${rows[r.i]!.text} -> ${r.p.toFixed(2)} ${labels[r.k]}`);
@@ -159,7 +186,7 @@ const scales = m.W.map((w, k) => {
 });
 const model: SaidAsModel = {
   labels, dim: D, w: Buffer.from(bytes.buffer).toString('base64'), scales: scales.map((s) => Number(s.toPrecision(6))),
-  b: Array.from(m.B, (x) => Math.round(x * 1e4) / 1e4), scale: SCALE, sure, leans,
+  b: Array.from(m.B, (x) => Math.round(x * 1e4) / 1e4), scale: SCALE, sure, leans, noCard,
 };
 // The rounding must not change what the model says.
 let moved = 0;

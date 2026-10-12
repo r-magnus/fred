@@ -1,0 +1,7 @@
+BAD->ok  c8-person-with-dog       #1 decline/out-of-scope                   -> card:Twisted or sprained ankle, or     Twisted or spr:0.79[] | i tripped over the dog leash and my ankle rol
+BAD->ok  c8-water-below-camp      #1 card:Setting up a shelter for the n    -> chat                                   none:other:0.60['no-card'] | i can make out a little stream down the slope
+BAD->BAD c8-missed-cairn          #1 chat                                   -> chat{Lost: should I sta}               Lost: should I:0.47['offered'] | we must have gone past the cairn where the tr
+BAD->BAD c8-sore-hips             #1 card:Hip or pelvis injury after a f    -> card:Hip or pelvis injury after a f    Hip or pelvis :0.45[] | my hips are bruised and sore from the hip bel
+BAD->BAD c8-stiff-neck-sleep      #1 card:Possible neck or back injury      -> card:Possible neck or back injury      none:minor:0.28[] | woke up with a stiff neck from sleeping on a 
+ok ->ok  c8-what-now-anaphylaxis  #2 written                                -> card:Severe allergic reaction (anap    none:fragment:0.40[] | what now
+{'b': 29, 'a': 31} of 34

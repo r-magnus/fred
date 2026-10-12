@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { noCardKind, saidAs, type SaidAsModel } from '../src/said-as.ts';
+import { noCardKind, noCardShare, saidAs, type SaidAsModel } from '../src/said-as.ts';
 
 /** Two labels over two dimensions: int8 rows (127, 0) and (0, 127). */
 const model: SaidAsModel = {
@@ -26,4 +26,12 @@ test("saidAs: the vector's own length does not matter", () => {
 test('noCardKind: a none label names its kind, a card has none', () => {
   assert.equal(noCardKind('none:pet'), 'pet');
   assert.equal(noCardKind('Burns'), undefined);
+});
+
+test("noCardShare: the no-card kinds add up, a fragment is left out", () => {
+  const said = [
+    { label: 'none:other', p: 0.4 }, { label: 'Burns', p: 0.2 }, { label: 'none:chat', p: 0.2 },
+    { label: 'none:fragment', p: 0.15 }, { label: 'Snakebite', p: 0.05 },
+  ];
+  assert.ok(Math.abs(noCardShare(said) - 0.6) < 1e-9);
 });

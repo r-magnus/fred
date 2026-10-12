@@ -1,0 +1,43 @@
+ailments: 23 replies, answered 12 -> 12, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 20, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 16 -> 16, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 1, misses 1 -> 1
+  c2-eat-berries#1 [any] chat -> chat{Eating wild plants and} said=Eating wild plants a:0.62[offered]  "there's purple berries all over this bush"
+holdout-chats-3: 37 replies, answered 19 -> 17, changed 3, misses 6 -> 4
+  FIXED c3-oos-dog-paw#1 [decline] watch/watch -> decline/out-of-scope said=none:pet:0.30[] pet  "our lab tore a pad on the lava rock"
+  FIXED c3-oos-dog-paw#2 [decline] answer(card:Heavy bleeding from a wound) -> decline/out-of-scope said=Heavy bleeding from :0.39[] pet  "its bleeding a fair bit"
+  c3-oos-pills#1 [not-urgent] answer(card:Possible neck or back injury) -> watch/watch said=none:minor:0.42[no-card+no-card]  "my back is wrecked from the pack"
+holdout-chats-4: 38 replies, answered 20 -> 19, changed 1, misses 5 -> 5
+  c4-socks-soaked#1 [not-urgent] answer(card:Immersion foot (trench foot): cold) -> watch/watch said=none:gear:0.53[no-card+no-card]  "my socks are soaked through and i only brought one pair"
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 19 -> 19, changed 0, misses 1 -> 1
+holdout-chats-7: 28 replies, answered 11 -> 11, changed 2, misses 2 -> 1
+  FIXED c7-pet-mare#1 [decline] watch/watch -> decline/out-of-scope said=none:pet:0.57[] pet  "my mare came up lame after the ford and her fetlock feels hot"
+  c7-missed-turnoff#1 [answer] chat -> chat{Lost: should I stay or} said=Lost: should I stay :0.58[offered]  "pretty sure we walked right past our turnoff about an hour ago"
+holdout-chats-8: 34 replies, answered 23 -> 23, changed 4, misses 2 -> 1
+  FIXED c8-person-with-dog#1 [answer] decline/out-of-scope -> answer(card:Twisted or sprained ankle, or a st) said=Twisted or sprained :0.79[]  "i tripped over the dog leash and my ankle rolled, its swelling fast"
+  c8-water-below-camp#1 [any] answer(card:Setting up a shelter for the night) -> chat said=none:other:0.60[no-card]  "i can make out a little stream down the slope from our tent"
+  c8-missed-cairn#1 [answer] chat -> chat{Lost: should I stay or} said=Lost: should I stay :0.47[offered]  "we must have gone past the cairn where the trail splits, that was a good while ago"
+  c8-what-now-anaphylaxis#2 [help-now] answer(gen:Bee, wasp and insect s | Severe allergic reacti | MULTIPLE CHOICE QUESTI) -> answer(card:Severe allergic reaction (anaphyla) said=none:fragment:0.40[]  "what now"
+holdout-chats: 162 replies, answered 110 -> 110, changed 3, misses 6 -> 6
+  nu-headache#2 [not-urgent] chat -> chat{Dehydration} said=Dehydration:0.69[offered]  "probably didn't drink enough today"
+  qn-creek'#2 [any] answer(card:Crossing a river or stream) -> answer(gen:Safe River Crossings > | Crossing a river or st | Flash Floods: Tread Sa) said=none:other:0.56[no-card]  "i can see a stream below me"
+  qn-bear-food#1 [any] chat -> chat{A bear close by, charg} said=A bear close by, cha:0.68[offered]  "we're camping in bear country"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 2, misses 1 -> 1
+  l2-diabetic-friend#2 [chat] chat -> chat{Low blood sugar} said=Low blood sugar:0.87[offered]  "sam has type 1 diabetes"
+  l2-altitude-dizzy#1 [any] chat -> chat{Altitude illness} said=Altitude illness:0.65[offered]  "we're on a trek around 11000 feet"
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 1
+  sv-food-01 [] abstain/low-score -> abstain/out-of-scope said=none:pet:0.33[] pet  "I have a cooler with some sandwiches and breakfast sausages in it, can animals get in?"
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+17 replies changed

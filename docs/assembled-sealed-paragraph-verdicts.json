@@ -1,0 +1,362 @@
+{
+ "grader": "Claude Opus 5.5 (in-session), 2026-10-12. Not blind: the grader also wrote these questions and key points. \"cause\" is the grader's label for why an answer fell short (model, quote-off, card-general, card-wrong).",
+ "variant": "quote-context branch (paragraph quotes), packs fred-packs-g-all",
+ "runs": "docs/c23/assembled-sealed-paragraph.jsonl",
+ "verdicts": [
+  {
+   "questionId": "az-rotten-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Not good: smoulders, hard to light."
+  },
+  {
+   "questionId": "az-snap-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Cambium, fire damage, colour: no snap test, reads as made up."
+  },
+  {
+   "questionId": "az-thick-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Still the green-logs passage, now with a second sentence about stacking; not how thick fuel should be."
+  },
+  {
+   "questionId": "az-base-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Dry base: dry wood or nonporous rock."
+  },
+  {
+   "questionId": "az-clear-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Bare soil, 3 feet across."
+  },
+  {
+   "questionId": "az-reflect-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Campfire card; nothing about a reflector."
+  },
+  {
+   "questionId": "az-nowood-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Dry grass, dung, peat."
+  },
+  {
+   "questionId": "az-icevssnow-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Ice: more water, less heat."
+  },
+  {
+   "questionId": "az-fastwater-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Water card: treat any water. Does not say moving water is the better choice."
+  },
+  {
+   "questionId": "az-leaves-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Shelter card lines; no depth of insulation over you."
+  },
+  {
+   "questionId": "az-sandstake-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: tie to wood or rock and bury it."
+  },
+  {
+   "questionId": "az-wreckfire-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: unwise near wreckage, fuel may ignite; shelter a safe distance away."
+  },
+  {
+   "questionId": "az-dst-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Between the hour hand and 1300 on daylight time."
+  },
+  {
+   "questionId": "az-moon-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Rises before sunset: lit side west; after midnight: east."
+  },
+  {
+   "questionId": "az-cass-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Direction card, which says to find the Big Dipper; no Cassiopeia."
+  },
+  {
+   "questionId": "az-bark-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Quote lists natural fibres (grasses, sinew) but not inner bark, twisting or testing."
+  },
+  {
+   "questionId": "az-jerky-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Thin across the grain, fat off, sun and wind or non-resinous smoke."
+  },
+  {
+   "questionId": "az-ripples-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Submerged boulders, logs, swift water, uneven bottom."
+  },
+  {
+   "questionId": "az-bend-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "River card; never says a straight stretch."
+  },
+  {
+   "questionId": "az-closed-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Do not enter, follow closures. Step 1 is filler."
+  },
+  {
+   "questionId": "az-lostburn-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Lost card: stop, take stock, call if there is signal."
+  },
+  {
+   "questionId": "az-bike-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: bikers yield to hikers."
+  },
+  {
+   "questionId": "az-bearspray-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Opens \"Yes, but it is not recommended\" where the source says no; the rest is right."
+  },
+  {
+   "questionId": "az-smellfood-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Compact, high calorie, low odour foods."
+  },
+  {
+   "questionId": "az-wolf-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "100 yards."
+  },
+  {
+   "questionId": "az-crampsalt-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Avoid salt tablets, water and sports drink, help after an hour."
+  },
+  {
+   "questionId": "az-babyrattle-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "No; young have none, adults lose them."
+  },
+  {
+   "questionId": "az-layers-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model-declined",
+   "reasoning": "The model declined with the layering passage in hand; no quote or card replaced it."
+  }
+ ]
+}

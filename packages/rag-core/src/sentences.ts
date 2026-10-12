@@ -11,7 +11,7 @@
  * EmbeddingGemma is Matryoshka-trained, so the leading dimensions carry most of
  * the meaning; 256 of 768 keeps the index to about a third of the size.
  */
-import { splitSentences } from './compress.ts';
+import { splitSentences, unwrapLines } from './compress.ts';
 import { cosineInt8 } from './score.ts';
 
 export const SENTENCE_DIM = 256;
@@ -48,19 +48,29 @@ export function quotableSentences(text: string): string[] {
 const MAX_WHOLE_SENTENCE = 400;
 
 /**
- * The sentences of a passage as the reader would see them, wrapped lines
- * joined. Index rows are cut at every line break, so a row can be the back
- * half of a sentence: the manual's "Avoid directly / eating snow as it lowers
- * the body's core temperature" was quoted without its first two words (#23).
- * Rows still rank; what is shown is the sentence the row sits in.
+ * A paragraph or list item up to this long is quoted whole (about three
+ * sentences). The sentence closest to a question is often the one beside the
+ * answer: asked what to do about a smoke column, the closest sentence was
+ * "travel safely to another lake" and the same list item began "Most fires
+ * travel with the prevailing wind so have a route in mind that is in another
+ * direction" (docs/results-assembled-grade.md).
  */
-function wholeSentences(text: string): string[] {
-  // Without the bullet or the paragraph number ("3-10.") in front, as rows are.
-  return splitSentences(bodyLines(text).join('\n')).map((s) => s.replace(/^(?:[-*•]|\d+(?:-\d+)?\.|[a-z]\.)\s+/, '').replace(/\s+/g, ' '));
-}
+const MAX_QUOTED_PARAGRAPH = 360;
 
-function wholeSentenceOf(row: string, wholes: readonly string[]): string {
+/** Without the bullet, the paragraph number ("3-10.") or a bare "Note." in front, as rows are. */
+const unmarked = (s: string): string => s.replace(/^(?:[-*•]|\d+(?:-\d+)?\.|[a-z]\.|Note\.)\s+/, '').replace(/\s+/g, ' ');
+
+/**
+ * What is shown for an index row. Rows are cut at every line break, so a row
+ * can be the back half of a sentence: the manual's "Avoid directly / eating
+ * snow as it lowers the body's core temperature" was quoted without its first
+ * two words (#23). Rows still rank; what is shown is the short paragraph the
+ * row sits in, or else its whole sentence, or else the row itself.
+ */
+function shownFor(row: string, paragraphs: readonly string[], wholes: readonly string[]): string {
   const flat = row.replace(/\s+/g, ' ');
+  const paragraph = paragraphs.find((p) => p.includes(flat));
+  if (paragraph !== undefined && paragraph.length <= MAX_QUOTED_PARAGRAPH) return paragraph;
   const whole = wholes.find((w) => w.includes(flat));
   return whole === undefined || whole.length > MAX_WHOLE_SENTENCE ? row : whole;
 }
@@ -83,7 +93,7 @@ export interface QuotedSentence {
 
 /**
  * The sentences of these passages closest to the query, best first, each
- * given as the whole sentence its row sits in. Passages whose rows don't match
+ * given as the short paragraph or whole sentence its row sits in. Passages whose rows don't match
  * their split (a pack built from other text) are skipped, never guessed at.
  */
 export function rankSentences(
@@ -95,8 +105,10 @@ export function rankSentences(
   for (const p of passages) {
     const sentences = quotableSentences(p.text);
     if (p.rows === undefined || p.rows.length !== sentences.length) continue;
-    const wholes = wholeSentences(p.text);
-    sentences.forEach((text, i) => out.push({ chunkId: p.chunkId, text: wholeSentenceOf(text, wholes), similarity: cosineInt8(q, p.rows![i]!) }));
+    const body = bodyLines(p.text).join('\n');
+    const paragraphs = unwrapLines(body).map(unmarked);
+    const wholes = splitSentences(body).map(unmarked);
+    sentences.forEach((text, i) => out.push({ chunkId: p.chunkId, text: shownFor(text, paragraphs, wholes), similarity: cosineInt8(q, p.rows![i]!) }));
   }
   return out.sort((a, b) => b.similarity - a.similarity);
 }

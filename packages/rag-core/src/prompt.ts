@@ -151,6 +151,33 @@ export const SYSTEM_PREFIX = `You are a field first-aid and wilderness survival 
 - If the SOURCES do not contain the answer, reply with exactly: I don't have reliable information on that.`;
 
 /**
+ * #23: two wordings of the last rule, for measurement only. Studies of larger
+ * models blame the blanket "if the sources do not contain the answer, say the
+ * fixed sentence" rule for many false declines and found a narrow statement of
+ * when to decline cheaper (research_notes/Fewer false declines in Fred).
+ * 'narrow' declines only when no source is on the topic; 'partial' also says
+ * to give the part the sources do answer.
+ *
+ * MEASURED AND REJECTED — see docs/results-decline-wording.md. Default off.
+ *
+ * On the 23 questions where the model declines today, 'narrow' answered 13
+ * and 'partial' 17, and the answers were worse than what the decline already
+ * leads to. Told berries "around here" were edible, picked a tent, and for
+ * "my friend is on the ground not breathing" replaced the lightning card
+ * (start CPR) with "Contact emergency services first." The model's decline is
+ * what hands the reply to reviewed text (the quote, the card, the safety
+ * lines), so making it rarer removes that text.
+ */
+const RULES_BEFORE_DECLINE = SYSTEM_PREFIX.slice(0, SYSTEM_PREFIX.lastIndexOf('\n- ') + 1);
+export const SYSTEM_PREFIX_NARROW = `${RULES_BEFORE_DECLINE}- Decline only when none of the SOURCES is about what the question asks. To decline, reply with exactly: I don't have reliable information on that.`;
+export const SYSTEM_PREFIX_PARTIAL = `${RULES_BEFORE_DECLINE}- If the SOURCES answer only part of the question, give that part and nothing more.
+- If none of the SOURCES is about what the question asks, reply with exactly: I don't have reliable information on that.`;
+
+const SYSTEM_PREFIXES: Record<AnswerVariant, string> = {
+  default: SYSTEM_PREFIX, lead: SYSTEM_PREFIX_LEAD, narrow: SYSTEM_PREFIX_NARROW, partial: SYSTEM_PREFIX_PARTIAL,
+};
+
+/**
  * Response-shape instruction, chosen per query rather than fixed in the prefix.
  *
  * The prefix used to end with "Reply with short numbered steps", which is right
@@ -303,7 +330,7 @@ export interface PromptParts {
 }
 
 /** Which answer-shape wording to use. See SYSTEM_PREFIX_LEAD. */
-export type AnswerVariant = 'default' | 'lead';
+export type AnswerVariant = 'default' | 'lead' | 'narrow' | 'partial';
 
 export function buildPromptParts(
   query: string,
@@ -314,7 +341,7 @@ export function buildPromptParts(
   shape: ShapeVariant = 'default',
 ): PromptParts {
   return {
-    system: variant === 'lead' ? SYSTEM_PREFIX_LEAD : SYSTEM_PREFIX,
+    system: SYSTEM_PREFIXES[variant],
     user: buildQuerySuffix(query, blocks, place, earlier, shape).trimStart(),
   };
 }

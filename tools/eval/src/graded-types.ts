@@ -244,6 +244,8 @@ export interface GradedRun {
   readonly widenedTopScore?: number;
   /** The understanding step, when it ran (#98). */
   readonly understood?: { readonly intent?: string | undefined; readonly request: string; readonly topScore?: number; readonly ownScore?: number; readonly used: boolean };
+  /** #23: the closest sentence in the passages found, for a search under the gate. */
+  readonly nearSentence?: { readonly similarity: number; readonly text: string };
   /** The model's whole reply was the decline sentence (#23). */
   readonly modelRefused?: boolean;
   /** What replaced a model-written answer, when something did: 'quoted', 'number', a condition. */

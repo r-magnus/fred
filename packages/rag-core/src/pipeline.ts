@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord, DomainTag } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, DEAD_ENDS, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, DEAD_ENDS, CLOSEST_CARD_LEAD, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -193,6 +193,10 @@ export interface AskOptions {
    * Default on; off only to measure what it changes.
    */
   readonly guards?: boolean;
+  /** #23: quote the closest sentence for a search under the gate (UNDER_GATE_QUOTE_FLOOR). Default on; off only to measure. */
+  readonly quoteUnderGate?: boolean;
+  /** #23: a field card in place of the model's decline (CLOSEST_CARD_FLOOR). Default on; off only to measure. */
+  readonly closestCard?: boolean;
   /** Overrides UNDERSTOOD_OWN_TOP, for calibration on the tuning sets. */
   readonly understandOwnTop?: number;
   /**
@@ -500,6 +504,29 @@ function leadingCard(candidates: readonly ScoredChunk[], isCard: (c: ScoredChunk
 export const CARD_TOP_FLOOR = 0.32;
 
 /**
+ * #23: when the model declines a question the search chose to answer, the
+ * best field card it was handed is shown under CLOSEST_CARD_LEAD, if the card
+ * scored at least this. "how do i start a fire with wet wood" had the campfire
+ * card at 0.318, under CARD_TOP_FLOOR, and the model declined three times in
+ * four on the phone with the card's dry-tinder and dry-base lines in hand.
+ * Nothing else changes: this runs only on a reply that was a decline.
+ */
+export const CLOSEST_CARD_FLOOR = 0.29;
+
+/**
+ * #23: a search under the gate is still answered, by quoting, when the best
+ * sentence in the passages found is at least this close to the question. On
+ * the tuning, breadth and working `assembled` sets (55 searches declined under
+ * the gate) the four at or above 0.60 were all the answer: "walk 200 feet or
+ * 70 large steps away" for how far from the lake to dig, "Fresh rainwater
+ * collected into containers does not require purification" (0.608 to 0.676).
+ * The closest sentence for a question Fred must decline was 0.592 ("How do I
+ * amputate a trapped limb?") and 0.582 (stitching a cut), then 0.556 and down.
+ * Stricter than QUOTE_FLOOR, which is only used above the gate.
+ */
+export const UNDER_GATE_QUOTE_FLOOR = 0.6;
+
+/**
  * A follow-up whose own best match reaches this keeps that match: the search
  * joined to the previous question may only win if it contains it. The same
  * bar that makes a field card a clear match (retrieve.ts reserve.minScore).
@@ -571,6 +598,8 @@ export interface Diagnostics {
    * `replacedBy` is filled in once the stream has been read, when the answer
    * gave advice the condition's card says not to give and the card was shown.
    */
+  /** #23: the retrieved passages' sentence closest to the question, when the search fell under the gate. */
+  readonly nearSentence?: { readonly similarity: number; readonly text: string };
   /** `refused`: the model's whole reply was a dead end (#23); `replacedBy`: what was shown instead. */
   readonly answerGuard?: { readonly replacedBy?: string; readonly refused?: boolean };
   /** Time before the decision, split into model calls and embedding (ms). */
@@ -1047,6 +1076,27 @@ async function askCore(
   };
   const supportOf = async (cs: readonly ScoredChunk[]): Promise<CardSupport | undefined> =>
     (opts.understand !== false && opts.guards !== false ? cardSupport(cs, isCard, store) : undefined);
+  // #126: the one or two sentences of these passages that are closest to the
+  // question, verbatim, when one clears `floor`.
+  const quoteFrom = async (chunks: readonly ChunkRecord[], floor: number): Promise<{ text: string; similarity: number; chunkIds: string[] } | undefined> => {
+    const passages = chunks.map((c) => ({ chunkId: c.id, text: c.text, rows: store.sentenceVectorsFor?.(c.id) }));
+    if (!passages.some((p) => p.rows !== undefined)) return undefined;
+    const ranked = rankSentences(await queryVector(backend, query), passages);
+    const best = ranked[0];
+    if (best === undefined || best.similarity < floor) return undefined;
+    // The same sentence often sits on two pages ("pick them up if possible so
+    // they don't panic and run", three mountain-lion pages): quote it once.
+    const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const picked: { text: string; chunkId: string }[] = [];
+    for (const r of ranked) {
+      if (r.similarity < Math.max(floor, best.similarity - QUOTE_BAND) || picked.length === 2) break;
+      if (picked.some((p) => norm(p.text).includes(norm(r.text)) || norm(r.text).includes(norm(p.text)))) continue;
+      picked.push({ text: r.text, chunkId: r.chunkId });
+    }
+    // Introduced by who said it (#135).
+    const sources = picked.map((p) => chunks.find((c) => c.id === p.chunkId)?.source ?? '');
+    return { text: `${quoteIntro(sources)}\n${picked.map((p) => p.text).join('\n')}`, similarity: best.similarity, chunkIds: picked.map((p) => p.chunkId) };
+  };
   // Only the earlier messages this one continues (understand.ts, currentThread).
   const history = currentThread(query, opts.history ?? []);
   const understandOn = opts.understand !== false;
@@ -1633,8 +1683,25 @@ async function askCore(
     if (routed.skippedStatePacks.length > 0) {
       return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
     }
+    // #23: a search under the gate whose passages hold a sentence this close
+    // to the question is answered with that sentence, word for word
+    // (UNDER_GATE_QUOTE_FLOOR). Nothing is written, so nothing is made up.
+    const sourcesFound = candidates.slice(0, retrievalOpts.topK)
+      .filter((c) => !isCard(c) && c.chunk.audience !== 'provider' && c.chunk.packId !== retrievalOpts.reserve?.packId);
+    const near = guardsOn && !aboutPet && !petPatient && !NOT_FREDS_JOB.test(query)
+      ? await quoteFrom(sourcesFound.map((c) => c.chunk), 0) : undefined;
+    const nearDiag = near === undefined ? weak : { ...weak, nearSentence: { similarity: near.similarity, text: near.text } };
+    if (near !== undefined && near.similarity >= UNDER_GATE_QUOTE_FLOOR && opts.quoteUnderGate !== false) {
+      const quoted = sourcesFound.filter((c) => near.chunkIds.includes(c.chunk.id));
+      return {
+        kind: 'answer', stream: once(near.text), citations: quoted.map(citeOf),
+        prompt: { system: '', user: '' }, medical: quoted.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
+        diagnostics: { ...nearDiag, sufficient: null, answerGuard: { replacedBy: 'near-quote' } },
+        ...(offer === undefined ? {} : { card: offer }),
+      };
+    }
     return {
-      kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
+      kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: nearDiag,
       ...(offer === undefined ? {} : { offer }),
     };
   }
@@ -1899,24 +1966,12 @@ async function askCore(
   // the question, verbatim, when one clears QUOTE_FLOOR.
   const quoteSources = async (): Promise<string | undefined> => {
     if (!guardsOn || NOT_FREDS_JOB.test(query)) return undefined;
-    const passages = blocks.filter((b) => b.chunk.packId !== retrievalOpts.reserve?.packId)
-      .map((b) => ({ chunkId: b.chunk.id, text: b.chunk.text, rows: store.sentenceVectorsFor?.(b.chunk.id) }));
-    if (!passages.some((p) => p.rows !== undefined)) return undefined;
-    const ranked = rankSentences(await queryVector(backend, query), passages);
-    const best = ranked[0];
-    if (best === undefined || best.similarity < QUOTE_FLOOR) return undefined;
-    // The same sentence often sits on two pages ("pick them up if possible so
-    // they don't panic and run", three mountain-lion pages): quote it once.
-    const norm = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, '');
-    const picked: { text: string; chunkId: string }[] = [];
-    for (const r of ranked) {
-      if (r.similarity < Math.max(QUOTE_FLOOR, best.similarity - QUOTE_BAND) || picked.length === 2) break;
-      if (picked.some((p) => norm(p.text).includes(norm(r.text)) || norm(r.text).includes(norm(p.text)))) continue;
-      picked.push({ text: r.text, chunkId: r.chunkId });
-    }
-    // Introduced by who said it (#135).
-    const sources = picked.map((p) => blocks.find((b) => b.chunk.id === p.chunkId)?.chunk.source ?? '');
-    return `${quoteIntro(sources)}\n${picked.map((p) => p.text).join('\n')}`;
+    return (await quoteFrom(blocks.filter((b) => b.chunk.packId !== retrievalOpts.reserve?.packId).map((b) => b.chunk), QUOTE_FLOOR))?.text;
+  };
+  const closestCard = (): ScoredChunk | undefined => {
+    if (!guardsOn || opts.closestCard === false || NOT_FREDS_JOB.test(query) || petPatient || saidNoCard) return undefined;
+    const card = usable.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+    return card !== undefined && card.score >= CLOSEST_CARD_FLOOR ? card : undefined;
   };
   const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
@@ -1942,6 +1997,12 @@ async function askCore(
       // and one of them is close to the question.
       const quoted = await quoteSources();
       if (quoted !== undefined) { answerGuard.replacedBy = 'quoted'; return quoted; }
+      // #23: the field card the model was handed and declined to use.
+      const near = closestCard();
+      if (near !== undefined) {
+        answerGuard.replacedBy = 'card';
+        return `${CLOSEST_CARD_LEAD}\n${renderCard(parseCard(near.chunk.text))}`;
+      }
       if (emergency) { answerGuard.replacedBy = 'safety-net'; return SAFETY_NET_REPLY; }
       return text;
     }

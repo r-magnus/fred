@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
-import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD } from '../src/pipeline.ts';
+import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD, CLOSEST_CARD_FLOOR, UNDER_GATE_QUOTE_FLOOR } from '../src/pipeline.ts';
 import { currentThread, readUnderstood } from '../src/understand.ts';
 import { applyQueryTemplate, assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { quantizeInt8 } from '../src/score.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
-import { SYSTEM_PREFIX } from '../src/prompt.ts';
-import { FakeBackend, FakePackStore, FAKE_SPEC } from './fakes.ts';
+import { SYSTEM_PREFIX, CLOSEST_CARD_LEAD } from '../src/prompt.ts';
+import { FakeBackend, FakePackStore, FAKE_SPEC, fakeEmbed } from './fakes.ts';
+import { truncateVector } from '../src/sentences.ts';
 
 type Seed = Omit<ChunkRecord, 'id' | 'packId' | 'ordinal'>;
 const seed = (text: string, over: Partial<Seed> = {}): Seed => ({
@@ -915,4 +916,74 @@ test('with LEAD off, the card itself is the answer', async () => {
   const res = await ask(ICE_Q, { backend: b, store: await leadStore(b, [false, true]), packs: clinicalPacks },
     { ...leadOpts, lead: false, history: ['a snake bit my friend'] });
   if (res.kind === 'answer') assert.equal(res.card, undefined);
+});
+
+// #23: the model declines a question the search chose to answer.
+class Declines extends FakeBackend {
+  override async *generate(): AsyncIterable<string> { yield "I don't have reliable "; yield 'information on that.'; }
+}
+function declineStore(): FakePackStore {
+  const store = new FakePackStore();
+  store.addPack('core-survival', [seed('To get a fire going in the rain with wet wood, find standing dead wood: it stays dry in rain.', { domain: 'survival' })]);
+  store.addPack('core-fieldcards', [seed('Starting a fire\nLay dry tinder on a dry base.\n1. Add wood from small to large.', { source: 'Fred field card', section: 'Starting a campfire', domain: 'survival' })]);
+  return store;
+}
+const textOf = async (s: AsyncIterable<string>): Promise<string> => { let o = ''; for await (const x of s) o += x; return o; };
+const declinePacks = [
+  { id: 'core-survival', domains: ['survival'] as const, scope: { kind: 'global' } as const },
+  { id: 'core-fieldcards', domains: ['survival'] as const, scope: { kind: 'global' } as const },
+];
+test('a model decline shows the field card it was handed, said to be the closest (#23)', async () => {
+  const q = 'how do i get a fire going with wet wood in the rain';
+  const optsFor = (closestCard: boolean) => ({
+    // The card is a source for the model here, not shown word for word.
+    state: null, abstainThreshold: 0, closestCard, cardAnswer: 'off' as const,
+    retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 2 } },
+  });
+  const on = await ask(q, { backend: new Declines(), store: declineStore(), packs: declinePacks }, optsFor(true));
+  assert.equal(on.kind, 'answer');
+  if (on.kind !== 'answer') return;
+  const card = on.diagnostics.candidates.find((c) => c.chunk.packId === 'core-fieldcards');
+  assert.ok(card !== undefined && card.score >= CLOSEST_CARD_FLOOR, `card score ${card?.score}`);
+  const text = await textOf(on.stream);
+  assert.ok(text.startsWith(CLOSEST_CARD_LEAD), text);
+  assert.match(text, /dry tinder on a dry base/i);
+  assert.deepEqual(on.diagnostics.answerGuard, { refused: true, replacedBy: 'card' });
+
+  const off = await ask(q, { backend: new Declines(), store: declineStore(), packs: declinePacks }, optsFor(false));
+  assert.equal(off.kind, 'answer');
+  if (off.kind === 'answer') assert.equal(await textOf(off.stream), "I don't have reliable information on that.");
+});
+
+test('an answer the model did write is never touched by the closest-card step (#23)', async () => {
+  const res = await ask('how do i get a fire going with wet wood in the rain', { backend: new FakeBackend(), store: declineStore(), packs: declinePacks }, {
+    state: null, abstainThreshold: 0, cardAnswer: 'off', retrieval: { ...DEFAULT_RETRIEVAL, reserve: { packId: 'core-fieldcards', minScore: 2 } },
+  });
+  assert.equal(res.kind, 'answer');
+  if (res.kind === 'answer') { assert.equal(await textOf(res.stream), 'FAKE ANSWER'); assert.deepEqual(res.diagnostics.answerGuard, {}); }
+});
+
+// #23: a search under the gate whose passages hold a sentence close to the question.
+test('under the gate, a sentence close to the question is quoted; a distant one is not (#23)', async () => {
+  const q = 'how far from the lake do i dig a cathole';
+  const passage = 'Dispose of waste properly on every trip.\nTo dig a cathole, walk 200 feet from any lake or stream.';
+  const make = (closeTo: string): FakePackStore => {
+    const store = new FakePackStore();
+    store.addPack('core-survival', [seed(passage, { domain: 'survival', source: 'National Park Service' })]);
+    const row = (t: string): Int8Array => quantizeInt8(truncateVector(fakeEmbed(t))).vec;
+    return Object.assign(store, { sentenceVectorsFor: () => [row('nothing alike zzz'), row(closeTo)] });
+  };
+  const packs = [{ id: 'core-survival', domains: ['survival'] as const, scope: { kind: 'global' } as const }];
+  // The gate is set above any score, so the search is declined.
+  const near = await ask(q, { backend: new FakeBackend(), store: make(q), packs }, { state: null, abstainThreshold: 5, fallbackThreshold: 5 });
+  assert.equal(near.kind, 'answer');
+  if (near.kind !== 'answer') return;
+  assert.equal(await textOf(near.stream), "Here's what the National Park Service says:\nTo dig a cathole, walk 200 feet from any lake or stream.");
+  assert.equal(near.diagnostics.answerGuard?.replacedBy, 'near-quote');
+  assert.ok((near.diagnostics.nearSentence?.similarity ?? 0) >= UNDER_GATE_QUOTE_FLOOR);
+
+  const far = await ask(q, { backend: new FakeBackend(), store: make('bears wolves moose elk bison'), packs }, { state: null, abstainThreshold: 5, fallbackThreshold: 5 });
+  assert.equal(far.kind, 'abstain');
+  const off = await ask(q, { backend: new FakeBackend(), store: make(q), packs }, { state: null, abstainThreshold: 5, fallbackThreshold: 5, quoteUnderGate: false });
+  assert.equal(off.kind, 'abstain');
 });

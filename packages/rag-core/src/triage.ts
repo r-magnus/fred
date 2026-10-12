@@ -129,8 +129,13 @@ const EAT = /\b(?:eat|edible|eatable)\b/i;
  * (tuning set, ff-forage-03).
  */
 const UNNAMED = /\beat (?:these|this|them|those|that|it|one|some)\b|\b(?:are|is) (?:these|this|those|they|it|that) (?:\w+ )?(?:edible|safe to eat|ok to eat|okay to eat|good to eat)\b|(?:^|\s)(?:wild )?(?:berr(?:y|ies)|mushrooms?|fungus|fungi|wild plants?)\b/i;
+/**
+ * Snow and ice are named, and are not plants: "im out of water but theres
+ * snow everywhere, can i just eat it" opened the wild-plants card (#23).
+ */
+const EATS_SNOW = /\b(?:snow|ice|icicles?|hail)\b/i;
 export function asksToEatUnknown(message: string): boolean {
-  return EAT.test(message) && UNNAMED.test(message) && asksSomething(message);
+  return EAT.test(message) && UNNAMED.test(message) && !EATS_SNOW.test(message) && asksSomething(message);
 }
 
 /**

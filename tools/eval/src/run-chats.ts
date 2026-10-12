@@ -122,6 +122,7 @@ for (const set of sets) {
           ...(d.said === undefined ? {} : { said: d.said }),
           ...(d.everyday === undefined ? {} : { everyday: d.everyday }),
           ...(d.answerGuard?.refused === true ? { modelRefused: true } : {}),
+          ...(d.nearSentence === undefined ? {} : { nearSentence: { similarity: Number(d.nearSentence.similarity.toFixed(3)), text: d.nearSentence.text } }),
           ...(d.answerGuard?.replacedBy === undefined ? {} : { guardedBy: d.answerGuard.replacedBy }),
           keyPoints: turn.keyPoints ?? [], unsafe: c.unsafe,
           decideMs, timing: d.timing ?? null,

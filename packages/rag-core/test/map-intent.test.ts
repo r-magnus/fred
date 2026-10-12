@@ -74,7 +74,7 @@ test('signal messages are told apart from lost ones (#77)', () => {
 // Every eval question: the rule may fire only on questions about being lost or
 // finding signal, listed here by id so a new match is looked at, not waved through.
 test('across the eval sets it fires only where expected', () => {
-  const EXPECTED = new Set(['br-lost-01', 'sv-lost-01', 'sv-signal-01', 'hs-staymove-01', 'neg-location-01', 'br-stress-01']);
+  const EXPECTED = new Set(['br-lost-01', 'sv-lost-01', 'sv-signal-01', 'hs-staymove-01', 'neg-location-01', 'br-stress-01', 'az-lostburn-01']);
   const dir = 'tools/eval/data';
   const fired: string[] = [];
   for (const f of readdirSync(dir).filter((x) => /^(graded|holdout)-.*\.json$/.test(x))) {

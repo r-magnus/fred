@@ -185,6 +185,16 @@ export const STATE_SETS = ['tools/eval/data/holdout-states.json'] as const;
 export const GROUNDED_CONFIRM_SETS = ['tools/eval/data/confirm-grounded.json'] as const;
 
 /** Which family a run is against. `EVAL_SET=holdout` selects the held-out one. */
+/**
+ * #23: questions whose answer is in the sources but has to be put together or
+ * is worded differently from them (30), with 15 look-alikes on the same topics
+ * that the sources do not answer. Written from the source text 2026-10-12,
+ * before the second step after a model decline existed. `assembled` is the
+ * working half; `assembled-sealed` is run once, to confirm.
+ */
+export const ASSEMBLED_SETS = ['tools/eval/data/assembled.json'] as const;
+export const ASSEMBLED_SEALED_SETS = ['tools/eval/data/holdout-assembled.json'] as const;
+
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
     case 'tuning': return GRADED_SETS;
@@ -199,8 +209,10 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'hazards': return HAZARD_SETS;
     case 'states': return STATE_SETS;
     case 'grounded-confirm': return GROUNDED_CONFIRM_SETS;
+    case 'assembled': return ASSEMBLED_SETS;
+    case 'assembled-sealed': return ASSEMBLED_SEALED_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | grounded-confirm | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);
   }
 }
 

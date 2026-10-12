@@ -34,6 +34,7 @@ import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPha
 import { beginAnswer, ceilingEstimate, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { signalAdvice } from './src/coverage-layer.ts';
+import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { Scene } from './src/scene.tsx';
 import { SideDrawer, SideTab } from './src/side-drawer.tsx';
@@ -127,8 +128,13 @@ interface Turn {
   decline?: DeclineReply;
 }
 
-/** The jump-to-end arrow shows when this much of the chat is below the screen. */
-const MORE_BELOW_PX = 48;
+/**
+ * The jump-to-end hint shows when more than this share of a screen of chat is
+ * below, and goes once less than the smaller share is: near the end it would
+ * only be in the way, and two cut-offs keep it from flickering at the edge.
+ */
+const MORE_BELOW_SHOW = 0.45;
+const MORE_BELOW_HIDE = 0.2;
 
 /** #77: how long after a signal question its reply may still be filled in. */
 const SIGNAL_REPLY_WINDOW_MS = 2 * 60_000;
@@ -222,7 +228,8 @@ function Screen() {
   if (shownCount.current !== turns.length) { shownCount.current = turns.length; jumpOwed.current = true; }
   const checkBelow = useCallback((): void => {
     const { offset, height, content } = scrollAt.current;
-    setMoreBelow(content - (offset + height) > MORE_BELOW_PX);
+    const below = content - (offset + height);
+    setMoreBelow((was) => below > height * (was ? MORE_BELOW_HIDE : MORE_BELOW_SHOW));
   }, []);
   const toEnd = useCallback((): void => { scroller.current?.scrollToEnd({ animated: true }); }, []);
   const nextId = useRef(1);
@@ -886,14 +893,7 @@ function Screen() {
           </View>
         ))}
       </ScrollView>
-      {moreBelow && (
-        <View style={styles.toEndWrap} pointerEvents="box-none">
-          <Pressable style={styles.toEnd} onPress={toEnd} hitSlop={10}
-            accessibilityRole="button" accessibilityLabel="Jump to the end">
-            <Image source={ARROW} resizeMode="contain" style={styles.toEndMark} />
-          </Pressable>
-        </View>
-      )}
+      <JumpToEnd shown={moreBelow} onPress={toEnd} />
 
       {/* 'padding' on Android too. The usual Android answer is adjustResize in
           the manifest, but edge-to-edge (RN 0.86, Android 15+) means the window
@@ -971,15 +971,6 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   clarifyQ: { color: palette.ink, fontSize: 14, fontWeight: '600' },
   clarifyOther: { color: palette.moss, fontSize: 13, fontWeight: '600' },
   root: { flex: 1, backgroundColor: palette.cream },
-  // A zero-height row between the chat and the composer; the button hangs up into the chat.
-  toEndWrap: { height: 0, alignItems: 'center', zIndex: 2 },
-  toEnd: {
-    position: 'absolute', bottom: 8, width: 36, height: 36, borderRadius: 18,
-    alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.paper, borderWidth: 1, borderColor: palette.sand,
-    boxShadow: `0 2 8 ${palette.shade}`,
-  },
-  toEndMark: { width: 16, height: 16, tintColor: palette.pine, transform: [{ rotate: '180deg' }] },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
   wordmarkSmall: { height: 28, width: 28 * LOGO_RATIO, tintColor: palette.logo },

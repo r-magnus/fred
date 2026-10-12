@@ -86,9 +86,24 @@ taken on the road. The dot on the map is drawn from these same readings
 (#178), so an accurate track means an accurate dot, but nobody
 photographed it.
 
-Also not shown: whether GPS held in airplane mode. The recording does not
-note whether the phone had signal, so the airplane-mode stretch, if it was
-done, cannot be picked out of the tracks.
+### Airplane mode: not during these recordings
+
+Ryan switched airplane mode on and off during the trip without noting when.
+The phone keeps its own log of every switch, in two separate places (the
+radio and the WiFi system), and the two agree: over the trip, airplane mode
+was on once, on 10-10 from 09:25 to 09:31. No recording was running then.
+During all four driving tracks the phone was in normal mode.
+
+So the tracks say nothing about GPS without signal. What stands on that
+question is still the 2026-09-21 reading in `results-bkr1-outdoor.md`
+(9.5 m in airplane mode, one spot). Fred was open during the six minutes on
+10-10 and its saved files were written then, so the app runs in airplane
+mode; that is all those six minutes show.
+
+One more thing the same log shows: the phone really had no service on
+10-11 from about 16:07 to 16:20. That is after the last recording stopped
+(15:19), so there is no position to match it to. If the place is
+remembered, it is a real point to check against the coverage map.
 
 ## B-KR2: do answers fit where you are?
 

@@ -127,6 +127,9 @@ interface Turn {
   decline?: DeclineReply;
 }
 
+/** The jump-to-end arrow shows when this much of the chat is below the screen. */
+const MORE_BELOW_PX = 48;
+
 /** #77: how long after a signal question its reply may still be filled in. */
 const SIGNAL_REPLY_WINDOW_MS = 2 * 60_000;
 
@@ -203,6 +206,25 @@ function Screen() {
   const abort = useRef<AbortController | null>(null);
   const engine = useRef<Engine | null>(null);
   const scroller = useRef<ScrollView | null>(null);
+  // The chat stays where the reader left it while an answer comes in. A
+  // message just sent moves to the top of the screen, so its answer fills
+  // the screen below it, and an arrow offers the jump to the end whenever
+  // there is more below. Following the answer down made it hard to read
+  // (Ryan, 2026-10-11).
+  const scrollAt = useRef({ offset: 0, height: 0, content: 0 });
+  const [moreBelow, setMoreBelow] = useState(false);
+  // The chat's visible height: the newest message is given that much room, so it can sit at the top.
+  const [threadHeight, setThreadHeight] = useState(0);
+  // Set when the number of messages changes (one sent, a past chat opened);
+  // the newest message is then brought to the top, once.
+  const jumpOwed = useRef(false);
+  const shownCount = useRef(0);
+  if (shownCount.current !== turns.length) { shownCount.current = turns.length; jumpOwed.current = true; }
+  const checkBelow = useCallback((): void => {
+    const { offset, height, content } = scrollAt.current;
+    setMoreBelow(content - (offset + height) > MORE_BELOW_PX);
+  }, []);
+  const toEnd = useCallback((): void => { scroller.current?.scrollToEnd({ animated: true }); }, []);
   const nextId = useRef(1);
 
   // Past chats (src/chat-log.ts) and the drawer that lists them.
@@ -630,7 +652,14 @@ function Screen() {
         ref={scroller}
         style={styles.thread}
         contentContainerStyle={styles.threadInner}
-        onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={(_w, h) => {
+          scrollAt.current.content = h;
+          // The answer growing does not move the chat.
+          checkBelow();
+        }}
+        onLayout={(e) => { scrollAt.current.height = e.nativeEvent.layout.height; setThreadHeight(e.nativeEvent.layout.height); checkBelow(); }}
+        onScroll={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
+        scrollEventThrottle={100}
       >
         {turns.length === 0 && (
           <View style={styles.emptyWrap}>
@@ -650,8 +679,16 @@ function Screen() {
           </View>
         )}
 
-        {turns.map((t) => (
-          <View key={t.id} style={styles.turn}>
+        {turns.map((t, i) => (
+          <View
+            key={t.id}
+            style={i === turns.length - 1 ? [styles.turn, { minHeight: Math.max(0, threadHeight - 18) }] : styles.turn}
+            onLayout={i !== turns.length - 1 ? undefined : (e) => {
+              if (!jumpOwed.current) return;
+              jumpOwed.current = false;
+              scroller.current?.scrollTo({ y: Math.max(0, e.nativeEvent.layout.y - 6), animated: true });
+            }}
+          >
             <View style={styles.asked}>
               <Waypoint who="hiker" />
               <Text style={styles.question}>{t.question}</Text>
@@ -849,6 +886,14 @@ function Screen() {
           </View>
         ))}
       </ScrollView>
+      {moreBelow && (
+        <View style={styles.toEndWrap} pointerEvents="box-none">
+          <Pressable style={styles.toEnd} onPress={toEnd} hitSlop={10}
+            accessibilityRole="button" accessibilityLabel="Jump to the end">
+            <Image source={ARROW} resizeMode="contain" style={styles.toEndMark} />
+          </Pressable>
+        </View>
+      )}
 
       {/* 'padding' on Android too. The usual Android answer is adjustResize in
           the manifest, but edge-to-edge (RN 0.86, Android 15+) means the window
@@ -926,6 +971,15 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   clarifyQ: { color: palette.ink, fontSize: 14, fontWeight: '600' },
   clarifyOther: { color: palette.moss, fontSize: 13, fontWeight: '600' },
   root: { flex: 1, backgroundColor: palette.cream },
+  // A zero-height row between the chat and the composer; the button hangs up into the chat.
+  toEndWrap: { height: 0, alignItems: 'center', zIndex: 2 },
+  toEnd: {
+    position: 'absolute', bottom: 8, width: 36, height: 36, borderRadius: 18,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: palette.paper, borderWidth: 1, borderColor: palette.sand,
+    boxShadow: `0 2 8 ${palette.shade}`,
+  },
+  toEndMark: { width: 16, height: 16, tintColor: palette.pine, transform: [{ rotate: '180deg' }] },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
   wordmarkSmall: { height: 28, width: 28 * LOGO_RATIO, tintColor: palette.logo },

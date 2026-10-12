@@ -133,8 +133,8 @@ interface Turn {
  * below, and goes once less than the smaller share is: near the end it would
  * only be in the way, and two cut-offs keep it from flickering at the edge.
  */
-const MORE_BELOW_SHOW = 0.45;
-const MORE_BELOW_HIDE = 0.2;
+const MORE_BELOW_SHOW = 0.3;
+const MORE_BELOW_HIDE = 0.15;
 
 /** #77: how long after a signal question its reply may still be filled in. */
 const SIGNAL_REPLY_WINDOW_MS = 2 * 60_000;
@@ -212,27 +212,35 @@ function Screen() {
   const abort = useRef<AbortController | null>(null);
   const engine = useRef<Engine | null>(null);
   const scroller = useRef<ScrollView | null>(null);
-  // The chat stays where the reader left it while an answer comes in. A
-  // message just sent moves to the top of the screen, so its answer fills
-  // the screen below it, and an arrow offers the jump to the end whenever
-  // there is more below. Following the answer down made it hard to read
-  // (Ryan, 2026-10-11).
-  const scrollAt = useRef({ offset: 0, height: 0, content: 0, lastTop: 0, lastHeight: 0 });
+  // The chat follows a new answer only until its question reaches the top of
+  // the screen, then stays put while the rest is written below; a hint
+  // offers the jump to the end when there is a good deal more below.
+  // Following the answer all the way down made it hard to read (Ryan,
+  // 2026-10-11). No empty room is added under a short answer to get the
+  // question to the top: that looked odd.
+  const scrollAt = useRef({ offset: 0, height: 0, content: 0, lastTop: 0 });
   const [moreBelow, setMoreBelow] = useState(false);
-  // The chat's visible height: the newest message is given that much room, so it can sit at the top.
-  const [threadHeight, setThreadHeight] = useState(0);
-  // Set when the number of messages changes (one sent, a past chat opened);
-  // the newest message is then brought to the top, once.
-  const jumpOwed = useRef(false);
+  // Set when the number of messages changes (one sent, a past chat opened),
+  // and dropped when the question is at the top or the reader takes over.
+  const following = useRef(false);
   const shownCount = useRef(0);
-  if (shownCount.current !== turns.length) { shownCount.current = turns.length; jumpOwed.current = true; }
+  if (shownCount.current !== turns.length) { shownCount.current = turns.length; following.current = true; }
   const checkBelow = useCallback((): void => {
-    const { offset, height, content, lastTop, lastHeight } = scrollAt.current;
-    // Measured to the end of the newest message, not of the empty room under
-    // it: with a short answer on screen the hint stayed up over blank space.
-    const end = Math.min(content, lastTop + lastHeight);
-    const below = end - (offset + height);
+    const { offset, height, content } = scrollAt.current;
+    const below = content - (offset + height);
     setMoreBelow((was) => below > height * (was ? MORE_BELOW_HIDE : MORE_BELOW_SHOW));
+  }, []);
+  /** While following: as far down as the chat goes, and no further than the newest question at the top. */
+  const follow = useCallback((): void => {
+    if (!following.current) return;
+    const { height, content, lastTop } = scrollAt.current;
+    const end = content - height;
+    const top = lastTop - 6;
+    if (end >= top) following.current = false;
+    const y = Math.max(0, Math.min(end, top));
+    // Counted as there already: the scroll's own reports lag, and the hint flashed up meanwhile.
+    scrollAt.current.offset = y;
+    scroller.current?.scrollTo({ y, animated: true });
   }, []);
   const toEnd = useCallback((): void => { scroller.current?.scrollToEnd({ animated: true }); }, []);
   const nextId = useRef(1);
@@ -662,14 +670,12 @@ function Screen() {
         ref={scroller}
         style={styles.thread}
         contentContainerStyle={styles.threadInner}
-        onContentSizeChange={(_w, h) => {
-          scrollAt.current.content = h;
-          // The answer growing does not move the chat.
-          checkBelow();
-        }}
-        onLayout={(e) => { scrollAt.current.height = e.nativeEvent.layout.height; setThreadHeight(e.nativeEvent.layout.height); checkBelow(); }}
+        onContentSizeChange={(_w, h) => { scrollAt.current.content = h; follow(); checkBelow(); }}
+        onLayout={(e) => { scrollAt.current.height = e.nativeEvent.layout.height; checkBelow(); }}
         onScroll={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
         scrollEventThrottle={100}
+        // A finger on the chat: the reader is in charge from here.
+        onScrollBeginDrag={() => { following.current = false; }}
         // The last report of a fling can be dropped by the throttle: read where it came to rest.
         onMomentumScrollEnd={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
         onScrollEndDrag={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
@@ -695,21 +701,9 @@ function Screen() {
         {turns.map((t, i) => (
           <View
             key={t.id}
-            style={i === turns.length - 1 ? { minHeight: Math.max(0, threadHeight - 18) } : undefined}
-            onLayout={i !== turns.length - 1 ? undefined : (e) => {
-              scrollAt.current.lastTop = e.nativeEvent.layout.y;
-              checkBelow();
-              if (!jumpOwed.current) return;
-              jumpOwed.current = false;
-              scroller.current?.scrollTo({ y: Math.max(0, e.nativeEvent.layout.y - 6), animated: true });
-            }}
+            style={styles.turn}
+            onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastTop = e.nativeEvent.layout.y; follow(); }}
           >
-           {/* The message itself, inside the room it is given: its own height
-               is where the conversation really ends. */}
-           <View
-             style={styles.turn}
-             onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastHeight = e.nativeEvent.layout.height; checkBelow(); }}
-           >
             <View style={styles.asked}>
               <Waypoint who="hiker" />
               <Text style={styles.question}>{t.question}</Text>
@@ -902,7 +896,6 @@ function Screen() {
                   )}
               </View>
             )}
-            </View>
             </View>
             </View>
           </View>

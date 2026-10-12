@@ -2,7 +2,7 @@
  * The hint that there is more of the chat below, and the way to it (#184).
  *
  * Made to look passing, not like a control that lives there: a small leaf-green
- * drop with no outline, a little see-through, that drifts in, bobs like
+ * pill with no outline, a little see-through, that drifts in, bobs like
  * something floating, and fades out again once the reader is near the end.
  * With the phone's "remove animations" setting on it only fades.
  */
@@ -46,7 +46,7 @@ export function JumpToEnd({ shown, onPress }: { shown: boolean; onPress: () => v
           { translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, 3] }) },
         ],
       }]}>
-        <Pressable style={styles.drop} onPress={onPress} hitSlop={12}
+        <Pressable style={styles.drop} onPress={onPress} hitSlop={{ top: 14, bottom: 10, left: 16, right: 16 }}
           accessibilityRole="button" accessibilityLabel="Jump to the end">
           <Image source={ARROW} resizeMode="contain" style={styles.mark} />
         </Pressable>
@@ -56,11 +56,14 @@ export function JumpToEnd({ shown, onPress }: { shown: boolean; onPress: () => v
 }
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
-  row: { height: 0, alignItems: 'center', zIndex: 2 },
+  // No zIndex: it stays under the dusk veil (theme.tsx), so it changes colour
+  // out of sight with the rest of the page instead of snapping above it.
+  row: { height: 0, alignItems: 'center' },
   float: { position: 'absolute', bottom: 10 },
   // The green of Fred's own tabs, so it reads as Fred's and not as a button of the phone's.
   drop: {
-    width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
+    // Wider than tall: a thumb comes at it from the side.
+    width: 76, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center',
     backgroundColor: palette.sage, boxShadow: `0 2 10 ${palette.shade}`,
   },
   mark: { width: 14, height: 14, tintColor: palette.pine, transform: [{ rotate: '180deg' }] },

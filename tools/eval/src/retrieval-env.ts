@@ -90,7 +90,7 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     // default wording is 0 of 3 on dosing questions.
     ...(env.SUFFICIENCY_PROMPT === 'numeric' ? { sufficiencyVariant: 'numeric' as const } : {}),
     // ANSWER_SHAPE=lead adds "give the thing the question asks for, first".
-    ...(env.ANSWER_SHAPE === 'lead' ? { answerVariant: 'lead' as const } : {}),
+    ...(env.ANSWER_SHAPE === 'lead' || env.ANSWER_SHAPE === 'narrow' || env.ANSWER_SHAPE === 'partial' ? { answerVariant: env.ANSWER_SHAPE } : {}),
     // JOIN=1 gives neighbouring passages as one (docs/results-noise-research.md).
     ...(env.JOIN === '1' ? { joinNeighbours: true } : {}),
     // SHAPE=how|how-few: how-to questions answered in steps; how-few also loosens the sentence cap.

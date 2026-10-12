@@ -217,7 +217,7 @@ function Screen() {
   // the screen below it, and an arrow offers the jump to the end whenever
   // there is more below. Following the answer down made it hard to read
   // (Ryan, 2026-10-11).
-  const scrollAt = useRef({ offset: 0, height: 0, content: 0 });
+  const scrollAt = useRef({ offset: 0, height: 0, content: 0, lastTop: 0, lastHeight: 0 });
   const [moreBelow, setMoreBelow] = useState(false);
   // The chat's visible height: the newest message is given that much room, so it can sit at the top.
   const [threadHeight, setThreadHeight] = useState(0);
@@ -227,8 +227,11 @@ function Screen() {
   const shownCount = useRef(0);
   if (shownCount.current !== turns.length) { shownCount.current = turns.length; jumpOwed.current = true; }
   const checkBelow = useCallback((): void => {
-    const { offset, height, content } = scrollAt.current;
-    const below = content - (offset + height);
+    const { offset, height, content, lastTop, lastHeight } = scrollAt.current;
+    // Measured to the end of the newest message, not of the empty room under
+    // it: with a short answer on screen the hint stayed up over blank space.
+    const end = Math.min(content, lastTop + lastHeight);
+    const below = end - (offset + height);
     setMoreBelow((was) => below > height * (was ? MORE_BELOW_HIDE : MORE_BELOW_SHOW));
   }, []);
   const toEnd = useCallback((): void => { scroller.current?.scrollToEnd({ animated: true }); }, []);
@@ -667,6 +670,9 @@ function Screen() {
         onLayout={(e) => { scrollAt.current.height = e.nativeEvent.layout.height; setThreadHeight(e.nativeEvent.layout.height); checkBelow(); }}
         onScroll={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
         scrollEventThrottle={100}
+        // The last report of a fling can be dropped by the throttle: read where it came to rest.
+        onMomentumScrollEnd={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
+        onScrollEndDrag={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
       >
         {turns.length === 0 && (
           <View style={styles.emptyWrap}>
@@ -689,13 +695,21 @@ function Screen() {
         {turns.map((t, i) => (
           <View
             key={t.id}
-            style={i === turns.length - 1 ? [styles.turn, { minHeight: Math.max(0, threadHeight - 18) }] : styles.turn}
+            style={i === turns.length - 1 ? { minHeight: Math.max(0, threadHeight - 18) } : undefined}
             onLayout={i !== turns.length - 1 ? undefined : (e) => {
+              scrollAt.current.lastTop = e.nativeEvent.layout.y;
+              checkBelow();
               if (!jumpOwed.current) return;
               jumpOwed.current = false;
               scroller.current?.scrollTo({ y: Math.max(0, e.nativeEvent.layout.y - 6), animated: true });
             }}
           >
+           {/* The message itself, inside the room it is given: its own height
+               is where the conversation really ends. */}
+           <View
+             style={styles.turn}
+             onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastHeight = e.nativeEvent.layout.height; checkBelow(); }}
+           >
             <View style={styles.asked}>
               <Waypoint who="hiker" />
               <Text style={styles.question}>{t.question}</Text>
@@ -888,6 +902,7 @@ function Screen() {
                   )}
               </View>
             )}
+            </View>
             </View>
             </View>
           </View>

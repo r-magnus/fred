@@ -15,6 +15,7 @@ import { File, Paths } from 'expo-file-system';
 import { gunzipSync } from 'fflate';
 import { cellsToMultiPolygon, latLngToCell } from 'h3-js';
 import { insideState, MAJOR_CARRIERS } from '@fred/geo';
+import { loadCarrier } from './carrier.ts';
 import {
   decodePack, nearestCoverage, describeBearing, zoneOf, zonesNear, anyCarrier, carrierCells,
   COVERAGE_RES, type CoveragePack, type NearestCoverage,
@@ -114,4 +115,18 @@ export function coverageNear(
     advice,
     carrierName: gapFor === null ? null : name,
   };
+}
+
+/**
+ * The map's advice for a position, for a chat reply to a signal question
+ * (#77): the same sentence the map shows, so the two cannot disagree. Null
+ * when the position is outside every state or its coverage pack is not on
+ * the phone.
+ */
+export async function signalAdvice(
+  fix: { readonly latitude: number; readonly longitude: number; readonly state: string | null },
+): Promise<string | null> {
+  if (fix.state === null) return null;
+  const [pack, carrier] = await Promise.all([loadCoverage(fix.state), loadCarrier()]);
+  return pack === null ? null : coverageNear(fix.latitude, fix.longitude, fix.state, pack, carrier.id).advice;
 }

@@ -1,0 +1,377 @@
+{
+ "grader": "Claude Opus 5.5 (in-session), 2026-10-12. Not blind: the grader also wrote these questions and key points. \"cause\" is the grader's label for why an answer fell short (model, quote-off, card-general, card-wrong).",
+ "variant": "main at 509cd00, packs fred-packs-g-all",
+ "runs": "docs/c23/assembled-shipped.jsonl",
+ "verdicts": [
+  {
+   "questionId": "as-soaked-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Campfire card, correct, but never says where dry wood is found in rain (standing dead wood, inner wood)."
+  },
+  {
+   "questionId": "as-green-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Says green branches can be used and adds generic steps not in the sources; no \"last resort\", no splitting or mixing with dry wood; echoes the emergency rule."
+  },
+  {
+   "questionId": "as-dying-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Campfire card under the \"closest I have\" line: three sizes ready first, add kindling once tinder burns strongly, do not smother."
+  },
+  {
+   "questionId": "as-firedist-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "3 feet."
+  },
+  {
+   "questionId": "as-tinder-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Lists rocks and steel that make a spark, not material that catches one."
+  },
+  {
+   "questionId": "as-eatsnow-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: avoid eating snow directly, lowers core temperature."
+  },
+  {
+   "questionId": "as-melt-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Dark surface in the sun is in the sources; misses the container near a fire or under clothing; last sentence is vague."
+  },
+  {
+   "questionId": "as-rain-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: fresh rainwater in a container needs no purification."
+  },
+  {
+   "questionId": "as-puddle-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    2
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Water card: filter through cloth or a seep hole, then still purify. No charcoal."
+  },
+  {
+   "questionId": "as-iodine-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Water-card lines on iodine dosing; never says iodine does not reliably kill cryptosporidium. No red flag: it does not claim iodine kills everything."
+  },
+  {
+   "questionId": "as-nopad-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Cold card: insulation under you, grass, ferns, boughs 12 inches thick."
+  },
+  {
+   "questionId": "as-digital-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Draw a clock face with the correct time."
+  },
+  {
+   "questionId": "as-toofast-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Toss a stick is there, but merged with the rock \"ka-thump\" test into one garbled step; no walking-pace comparison."
+  },
+  {
+   "questionId": "as-glacier-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Cool early morning, lower and slower."
+  },
+  {
+   "questionId": "as-burnedforest-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Yes, wind brings trees down in burned areas."
+  },
+  {
+   "questionId": "as-smoke-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Quote is from a canoe-country page (travel to another lake, winds and waves): take precautions, but not wind direction or route."
+  },
+  {
+   "questionId": "as-ashpit-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Hollow left by ground fire, severe burns."
+  },
+  {
+   "questionId": "as-crypto-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Quote is about treating water for cryptosporidium, not whether there is a cure; the \"no known cure but time\" sentence is two lines above it in the same passage."
+  },
+  {
+   "questionId": "as-horse-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-wrong",
+   "reasoning": "Bear card for a group of horses."
+  },
+  {
+   "questionId": "as-cathole-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: 200 feet or 70 large steps, cathole."
+  },
+  {
+   "questionId": "as-fireout-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Pour water, stir, cool to the touch. The match-or-flashlight line is odd but harmless."
+  },
+  {
+   "questionId": "as-antler-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Quote explains nutrient cycling but never says to leave the antler."
+  },
+  {
+   "questionId": "as-hotspot-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Tape or plaster now, before it blisters."
+  },
+  {
+   "questionId": "as-down-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Down loses warmth when wet. Bivy and liner lines are beside the point."
+  },
+  {
+   "questionId": "as-widow-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote names dead branches overhead (widow makers)."
+  },
+  {
+   "questionId": "as-tickdryer-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Body check is there; the dryer on high heat, which is the answer, is missing."
+  },
+  {
+   "questionId": "as-algaeboil-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Algal-bloom text: boiling does not remove toxins, find other water."
+  },
+  {
+   "questionId": "as-mooseears-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Ears back, hackles up."
+  },
+  {
+   "questionId": "as-fawn-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model-declined",
+   "reasoning": "The model declined with the fawn passage in hand; no quote or card replaced it."
+  }
+ ]
+}

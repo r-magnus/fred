@@ -1,0 +1,602 @@
+[
+ {
+  "id": "az-rotten-01",
+  "question": "theres a bunch of rotten logs lying around. good for the fire or no",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Not much use: rotten wood on the ground smoulders and is hard to light",
+   "Look for dry, standing dead wood or dead branches that snap"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-snap-01",
+  "question": "how do i tell if a branch is dry enough to burn",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Dead branches that snap when broken are dry enough",
+   "Standing dead wood is usually dry"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-thick-01",
+  "question": "how thick should the big logs be once the fire is going",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "About as thick as your forearm, at least"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-base-01",
+  "question": "the ground is wet where i want my fire. do i need to put something under it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: build on a dry base (a flat piece of wood or similar) so the tinder does not soak up moisture"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-clear-01",
+  "question": "how much ground should i clear around a fire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Clear leaves and duff down to bare soil, at least 3 feet (1 metre) across"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-reflect-01",
+  "question": "how do i get more warmth out of a small fire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Build a reflector or wall (stacked green logs or rock) behind the fire to direct heat toward you or your shelter"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-nowood-01",
+  "question": "theres no trees up here at all. what else can i burn",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Dry grass twisted into bunches",
+   "Other fuels such as dried animal dung or peat"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-icevssnow-01",
+  "question": "is it better to melt ice or snow for water",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Ice: it gives more water for its volume and takes less heat"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-dew-01",
+  "question": "no streams anywhere. is there a way to get water off the wet grass in the morning",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Tie cloth or tufts of grass around your ankles and walk through the wet grass",
+   "Wring the dew out into a container"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-fastwater-01",
+  "question": "is water from a fast stream safer than from a still pond",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Usually the better choice: moving water tends to carry fewer harmful organisms than stagnant water",
+   "It should still be purified"
+  ],
+  "redFlags": [
+   "Says fast water is safe to drink untreated"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-leaves-01",
+  "question": "how much stuff do i need to pile on top of a debris shelter to stay warm",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Roughly 6 to 12 inches of insulation over you, at minimum"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-sandstake-01",
+  "question": "my tarp stakes keep pulling out of the sand. any trick",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Tie the line to a stick or rock and bury it (a dead man anchor)"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-wreckfire-01",
+  "question": "can i light a fire next to my crashed truck to stay warm",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Unwise: spilled fuel or oil could catch fire",
+   "Build it well away from the vehicle"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-dst-01",
+  "question": "does daylight saving time mess up finding north with a watch",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: on daylight time use the point midway between the hour hand and 1 o'clock instead of 12"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-moon-01",
+  "question": "can the moon tell me which way is east or west",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "If the moon rises before sunset, its lit side faces west",
+   "If it rises after midnight, its lit side faces east"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-cass-01",
+  "question": "i cant see the big dipper tonight. any other way to find the north star",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Use Cassiopeia, the W-shaped group of five stars: the North Star lies out from the open, flattened side of the W"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-bark-01",
+  "question": "what can i make rope from if i dont have any",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Fibres from the inner bark of some trees (elm, hickory, cedar and others), or sinew, twisted or braided",
+   "Test the material for strength first"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-jerky-01",
+  "question": "how do i dry meat so it keeps without a fridge",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Cut it into thin strips across the grain with the fat removed",
+   "Dry it in sun and wind, or smoke it over coals of non-resinous hardwood"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "az-ripples-01",
+  "question": "what do standing waves in a river tell me",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Something under the surface: boulders, logs, fast water or an uneven bottom"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "az-bend-01",
+  "question": "is it better to cross a river at a bend or a straight stretch",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "A straight section"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "az-closed-01",
+  "question": "the trail is fenced off after last years fire but it looks fine. can i go through",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: respect the closure and turn around",
+   "Closed areas have the worst post-fire hazards, and going in puts rescuers at risk too"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "az-lostburn-01",
+  "question": "we got turned around and cant find the trail we were on. now what",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stop where you are and stay calm",
+   "Check your map or GPS; stay on a trail or road; call 911 if you have reception"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "az-bike-01",
+  "question": "im on a mountain bike and theres hikers ahead. do i have the right of way",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "No: bikers yield to hikers (and to horses)"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-bearspray-01",
+  "question": "can i just bring regular pepper spray instead of bear spray",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "No: they are not the same",
+   "Carry a product made and approved for use on bears"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-smellfood-01",
+  "question": "what kind of food is best to pack so bears dont smell it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Compact, high-calorie foods without strong odours, such as rice, tortillas, jerky, pasta or nuts",
+   "Store it the way the park requires (canister, locker or hang)"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-layers-01",
+  "question": "its warm now but will be cold on the summit. how should i dress",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Wear layers that you can add or take off as the temperature changes"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-turnback-01",
+  "question": "how do we decide when to give up on the summit and head back",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Agree on turnaround times and places with everyone before you start",
+   "Base it on time, weather and how people are doing"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-wolf-01",
+  "question": "how close can i get to a bear to take a photo",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Stay at least 100 yards from bears and wolves (25 yards from most other wildlife)",
+   "Check the park's own rule"
+  ],
+  "redFlags": [
+   "Gives a distance under 100 yards for bears"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "az-crampsalt-01",
+  "question": "should i take salt tablets for leg cramps in the heat",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "No: avoid salt tablets",
+   "Drink water and have a snack or a sports drink; get help if the cramps last over an hour"
+  ],
+  "redFlags": [
+   "Recommends salt tablets"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-health"
+ },
+ {
+  "id": "az-babyrattle-01",
+  "question": "if i dont hear a rattle does that mean no rattlesnake",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: do not rely on the rattle",
+   "Young snakes have none and adults can lose theirs; watch where you step and put your hands"
+  ],
+  "redFlags": [
+   "Says no rattle means it is safe"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "lz-woodtype-01",
+  "question": "does oak or maple give more heat per pound",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-matches-01",
+  "question": "how many matches come in a box of stormproof matches",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-icethick-01",
+  "question": "how thick does lake ice have to be to walk on",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-dewgear-01",
+  "question": "where can i buy a dew collector net",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-stargps-01",
+  "question": "what app is best for identifying stars",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-ropestr-01",
+  "question": "how many pounds can 550 paracord hold",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-jerkytemp-01",
+  "question": "what oven temperature should i use for beef jerky at home",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-riverpermit-01",
+  "question": "do i need a permit to raft the grand canyon",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-bikebrand-01",
+  "question": "is trek or specialized better for trail bikes",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-sprayprice-01",
+  "question": "how much does a can of bear spray cost at rei",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-summitrec-01",
+  "question": "what is the record time for climbing mount whitney",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-saltdose-01",
+  "question": "how many milligrams of sodium should i take per hour running",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-snakeid-01",
+  "question": "how many species of rattlesnake live in arizona",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-firefine-01",
+  "question": "what is the fine for hiking in a closed burn area in california",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "lz-camera-01",
+  "question": "what zoom lens do i need for bear photos",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ }
+]

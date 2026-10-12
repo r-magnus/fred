@@ -61,6 +61,8 @@ test('a model-written answer that gives advice the condition card forbids is cau
 test('asking whether something unnamed is safe to eat', () => {
   assert.ok(asksToEatUnknown('can i eat them'));
   assert.ok(asksToEatUnknown('are these berries edible'));
+  // #23: snow is named and is not a plant.
+  assert.ok(!asksToEatUnknown('im out of water but theres snow everywhere, can i just eat it'));
   assert.ok(!asksToEatUnknown('how do i cook rice on a stove'));
   assert.ok(!asksToEatUnknown('my kid ate some berries'));
 });

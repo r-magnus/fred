@@ -76,6 +76,9 @@ for (const [i, q] of questions.entries()) {
     ...(d.scope !== undefined ? { scope: d.scope } : {}),
     ...(d.said !== undefined ? { said: d.said } : {}),
     ...(d.everyday !== undefined ? { everyday: d.everyday } : {}),
+    ...(d.answerGuard?.refused === true ? { modelRefused: true } : {}),
+    ...(d.nearSentence === undefined ? {} : { nearSentence: { similarity: Number(d.nearSentence.similarity.toFixed(3)), text: d.nearSentence.text } }),
+    ...(d.answerGuard?.replacedBy !== undefined ? { guardedBy: d.answerGuard.replacedBy } : {}),
     retrieved: d.candidates.map((c) => ({ packId: c.chunk.packId, chunkId: c.chunk.id, section: c.chunk.section, score: Number(c.score.toFixed(4)) })),
   };
   runs.push(run);

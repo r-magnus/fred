@@ -105,6 +105,10 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.LEAD === '0' ? { lead: false } : {}),
     // GUARDS=0 turns off round 2 of #98 (conditions, question rule, danger signs, agreement).
     ...(env.GUARDS === '0' ? { guards: false } : {}),
+    // NEAR_QUOTE=0 declines a search under the gate whatever its closest sentence (#23; on by default).
+    ...(env.NEAR_QUOTE === '0' ? { quoteUnderGate: false } : {}),
+    // CLOSEST_CARD=0 leaves a model decline as it is (#23; on by default).
+    ...(env.CLOSEST_CARD === '0' ? { closestCard: false } : {}),
     // UNDERSTAND_TOP=3 sets the own-words rank rule, for calibration on tuning sets only.
     ...(env.UNDERSTAND_TOP !== undefined ? { understandOwnTop: Number(env.UNDERSTAND_TOP) } : {}),
     // UNDERSTAND_FLOOR=0.15 sets the own-words floor, for calibration on tuning sets only.

@@ -87,6 +87,9 @@ export const CONDITION_CLARIFY = (label: string): string => `Is this about the $
 /** The emergency rule the prompt adds for medical passages (buildQuerySuffix). */
 export const EMERGENCY_RULE = 'If life is at risk, say to contact emergency services first.';
 
+/** #23: said before a field card shown in place of the model's decline. It claims closeness, not an answer. */
+export const CLOSEST_CARD_LEAD = "My guides don't answer that exactly. Here's the closest I have:";
+
 /**
  * Replies that answer nothing: the model's decline, or the emergency rule
  * echoed back verbatim. "my buddy just got struck by lightning, is it safe to

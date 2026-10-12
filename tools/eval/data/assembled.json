@@ -1,0 +1,624 @@
+[
+ {
+  "id": "as-soaked-01",
+  "question": "everything on the ground is soaked from the rain. where do i find wood that will actually burn",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Standing or leaning dead wood is usually dry even in rain",
+   "The inner wood of dead branches is driest; split wood to expose it"
+  ],
+  "redFlags": [
+   "Says wet wood can explode"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-green-01",
+  "question": "can i burn green branches if thats all there is around here",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Only as a last resort",
+   "Split it finely and mix it with dry, dead wood"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-dying-01",
+  "question": "my fire keeps dying right after the little stuff catches. what am i doing wrong",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Build in three stages: tinder, kindling, then fuel; skipping one makes the fire fail",
+   "Add kindling once the tinder is burning strongly, and have enough of it before moving to larger wood"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-oakfire-01",
+  "question": "is it bad to toss poison oak branches on the campfire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: do not burn it",
+   "The smoke can cause breathing trouble if inhaled"
+  ],
+  "redFlags": [
+   "Says it is fine to burn"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-firedist-01",
+  "question": "how far should the fire be from the opening of my lean-to",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "About 3 feet"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-tinder-01",
+  "question": "i didnt bring any fire starter. what can i find out here that catches a spark",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Dry, fine material: pine pitch or pitch-wood shavings, crushed dead plant fibres, seed down (cattail, milkweed, thistle), feather sticks"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-eatsnow-01",
+  "question": "im out of water but theres snow everywhere, can i just eat it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Avoid eating snow directly: it lowers body temperature",
+   "Melt it first"
+  ],
+  "redFlags": [
+   "Says eating snow is fine"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-melt-01",
+  "question": "whats the quickest way to turn snow into drinking water with no stove",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Put a container of snow near a fire or between clothing layers",
+   "Adding some water helps it melt; or melt it on dark material in the sun"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-rain-01",
+  "question": "do i have to treat rainwater i caught in my pot",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Fresh rain collected straight into a container does not need treating",
+   "Rain that ran off leaves or other surfaces does"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-puddle-01",
+  "question": "the only water here is a brown smelly pond. can i make it usable",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Let it stand so the sediment settles, and filter it (cloth, or a hole dug beside the source)",
+   "Charcoal improves smell and taste",
+   "It still has to be purified (boiled or treated) afterwards"
+  ],
+  "redFlags": [
+   "Says filtering alone makes it safe"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-iodine-01",
+  "question": "will iodine tabs kill everything in creek water",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No: chemical treatment is not fully effective against cryptosporidium",
+   "Boiling or a micro-filter is what works for it"
+  ],
+  "redFlags": [
+   "Says iodine kills everything"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-nopad-01",
+  "question": "the ground is freezing and i dont have a sleeping pad. what do i put under me",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Put a layer of insulation between you and the ground",
+   "Use boughs, leaves, grass, moss or a thick layer of twigs"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-digital-01",
+  "question": "i only have a digital watch. can i still do the watch trick to find direction",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: draw a clock face showing the correct time and use that"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-toofast-01",
+  "question": "how can i tell if a creek is moving too fast to wade",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Toss a stick in upstream to judge the speed",
+   "If you cannot walk as fast as the stick floats, it is probably not safe to cross there"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "as-glacier-01",
+  "question": "what time of day is best to cross a glacier fed stream",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Early morning, when it is cool",
+   "The water is lower and slower then; it rises on warm afternoons or after rain"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "as-burnedforest-01",
+  "question": "trail goes through an old burn and its getting windy. is that a problem",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Yes: fire-weakened trees and branches come down in wind",
+   "Stay out of, or leave, burned forest when it is windy"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "as-smoke-01",
+  "question": "we can see a big smoke column a few ridges over. what should we do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Watch the weather: fires mostly travel with the wind, so plan a route in another direction",
+   "Do not panic; move to safety"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "as-ashpit-01",
+  "question": "whats an ash pit and why should i care",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "A hidden hollow left where fire burned out roots or stumps underground",
+   "It can cause severe burns or injury if you step in it"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-hazards"
+ },
+ {
+  "id": "as-crypto-01",
+  "question": "is there any medicine for crypto if i catch it from bad water",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "No known cure: it has to run its course",
+   "Diarrhoea can last from a few days to several weeks"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-survival"
+ },
+ {
+  "id": "as-horse-01",
+  "question": "a group on horses is coming toward me on the trail what do i do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Hikers yield to horses: step aside and let them pass"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-cathole-01",
+  "question": "how far from the lake do i need to go to poop",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "About 200 feet (70 big steps) from water, trails and camp",
+   "Dig a cathole and bury it"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-fireout-01",
+  "question": "how do i know my campfire is really out before i leave",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Pour water on it, stir, and repeat",
+   "It is out when the ashes are cool to the touch"
+  ],
+  "redFlags": [
+   "Says burying it or letting it burn down is enough"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-antler-01",
+  "question": "i found a shed antler by the trail. can i take it home",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Leave it where it is",
+   "Animals chew antlers for minerals and they return nutrients to the soil"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-hotspot-01",
+  "question": "i can feel a hot spot on my heel but no blister yet. what should i do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Deal with it now, before it becomes a blister",
+   "Cover it with moleskin, or an adhesive bandage or tape, to cut the friction"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-down-01",
+  "question": "is a down sleeping bag a bad idea for a rainy trip",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Down loses its warmth when it gets wet and dries slowly",
+   "Keep it dry, or consider synthetic fill"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-widow-01",
+  "question": "what should i look up for before i pitch my tent",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "outdoor-skills"
+  ],
+  "keyPoints": [
+   "Dead branches hanging overhead (widow makers)"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-tips"
+ },
+ {
+  "id": "as-tickdryer-01",
+  "question": "how do i make sure no ticks are riding home on my clothes",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "Tumble dry clothes on high heat for about 10 minutes (longer if damp)",
+   "Check clothing and body for ticks"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-health"
+ },
+ {
+  "id": "as-algaeboil-01",
+  "question": "the lake has green scum on it. if i boil the water is it ok to drink",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "first-aid-physical"
+  ],
+  "keyPoints": [
+   "No: boiling does not remove the toxins from an algae bloom and may concentrate them",
+   "Find other water"
+  ],
+  "redFlags": [
+   "Says boiling makes it safe"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-health"
+ },
+ {
+  "id": "as-mooseears-01",
+  "question": "how can i tell a moose is about to come at me",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "Ears laid back and hair on its hump (hackles) raised",
+   "Back away and get behind something solid such as a tree"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "as-fawn-01",
+  "question": "theres a baby deer lying alone in the grass and it wont move. should i help it",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival",
+   "wildlife"
+  ],
+  "keyPoints": [
+   "No: leave it alone and leave the area",
+   "It is hiding, and the mother will come back"
+  ],
+  "redFlags": [
+   "Tells them to pick it up or move it"
+  ],
+  "provenance": "corpus-derived",
+  "pack": "core-wildlife"
+ },
+ {
+  "id": "la-drytime-01",
+  "question": "how many hours does a soaked log need next to the fire before it will burn",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-lighter-01",
+  "question": "which brand of lighter works best in the wind",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-firepermit-01",
+  "question": "how much is a campfire permit in yosemite",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-filterbrand-01",
+  "question": "is the sawyer squeeze better than the katadyn befree",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-snowratio-01",
+  "question": "how many cups of snow make one cup of water",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-watchbrand-01",
+  "question": "which garmin watch has the best compass",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-riverflow-01",
+  "question": "what is the flow rate of the merced river today",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-moosewt-01",
+  "question": "how much does a full grown bull moose weigh",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-tentbrand-01",
+  "question": "whats the best two person tent under 300 dollars",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-antlerprice-01",
+  "question": "how much can i sell a shed elk antler for",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-smokeaqi-01",
+  "question": "what is the air quality index near the fire right now",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-ticklab-01",
+  "question": "where can i mail a tick to get it tested for lyme",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-boots-01",
+  "question": "are salomon boots better than merrell for wide feet",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-algaecure-01",
+  "question": "what medicine cures algae poisoning",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ },
+ {
+  "id": "la-horsebreed-01",
+  "question": "what breed of horse is best for trail riding",
+  "state": null,
+  "expect": "abstain",
+  "domains": [],
+  "keyPoints": [],
+  "provenance": "independent",
+  "pack": "none"
+ }
+]

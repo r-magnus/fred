@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { numberChecked, numbersIn, unsourcedNumbers } from '../src/grounding.ts';
-import { quotableSentences, truncateVector } from '../src/sentences.ts';
+import { quotableSentences, rankSentences, truncateVector } from '../src/sentences.ts';
 
 async function* from(...t: string[]): AsyncIterable<string> { for (const x of t) yield x; }
 const all = async (s: AsyncIterable<string>): Promise<string> => { let o = ''; for await (const x of s) o += x; return o; };
@@ -46,6 +46,21 @@ test('product picks and forecasts are never quoted in place of a decline', async
 test('quotable sentences skip the heading and split list items', () => {
   assert.deepEqual(quotableSentences('Bison — Stay away\n- Stay at least 25 yards away from bison.\nRun away if a bison charges. It can run fast too.'),
     ['Stay at least 25 yards away from bison.', 'Run away if a bison charges.', 'It can run fast too.'.length >= 25 ? 'It can run fast too.' : ''].filter((x) => x !== ''));
+});
+
+test('a quote is the whole sentence, not the line the index cut it at (#23)', () => {
+  const text = 'RAIN, SNOW, AND ICE\n3-12. Use fresh, clean snow as a water source. Adding water to snow will help it melt faster. Avoid directly\neating snow as it lowers the body\'s core temperature and requires the body to use more energy reserves than\nif the snow is heated externally.\n- Melt it in a container near the fire.';
+  const lines = quotableSentences(text);
+  const hit = lines.findIndex((l) => l.startsWith('eating snow'));
+  assert.ok(hit >= 0);
+  const row = (on: boolean): Int8Array => new Int8Array(256).fill(0).map((_, i) => (i === 0 ? (on ? 100 : 0) : i === 1 ? (on ? 0 : 100) : 0));
+  const q = new Float32Array(768); q[0] = 1;
+  const ranked = rankSentences(q, [{ chunkId: 'c', text, rows: lines.map((_, i) => row(i === hit)) }]);
+  assert.equal(ranked[0]!.text, "Avoid directly eating snow as it lowers the body's core temperature and requires the body to use more energy reserves than if the snow is heated externally.");
+  // A row that is already a whole sentence, and a list item, are unchanged.
+  assert.ok(ranked.some((r) => r.text === 'Adding water to snow will help it melt faster.'));
+  assert.ok(ranked.some((r) => r.text === 'Use fresh, clean snow as a water source.'));
+  assert.ok(ranked.some((r) => r.text === 'Melt it in a container near the fire.'));
 });
 
 test('a truncated vector has unit length', () => {

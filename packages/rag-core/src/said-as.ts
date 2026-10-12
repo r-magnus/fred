@@ -34,6 +34,13 @@ export interface SaidAsModel {
   readonly sure: number;
   /** At or above this share, a card can replace one the message does not support. */
   readonly leans: number;
+  /**
+   * At or above this share for the no-card labels together, the message is
+   * one no card is for, whichever kind it is. The matcher is often unsure
+   * which kind ("none:other" 0.56) and right that it is one: on examples it
+   * never saw, 99 in 100 at this share (docs/results-unsure-label.md).
+   */
+  readonly noCard?: number;
 }
 
 export interface Said {
@@ -70,4 +77,12 @@ export function saidAs(model: SaidAsModel, vec: Float32Array): Said[] {
 /** The kind of a "none:<kind>" label, or undefined for a card. */
 export function noCardKind(label: string): string | undefined {
   return label.startsWith('none:') ? label.slice(5) : undefined;
+}
+
+/**
+ * The no-card labels' share together. A follow-up fragment is left out: it
+ * says the message has nothing of its own, not that no card is for it.
+ */
+export function noCardShare(said: readonly Said[]): number {
+  return said.reduce((a, x) => (x.label.startsWith('none:') && x.label !== 'none:fragment' ? a + x.p : a), 0);
 }

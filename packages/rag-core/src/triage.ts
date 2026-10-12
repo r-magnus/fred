@@ -173,6 +173,15 @@ export function petIsPatient(message: string, previous?: string): boolean {
 export function personIsHurt(message: string): boolean {
   return PERSON_HURT.test(message);
 }
+/**
+ * The speaker or their party is in the message: "i tripped over the dog
+ * leash and my ankle rolled". With the matcher sure of a card for people, the
+ * pet words do not make the pet the patient (#152).
+ */
+const FIRST_PERSON = /\b(?:i|i'm|i've|me|we|we've|us|my (?!dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)\w+(?!'s\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)))\b/i;
+export function namesSpeaker(message: string): boolean {
+  return FIRST_PERSON.test(message);
+}
 /** "its bleeding a fair bit" after a message about a pet: a pronoun, and no person. */
 export function pointsBackAtPet(message: string): boolean {
   return PRONOUN.test(message) && !PERSON.test(message) && !PERSON_HURT.test(message);

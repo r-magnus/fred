@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
-import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, petIsPatient } from '../src/triage.ts';
+import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
 const ids = (ms: string[]): string[] => conditionsIn(ms).map((c) => c.id);
@@ -262,4 +262,11 @@ test('a question that asks for a dose or which medicine to take (#24)', () => {
     'what kind of antibiotic clears up a uti']) assert.ok(asksDose(m), m);
   for (const m of ['should i chew an aspirin', 'how many iodine tablets go in a quart of water', 'can i give him ibuprofen', 'how much water should i carry',
     'i think he overdosed', 'how many miles to the trailhead', 'she took her pills this morning and feels dizzy']) assert.ok(!asksDose(m), m);
+});
+
+test('namesSpeaker: the speaker or their party, never a pet or someone else\'s pet (#152)', () => {
+  for (const m of ['i tripped over the dog leash and my ankle rolled', 'the horse threw me', 'we got stung walking the dog', 'my knee gave out chasing the puppy'])
+    assert.ok(namesSpeaker(m), m);
+  for (const m of ['the dog cut his paw', 'my dog is bleeding', "my friend's dog got bitten by a rattlesnake", 'our horse is limping', 'her cat ate a lily'])
+    assert.ok(!namesSpeaker(m), m);
 });

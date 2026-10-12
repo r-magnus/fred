@@ -61,3 +61,37 @@ near-miss quotes and search. Two things stand out:
   the one made-up look-alike answer. This is the limit of the 1.7B model, not of the pipeline around it.
 
 Grades: `docs/assembled-verdicts.json`, `docs/assembled-sealed-verdicts.json` (each verdict has a `cause`).
+
+## Follow-up: can the quotes be made to answer more often? (2026-10-12)
+
+Two ideas were tried on the quoted answers. Neither works; nothing was changed.
+
+**Show the neighbouring sentences.** For the five off-target quotes, the sentence that answers is not next to
+the one quoted:
+
+| Question | Where the answering sentence is |
+|---|---|
+| as-crypto-01 | Same passage, three sentences earlier, ranked 6th (0.493 against 0.656) |
+| az-bark-01 | A different passage, ranked 4th (0.538 against 0.595) |
+| az-thick-01 | Not among the passages found |
+| as-antler-01 | No sentence in the passages found says to leave it |
+| as-smoke-01 | Not there; the neighbours are canoe advice ("tip your canoe and go under it") |
+
+A higher bar does not separate them either: the off-target quotes score 0.595 to 0.656 and the good ones
+0.608 to 0.676.
+
+**Let the model pick.** The model was shown the question and the six closest sentences and asked for the
+number of the one that answers, or 0 (`docs/c23/quote-picker-*.txt`, about 2 s a call on the desktop).
+
+- Off-target quotes fixed: 0 of 5. For the antler it picked "You want to take it home to show your nephew."
+- Good quotes on the fresh sets made worse: 3 of 7 (rain, tarp stakes, crashed truck).
+- On existing questions it answered "none" for the bison selfie and the hike-time quotes, both good, and
+  picked a weaker line for the cougar and the moose.
+
+The 1.7B model cannot judge which sentence answers a question any better than the similarity score does.
+
+**One lead, not acted on.** The two answerable questions where the model declines and nothing replaces it
+have a sentence that answers just under the quote bar of 0.57: `as-fawn-01` at 0.545 ("Leave the fawn alone…
+its mother will return") and `az-layers-01` at 0.562. The nearest bad candidate among today's dead ends is
+`he-cooktent-01` at 0.526. A bar of about 0.54 would pick up both, but that is two examples with a margin of
+0.02, chosen after reading the answers. It needs questions nobody has looked at before it can be trusted.

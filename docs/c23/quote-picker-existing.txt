@@ -1,0 +1,96 @@
+query=question densePool=20 topK=4 alpha=1 compress=off  model=Qwen3-1.7B-Q4_K_M.gguf  packs=/home/odysseus/fred-packs-g-all
+[node-llama-cpp] load: control-looking token:    212 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+[node-llama-cpp] load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+60 packs, embedder parity OK
+
+
+=== hc-neg-05 [DEAD END] whats the best tent to buy for next time
+    model says "0" (2827ms) -> NONE
+    1. 0.604 If you're thinking of a larger tent so you can keep your gear with you (whether for easier access or to keep it out of the weather), a tent with a ves
+    2. 0.524 By the time you get to a "4-person" tent, you're generally talking about something spacious enough that one or two people can sit upright in it, but h
+    3. 0.517 Unless you're sure you're never going to get rained on, a tent with a "rain fly" – a water resistant raincoat for your tent – is essential (this is in
+    4. 0.513 Depending on just how close you and your camping partner want to be, you might prefer a "2-to-3-person" tent (otherwise big enough for two adults and 
+    5. 0.506 A "2-person" tent is going to be big enough for just that: two people, lying right side-by-side.
+    6. 0.496 Although tents will keep most of the wind out, and usually trap air well enough to keep it warmer than outside, don't count on them to keep you warm ;
+
+=== he-hiketime-01 [quoted] how long will a 10 mile hike with 3000 feet of climbing take me
+    model says "0" (2654ms) -> NONE
+    1. 0.651 For any ascends 15 min per 100 m altitude gain is a good estimate, above 3,000 m elevation it is better to use 20-30 min per 100 m altitude gain.
+    2. 0.578 Always overestimate the length of time that a hike will take you – the standard calculation advises 4 km/hr (on a good trail).
+    3. 0.532 A three-year-old child might be able to hike three miles (5 km) in a whole day, and may take three times as long as an adult to cover that distance.
+    4. 0.515 You may want to adjust the standard calculation down to 3½, 3 or even 2½ km/hr if you are a new or inexperienced walker or if the route grade becomes 
+    5. 0.502 A Norwegian father hiked the length of Norway with his son and daughter: 3140 km split over seven years.
+    6. 0.489 Once you have calculated this, build in additional time for rest stops, lunch breaks, and sightseeing.
+
+=== he-wildlifedist-01 [quoted] how close can i get to elk for a good photo
+    model says "1" (2259ms) -> Keep at least 25 yards (23 meters) from elk at all times and never approach an elk to take a photo.
+    1. 0.764 Keep at least 25 yards (23 meters) from elk at all times and never approach an elk to take a photo.
+    2. 0.607 If need be, turn around and go the other way if an elk walks within 25 yards.
+    3. 0.599 Always stay at least 100 yards (91 m) away from bears, wolves, and cougars, and at least 25 yards (23 m) away from all other animals, including bison 
+    4. 0.592 Keep at least 100 yards (91 meters) from wolves and cougars at all times and never approach them to take a photo.
+    5. 0.580 To protect their young, they may run towards you or kick with hard hooves, even if you're more than 25 yards (23 m) away.
+    6. 0.531 Lenses with focal lengths of 300mm or greater are recommended for adequate reach.
+
+=== he-cooktent-01 [DEAD END] it's pouring, can we just cook inside the tent
+    model says "2" (2442ms) -> However, you can often cope with rain even if you don't have those, if you dress in 2–3 layers (even more if it's really cold) to prevent most of the rain from getting in.
+    1. 0.526 Check how to set up the tent in a heavy rain without the inside getting wet.
+    2. 0.523 However, you can often cope with rain even if you don't have those, if you dress in 2–3 layers (even more if it's really cold) to prevent most of the 
+    3. 0.522 Unless you're sure you're never going to get rained on, a tent with a "rain fly" – a water resistant raincoat for your tent – is essential (this is in
+    4. 0.515 Since it is so small condensation from your breath will build up.
+    5. 0.507 Some water will penetrate through the outer layers, so take them off (despite the cold) whenever there's a break in the rain or if you find good cover
+    6. 0.491 A cloth can be rigged to protect for wind and snow and reflect the heat from the fire (cf. tarp tents; there are also tent substitutes made for this u
+
+=== hst-az-saguaro-01 no sentences
+
+=== hst-ak-spruce-01 no sentences
+
+=== ff-forage-02 no sentences
+
+=== neg-state-02 no sentences
+
+=== uv-neg-weather-01 [DEAD END] Is that thunderhead going to reach me before dark?
+    model says "0" (1858ms) -> NONE
+    1. 0.597 If you hear thunder, lightning is close enough to strike you.
+    2. 0.549 When you hear thunder, immediately move to safe shelter: a substantial building with electricity or plumbing or an enclosed, metal-topped vehicle with
+    3. 0.531 You're cooking dinner on the camp stove when you hear distant rumbles of thunder.
+    4. 0.525 Stay in safe shelter at least 30 minutes after you hear the last sound of thunder.
+    5. 0.524 NO PLACE outside is safe when thunderstorms are in the area!!
+    6. 0.495 For example, in mountainous areas, thunderstorms typically develop in the early afternoon, so plan to hike early in the day and be down the mountain b
+
+=== hw-lion-playdead-01 [quoted] if a cougar goes for us is lying still the right move
+    model says "5" (1830ms) -> The idea is to convince the mountain lion that you are not prey and that you may be a danger to it.
+    1. 0.638 Act dominant—stare in the cat’s eyes and show your teeth while making noise.
+    2. 0.630 Do not run, do not bend down to pick up sticks.
+    3. 0.599 Stay in a group; carry small children; make noise and ready your bear spray.
+    4. 0.548 Throw stones, branches, or whatever you can reach without crouching or turning your back.
+    5. 0.539 The idea is to convince the mountain lion that you are not prey and that you may be a danger to it.
+    6. 0.532 Since a mountain lion usually tries to bite the head or neck, try to remain standing and face the attacking animal.
+
+=== hw-moose-trail-01 [quoted] there's a moose standing in the trail, can we just walk past it
+    model says "4" (2080ms) -> If it knows you’re there, talk to it softly and move away slowly.
+    1. 0.595 They are likely to stand their ground even when they hear people approaching, so pay close attention to your surroundings, especially in prime moose h
+    2. 0.588 Unlike with bears , it is okay to run from a moose .
+    3. 0.585 Most of the time, when a moose charges it is a 'bluff', or warning for you to get back - a warning you should take very seriously!
+    4. 0.568 If it knows you’re there, talk to it softly and move away slowly.
+    5. 0.560 If a moose knocks you down, curl up in a ball and protect your head with your arms and keep still.
+    6. 0.555 Only move once the moose has backed off to a safe distance or it may renew its attack.
+
+=== hw-bison-selfie-01 [quoted] is it ok to walk up to the bison for a selfie
+    model says "0" (1977ms) -> NONE
+    1. 0.724 Keep at least 25 yards (23 meters) from bison at all times and never approach a bison to take a photo.
+    2. 0.631 If need be, turn around and go the other way if a bison walks within 25 yards.
+    3. 0.592 If approached too closely, bison may respond by bluff charging, head bobbing while staring at you, pawing, bellowing, or raising its tail.
+    4. 0.568 If the bison follows you, spray bear spray as you are moving away, and seek cover behind nearby trees or cars.
+    5. 0.563 Immediately walk or run away from the animal.
+    6. 0.558 Article You’re visiting a park and notice a bison walk up a little way away from you.
+
+=== hw-neg-hunt-01 no sentences
+
+=== hz-ltg-wait-01 [quoted] the thunder stopped, how long before we keep hiking up
+    model says "2" (1864ms) -> Wait 30 minutes until after the last rumble of thunder before going back to the campsite.
+    1. 0.575 Wait at least 30 minutes after seeing lightning or hearing thunder before resuming your activity.
+    2. 0.573 Wait 30 minutes until after the last rumble of thunder before going back to the campsite.
+    3. 0.527 For example, in mountainous areas, thunderstorms typically develop in the early afternoon, so plan to hike early in the day and be down the mountain b
+    4. 0.507 Don’t go back outside just because the rain has slowed or stopped.
+    5. 0.476 You're cooking dinner on the camp stove when you hear distant rumbles of thunder.
+    6. 0.456 If there is a high chance of thunderstorms, stay inside.

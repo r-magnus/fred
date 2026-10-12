@@ -571,7 +571,8 @@ export interface Diagnostics {
    * `replacedBy` is filled in once the stream has been read, when the answer
    * gave advice the condition's card says not to give and the card was shown.
    */
-  readonly answerGuard?: { readonly replacedBy?: string };
+  /** `refused`: the model's whole reply was a dead end (#23); `replacedBy`: what was shown instead. */
+  readonly answerGuard?: { readonly replacedBy?: string; readonly refused?: boolean };
   /** Time before the decision, split into model calls and embedding (ms). */
   readonly timing?: { readonly modelMs: number; readonly embedMs: number; readonly totalMs: number };
   /** Top score of the search widened to every unscoped pack, when the routed one fell under the gate. */
@@ -1926,10 +1927,12 @@ async function askCore(
   const guardCard = async (text: string): Promise<string> => {
     // A refusal in the middle of a condition is a dead end too.
     if (isRefusal(text) && followed !== undefined) {
+      answerGuard.refused = true;
       answerGuard.replacedBy = 'refusal';
       return renderCard(parseCard(followed.chunk.text));
     }
     if (isRefusal(text)) {
+      answerGuard.refused = true;
       // The reviewed reply for the risk at hand, when there is one: a
       // lightning victim gets "safe to touch... start CPR", not only "call
       // emergency services" (#115).
@@ -1950,7 +1953,7 @@ async function askCore(
     answerGuard.replacedBy = by.id;
     return renderCard(parseCard(card.chunk.text));
   };
-  const answerGuard: { replacedBy?: string } = {};
+  const answerGuard: { replacedBy?: string; refused?: boolean } = {};
   // #126: the generation with its numbers checked against the passages given.
   const sourceText = [query, earlier ?? '', ...blocks.map((b) => b.text)].join('\n');
   const generated = (): AsyncIterable<string> => (guardsOn
@@ -2018,7 +2021,7 @@ async function askCore(
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,
-      ...(watched.length === 0 ? {} : { answerGuard }),
+      ...(guardsOn ? { answerGuard } : {}),
     },
   };
 }

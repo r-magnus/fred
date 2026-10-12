@@ -232,6 +232,10 @@ export interface GradedRun {
   readonly widenedTopScore?: number;
   /** The understanding step, when it ran (#98). */
   readonly understood?: { readonly intent?: string | undefined; readonly request: string; readonly topScore?: number; readonly ownScore?: number; readonly used: boolean };
+  /** The model's whole reply was the decline sentence (#23). */
+  readonly modelRefused?: boolean;
+  /** What replaced a model-written answer, when something did: 'quoted', 'number', a condition. */
+  readonly guardedBy?: string;
   /** The passages retrieved, best first, with their packs and scores. Absent in runs before 2026-09-25. */
   readonly retrieved?: readonly { readonly packId: string; readonly chunkId: string; readonly section: string; readonly score: number }[];
 }

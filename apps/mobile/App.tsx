@@ -297,10 +297,11 @@ function Screen() {
   // #77: a signal question ("no service", "where can I call from?") is answered
   // with how far and which way the nearest reported coverage is. Filled in once
   // a position is known, and only for a message just asked: an old chat opened
-  // again is not answered for wherever the phone is now.
-  const newest = turns.at(-1);
-  const signalOwed = newest !== undefined && newest.signal === undefined &&
-    Date.now() - newest.askedAt < SIGNAL_REPLY_WINDOW_MS && wantsSignal(newest.question) ? newest.id : null;
+  // again is not answered for wherever the phone is now. Not only the newest
+  // message: a position can take fifteen seconds, and the hiker may have sent
+  // another by then (seen on the phone, 2026-10-11).
+  const signalOwed = turns.findLast((t) => t.signal === undefined &&
+    Date.now() - t.askedAt < SIGNAL_REPLY_WINDOW_MS && wantsSignal(t.question))?.id ?? null;
   useEffect(() => {
     if (signalOwed === null || fix === null) return;
     let live = true;

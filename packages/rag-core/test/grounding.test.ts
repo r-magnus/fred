@@ -48,19 +48,24 @@ test('quotable sentences skip the heading and split list items', () => {
     ['Stay at least 25 yards away from bison.', 'Run away if a bison charges.', 'It can run fast too.'.length >= 25 ? 'It can run fast too.' : ''].filter((x) => x !== ''));
 });
 
-test('a quote is the whole sentence, not the line the index cut it at (#23)', () => {
-  const text = 'RAIN, SNOW, AND ICE\n3-12. Use fresh, clean snow as a water source. Adding water to snow will help it melt faster. Avoid directly\neating snow as it lowers the body\'s core temperature and requires the body to use more energy reserves than\nif the snow is heated externally.\n- Melt it in a container near the fire.';
+test('a quote is the short paragraph a row sits in, or its whole sentence, never a cut line (#23)', () => {
+  const para = "3-12. Use fresh, clean snow as a water source. Adding water to snow will help it melt faster. Avoid directly\neating snow as it lowers the body's core temperature and requires the body to use more energy reserves than\nif the snow is heated externally.";
+  const long = `3-13. ${'Isolated persons can construct a water machine that will produce water from snow. '.repeat(5)}Place snow on any porous\nmaterial and hang it near a fire.`;
+  const text = `RAIN, SNOW, AND ICE\n${para}\n${long}\n- Melt it in a container near the fire.`;
   const lines = quotableSentences(text);
-  const hit = lines.findIndex((l) => l.startsWith('eating snow'));
-  assert.ok(hit >= 0);
-  const row = (on: boolean): Int8Array => new Int8Array(256).fill(0).map((_, i) => (i === 0 ? (on ? 100 : 0) : i === 1 ? (on ? 0 : 100) : 0));
   const q = new Float32Array(768); q[0] = 1;
-  const ranked = rankSentences(q, [{ chunkId: 'c', text, rows: lines.map((_, i) => row(i === hit)) }]);
-  assert.equal(ranked[0]!.text, "Avoid directly eating snow as it lowers the body's core temperature and requires the body to use more energy reserves than if the snow is heated externally.");
-  // A row that is already a whole sentence, and a list item, are unchanged.
-  assert.ok(ranked.some((r) => r.text === 'Adding water to snow will help it melt faster.'));
-  assert.ok(ranked.some((r) => r.text === 'Use fresh, clean snow as a water source.'));
-  assert.ok(ranked.some((r) => r.text === 'Melt it in a container near the fire.'));
+  const shown = (starts: string): string => {
+    const hit = lines.findIndex((l) => l.startsWith(starts));
+    assert.ok(hit >= 0, starts);
+    const rows = lines.map((_, i) => { const r = new Int8Array(256); r[i === hit ? 0 : 1] = 100; return r; });
+    return rankSentences(q, [{ chunkId: 'c', text, rows }])[0]!.text;
+  };
+  // A short paragraph is quoted whole, without its number, and with the words the line break cut off.
+  assert.equal(shown('eating snow'), "Use fresh, clean snow as a water source. Adding water to snow will help it melt faster. Avoid directly eating snow as it lowers the body's core temperature and requires the body to use more energy reserves than if the snow is heated externally.");
+  // In a long paragraph, only the sentence.
+  assert.equal(shown('material and hang'), 'Place snow on any porous material and hang it near a fire.');
+  // A list item is its own paragraph, without the bullet.
+  assert.equal(shown('Melt it in'), 'Melt it in a container near the fire.');
 });
 
 test('a truncated vector has unit length', () => {

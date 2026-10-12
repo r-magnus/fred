@@ -61,3 +61,56 @@ near-miss quotes and search. Two things stand out:
   the one made-up look-alike answer. This is the limit of the 1.7B model, not of the pipeline around it.
 
 Grades: `docs/assembled-verdicts.json`, `docs/assembled-sealed-verdicts.json` (each verdict has a `cause`).
+
+## Follow-up: can the quotes be made to answer more often? (2026-10-12)
+
+Three ideas were tried on the quoted answers. One was kept.
+
+**Where the answering sentence is, for the five off-target quotes**
+
+| Question | Answering sentence | Rank by closeness to the question |
+|---|---|---|
+| as-smoke-01 | Same list item, two sentences before the one quoted | 13th (0.459 against 0.600) |
+| as-crypto-01 | Same passage, two sentences before, in the paragraph above | 6th (0.493 against 0.656) |
+| az-bark-01 | A different passage | 4th (0.538 against 0.595) |
+| az-thick-01 | A different passage ("the diameter of the forearm at a minimum") | 9th (0.489 against 0.610) |
+| as-antler-01 | A different passage ("please leave them where you find them") | 12th (0.438 against 0.595) |
+
+So the answer was found by the search every time and lost when one sentence was chosen. A higher bar does
+not separate good quotes from off-target ones: off-target quotes score 0.595 to 0.656, good ones 0.608 to 0.676.
+
+**Rejected: let the model pick.** The model was shown the question and the six closest sentences and asked
+for the number of the one that answers, or 0 (`docs/c23/quote-picker-*.txt`, about 2 s a call on the desktop).
+
+- Off-target quotes fixed: 0 of 5. For the antler it picked "You want to take it home to show your nephew."
+- Good quotes on the fresh sets made worse: 3 of 7 (rain, tarp stakes, crashed truck).
+- On existing questions it answered "none" for the bison selfie and the hike-time quotes, both good, and
+  picked a weaker line for the cougar and the moose.
+
+The 1.7B model cannot judge which sentence answers a question any better than the similarity score does.
+
+**Kept: quote the short paragraph the sentence sits in.** When the paragraph or list item around the chosen
+sentence is 360 characters or less (about three sentences), all of it is quoted; otherwise the sentence alone,
+as before. The choice of sentence does not change, so no decision changes: only the text of a quote.
+
+Re-run with written answers on both fresh sets and the seven existing questions that get a quote: 97 replies,
+84 identical, 13 quotes longer.
+
+| | Count | Which |
+|---|---|---|
+| Now answers the question | 1 | as-smoke-01 (wind and route) |
+| Same grade, more complete | 7 | as-eatsnow (melt it), as-rain (rain off leaves), az-wreckfire (safe distance), az-bike, elk, bison, cougar |
+| Same grade, no better | 3 | as-crypto, as-antler, tick |
+| Same grade, noisier | 2 | az-sandstake (opens with a sentence about a branch, but names the "dead man" method), az-thick (still the wrong passage, now two sentences of it) |
+| Worse | 0 | |
+
+Working set 35.5 → 36.0 of 45 (80.0%); sealed set unchanged at 35.5. No unsafe answer. The 360 limit was
+chosen by eye on these quotes, and the gain in grade is one question, so this is a wording improvement to
+text that is already reviewed, not a measured gain in accuracy.
+Grades: `docs/assembled-paragraph-verdicts.json`, `docs/assembled-sealed-paragraph-verdicts.json`.
+
+**One lead, not acted on.** The two answerable questions where the model declines and nothing replaces it
+have a sentence that answers just under the quote bar of 0.57: `as-fawn-01` at 0.545 ("Leave the fawn alone…
+its mother will return") and `az-layers-01` at 0.562. The nearest bad candidate among today's dead ends is
+`he-cooktent-01` at 0.526. A bar of about 0.54 would pick up both, but that is two examples with a margin of
+0.02, chosen after reading the answers. It needs questions nobody has looked at before it can be trusted.

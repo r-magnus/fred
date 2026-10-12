@@ -4,9 +4,8 @@
 
 **Short version: a question about phone signal now gets, in Fred's own
 reply, how far and which way the nearest reported coverage is, and the map
-under it. Built and tested on the desktop. Not yet seen on the phone: it was
-unplugged before the new build could be installed. #77 stays open until it
-is.**
+under it. Checked on the phone on 2026-10-11, where it also turned up a bug
+that the desktop could not: fixed and checked again.**
 
 ## What was already there
 
@@ -62,12 +61,32 @@ filings.
 | Sespe Wilderness | no service | 2.6 km north-east | 2.6 km north-east |
 | Yosemite Valley | covered | here | here |
 
+## On the phone (2026-10-11)
+
+Field-test build from main, three questions asked through the test hook
+(`ask-phone.sh`), screen read by screenshot.
+
+- **First try: recognised, not answered.** "where can I call from?" and
+  "how far is the nearest signal?" showed the map and "Here's where you
+  are.", with no coverage sentence. The sentence was filled in only for the
+  newest message, and the position arrived after the next message had been
+  sent. A hiker who types a second message within the fifteen seconds a
+  position can take would have seen the same.
+- **Fix:** the sentence is filled in for any signal question of the last
+  two minutes that lacks it, newest first.
+- **Second try: all three answered.** Both plain questions: "T-Mobile
+  reports coverage here. The map below shows where.", one map under each,
+  the sentence not repeated under the map. "my phone has no signal and my
+  friend is hurt" kept its own reply, with the map and the sentence beneath.
+
 ## Not done
 
-- **Not seen on the phone.** The build is made
-  (`tools/eval/build-apk.sh --field-test`, 2026-10-11 18:37) and waits to be
-  installed with `tools/eval/install-apk.sh`. To check: ask "where can I
-  call from?" and look for the coverage sentence in Fred's reply and one map
-  under it, with the sentence not repeated under the map.
+- **The no-coverage wording was not seen on the phone.** The desk is inside
+  T-Mobile's reported coverage, so the phone said "reports coverage here".
+  The distance-and-direction sentence comes from the same code and is the
+  one the map has shown since September; it will be seen on the phone on
+  the visit to a no-service place that #20 still owes.
+- "The map below shows where." reads a little oddly when the answer is
+  "coverage here". Left as it is.
 - **Whether the distance is right on the ground** is B-KR3, part of the
   drive test (#20), not this ticket.

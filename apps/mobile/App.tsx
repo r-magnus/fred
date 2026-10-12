@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, declineReply, isRefusal, typeOut, wantsMap, type CardOffer, type Citation, type ClarifyView, type DeclineReply, type LinePart } from '@fred/rag-core';
+import { CONDITION_HISTORY, MEDICAL_DISCLAIMER, REFER_REPLY, SAFETY_NET_REPLY, WATCH_REPLY, declineReply, isRefusal, typeOut, wantsMap, wantsSignal, type CardOffer, type Citation, type ClarifyView, type DeclineReply, type LinePart } from '@fred/rag-core';
 
 /** One piece of fixed text as a stream, for typeOut. */
 async function* oneShot(text: string): AsyncIterable<string> { yield text; }
@@ -33,6 +33,7 @@ import { File, Paths } from 'expo-file-system';
 import { loadEngine, describePhase, setVerboseLogging, type Engine, type LoadPhase } from './src/engine.ts';
 import { beginAnswer, ceilingEstimate, endAnswer, estimateFor, sampleIdle } from './src/battery.ts';
 import { MapPreview, MapScreen } from './src/map-probe.tsx';
+import { signalAdvice } from './src/coverage-layer.ts';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { Scene } from './src/scene.tsx';
 import { SideDrawer, SideTab } from './src/side-drawer.tsx';
@@ -108,6 +109,11 @@ interface Turn {
   offerOpen?: boolean;
   /** "I'm lost", "where am I?", "no signal": a map is shown beside the reply (US-05). */
   map?: boolean;
+  /**
+   * #77: the reply to a signal question, "Nearest reported coverage: about
+   * 3.2 km north-east." It is the map's own sentence for where the hiker stood.
+   */
+  signal?: string;
   /** A card's clarifying question (#50): buttons under the answer until one is used. */
   clarify?: ClarifyView;
   clarifyUsed?: boolean;
@@ -119,6 +125,19 @@ interface Turn {
   lead?: string;
   /** #172: what a plain decline says, fitted to the message. */
   decline?: DeclineReply;
+}
+
+/** #77: how long after a signal question its reply may still be filled in. */
+const SIGNAL_REPLY_WINDOW_MS = 2 * 60_000;
+
+/**
+ * Whether Fred's own reply carries the signal line (#77): the plain decline
+ * does, in place of "I don't have that". Any other reply keeps its words, and
+ * the line goes with the map under it.
+ */
+function saidSignal(t: Turn): boolean {
+  return t.signal !== undefined && t.kind === 'abstain' &&
+    t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY;
 }
 
 /**
@@ -274,6 +293,24 @@ function Screen() {
   const update = useCallback((id: number, patch: Partial<Turn>): void => {
     setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   }, []);
+
+  // #77: a signal question ("no service", "where can I call from?") is answered
+  // with how far and which way the nearest reported coverage is. Filled in once
+  // a position is known, and only for a message just asked: an old chat opened
+  // again is not answered for wherever the phone is now.
+  const newest = turns.at(-1);
+  const signalOwed = newest !== undefined && newest.signal === undefined &&
+    Date.now() - newest.askedAt < SIGNAL_REPLY_WINDOW_MS && wantsSignal(newest.question) ? newest.id : null;
+  useEffect(() => {
+    if (signalOwed === null || fix === null) return;
+    let live = true;
+    void signalAdvice(fix).then((line) => {
+      if (!live || line === null) return;
+      console.log(`[fred] signal ${line}`);
+      update(signalOwed, { signal: line });
+    });
+    return () => { live = false; };
+  }, [signalOwed, fix, update]);
 
   const send = useCallback(async (questionText?: string, withState?: string | null, viaHook = false) => {
     const question = (questionText ?? draft).trim();
@@ -666,7 +703,7 @@ function Screen() {
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
-                  {t.map === true ? 'Here\u2019s where you are.' : t.decline?.text ?? 'I don\u2019t have that in my guides, and I\u2019d rather not guess.'}
+                  {t.signal !== undefined ? `${t.signal} The map below shows where.` : t.map === true ? 'Here\u2019s where you are.' : t.decline?.text ?? 'I don\u2019t have that in my guides, and I\u2019d rather not guess.'}
                 </Text>
                 {t.map === true && t.offer === undefined ? null : t.offer === undefined ? (
                   <Text style={styles.hint}>
@@ -795,11 +832,14 @@ function Screen() {
               <View style={styles.card}>
                 <Tab label="Map" tone={palette.skyWash} />
                 {t.id === liveMap
-                  ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} />
+                  ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} quiet={saidSignal(t)} />
                   : (
-                    <Pressable onPress={() => setMapOpen(true)} hitSlop={8} accessibilityRole="button">
-                      <Text style={styles.offerTitle}>▸ Open the map</Text>
-                    </Pressable>
+                    <>
+                      {t.signal !== undefined && !saidSignal(t) && <Text style={styles.body}>{t.signal}</Text>}
+                      <Pressable onPress={() => setMapOpen(true)} hitSlop={8} accessibilityRole="button">
+                        <Text style={styles.offerTitle}>▸ Open the map</Text>
+                      </Pressable>
+                    </>
                   )}
               </View>
             )}

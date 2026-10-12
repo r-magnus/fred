@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { wantsMap } from '../src/map-intent.ts';
+import { wantsMap, wantsSignal } from '../src/map-intent.ts';
 
 test('lost, where-am-I and no-signal messages open the map', () => {
   for (const m of [
@@ -32,6 +32,43 @@ test('ordinary questions do not', () => {
     'What plants and animals are near me?',
     'My friend is lost in thought',
   ]) assert.ok(!wantsMap(m), m);
+});
+
+test('signal messages are told apart from lost ones (#77)', () => {
+  for (const m of [
+    'I have no service, what do I do?',
+    'I have no signal, what should I do?',
+    "I don't have any service",
+    'I lost signal an hour ago',
+    'where can I get cell signal?',
+    'where should we go to find reception?',
+    'where can I call from?',
+    'Where can we make a call?',
+    'how far is the nearest signal?',
+    'which way do I go to get reception?',
+    'what direction is the closest cell coverage',
+    'is there cell coverage around here?',
+    'I need to call 911 but I have no bars',
+    "I can't call 911",
+    'my phone has no signal and my friend is hurt',
+  ]) {
+    assert.ok(wantsSignal(m), m);
+    assert.ok(wantsMap(m), m);
+  }
+  for (const m of [
+    "I'm lost",
+    'where am i?',
+    "can't find the trailhead",
+    'how far can a signal fire be seen?',
+    'which way should I point the signal mirror?',
+    'how do I signal a helicopter?',
+    'what is the nearest water source?',
+    'which way is the road',
+    "I can't call my dog back",
+    'is there a ranger service near Yosemite?',
+    'where can I find water?',
+    'are there bears around here?',
+  ]) assert.ok(!wantsSignal(m), m);
 });
 
 // Every eval question: the rule may fire only on questions about being lost or

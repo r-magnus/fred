@@ -548,7 +548,7 @@ export function MapScreen(
  * preview itself takes no gestures, so scrolling the chat never pans the map.
  */
 export function MapPreview(
-  { fix, onOpen }: { fix: LocationFix | null; onOpen: () => void },
+  { fix, onOpen, quiet = false }: { fix: LocationFix | null; onOpen: () => void; quiet?: boolean },
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const { coverage } = useCoverage(fix);
@@ -562,7 +562,8 @@ export function MapPreview(
       <View style={styles.preview} pointerEvents="none">
         <FredMap fix={fix} coverage={coverage} zoom={12} credit={false} />
       </View>
-      <Text style={styles.previewCaption}>{caption}</Text>
+      {/* #77: left out when Fred's reply above has already said it. */}
+      {quiet && coverage !== null ? null : <Text style={styles.previewCaption}>{caption}</Text>}
       <Text style={styles.previewOpen}>Tap to open the map</Text>
     </Pressable>
   );

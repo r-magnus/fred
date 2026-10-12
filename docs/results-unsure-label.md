@@ -7,8 +7,8 @@ Earlier rounds: `results-said-as.md`, `results-card-matcher-2.md`.
 still right about the bigger question, "is this something no card is for?"
 Fred now uses that. On 25 fresh test chats written before the change, 29 of
 34 replies were right before and 31 after. Across all 986 replies on every
-test set, 17 changed: 10 better, 7 small talk replies that now carry a
-folded card, none clearly worse. Three of the five messages #152 names are
+test set, 17 changed: 10 better, 5 more small talk replies that now carry a
+folded card, 2 neither better nor worse, none clearly worse. Three of the five messages #152 names are
 fixed. Sore hips, a stiff neck and a missed junction are not, and the three
 tickets stay open for what is left.**
 

@@ -986,4 +986,15 @@ test('under the gate, a sentence close to the question is quoted; a distant one 
   assert.equal(far.kind, 'abstain');
   const off = await ask(q, { backend: new FakeBackend(), store: make(q), packs }, { state: null, abstainThreshold: 5, fallbackThreshold: 5, quoteUnderGate: false });
   assert.equal(off.kind, 'abstain');
+
+  // Read as urgent, with no danger sign: the sentence comes before the watch reply.
+  const urgent = { backend: understanding('NOW | cathole distance from lake', 'NOW'), store: make(q), packs };
+  const now = await ask(q, urgent, { ...uOpts, state: null, abstainThreshold: 5, fallbackThreshold: 5 });
+  assert.equal(now.kind, 'answer');
+  if (now.kind === 'answer') assert.equal(now.diagnostics.answerGuard?.replacedBy, 'near-quote');
+  const watch = await ask(q, { ...urgent, backend: understanding('NOW | cathole distance from lake', 'NOW') }, { ...uOpts, state: null, abstainThreshold: 5, fallbackThreshold: 5, quoteBeforeWatch: false });
+  assert.equal(watch.kind === 'abstain' && watch.reason, 'watch');
+  // A danger sign keeps the get-help-now reply.
+  const danger = await ask(`he is not breathing. ${q}`, { ...urgent, backend: understanding('NOW | not breathing', 'NOW'), store: make(`he is not breathing. ${q}`) }, { ...uOpts, state: null, abstainThreshold: 5, fallbackThreshold: 5 });
+  assert.equal(danger.kind === 'abstain' && danger.reason, 'safety-net');
 });

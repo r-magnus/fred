@@ -107,6 +107,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.GUARDS === '0' ? { guards: false } : {}),
     // NEAR_QUOTE=0 declines a search under the gate whatever its closest sentence (#23; on by default).
     ...(env.NEAR_QUOTE === '0' ? { quoteUnderGate: false } : {}),
+    // WATCH_QUOTE=0 gives the watch reply to an urgent-read message whatever its closest sentence (#23; on by default).
+    ...(env.WATCH_QUOTE === '0' ? { quoteBeforeWatch: false } : {}),
     // CLOSEST_CARD=0 leaves a model decline as it is (#23; on by default).
     ...(env.CLOSEST_CARD === '0' ? { closestCard: false } : {}),
     // UNDERSTAND_TOP=3 sets the own-words rank rule, for calibration on tuning sets only.

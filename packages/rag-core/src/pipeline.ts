@@ -195,6 +195,8 @@ export interface AskOptions {
   readonly guards?: boolean;
   /** #23: quote the closest sentence for a search under the gate (UNDER_GATE_QUOTE_FLOOR). Default on; off only to measure. */
   readonly quoteUnderGate?: boolean;
+  /** #23: with no danger sign, try that sentence before the watch reply of a message read as urgent. Default on; off only to measure. */
+  readonly quoteBeforeWatch?: boolean;
   /** #23: a field card in place of the model's decline (CLOSEST_CARD_FLOOR). Default on; off only to measure. */
   readonly closestCard?: boolean;
   /** Overrides UNDERSTOOD_OWN_TOP, for calibration on the tuning sets. */
@@ -1666,10 +1668,37 @@ async function askCore(
         };
       }
     }
+    // #23: a search under the gate whose passages hold a sentence this close
+    // to the question is answered with that sentence, word for word
+    // (UNDER_GATE_QUOTE_FLOOR). Nothing is written, so nothing is made up.
+    const sourcesFound = candidates.slice(0, retrievalOpts.topK)
+      .filter((c) => !isCard(c) && c.chunk.audience !== 'provider' && c.chunk.packId !== retrievalOpts.reserve?.packId);
+    const nearQuote = async (): Promise<{ diagnostics: typeof weak; answer?: AskResult }> => {
+      const near = guardsOn && !aboutPet && !petPatient && !NOT_FREDS_JOB.test(query)
+        ? await quoteFrom(sourcesFound.map((c) => c.chunk), 0) : undefined;
+      if (near === undefined) return { diagnostics: weak };
+      const diagnostics = { ...weak, nearSentence: { similarity: near.similarity, text: near.text } };
+      if (near.similarity < UNDER_GATE_QUOTE_FLOOR || opts.quoteUnderGate === false) return { diagnostics };
+      const quoted = sourcesFound.filter((c) => near.chunkIds.includes(c.chunk.id));
+      return {
+        diagnostics,
+        answer: {
+          kind: 'answer', stream: once(near.text), citations: quoted.map(citeOf),
+          prompt: { system: '', user: '' }, medical: quoted.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
+          diagnostics: { ...diagnostics, sufficient: null, answerGuard: { replacedBy: 'near-quote' } },
+          ...(offer === undefined ? {} : { card: offer }),
+        },
+      };
+    };
     if (understandOn && intent === 'now' && !aboutPet) {
       const danger = !guardsOn || dangerNow;
+      // With no danger sign, the sentence is tried before "I don't have steps
+      // for that": "is it ok to eat snow if im out of water", read as urgent
+      // on the phone, got that reply with the manual's answer in hand (#23).
+      const near = danger || opts.quoteBeforeWatch === false ? { diagnostics: weak } : await nearQuote();
+      if (near.answer !== undefined) return near.answer;
       return {
-        kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: weak,
+        kind: 'abstain', reason: danger ? 'safety-net' : 'watch', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: near.diagnostics,
         ...(offer === undefined ? {} : { offer }),
       };
     }
@@ -1683,25 +1712,10 @@ async function askCore(
     if (routed.skippedStatePacks.length > 0) {
       return { kind: 'needs-location', candidatePacks: routed.skippedStatePacks, diagnostics: weak };
     }
-    // #23: a search under the gate whose passages hold a sentence this close
-    // to the question is answered with that sentence, word for word
-    // (UNDER_GATE_QUOTE_FLOOR). Nothing is written, so nothing is made up.
-    const sourcesFound = candidates.slice(0, retrievalOpts.topK)
-      .filter((c) => !isCard(c) && c.chunk.audience !== 'provider' && c.chunk.packId !== retrievalOpts.reserve?.packId);
-    const near = guardsOn && !aboutPet && !petPatient && !NOT_FREDS_JOB.test(query)
-      ? await quoteFrom(sourcesFound.map((c) => c.chunk), 0) : undefined;
-    const nearDiag = near === undefined ? weak : { ...weak, nearSentence: { similarity: near.similarity, text: near.text } };
-    if (near !== undefined && near.similarity >= UNDER_GATE_QUOTE_FLOOR && opts.quoteUnderGate !== false) {
-      const quoted = sourcesFound.filter((c) => near.chunkIds.includes(c.chunk.id));
-      return {
-        kind: 'answer', stream: once(near.text), citations: quoted.map(citeOf),
-        prompt: { system: '', user: '' }, medical: quoted.some((c) => MEDICAL_DOMAINS.has(c.chunk.domain)),
-        diagnostics: { ...nearDiag, sufficient: null, answerGuard: { replacedBy: 'near-quote' } },
-        ...(offer === undefined ? {} : { card: offer }),
-      };
-    }
+    const near = await nearQuote();
+    if (near.answer !== undefined) return near.answer;
     return {
-      kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: nearDiag,
+      kind: 'abstain', reason: 'low-score', nearest: candidates.slice(0, 2).map(toCitation), diagnostics: near.diagnostics,
       ...(offer === undefined ? {} : { offer }),
     };
   }

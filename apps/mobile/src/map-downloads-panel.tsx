@@ -13,9 +13,8 @@ import {
   type MapIndex, type Progress,
 } from './map-downloads.ts';
 import { CalmLoader } from './calm-loader.tsx';
+import { orderStates, size } from './setup-plan.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
-
-const size = (b: number): string => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
 
 export function MapDownloads(
   { here, onClose, onChanged }: { here: string | null; onClose: () => void; onChanged: () => void },
@@ -53,8 +52,7 @@ export function MapDownloads(
       .finally(() => { setBusy(null); setProgress(null); abort.current = null; setTick((t) => t + 1); });
   }, [idx, onChanged]);
 
-  const states = idx === null ? [] : Object.keys(idx.states).sort((a, b) =>
-    (a === here ? -1 : b === here ? 1 : (STATE_NAMES[a] ?? a).localeCompare(STATE_NAMES[b] ?? b)));
+  const states = idx === null ? [] : orderStates(Object.keys(idx.states), here, STATE_NAMES);
 
   return (
     <View style={styles.panel}>

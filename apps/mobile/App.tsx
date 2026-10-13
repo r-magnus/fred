@@ -38,6 +38,9 @@ import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { Scene } from './src/scene.tsx';
 import { SideDrawer, SideTab } from './src/side-drawer.tsx';
+import { GuideScreen } from './src/guide.tsx';
+import { SetupWizard } from './src/setup-wizard.tsx';
+import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
 import { GREETINGS, TOPICS, pick } from './src/words.ts';
 import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
@@ -206,6 +209,11 @@ function Screen() {
   const [recording, setRecording] = useState(isRecording());
   // The full-screen map: opened from a map in the chat, or by tapping the wordmark.
   const [mapOpen, setMapOpen] = useState(false);
+  // First-run setup (#196): shown once on a new phone, and again when asked
+  // for from the guide. The engine is not loaded under it: a download and a
+  // model in memory at once is more than a small phone has room for.
+  const [setup, setSetup] = useState(wizardWanted);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -283,7 +291,10 @@ function Screen() {
   const [engineGen, setEngineGen] = useState(0);
   const packsChanged = useRef(false);
   useEffect(() => {
+    if (setup) return;
     let live = true;
+    // Back from setup, or a reload: the loading screen again, not the last failure.
+    setLoad({ phase: 'idle' });
     void loadEngine((p) => { if (live) setLoad(p); })
       .then((e) => { if (live) engine.current = e; })
       .catch(() => { /* phase already carries the message */ });
@@ -292,7 +303,7 @@ function Screen() {
       void engine.current?.release();
       engine.current = null;
     };
-  }, [engineGen]);
+  }, [engineGen, setup]);
 
   /**
    * A cached fix costs nothing and prompts for nothing — getLastKnownPositionAsync
@@ -308,7 +319,8 @@ function Screen() {
       setState((s) => s ?? f.state);
     });
     return () => { live = false; };
-  }, []);
+    // Read again after setup, where location may just have been allowed.
+  }, [setup]);
 
   const locate = useCallback(async (): Promise<string | null> => {
     setLocating(true);
@@ -606,6 +618,10 @@ function Screen() {
     }
   };
 
+  if (setup) {
+    return <SetupWizard onDone={() => { markSetupDone(); setSetup(false); }} />;
+  }
+
   if (load.phase !== 'ready') {
     const failed = load.phase === 'failed';
     return (
@@ -617,6 +633,12 @@ function Screen() {
           {!failed && <CalmLoader size={72} style={styles.loadShapes} />}
           <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
           {!failed && <Text style={styles.loadHint}>Getting the guides ready. This takes a moment.</Text>}
+          {/* A phone with no guides: setup is where they come from. */}
+          {failed && !guidesOnPhone() && (
+            <Pressable style={styles.loadSetup} onPress={() => setSetup(true)} accessibilityRole="button">
+              <Text style={styles.loadSetupText}>Set up Fred</Text>
+            </Pressable>
+          )}
         </View>
       </View>
     );
@@ -639,6 +661,15 @@ function Screen() {
           locating, progress: locProgress, note: locNote, recording,
           locate: () => void locate(), dismissNote: () => setLocNote(null), toggleRecording,
         }}
+      />
+    );
+  }
+  if (guideOpen) {
+    return (
+      <GuideScreen
+        onClose={() => setGuideOpen(false)}
+        onMap={() => { setGuideOpen(false); setMapOpen(true); }}
+        onSetup={() => { setGuideOpen(false); setSetup(true); }}
       />
     );
   }
@@ -961,6 +992,7 @@ function Screen() {
         current={chatId.current}
         onClose={() => setDrawer(false)}
         onMap={() => { setDrawer(false); setMapOpen(true); }}
+        onGuide={() => { setDrawer(false); setGuideOpen(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
         onRemoveChat={(id) => {
@@ -985,6 +1017,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   loadShapes: { marginTop: 30, marginBottom: 20 },
   loadNote: { color: palette.ink, fontSize: 15, fontWeight: '600' },
   loadHint: { color: palette.moss, fontSize: 13, marginTop: 6 },
+  loadSetup: { marginTop: 22, borderRadius: radius.pill, backgroundColor: palette.pine, paddingHorizontal: 26, paddingVertical: 14 },
+  loadSetupText: { color: palette.paper, fontSize: 16, fontWeight: '700' },
   loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
 
   header: {

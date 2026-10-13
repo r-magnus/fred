@@ -48,10 +48,12 @@ const GULL_MS = 34_000;
 const TAP = 8;
 
 export function Scene(
-  { height, top, children }: {
+  { height, top, hint = false, children }: {
     height: number;
     /** The status bar's height: nothing of the sky's furniture is drawn under the clock. */
     top: number;
+    /** A slow ring round the sun or moon, for the page that teaches the switch (#196). */
+    hint?: boolean;
     children?: ReactNode;
   },
 ): React.JSX.Element {
@@ -61,6 +63,13 @@ export function Scene(
 
   const drift = useRef(new Animated.Value(0)).current;
   const glide = useRef(new Animated.Value(0)).current;
+  const ripple = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (still || !hint) return;
+    const loop = Animated.loop(Animated.timing(ripple, { toValue: 1, duration: 2400, easing: Easing.out(Easing.quad), useNativeDriver: true }));
+    loop.start();
+    return () => { loop.stop(); ripple.setValue(0); };
+  }, [still, hint, ripple]);
   useEffect(() => {
     if (still) return;
     const forever = (v: Animated.Value, duration: number) =>
@@ -126,6 +135,8 @@ export function Scene(
     nightHills: follow(turn, (n) => Math.min(1, n / 0.12)),
     dayHills: follow(turn, (n) => 1 - n),
     veil: follow(turn, veiled),
+    // The hint's ring changes colour with the page, so it steps aside for the change.
+    hint: follow(turn, (n) => 1 - veiled(n)),
   }), [turn]);
 
   return (
@@ -179,6 +190,18 @@ export function Scene(
           )}
         </Animated.View>
 
+        {hint && (
+          <Animated.View style={[styles.hint, { left: rest.x - orb, top: rest.y - orb, width: orb * 2, height: orb * 2, opacity: fx.hint }]}>
+            <Animated.View style={{
+              width: orb * 1.3, height: orb * 1.3, borderRadius: orb, borderWidth: 2,
+              borderColor: palette.night ? WHITE : palette.pine,
+              // Standing still, a plain ring; moving, it widens and fades like a ripple.
+              opacity: still ? 0.5 : ripple.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 0.6, 0] }),
+              transform: [{ scale: still ? 1.15 : ripple.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1.5] }) }],
+            }} />
+          </Animated.View>
+        )}
+
         <Animated.Image source={HILL_BACK} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: NIGHT.back, opacity: fx.nightHills }]} />
         <Animated.Image source={HILL_BACK} resizeMode="stretch"
@@ -211,6 +234,7 @@ const styles = StyleSheet.create({
   wheel: { position: 'absolute' },
   orbBox: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   glow: { position: 'absolute', opacity: 0.3 },
+  hint: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   cloud: { position: 'absolute', left: 0, width: 80, height: 35, tintColor: WHITE },
   cloudSmall: { position: 'absolute', left: 0, width: 52, height: 23, tintColor: WHITE },
   gull: { position: 'absolute', left: 0, width: 22, height: 12, tintColor: WHITE },

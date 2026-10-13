@@ -1,0 +1,24 @@
+Phone check of the quote before the watch reply (#23), 2026-10-13, field-test build of branch quote-before-watch. Each question asked alone in a fresh chat.
+
+=== snow run 1
+[fred] text "Here's what the Army survival manual says:\nUse fresh, clean snow as a water source. Place containers filled with snow near a fire or between clothing layers to allow body heat to melt it. Adding water to snow will help it melt faster. Avoid directly eating snow as it lowers the body's core temperature and requires the body to use more energy reserves than if the snow is heated externally."
+[fred] answer retrieval=3303ms first=3304ms total=5809ms chars=391 U=0.274 tokens=0 intent=now understood=unused("snow can be eaten, but it's not safe, what to do right now") model=2165ms embed=651ms top=RAIN, SNOW, AND ICE | RAIN, SNOW, AND ICE | DEW | RAIN, SNOW, AND ICE
+=== smoke run 1
+[fred] text "That one isn't in my guides, and I'd rather not guess. / Ask it another way, or tell me what's going on around it, and I'll look again."
+[fred] abstain retrieval=666ms U=0.256 intent=prevent reason=low-score model=454ms embed=0ms top=Stay Safe > Watch for Wildfire Hazards > If You See or Smell Smoke, Don't Panic | MEANS FOR SIGNALING | Signalling for rescue | Wildland fire safety for park visitors - Fire > Keep these tips in mind before you leave home and while you're on the trail to have an enjoyable outdoor experience during fire season!
+=== snow run 2
+[fred] text "Here's what the Army survival manual says:\nUse fresh, clean snow as a water source. Place containers filled with snow near a fire or between clothing layers to allow body heat to melt it. Adding water to snow will help it melt faster. Avoid directly eating snow as it lowers the body's core temperature and requires the body to use more energy reserves than if the snow is heated externally."
+[fred] answer retrieval=3896ms first=3897ms total=6392ms chars=391 U=0.274 tokens=0 intent=now understood=unused("snow can be eaten, but it's not safe, what to do right now") model=1833ms embed=1573ms top=RAIN, SNOW, AND ICE | RAIN, SNOW, AND ICE | DEW | RAIN, SNOW, AND ICE
+=== smoke run 2
+[fred] text "That one isn't in my guides, and I'd rather not guess. / Ask it another way, or tell me what's going on around it, and I'll look again."
+[fred] abstain retrieval=634ms U=0.256 intent=prevent reason=low-score model=413ms embed=0ms top=Stay Safe > Watch for Wildfire Hazards > If You See or Smell Smoke, Don't Panic | MEANS FOR SIGNALING | Signalling for rescue | Wildland fire safety for park visitors - Fire > Keep these tips in mind before you leave home and while you're on the trail to have an enjoyable outdoor experience during fire season!
+
+Urgent messages that should keep the watch reply:
+=== my knee is killing me going downhill
+[fred] text "Sorry about your knee."
+[fred] abstain retrieval=3098ms U=0.245 intent=now understood=unused("knee pain when going downhill, what to do right now") reason=watch model=1285ms embed=667ms top=Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries | Sports Injuries–Types, Symptoms, & Risk Factors > Who Gets Sports Injuries? | Sports Injuries–Types, Symptoms, & Risk Factors > Types of Sports Injuries
+=== my pack straps are rubbing my shoulders raw
+[fred] text "Sorry about your shoulders."
+[fred] abstain retrieval=8536ms U=0.169 intent=now understood=unused("straps pack straps rubbing shoulders raw, what to do") scope=framed reason=watch model=1489ms embed=5549ms top=SHOULDER BANDAGE | APPLY AN IMPROVISED SLING | SHOULDER BANDAGE | APPLY AN IMPROVISED SLING
+=== we're up on the ridge and just heard thunder, what do we do
+[fred] abstain retrieval=2570ms U=0.268 intent=now understood=unused("thunder on the ridge, what to do right now") reason=watch model=1314ms embed=678ms top=Lightning Tips > Lightning: What You Need to Know | When a Safe Building or Vehicle is Nearby > Camping, Climbing and Other Wilderness Activities | Lightning Tips > Last Resort Outdoor Risk Reduction Tips | When a Safe Building or Vehicle is Nearby

@@ -1,0 +1,44 @@
+ailments: 23 replies, answered 12 -> 14, changed 3
+  ha-chafe-thighs-01 [] abstain/watch -> answer(gen:Hiking > Stay healthy  | Wilderness backpacking | Hiking > Stay healthy ) said=none:minor:0.70[minor]  "my inner thighs are chafed raw from hiking"
+  ha-chafe-straps-01 [] abstain/watch -> answer(gen:Wilderness backpacking | Wilderness backpacking | Wilderness backpacking) said=none:minor:0.82[minor]  "my pack straps are rubbing my shoulders raw"
+  ha-blister-lip-01 [] abstain/watch -> abstain/low-score said=none:minor:0.56[minor]  "my lips are sunburned and cracking"
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 21, changed 3, misses 2 -> 2
+  ph-camp-bear#8 [answer] answer(card:Burns) -> answer(card:A bear close by, charging or attac) said=none:minor:0.24[minor]  "it's blistering"
+  ph-camp-bear#9 [not-urgent] watch/watch -> answer(card:A bear close by, charging or attac) said=none:fragment:0.79[]  "should i pop it"
+  ph-lost-dusk#8 [not-urgent] watch/watch -> decline/low-score said=none:minor:0.44[minor]  "my knee is killing me going downhill"
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 16 -> 16, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 17 -> 18, changed 2, misses 4 -> 4
+  c3-oos-pills#1 [not-urgent] watch/watch -> answer(gen:Camping Safely Step 1  | Before the Trip - Camp | Wilderness backpacking) said=none:minor:0.42[minor]  "my back is wrecked from the pack"
+  c3-switch-blister-fire#1 [answer] answer(gen:SOFT TISSUE TRAUMA | TRENCH FOOT | During Extremely Cold ) -> answer(gen:SOFT TISSUE TRAUMA | Hiking > Stay healthy  | Hiking > Stay healthy ) said=none:minor:0.47[minor]  "my heel is rubbed raw and there's a bubble on it"
+holdout-chats-4: 38 replies, answered 19 -> 19, changed 1, misses 5 -> 5
+  c4-toe-jam#1 [not-urgent] watch/watch -> decline/low-score said=none:minor:0.45[minor]  "kicked a rock in my sandals and the nail on my big toe is lifting"
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 19 -> 20, changed 1, misses 1 -> 1
+  c6-ambulance-then-blister#3 [not-urgent] watch/watch -> answer(gen:Hiking > Stay healthy  | Hiking > Stay healthy  | SOFT TISSUE TRAUMA) said=none:minor:0.68[minor]  "now ive got a blister on my heel from running down"
+holdout-chats-7: 28 replies, answered 11 -> 12, changed 2, misses 1 -> 1
+  c7-sore-lower-back#1 [any] watch/watch -> answer(gen:Wilderness backpacking | Hiking > Prepare > Pac | Wilderness backpacking) said=none:minor:0.71[minor]  "my lower back is aching from hauling this heavy pack since dawn"
+  c7-raw-shoulders#1 [any] answer(gen:SHOULDER BANDAGE | SHOULDER BANDAGE | APPLY AN IMPROVISED SL) -> answer(gen:Wilderness backpacking | Wilderness backpacking | Wilderness backpacking) said=none:minor:0.79[minor]  "the pack straps have rubbed my shoulders raw"
+holdout-chats-8: 34 replies, answered 23 -> 24, changed 1, misses 1 -> 1
+  c8-hot-spots#1 [any] watch/watch -> answer(gen:Wilderness backpacking | Hiking > Stay healthy  | Hiking > Stay healthy ) said=none:minor:0.47[minor]  "ive got hot spots on both heels and we have ten miles left"
+holdout-chats: 162 replies, answered 110 -> 110, changed 3, misses 6 -> 6
+  nu-knees'#1 [not-urgent] watch/watch -> decline/low-score said=none:minor:0.58[minor]  "downhill is killing my knees"
+  nu-cholla#2 [not-urgent] watch/watch -> decline/low-score said=none:minor:0.15[minor]  "ow too late its stuck in my finger"
+  sw-lost-knee#3 [not-urgent] watch/watch -> decline/low-score said=none:minor:0.43[minor]  "now my knee is killing me going downhill"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 1, misses 1 -> 1
+  l2-statements#5 [not-urgent] answer(gen:SOFT TISSUE TRAUMA | TRENCH FOOT | NONFREEZING INJURIES) -> answer(gen:Hiking > Stay healthy  | Hiking > Stay healthy  | SOFT TISSUE TRAUMA) said=none:minor:0.75[minor] everyday 0.29->0.35  "i'm getting a bad blister on my heel"
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 1
+  uv-neg-diagnose-01 [] abstain/watch -> abstain/low-score said=none:minor:0.36[minor]  "I've had pain in my lower right belly since yesterday. Is it appendicitis?"
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+18 replies changed

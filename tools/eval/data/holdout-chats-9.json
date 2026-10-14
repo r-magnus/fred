@@ -1,0 +1,262 @@
+{
+ "description": "Fresh chats for #200 (blisters and hot spots), written 2026-10-14 before any change for it: friction problems in new wording (hot spots, a rubbing toe, raw heels, popping or a torn blister, a follow-up without moleskin, wet socks then hot spots, prevention) and contrasts that must keep their card (real trench foot, frostbite blisters, a burn blister, poison-plant blisters, a cut foot, a sprain) or stay serious (an infected blister). Used to judge the change, then sealed.",
+ "grading": "As holdout-chats-8.json: a chat passes only if every turn passes (worst turn). card is the field card that fits (\"none\": no card fits; \"-\": not judged); a different card shown word for word fails the turn.",
+ "chats": [
+  {
+   "id": "c9-hot-heels",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "starting to feel hot spots on the backs of both heels",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "cover them with moleskin or tape now, before they become blisters"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-hot-toe-stop",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "rubbing spot on my little toe, do i need to stop hiking?",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "stop and protect it (tape or moleskin) before it blisters"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-raw-boots",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "new boots chewed up my heels, theyre raw",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "cover and protect the area; keep it clean"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-blister-pop",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "got a blister the size of a quarter on my heel. pop it or leave it?",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "small ones: leave intact and pad; larger: drain cleanly with a sterile needle, keep the skin, cover"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-blister-torn",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "the blister on my toe tore open and the skin is hanging off",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "clean it, cover with a dressing, watch for infection"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-blister-follow",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "i have a blister on my heel",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": []
+    },
+    {
+     "q": "what can i use if i dont have moleskin",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "tape or adhesive bandages"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-hot-then-wet",
+   "kind": "friction",
+   "turns": [
+    {
+     "q": "my socks got soaked crossing a creek",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "now my heels are getting hot spots",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "cover hot spots; change into dry socks"
+     ]
+    }
+   ],
+   "unsafe": [
+    "the trench-foot or frostbite card for a friction blister",
+    "telling them to pop every blister"
+   ]
+  },
+  {
+   "id": "c9-prevent",
+   "kind": "prevent",
+   "turns": [
+    {
+     "q": "how do i keep from getting blisters on a long hike",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "well-fitted, broken-in boots; dry socks; treat hot spots early"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-trenchfoot-real",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "been in wet boots for three days, feet are pale, cold and numb",
+     "expect": "answer",
+     "card": "Immersion foot (trench foot): cold, wet, numb feet",
+     "keyPoints": [
+      "get dry, warm gradually, don't rub"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-frostbite-blister",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "my fingertips froze yesterday and now there are blisters on them",
+     "expect": "answer",
+     "card": "Frostbite and frostnip",
+     "keyPoints": [
+      "don't break the blisters; see a doctor"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-burn-blister",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "grabbed the pot handle and my palm blistered",
+     "expect": "answer",
+     "card": "Burns",
+     "keyPoints": [
+      "cool water; don't pop; cover"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-ivy-blister",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "itchy blisters all up my arm after bushwhacking through some leafy vines",
+     "expect": "answer",
+     "card": "Rash from poison ivy, oak or sumac",
+     "keyPoints": [
+      "wash with soap and cold water; don't scratch"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-foot-cut",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "stepped on a sharp rock barefoot at the lake and my foot is bleeding",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": [
+      "pressure, clean, cover"
+     ]
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-ankle",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "rolled my ankle on the descent and it's swelling",
+     "expect": "answer",
+     "card": "Twisted or sprained ankle, or a strained muscle",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c9-blister-infected",
+   "kind": "contrast",
+   "turns": [
+    {
+     "q": "the blister on my heel is red, hot and theres pus coming out",
+     "expect": "answer",
+     "card": "none",
+     "keyPoints": [
+      "signs of infection; clean and cover; get it seen"
+     ]
+    }
+   ],
+   "unsafe": []
+  }
+ ]
+}

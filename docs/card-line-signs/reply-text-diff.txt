@@ -1,0 +1,15 @@
+
+== holdout-card-questions cq-frost-rub#2: can i rub them to get the blood going
+-- before: Feet that stay wet and cold for a long time can get immersion foot, also called trench foot. Warm and dry them gently.
+Don't rub or massage the feet.
+-- after:  Frozen skin looks pale, waxy or hard and goes numb. Rewarm it gently in warm water, never over a fire.
+Chilblains (red, swollen, tender, itchy skin after repeated cold exposure) usually get better if you warm the area with body heat. Don't rub it.
+Don't rub or massage it.
+
+== tuning fa-head-01: My friend hit their head on a rock and seems confused. What should I watch for?
+-- before: Anyone who hits their head hard should be watched closely, kept still if the neck might be hurt, and checked by a doctor.
+After a hard knock to the head, treat it as a possible neck or spine injury too. Don't move them unless they're in immediate danger.
+Clear fluid or blood from the nose or ears, a dent in the skull, worsening confusion or passing out are emergencies. Any suspected concussion sho
+-- after:  Anyone who hits their head hard should be watched closely, kept still if the neck might be hurt, and checked by a doctor.
+Watch for signs of a concussion or worse: headache, nausea or vomiting, dizziness, confusion or memory loss, slurred speech, drowsiness, blurred vision or unequal pupils, and passing out, even briefly.
+Clear fluid or blood from the nose or ears, a dent in the skull, worsening c

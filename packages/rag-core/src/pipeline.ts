@@ -1319,12 +1319,24 @@ async function askCore(
     // new, and still finds that card near the top stays on it, rather than
     // the card that leads by a few shared words: "can i rub them" after the
     // frostbite card for white, waxy toes led with trench foot (0.296 against
-    // 0.273).
+    // 0.273). Not when the leading card is the one for the condition the
+    // hiker described: "my toes went white and numb" opened trench foot, and
+    // "should i rub them with snow" then found frostbite again.
     else if (guardsOn && lastShown !== undefined && topCard !== undefined && topCard.chunk.id !== lastShown.chunk.id &&
-        setHere.length === 0 && !aboutPet && leansBack(query) &&
+        setHere.length === 0 && !aboutPet && leansBack(query) && !active.some((a) => a.card === topCard.chunk.section) &&
         candidates.some((c) => c.chunk.id === lastShown.chunk.id && c.score >= INTENT_CARD_NEAR_TOP * topCard.score)) {
       forcedCard = agreedCard = lastShown;
       keptShown = true;
+    }
+    // #112: the message says what happened, and the condition's trigger
+    // phrases and the card matcher agree on its card: that card opens, not
+    // one that leads the search by a few shared words. "my toes went white
+    // and numb" (frostbite, matcher 0.91) led with trench foot, 0.379 to 0.310.
+    else if (guardsOn && topCard !== undefined && saidSure !== undefined && saidKind === undefined && !aboutPet &&
+        topCard.chunk.section !== saidSure.label && setHere.some((c) => c.card === saidSure.label) &&
+        candidates.some((c) => isCard(c) && c.chunk.section === saidSure.label)) {
+      forcedCard = agreedCard = candidates.find((c) => isCard(c) && c.chunk.section === saidSure.label)!;
+      forcedOwn = true;
     }
     else if (topCard !== undefined && intent === 'now' && !aboutPet) { forcedCard = topCard; forcedOwn = true; }
     // #101: a message that says what happened opens that condition's card when

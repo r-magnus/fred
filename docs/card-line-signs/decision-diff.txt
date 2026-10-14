@@ -1,0 +1,31 @@
+ailments: 23 replies, answered 12 -> 12, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 1
+  br-frostbite-01 [] answer(card:Immersion foot (trench foot): cold) -> answer(card:Frostbite and frostnip) said=Frostbite and frostn:0.75[]  "My toes are white and numb after hiking in the snow all day. What should I do?"
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 20, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 16 -> 16, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 1, misses 0 -> 0
+  cq-frost-rub#2 [answer] answer(card:Immersion foot (trench foot): cold) -> answer(card:Frostbite and frostnip) said=Heavy bleeding from :0.15[]  "can i rub them to get the blood going"
+holdout-chats-2: 44 replies, answered 34 -> 34, changed 1, misses 1 -> 1
+  c2-danger-bleed#2 [help-now] answer(card:A bandage soaking through with blo) -> answer(card:Heavy bleeding from a wound) said=Heavy bleeding from :0.68[]  "the blood won't stop no matter how hard i press"
+holdout-chats-3: 37 replies, answered 17 -> 17, changed 0, misses 4 -> 4
+holdout-chats-4: 38 replies, answered 19 -> 19, changed 0, misses 5 -> 5
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 19 -> 19, changed 0, misses 1 -> 1
+holdout-chats-7: 28 replies, answered 11 -> 11, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 23 -> 23, changed 0, misses 1 -> 1
+holdout-chats: 162 replies, answered 110 -> 110, changed 1, misses 6 -> 6
+  ct-frostbite-rub#1 [answer] answer(card:Immersion foot (trench foot): cold) -> answer(card:Frostbite and frostnip) said=Frostbite and frostn:0.91[]  "my toes went white and numb"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 1, misses 1 -> 1
+  l2-tourniquet#5 [not-chat] answer(card:A bandage soaking through with blo) -> answer(card:Heavy bleeding from a wound) said=none:fragment:0.93[]  "how long can it stay on"
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 0
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+5 replies changed

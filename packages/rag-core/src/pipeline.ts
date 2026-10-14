@@ -618,7 +618,7 @@ export interface Diagnostics {
    * The card matcher's top label and its share, what it changed, and whether
    * it took the message as a pet's (said-as.ts).
    */
-  readonly said?: { readonly label: string; readonly p: number; readonly pet: boolean; readonly used: readonly ('card' | 'no-card' | 'opened' | 'offered')[] };
+  readonly said?: { readonly label: string; readonly p: number; readonly pet: boolean; readonly used: readonly ('card' | 'no-card' | 'opened' | 'offered' | 'minor')[] };
   /** The everyday-tips packs were searched too and led (#145). */
   readonly everyday?: { readonly routedTopScore: number; readonly topScore: number };
   /** Small talk taken as news about a problem still open in the conversation. */
@@ -1000,7 +1000,7 @@ async function askCore(
   const saidTop = saidList[0];
   const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
   const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
-  const saidUsed: ('card' | 'no-card' | 'opened' | 'offered')[] = [];
+  const saidUsed: ('card' | 'no-card' | 'opened' | 'offered' | 'minor')[] = [];
   // #152, round 3 (docs/results-unsure-label.md): an unsure top label is still
   // used where it is measured to be right. The no-card labels together: the
   // matcher is often unsure which kind a message is and right that no card is
@@ -1197,6 +1197,19 @@ async function askCore(
     if (guardsOn && intent === 'chat' && setHere.length > 0 && !saysResolved(query) && !petIsPatient(query)) {
       intent = 'now';
       if (u !== undefined && u.intent === 'chat') u = { ...u, intent };
+    }
+    // #200: a minor problem is not an emergency. When the card matcher's top
+    // label says no card is for it because it is minor, with no danger sign
+    // and no condition in the conversation, NOW is read as a question: "my
+    // feet are covered in hot spots" was searched in first aid only, reworded
+    // as "what to do right now", and opened the trench-foot card; "new boots
+    // chewed up my heels" got the watch reply. The blister tips were never
+    // searched. On the cards' own chats the matcher's top label was the card
+    // every time (trench foot, frostbite and burn blisters, a cut foot).
+    if (guardsOn && intent === 'now' && saidTop?.label === 'none:minor' && !dangerNow && setHere.length === 0 && active.length === 0) {
+      intent = 'question';
+      saidUsed.push('minor');
+      if (u !== undefined && u.intent === 'now') u = { ...u, intent };
     }
     // An emergency is answered from first aid, never from everyday tips (#96,
     // docs/plan-tips.md): "stepped in a hole and my ankle is huge" must not be

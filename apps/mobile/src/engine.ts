@@ -19,7 +19,7 @@ const BASE = Paths.document;
 const BASE_PATH = BASE.uri.replace(/^file:\/\//, '').replace(/\/$/, '');
 
 /** Filenames staged into internal storage. See tools/eval/measure-app.sh. */
-const MODEL_FILE = 'Qwen3-1.7B-Q4_K_M.gguf';
+export const MODEL_FILE = 'Qwen3-1.7B-Q4_K_M.gguf';
 
 export type LoadPhase =
   | { readonly phase: 'idle' }
@@ -92,7 +92,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
       }
     }
     if (manifests.length === 0) {
-      throw new Error('No knowledge packs installed. Stage them with tools/eval/measure-app.sh.');
+      throw new Error('Fred\u2019s guides aren\u2019t on this phone yet.');
     }
 
     onPhase({ phase: 'models' });

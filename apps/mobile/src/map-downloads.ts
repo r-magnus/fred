@@ -35,6 +35,12 @@ export interface MapIndex {
   readonly release: string;
   readonly baseUrl: string;
   readonly states: Readonly<Record<string, StateBundle>>;
+  /**
+   * What Fred needs before he can answer anything: the models and the guides
+   * that are the same everywhere (#196). Absent until they are published; a
+   * phone without them can then only be set up by cable.
+   */
+  readonly core?: StateBundle;
 }
 
 /** The index format this build understands. A newer one is refused, not guessed at. */
@@ -63,7 +69,7 @@ export function installState(bundle: StateBundle): InstallState {
   return n === bundle.files.length ? 'installed' : n === 0 ? 'none' : 'partial';
 }
 
-/** Bytes still to download for a state. */
+/** Bytes still to download for a bundle. */
 export const remainingBytes = (bundle: StateBundle): number =>
   bundle.files.filter((f) => !present(f)).reduce((a, f) => a + f.bytes, 0);
 
@@ -88,6 +94,16 @@ export async function downloadState(
 ): Promise<void> {
   const bundle = idx.states[state];
   if (bundle === undefined) throw new Error(`No map is published for ${state}.`);
+  return downloadBundle(idx, bundle, onProgress, signal);
+}
+
+/** The same for any bundle in the index: a state, or the core guides and models. */
+export async function downloadBundle(
+  idx: MapIndex,
+  bundle: StateBundle,
+  onProgress: (p: Progress) => void,
+  signal: AbortSignal,
+): Promise<void> {
   const todo = bundle.files.filter((f) => !present(f));
   const total = todo.reduce((a, f) => a + f.bytes, 0);
   if (Paths.availableDiskSpace < total + HEADROOM) {

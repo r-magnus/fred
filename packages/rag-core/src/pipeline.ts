@@ -1315,6 +1315,17 @@ async function askCore(
     // about that card, whatever its thread's words lead the search with: after
     // the anaphylaxis card the stings card led, and the model wrote from both.
     else if (guardsOn && lastShown !== undefined && BARE_ASK.test(query) && setHere.length === 0 && !aboutPet) { forcedCard = agreedCard = lastShown; keptShown = true; }
+    // #112: a follow-up that points back at the card just shown, says nothing
+    // new, and still finds that card near the top stays on it, rather than
+    // the card that leads by a few shared words: "can i rub them" after the
+    // frostbite card for white, waxy toes led with trench foot (0.296 against
+    // 0.273).
+    else if (guardsOn && lastShown !== undefined && topCard !== undefined && topCard.chunk.id !== lastShown.chunk.id &&
+        setHere.length === 0 && !aboutPet && leansBack(query) &&
+        candidates.some((c) => c.chunk.id === lastShown.chunk.id && c.score >= INTENT_CARD_NEAR_TOP * topCard.score)) {
+      forcedCard = agreedCard = lastShown;
+      keptShown = true;
+    }
     else if (topCard !== undefined && intent === 'now' && !aboutPet) { forcedCard = topCard; forcedOwn = true; }
     // #101: a message that says what happened opens that condition's card when
     // it leads, even read as a question: "i think im lost" led with the lost
@@ -1556,7 +1567,7 @@ async function askCore(
         (opts.cardAnswer ?? 'verbatim') !== 'verbatim') return undefined;
     const parsedOn = parseCard(onCard.chunk.text);
     const lines = cardLines(parsedOn);
-    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id));
+    const picked = matchCardLines(await queryVector(backend, query), parsedOn, store.cardLineVectorsFor?.(onCard.chunk.id), query);
     if (picked.length === 0) return undefined;
     return {
       kind: 'answer',
@@ -1862,7 +1873,7 @@ async function askCore(
     // and first reports keep the card open: its steps are the answer.
     if (cardMode === 'verbatim' && guardsOn && opts.lead !== false && asksSpecifically(query) && !petPatient) {
       const lines = cardLines(parsed);
-      const picked = matchCardLines(await queryVector(backend, query), parsed, store.cardLineVectorsFor?.(card.chunk.id));
+      const picked = matchCardLines(await queryVector(backend, query), parsed, store.cardLineVectorsFor?.(card.chunk.id), query);
       if (picked.length > 0) {
         return {
           ...common,

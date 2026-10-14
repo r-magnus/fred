@@ -94,12 +94,29 @@ const LINE_BAND = 0.08;
  * it reaches LINE_FLOOR, and the next if it is nearly as close. Empty when no
  * line does, or the vectors do not match the card (a pack built from other text).
  */
-export function matchCardLines(queryVec: Float32Array, card: ParsedCard, rows: readonly Int8Array[] | undefined): number[] {
+export function matchCardLines(queryVec: Float32Array, card: ParsedCard, rows: readonly Int8Array[] | undefined, message?: string): number[] {
   if (rows === undefined || rows.length !== cardLines(card).length) return [];
   const sims = rows.map((r, i) => [cosineInt8(queryVec, r), i] as const).sort((x, y) => y[0] - x[0]);
   const best = sims[0];
   if (best === undefined || best[0] < LINE_FLOOR) return [];
-  return sims.slice(0, 2).filter(([d]) => d >= Math.max(LINE_FLOOR, best[0] - LINE_BAND)).map(([, i]) => i).sort((x, y) => x - y);
+  const picked = sims.slice(0, 2).filter(([d]) => d >= Math.max(LINE_FLOOR, best[0] - LINE_BAND)).map(([, i]) => i);
+  // #112: "what should I watch for" is answered by the card's list of signs.
+  // The message's other words outvote it: "My friend hit their head on a rock
+  // and seems confused. What should I watch for?" matched the neck line and
+  // the emergency line (0.52, 0.53) over the concussion signs. Asked without
+  // them, the signs line was still second.
+  const signs = message !== undefined && ASKS_SIGNS.test(message) ? signsLine(card) : undefined;
+  if (signs !== undefined && !picked.includes(signs)) picked.splice(1, 1, signs);
+  return picked.sort((x, y) => x - y);
+}
+
+/** A question about what to look out for, or how to tell. */
+const ASKS_SIGNS = /\b(?:watch(?: out)? for|look(?: out)? for|signs?|symptoms?|how (?:do|can|would|will) (?:i|we|you) (?:know|tell))\b/i;
+
+/** The card's list of signs: the line that opens "Watch for" or "Signs" (0-based, card order). */
+export function signsLine(card: ParsedCard): number | undefined {
+  const i = cardLines(card).findIndex((l) => /^(?:watch for|signs\b)/i.test(l));
+  return i < 0 ? undefined : i;
 }
 
 /**

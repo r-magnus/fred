@@ -5,7 +5,7 @@
 **Short version: "what should I watch for" after a head injury now gets the
 card's list of concussion signs, and frostbite chats stay on the frostbite
 card instead of drifting to trench foot. Over every graded and chat set
-(about 1,000 replies, 24 sets), 5 replies changed, all for the better, none
+(about 1,000 replies, 24 sets), 6 replies changed, all for the better, none
 worse, none unsafe. No reply changed between answer, decline and help now.**
 
 ## What changed
@@ -38,7 +38,7 @@ in 2 and rule 3 were added for it, and every set was swept again.
 
 Decision sweep (`GENERATE=0`, `INTENT=1`, California, scope scorer, card
 matcher, voice), main at 35d6457 against this branch, same packs as the phone.
-Graded by Claude, who wrote the change and knew which side was new: with five
+Graded by Claude, who wrote the change and knew which side was new: with six
 changes the grading was not blinded. Each is listed below.
 
 | Reply | Before | After | |

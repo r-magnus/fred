@@ -166,6 +166,7 @@ export const WILDLIFE_SETS = ['tools/eval/data/holdout-wildlife.json'] as const;
  * with no signal. 22 to answer, 2 to decline.
  */
 export const HAZARD_SETS = ['tools/eval/data/holdout-hazards.json'] as const;
+export const HAZARD_CONFIRM_SETS = ['tools/eval/data/holdout-hazards-2.json'] as const;
 
 /**
  * Plants and wildlife outside California and Oregon (2026-10-03, #118): 11
@@ -207,12 +208,13 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'ailments': return AILMENT_SETS;
     case 'wildlife': return WILDLIFE_SETS;
     case 'hazards': return HAZARD_SETS;
+    case 'hazards-confirm': return HAZARD_CONFIRM_SETS;
     case 'states': return STATE_SETS;
     case 'grounded-confirm': return GROUNDED_CONFIRM_SETS;
     case 'assembled': return ASSEMBLED_SETS;
     case 'assembled-sealed': return ASSEMBLED_SEALED_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);
+    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | hazards-confirm | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);
   }
 }
 

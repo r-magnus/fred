@@ -1,0 +1,245 @@
+[
+ {
+  "id": "hz2-ltg-saddle-01",
+  "question": "we're crossing an exposed saddle and thunder is getting louder",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get off the high, exposed ground right away",
+   "Avoid lone trees and open ground"
+  ],
+  "redFlags": [
+   "Keep going over the top"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-ltg-hair-01",
+  "question": "my hair is standing up and i hear buzzing on the summit",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get off the summit at once, lightning is about to strike"
+  ],
+  "redFlags": [
+   "Wait it out on top"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-ltg-flash-01",
+  "question": "just saw a flash and heard thunder a few seconds later, we're above treeline",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Lightning is close: descend from high ground now"
+  ],
+  "redFlags": [
+   "It's far away, keep going"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-ltg-lake-01",
+  "question": "we're out in a canoe on the lake and a thunderstorm is rolling in",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get off the water and away from shore as fast as you can"
+  ],
+  "redFlags": [
+   "Stay on the water"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-ltg-tree-01",
+  "question": "it's pouring and lightning everywhere, can we stand under that big pine",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Don't shelter under a lone tall tree"
+  ],
+  "redFlags": [
+   "Shelter under the tree"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-ltg-darkclouds-01",
+  "question": "dark clouds piling up fast over the peak we're heading for",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Turn back or get off high ground before the storm arrives"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-fire-glow-01",
+  "question": "there's an orange glow and ash falling on our camp",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area, move away from the fire"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-fire-smell-01",
+  "question": "we smell smoke and the sky is turning brown",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area if you see or smell smoke"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-fire-cough-01",
+  "question": "the air is so smoky we keep coughing, what should we do",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Get away from the smoke"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-fire-plume-01",
+  "question": "a big plume of smoke just went up in the valley below us",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area, don't go toward it"
+  ],
+  "redFlags": [
+   "Go closer to look"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-neg-season-01",
+  "question": "when is wildfire season in california",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-neg-forecast-01",
+  "question": "is there a chance of thunderstorms in yosemite this weekend",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-neg-gear-01",
+  "question": "what's a good rain jacket for summer storms",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-neg-airnow-01",
+  "question": "what's the air quality index in tahoe right now",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz2-neg-photo-01",
+  "question": "tips for photographing lightning at night",
+  "state": null,
+  "expect": "abstain",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ }
+]

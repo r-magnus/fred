@@ -97,7 +97,7 @@ const BELLY = /\b(?:stabbed|impaled|gored)\b.*\b(?:belly|stomach|abdomen|gut|gut
  * stove grate" and "splashed hot coffee all over my wrist" never say "burn"
  * (confirmation chat set).
  */
-const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )burn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
+const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )(?<!\b(?:eyes?|throat|nose|lungs?)(?: (?:is|are|keep|keeps|started|start))? )burn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
 const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden|pale)\b|\b(?:white|waxy|pale)\b[^.]*\b(?:toes?|fingers?|fingertips?)\b|\bcan'?t feel (?:my|his|her|their) (?:toes?|fingers?|fingertips?|feet|hands?)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 

@@ -136,7 +136,10 @@ function body(page: CachedPage, publisher: Publisher): string {
   if (publisher === 'nps') h = npsArticle(h).html;
   if (publisher === 'blm' || publisher === 'usfs') between('<main', /<\/main>/);
   if (publisher === 'epa' || publisher === 'fda' || publisher === 'nih') between('<main', /<\/main>|Content current as of|Last Reviewed/);
-  if (publisher === 'nws') between('<div class="div-full">', /<div[^>]*class="footer/);
+  // #100: a forecast office's page has its menus inside div-full; the
+  // article is the cms-content block, before its links to other material.
+  if (publisher === 'nws' && !page.sourceUrl.includes('/safety/')) between('<div class="cms-content"', /<h1[^>]*>\s*Resource Materials/);
+  else if (publisher === 'nws') between('<div class="div-full">', /<div[^>]*class="footer/);
   return h
     .replace(/<div id="cdcAttribution"[\s\S]*?<\/div>/g, ' ')
     .replace(/<figure[\s\S]*?<\/figure>/g, ' ')
@@ -198,7 +201,7 @@ async function main(): Promise<void> {
     const vz = await embedder.embed(hz.map((c) => documentText(EMBEDDING_GEMMA, c.section, c.text)));
     const used = [...new Set(HAZARD_PAGES.map((p) => p.publisher))].map((p) => PUBLISHERS[p].license);
     const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
-      id: 'core-hazards', version: '1.0.0', displayName: 'Weather and Terrain Hazards',
+      id: 'core-hazards', version: '1.1.0', displayName: 'Weather and Terrain Hazards',
       description: 'What to do on the spot about lightning, flash floods, river crossings and wildfire, from the National Weather Service, National Park Service, Bureau of Land Management and Forest Service.',
       domains: ['survival'], scope: { kind: 'global' }, source: 'National Weather Service',
       licenseId: PUBLISHERS.nws.license.id, licenses: used, embedding: embedder.spec,

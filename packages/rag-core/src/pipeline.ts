@@ -272,6 +272,15 @@ export interface CardOffer {
  * set, under the 0.29 gate, while the gate still refused them.
  */
 export const INTENT_CARD_FLOOR = 0.15;
+/**
+ * #100: an emergency whose own words and restated request lead with the same
+ * weather or terrain passage is answered from it a little under the gate.
+ * "we're up on the ridge and just heard thunder, what do we do" led both
+ * searches with the NWS lightning tips (0.268 and 0.288) and got the watch
+ * reply. Only the hazards pack: what to do about lightning, floods and fire,
+ * not care, where a lower gate made answers up (results-scope-scorer.md).
+ */
+export const HAZARD_AGREED_FLOOR = 0.25;
 
 /** An animal as the patient: no human first-aid card is forced open for it. */
 const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)s?\b/i;
@@ -624,7 +633,7 @@ export interface Diagnostics {
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
   /** The scope scorer's score, and what it changed, when it is on (scope.ts). */
-  readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate')[] };
+  readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate' | 'hazard')[] };
   /**
    * The card matcher's top label and its share, what it changed, and whether
    * it took the message as a pet's (said-as.ts).
@@ -1048,7 +1057,7 @@ async function askCore(
   // Never for a medicine or a procedure: those are declined on purpose.
   const scopeZ = opts.scope === undefined ? undefined : scopeScore(opts.scope, await queryVector(backend, query));
   const inScope = scopeZ !== undefined && scopeZ >= opts.scope!.threshold && !medicine && !BEYOND_FIRST_AID.test(query);
-  const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate')[] = [];
+  const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate' | 'hazard')[] = [];
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
@@ -1152,6 +1161,8 @@ async function askCore(
   let u: Understood | undefined;
   // The request's search's leading card, for the agreement rule below.
   let requestCard: ScoredChunk | undefined;
+  /** The restated request's best passage, searched on its own. */
+  let requestTop: ScoredChunk | undefined;
   let agreedCard: ScoredChunk | undefined;
   // The leading card of the hiker's own thread, searched as one text.
   let threadCard: ScoredChunk | undefined;
@@ -1324,6 +1335,7 @@ async function askCore(
         ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
         (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
       requestCard = leadingCard(candR, isCard, await supportOf(candR));
+      requestTop = topR;
       understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), ...(ownRank === undefined ? {} : { ownRank }), used };
       if (used) {
         keywords = kwR;
@@ -1703,6 +1715,12 @@ async function askCore(
     }
   }
 
+  const ownTop = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  if (guardsOn && forcedCard === undefined && intent === 'now' && inScope && ownTop !== undefined && topScore < effectiveThreshold &&
+      ownTop.chunk.packId === 'core-hazards' && ownTop.score >= HAZARD_AGREED_FLOOR && requestTop?.chunk.id === ownTop.chunk.id) {
+    effectiveThreshold = ownTop.score;
+    scopeUsed.push('hazard');
+  }
   if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
     const fromCard = await cardLinesReply();
     if (fromCard !== undefined) return fromCard;

@@ -121,13 +121,17 @@ export function buildRecord(messages: readonly string[]): ConversationRecord {
     for (const c of CONDITIONS.filter((x) => x.said(messages.slice(0, i + 1)) && !before.has(x.id))) {
       out.push({ condition: c, who: who.kind === 'unknown' ? lastNamed : who, at: i, resolved: false });
     }
-    if (RESOLVED.test(m)) {
+    const over = RESOLVED.exec(m);
+    if (over !== null) {
+      // #100: but not what it names after saying something is over: "ok it
+      // left. my kid just burned her hand on the stove" closed the burn.
+      const after = m.slice(over.index + over[0].length);
       // The latest open condition of whoever this is about; or the latest one.
       for (let j = out.length - 1; j >= 0; j--) {
         const r = out[j]!;
         // A message can close what it sets: "he was bleeding badly yesterday
         // but he is fine now".
-        if (r.resolved) continue;
+        if (r.resolved || (r.at === i && r.condition.said([after]))) continue;
         if (who.kind === 'unknown' || who.kind === 'pronoun' || samePerson(r.who, who)) {
           out[j] = { ...r, resolved: true };
           break;

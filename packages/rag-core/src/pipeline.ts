@@ -279,6 +279,8 @@ export const INTENT_CARD_FLOOR = 0.15;
  * searches with the NWS lightning tips (0.268 and 0.288) and got the watch
  * reply. Only the hazards pack: what to do about lightning, floods and fire,
  * not care, where a lower gate made answers up (results-scope-scorer.md).
+ * Never with a danger sign: "the smoke is so thick it's hard to breathe"
+ * keeps the get-help reply.
  */
 export const HAZARD_AGREED_FLOOR = 0.25;
 
@@ -1716,7 +1718,7 @@ async function askCore(
   }
 
   const ownTop = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
-  if (guardsOn && forcedCard === undefined && intent === 'now' && inScope && ownTop !== undefined && topScore < effectiveThreshold &&
+  if (guardsOn && forcedCard === undefined && intent === 'now' && inScope && !dangerNow && ownTop !== undefined && topScore < effectiveThreshold &&
       ownTop.chunk.packId === 'core-hazards' && ownTop.score >= HAZARD_AGREED_FLOOR && requestTop?.chunk.id === ownTop.chunk.id) {
     effectiveThreshold = ownTop.score;
     scopeUsed.push('hazard');

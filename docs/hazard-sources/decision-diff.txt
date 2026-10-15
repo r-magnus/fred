@@ -1,0 +1,28 @@
+# Full sweep at 9cda091 (with the EPA smoke page), against e40c3f6 + fresh sets before
+hazards-confirm: 15 replies, answered 6 -> 7, changed 2
+  hz2-fire-smell-01 [] answer(gen:Stay Safe > Watch for  | MEANS FOR SIGNALING | Wildland fire safety f) -> answer(gen:Stay Safe > Watch for  | Protect Yourself From  | Protect Yourself From ) said=none:other:0.55[]  "we smell smoke and the sky is turning brown"
+  hz2-fire-cough-01 [] abstain/low-score -> answer(gen:Protect Yourself From  | Protect Yourself From  | Protect Yourself From ) said=none:other:0.14[]  "the air is so smoky we keep coughing, what should we do"
+hazards: 24 replies, answered 16 -> 18, changed 4
+  hz-ltg-ridge-01 [] abstain/watch -> answer(gen:Lightning Tips > Light | When a Safe Building o | Lightning Tips > Last ) said=none:other:0.69[]  "we're up on the ridge and just heard thunder, what do we do"
+  hz-ltg-plan-01 [] answer(gen:Lightning Tips > Last  | When a Safe Building o | When Thunder Roars, Go) -> answer(gen:Lightning Tips > Last  | When a Safe Building o | Outdoor Activities: Li) said=none:other:0.61[]  "we're climbing a peak tomorrow, how do we avoid getting caught by lightning"
+  hz-fire-close-01 [] answer(gen:Wildland fire safety f | Wildland fire safety f | Stay Safe > Watch for ) -> answer(gen:Stay Safe > Watch for  | Safety in Burned Areas | Wildland fire safety f) said=none:other:0.53[]  "the wildfire is coming toward us and we can't outrun it"
+  hz-fire-air-01 [] abstain/safety-net -> answer(gen:Protect Yourself From  | Protect Yourself From  | Protect Yourself From ) said=none:other:0.14[]  "the smoke is so thick it's hard to breathe"
+holdout-chats-12: 18 replies, answered 11 -> 11, changed 3, misses 1 -> 1
+  c12-ltg-lake#2 [answer] answer(gen:When a Safe Building o | Lightning Tips > Last  | Stay Safe > Watch for ) -> answer(gen:When a Safe Building o | Outdoor Activities: Li | Lightning Tips > Last ) said=none:other:0.54[]  "the sky went black and there's lightning, what do we do"
+  c12-smoke-two-messages#2 [answer] answer(card:Burns) -> answer(gen:Protect Yourself From  | Protect Yourself From  | Protect Yourself From ) said=Snow blindness:0.12[]  "the air got really smoky and my eyes and throat are burning"
+  c12-smoke-follow#1 [answer] answer(gen:Stay Safe > Watch for  | Wildland fire safety f | Wildland fire safety f) -> answer(gen:Stay Safe > Watch for  | Wildland fire safety f | Protect Yourself From ) said=none:other:0.54[]  "there's a lot of wildfire smoke where we're hiking"
+tuning: 104 replies, answered 67 -> 67, changed 1
+  uv-neg-weather-01 [] answer(gen:Lightning Tips > Light | When a Safe Building o | When a Safe Building o) -> answer(gen:Lightning Tips > Light | When a Safe Building o | Outdoor Activities: Li) said=none:other:0.64[]  "Is that thunderhead going to reach me before dark?"
+
+10 replies changed
+
+# Re-run of the sets that changed, at the final code (no EPA page; no agreed passage with a danger sign)
+hazards-confirm: 15 replies, answered 6 -> 6, changed 0
+hazards: 24 replies, answered 16 -> 17, changed 2
+  hz-ltg-ridge-01 [] abstain/watch -> answer(gen:Lightning Tips > Light | When a Safe Building o | Lightning Tips > Last ) said=none:other:0.69[]  "we're up on the ridge and just heard thunder, what do we do"
+  hz-ltg-plan-01 [] answer(gen:Lightning Tips > Last  | When a Safe Building o | When Thunder Roars, Go) -> answer(gen:Lightning Tips > Last  | When a Safe Building o | Outdoor Activities: Li) said=none:other:0.61[]  "we're climbing a peak tomorrow, how do we avoid getting caught by lightning"
+holdout-chats-12: 18 replies, answered 11 -> 10, changed 2, misses 1 -> 2
+  c12-ltg-lake#2 [answer] answer(gen:When a Safe Building o | Lightning Tips > Last  | Stay Safe > Watch for ) -> answer(gen:When a Safe Building o | Outdoor Activities: Li | Lightning Tips > Last ) said=none:other:0.54[]  "the sky went black and there's lightning, what do we do"
+  BROKE c12-smoke-two-messages#2 [answer] answer(card:Burns) -> watch/watch said=Snow blindness:0.12[]  "the air got really smoky and my eyes and throat are burning"
+
+4 replies changed

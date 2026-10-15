@@ -28,7 +28,7 @@ for (const turns of chats) {
   let lastWasPet = false;
   for (const q of turns) {
     const last = asked.at(-1);
-    const previous = last !== undefined && (last.kind === 'answer' || last.kind === 'chat') ? { question: last.q, topScore: last.topScore } : undefined;
+    const previous = last !== undefined && (last.kind === 'answer' || last.kind === 'chat') ? { question: last.q, topScore: last.topScore, ...(last.kind === 'chat' ? { chat: true } : {}) } : undefined;
     const history = asked.slice(-CONDITION_HISTORY).map((a) => a.q);
     const r = await ask(q, harness, {
       ...askOptions, state,

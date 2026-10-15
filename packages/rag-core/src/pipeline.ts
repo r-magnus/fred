@@ -167,6 +167,8 @@ export interface AskOptions {
     readonly question: string;
     /** That question's own best search score, from its diagnostics. */
     readonly topScore: number;
+    /** #100: Fred replied to it in conversation, not with an answer. */
+    readonly chat?: boolean;
   };
   /** Show the model the earlier question when the joined search wins. Default on. */
   readonly previousInPrompt?: boolean;
@@ -969,7 +971,10 @@ async function askCore(
   // declined question has no topic to build on. With a knot question that
   // itself fell under the gate as the opener, "what's the capital of France?"
   // was turned into a request for the hiker's state.
-  if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold) {
+  // #100: after a chat reply, only a message with something of its own: one
+  // that only points back ("what should we do") has the thread's card rules,
+  // and joined to "its really hot out" it lost the heat card for heat tips.
+  if (opts.previous !== undefined && opts.previous.topScore >= effectiveThreshold && (opts.previous.chat !== true || !leansBack(query))) {
     // #51: the earlier message's exposure holds for its follow-up: "a fox ...
     // nipped my ankle" then "should i be worried" (phone).
     const joined = opts.understand !== false && opts.guards !== false
@@ -980,12 +985,20 @@ async function askCore(
       ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
     });
     let candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
-    // #100: widened as the message's own search is: "we're camping in bear
-    // country where do we keep the food" routed to the California species
-    // pack alone (0.155), while the NPS food-storage pages score 0.55.
-    if (best(candidatesJ) < effectiveThreshold) {
-      const w = await widen(keywordsJ, routedJ, packs, joined);
-      if (w !== undefined && w.top > best(candidatesJ)) { routedJ = w.routed; candidatesJ = w.candidates; }
+    // #100: the joined text is searched in the packs the message itself is
+    // routed to as well: the earlier message's words can take the routing
+    // over. "we're camping in bear country where do we keep the food" reached
+    // only the wildlife packs (0.155), while the NPS food-storage pages, where
+    // "where do we keep the food" was routed, score 0.55. Widening every weak
+    // joined search to all packs let the earlier message win far more often:
+    // "now my heels are getting hot spots" after soaked socks went back to the
+    // trench-foot passages.
+    // Only after a chat reply: after an answer the topic is set, and the
+    // joined search, so helped, beat the message's own too often.
+    const missing = opts.previous.chat === true ? routed.packIds.filter((id) => !routedJ.packIds.includes(id)) : [];
+    if (missing.length > 0) {
+      routedJ = { ...routedJ, packIds: [...routedJ.packIds, ...missing], domains: [...new Set([...routedJ.domains, ...routed.domains])] };
+      candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
     }
     const joinedTop = best(candidatesJ);
     // A message with a strong match of its own keeps it: the joined search

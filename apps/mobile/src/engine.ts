@@ -43,7 +43,7 @@ export interface Engine {
     question: string,
     state: string | null,
     signal?: AbortSignal,
-    previous?: { readonly question: string; readonly topScore: number },
+    previous?: { readonly question: string; readonly topScore: number; readonly chat?: boolean },
     history?: readonly string[],
     lastCard?: string,
   ): Promise<AskResult>;

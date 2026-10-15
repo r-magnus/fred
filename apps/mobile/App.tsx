@@ -380,7 +380,7 @@ function Screen() {
     const last = turnsRef.current.at(-1);
     const previous = last !== undefined && last.done && (last.kind === 'answer' || last.kind === 'chat') && !last.stopped &&
       last.topScore !== undefined && last.question !== question
-      ? { question: last.question, topScore: last.topScore } : undefined;
+      ? { question: last.question, topScore: last.topScore, ...(last.kind === 'chat' ? { chat: true } : {}) } : undefined;
     // The hiker's recent messages, answered or not, for the understanding step
     // and the record of conditions (#98): "i'm lost and scared" then "help",
     // or a snakebite a few messages back. Only this conversation's last few,

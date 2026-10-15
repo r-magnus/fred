@@ -597,6 +597,8 @@ export interface Diagnostics {
     /** Its rank (0-based) among the hiker's own words' results; undefined when not among them. */
     readonly ownRank?: number;
     readonly used: boolean;
+    /** #100: a card the bare follow-up found was left closed, as the request did not lead with it. */
+    readonly cardLeftClosed?: string;
   };
   /** Round 2: the conditions the conversation established (conditions.ts). */
   readonly conditions?: readonly string[];
@@ -1363,6 +1365,17 @@ async function askCore(
         candidates.some((c) => isCard(c) && c.chunk.section === saidSure.label)) {
       forcedCard = agreedCard = candidates.find((c) => isCard(c) && c.chunk.section === saidSure.label)!;
       forcedOwn = true;
+    }
+    // #100: a follow-up that only points back ("how do i pull it out") is
+    // about its conversation, so a card its bare words find under the gate
+    // opens only when the restated request leads with the same card. After
+    // "can i touch a cholla cactus" / "dang its stuck in my hand now", the
+    // bare words found the tick card (0.197) and the request "cholla cactus
+    // stuck in hand, how to remove it" found nothing (0.073): Fred showed
+    // the tick card, rash and all. Nothing is offered either.
+    else if (guardsOn && topCard !== undefined && intent === 'now' && understood?.used === false && lastShown === undefined &&
+        setHere.length === 0 && leansBack(query) && topCard.score < effectiveThreshold && requestCard?.chunk.id !== topCard.chunk.id) {
+      understood = { ...understood, cardLeftClosed: topCard.chunk.section };
     }
     else if (topCard !== undefined && intent === 'now' && !aboutPet) { forcedCard = topCard; forcedOwn = true; }
     // #101: a message that says what happened opens that condition's card when

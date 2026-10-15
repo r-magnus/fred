@@ -1658,7 +1658,11 @@ async function askCore(
     // #152: the card the message says, when the matcher is sure, before any
     // second search: "ran hot water over my wrist by accident" has no card
     // leading either search.
-    const saidCard = saidSure !== undefined && saidKind === undefined && !saysResolved(query) ? ownCard(await cardByTitle(saidSure.label)) : undefined;
+    // #100: what is over is the card before, not the one named next: "it
+    // left. my wife sliced her hand on the hatchet" after the bear card
+    // (cut, 0.66) got the watch reply.
+    const overIsEarlier = saysAnother && lastShown !== undefined;
+    const saidCard = saidSure !== undefined && saidKind === undefined && (!saysResolved(query) || overIsEarlier) ? ownCard(await cardByTitle(saidSure.label)) : undefined;
     if (saidCard !== undefined && blockingCondition(saidCard.chunk.section, active) === undefined) {
       forcedCard = agreedCard = saidCard;
       saidUsed.push('opened');

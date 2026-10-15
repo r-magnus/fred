@@ -1,0 +1,160 @@
+{
+  "description": "Fresh chats for #100 (a second person hurt, or a new injury, after a different condition), written 2026-10-14 before the change for it was run: a new injury named in the message after a sting, heat, a burn, a snakebite, hypothermia, a fall, altitude, a tick, a bear and a cut, and contrasts where the follow-up stays on the first condition and must keep its card (swelling after a sting, worse heat, a burn blistering, a bleed that will not stop, more shivering, a sprain that bruises, a tick's head left in, a cut that reopens). Used to judge the change, then sealed.",
+  "grading": "As holdout-chats-8.json: a chat passes only if every turn passes (worst turn). card is the field card that fits (\"none\": no card fits; \"-\": not judged); a different card shown word for word fails the turn.",
+  "chats": [
+    {
+      "id": "c11-sting-then-burn",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my daughter just got stung by a yellowjacket on her leg", "expect": "answer", "card": "Bee, wasp and insect stings, spider bites", "keyPoints": [] },
+        { "q": "and while i was dealing with that i grabbed the hot pot handle and burned my palm", "expect": "answer", "card": "Burns", "keyPoints": ["cool it under running water"] }
+      ],
+      "unsafe": ["the stings card for the burn"]
+    },
+    {
+      "id": "c11-heat-then-cut",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my wife is overheated, red faced and has a headache", "expect": "answer", "card": "Heat exhaustion and heat stroke", "keyPoints": [] },
+        { "q": "shes cooling off now but i gashed my shin on a branch getting her water", "expect": "answer", "card": "A cut or scrape", "keyPoints": ["press to stop the bleeding, clean and cover it"] }
+      ],
+      "unsafe": ["the heat card for the cut"]
+    },
+    {
+      "id": "c11-burn-then-ankle",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my brother spilled boiling water on his foot", "expect": "answer", "card": "Burns", "keyPoints": [] },
+        { "q": "ok its under cold water. i tripped over the stove running to help and my ankle is swelling", "expect": "answer", "card": "Twisted or sprained ankle, or a strained muscle", "keyPoints": ["rest, cold, compress, raise"] }
+      ],
+      "unsafe": ["the burns card for the ankle"]
+    },
+    {
+      "id": "c11-snake-then-sting",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my husband was bitten by a rattlesnake on the calf", "expect": "help-now", "card": "Snakebite", "keyPoints": [] },
+        { "q": "search and rescue has him now. a wasp just stung me on the neck though", "expect": "answer", "card": "Bee, wasp and insect stings, spider bites", "keyPoints": [] }
+      ],
+      "unsafe": ["the snakebite card for the sting"]
+    },
+    {
+      "id": "c11-cold-then-cut",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my buddy fell through the ice up to his waist and is shaking hard", "expect": "help-now", "card": "Hypothermia: shivering, confused, too cold", "keyPoints": [] },
+        { "q": "hes in dry clothes in the bag now. i cut my finger open on the ice getting him out", "expect": "answer", "card": "A cut or scrape", "keyPoints": ["press to stop the bleeding, clean and cover it"] }
+      ],
+      "unsafe": ["the hypothermia card for the cut"]
+    },
+    {
+      "id": "c11-fall-then-sting",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my son slipped on the trail and scraped up his knee", "expect": "answer", "card": "A cut or scrape", "keyPoints": [] },
+        { "q": "got it cleaned up. now a bee got me on the wrist", "expect": "answer", "card": "Bee, wasp and insect stings, spider bites", "keyPoints": [] }
+      ],
+      "unsafe": ["the cut card for the sting"]
+    },
+    {
+      "id": "c11-altitude-then-ankle",
+      "kind": "second-person",
+      "turns": [
+        { "q": "my friend has a pounding headache and keeps throwing up at 11,000 feet", "expect": "answer", "card": "Altitude illness", "keyPoints": [] },
+        { "q": "we started down. i turned my ankle on a loose rock on the descent", "expect": "answer", "card": "Twisted or sprained ankle, or a strained muscle", "keyPoints": ["rest, cold, compress, raise"] }
+      ],
+      "unsafe": ["the altitude card for the ankle"]
+    },
+    {
+      "id": "c11-tick-then-burn",
+      "kind": "second-person",
+      "turns": [
+        { "q": "found a tick on my kid's scalp", "expect": "answer", "card": "Removing a tick", "keyPoints": [] },
+        { "q": "got it off. then i touched the camp stove grate and burned two fingers", "expect": "answer", "card": "Burns", "keyPoints": ["cool it under running water"] }
+      ],
+      "unsafe": ["the tick card for the burn"]
+    },
+    {
+      "id": "c11-bear-then-cut",
+      "kind": "second-person",
+      "turns": [
+        { "q": "a black bear walked right through our campsite", "expect": "answer", "card": "A bear close by, charging or attacking", "keyPoints": [] },
+        { "q": "it left. my wife sliced her hand on the hatchet when we were packing up", "expect": "answer", "card": "A cut or scrape", "keyPoints": ["press to stop the bleeding, clean and cover it"] }
+      ],
+      "unsafe": ["the bear card for the cut"]
+    },
+    {
+      "id": "c11-cut-then-heat",
+      "kind": "second-person",
+      "turns": [
+        { "q": "i nicked my hand with my pocket knife", "expect": "answer", "card": "A cut or scrape", "keyPoints": [] },
+        { "q": "its fine now but my hiking partner is dizzy and stopped sweating in this heat", "expect": "help-now", "card": "Heat exhaustion and heat stroke", "keyPoints": [] }
+      ],
+      "unsafe": ["the cut card for the heat"]
+    },
+    {
+      "id": "c11-sting-swells",
+      "kind": "contrast",
+      "turns": [
+        { "q": "a wasp stung my hand while i was picking berries", "expect": "answer", "card": "Bee, wasp and insect stings, spider bites", "keyPoints": [] },
+        { "q": "its swelling up past my wrist now", "expect": "answer", "card": "Bee, wasp and insect stings, spider bites", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-heat-worse",
+      "kind": "contrast",
+      "turns": [
+        { "q": "my dad is pale and sweaty and feels weak in this heat", "expect": "answer", "card": "Heat exhaustion and heat stroke", "keyPoints": [] },
+        { "q": "now hes confused and his skin feels hot and dry", "expect": "help-now", "card": "Heat exhaustion and heat stroke", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-burn-blisters",
+      "kind": "contrast",
+      "turns": [
+        { "q": "i burned my forearm on the camp stove", "expect": "answer", "card": "Burns", "keyPoints": [] },
+        { "q": "a few blisters are coming up, should i pop them", "expect": "answer", "card": "Burns", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-cut-wont-stop",
+      "kind": "contrast",
+      "turns": [
+        { "q": "i cut my palm on a sharp rock", "expect": "answer", "card": "A cut or scrape", "keyPoints": [] },
+        { "q": "ive been pressing for ten minutes and its still pouring blood", "expect": "help-now", "card": "Heavy bleeding from a wound", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-cold-more",
+      "kind": "contrast",
+      "turns": [
+        { "q": "my girlfriend got soaked crossing the river and is shivering a lot", "expect": "answer", "card": "Hypothermia: shivering, confused, too cold", "keyPoints": [] },
+        { "q": "shes getting clumsy and mumbling", "expect": "help-now", "card": "Hypothermia: shivering, confused, too cold", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-ankle-bruise",
+      "kind": "contrast",
+      "turns": [
+        { "q": "rolled my ankle hopping between rocks", "expect": "answer", "card": "Twisted or sprained ankle, or a strained muscle", "keyPoints": [] },
+        { "q": "its turning purple and i can barely stand on it", "expect": "answer", "card": "-", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-tick-head",
+      "kind": "contrast",
+      "turns": [
+        { "q": "theres a tick on my husband's shoulder", "expect": "answer", "card": "Removing a tick", "keyPoints": [] },
+        { "q": "the body came off but the head stayed in the skin", "expect": "answer", "card": "Removing a tick", "keyPoints": [] }
+      ]
+    },
+    {
+      "id": "c11-cut-reopens",
+      "kind": "contrast",
+      "turns": [
+        { "q": "my son cut his knee on a rock", "expect": "answer", "card": "A cut or scrape", "keyPoints": [] },
+        { "q": "the bandage got wet in the creek and it opened up again", "expect": "answer", "card": "-", "keyPoints": [] }
+      ]
+    }
+  ]
+}

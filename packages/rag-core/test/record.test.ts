@@ -40,6 +40,17 @@ test('a message can close what it sets', () => {
   assert.deepEqual(ids(['my friend was bleeding badly yesterday but he is fine now']), []);
 });
 
+test('burning something is not a burn (#100)', () => {
+  assert.deepEqual(conditionsIn(['is it ok to burn poison oak in the campfire to get rid of it']), []);
+  assert.deepEqual(conditionsIn(['can i burn this wood']), []);
+  assert.deepEqual(conditionsIn(['i tried to burn the trash and burned my fingers']).map((c) => c.id), ['burn']);
+});
+
+test('what is over comes before what the message names next (#100)', () => {
+  assert.deepEqual(ids(['something is rustling outside the tent', 'ok it left. my kid just burned her hand on the stove']), ['burn']);
+  assert.deepEqual(ids(['my brother burned his arm on the stove', 'ok hes fine now but he slipped and fell maybe 10 feet']), ['fall']);
+});
+
 test('help has taken over: rescuers have the person, or they are at a hospital (#173)', () => {
   for (const m of ['ok the rangers carried him out', 'the helicopter just lifted off with her', 'the paramedics have him now',
     'an ambulance took him from the trailhead', 'they took her to the hospital', 'search and rescue flew me out and im at the clinic']) {

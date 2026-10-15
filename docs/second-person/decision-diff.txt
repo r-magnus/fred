@@ -1,0 +1,39 @@
+ailments: 23 replies, answered 14 -> 14, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 20 -> 21, changed 2, misses 2 -> 2
+  ph-camp-bear#7 [answer] answer(card:A bear close by, charging or attac) -> answer(card:Burns) said=Burns:0.87[]  "ok it left. my kid just burned her hand on the stove"
+  ph-camp-bear#9 [not-urgent] watch/watch -> answer(card:Burns) said=none:fragment:0.79[]  "should i pop it"
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards: 24 replies, answered 16 -> 16, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-10: 37 replies, answered 21 -> 21, changed 1, misses 1 -> 1
+  c10-second-cut#2 [answer] answer(gen:Bee, wasp and insect s | FIRE ANTS | A cut or scrape) -> answer(card:A cut or scrape) said=A cut or scrape:0.85[opened]  "and now i sliced my thumb on the can lid"
+holdout-chats-11: 36 replies, answered 35 -> 35, changed 2, misses 1 -> 1
+  c11-bear-then-cut#2 [answer] answer(card:A bear close by, charging or attac) -> answer(card:A cut or scrape) said=A cut or scrape:0.66[opened]  "it left. my wife sliced her hand on the hatchet when we were packing up"
+  c11-sting-swells#2 [answer] answer(gen:Bee, wasp and insect s | FIRE ANTS | INSECTS) -> answer(card:Bee, wasp and insect stings, spide) said=Suspected broken bon:0.72[]  "its swelling up past my wrist now"
+holdout-chats-2: 44 replies, answered 34 -> 33, changed 2, misses 1 -> 1
+  c2-bear-then-cut#2 [answer] answer(card:A bear close by, charging or attac) -> answer(card:A cut or scrape) said=A cut or scrape:0.65[opened]  "it's gone. my partner sliced her thumb on the can lid cleaning up"
+  c2-danger-wake#2 [help-now] answer(card:Head injury or concussion) -> help-now/safety-net said=Someone is unconscio:0.82[]  "he's not waking up"
+holdout-chats-3: 37 replies, answered 17 -> 17, changed 0, misses 4 -> 4
+holdout-chats-4: 38 replies, answered 19 -> 19, changed 0, misses 5 -> 5
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 20 -> 20, changed 0, misses 1 -> 1
+holdout-chats-7: 28 replies, answered 12 -> 12, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 24 -> 24, changed 0, misses 1 -> 1
+holdout-chats-9: 17 replies, answered 15 -> 15, changed 0, misses 2 -> 2
+holdout-chats: 162 replies, answered 109 -> 109, changed 3, misses 6 -> 6
+  dg-allergy#2 [help-now] answer(gen:Bee, wasp and insect s | INSECTS | Severe allergic reacti) -> answer(card:Severe allergic reaction (anaphyla) said=Severe allergic reac:0.69[opened]  "my lips are swelling and my throat feels tight"
+  sw-bear-burn#2 [answer] answer(card:A bear close by, charging or attac) -> answer(card:Burns) said=Burns:0.64[card]  "it left. my daughter grabbed the stove and her palm is red and hurting"
+  lg-lake-heat#3 [answer] answer(gen:COLD INJURIES | Heat exhaustion and he | HYDRATION CONSIDERATIO) -> answer(card:Altitude illness) said=Altitude illness:0.79[card]  "ok we're up here and my friend is dizzy with a headache"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 0
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+10 replies changed

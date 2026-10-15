@@ -113,6 +113,13 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   { key: 'usfs-fire', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/visit/know-before-you-go/fire', domain: 'survival' },
   { key: 'usfs-superior-stay-safe', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/r09/superior/safety-ethics/stay-safe', domain: 'survival' },
   { key: 'usfs-burned-areas', publisher: 'usfs', pack: 'core-hazards', url: 'https://www.fs.usda.gov/r06/fire/management/safety-burned-areas', domain: 'survival' },
+  // #100: thunder on a ridge found nothing to answer from. The NWS Blacksburg
+  // office's outdoor page (ridges, water, lone trees). Left out: NPS Grand
+  // Canyon's lightning page, which still teaches the crouch NWS dropped in
+  // 2008, and the AirNow and EPA smoke pages, written for people at home
+  // (clean-air rooms, choosing a respirator): for "the smoke is so thick
+  // it's hard to breathe" the answer became how to fit an N95.
+  { key: 'nws-rnk-outdoors-lightning', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/rnk/outdoorslightning', domain: 'survival' },
 ];
 
 async function fetchText(url: string): Promise<string> {

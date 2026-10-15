@@ -43,6 +43,8 @@ test('a message can close what it sets', () => {
 test('burning something is not a burn (#100)', () => {
   assert.deepEqual(conditionsIn(['is it ok to burn poison oak in the campfire to get rid of it']), []);
   assert.deepEqual(conditionsIn(['can i burn this wood']), []);
+  assert.deepEqual(conditionsIn(['the air got really smoky and my eyes and throat are burning']), []);
+  assert.deepEqual(conditionsIn(['my throat keeps burning from the smoke']), []);
   assert.deepEqual(conditionsIn(['i tried to burn the trash and burned my fingers']).map((c) => c.id), ['burn']);
 });
 

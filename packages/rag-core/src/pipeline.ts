@@ -919,6 +919,17 @@ async function askCore(
   const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
   let topScore = best(candidates);
 
+  // #152 (said-as.ts): which card the message is about, or what kind of
+  // message no card is for, when the matcher is sure. A pet and a medicine
+  // are known by the word lists or by the matcher: "our lab tore a pad on
+  // the lava rock" has no "dog" in it, "how many naproxen is too many" named
+  // a medicine the list lacked.
+  const saidOn = opts.saidAs !== undefined && opts.understand !== false && opts.guards !== false;
+  const saidList: readonly Said[] = saidOn ? saidAs(opts.saidAs!, await queryVector(backend, query)) : [];
+  const saidTop = saidList[0];
+  const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
+  const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
+
   // Conversation memory: search the follow-up joined to the previous question
   // too, and keep whichever scores higher.
   let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
@@ -955,9 +966,16 @@ async function askCore(
     // must not change how Fred declines (into a location request, say, from the
     // joined query's routing). None of the 29 measured follow-ups needed it.
     const answers = joinedTop >= effectiveThreshold;
+    // #100: a message the matcher is sure names another card than the one
+    // the conversation is on is a new problem, not a follow-up: "and now i
+    // sliced my thumb on the can lid" after a wasp sting joined to the sting
+    // (0.294 against 0.115 alone) and was answered from the stings card and
+    // a fire-ant passage, though the matcher was sure of the cut card (0.85).
+    const onCard = opts.lastCard ?? candidatesJ.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined)?.chunk.section;
+    const namesAnother = saidSure !== undefined && saidKind === undefined && onCard !== undefined && saidSure.label !== onCard;
     followUp = {
       standaloneTopScore: topScore, joinedTopScore: joinedTop,
-      used: joinedTop > topScore && keepsAlone && staysOnTopic && answers,
+      used: joinedTop > topScore && keepsAlone && staysOnTopic && answers && !namesAnother,
     };
     standalone = candidates;
     if (followUp.used) {
@@ -1001,16 +1019,6 @@ async function askCore(
     }
   }
 
-  // #152 (said-as.ts): which card the message is about, or what kind of
-  // message no card is for, when the matcher is sure. A pet and a medicine
-  // are known by the word lists or by the matcher: "our lab tore a pad on
-  // the lava rock" has no "dog" in it, "how many naproxen is too many" named
-  // a medicine the list lacked.
-  const saidOn = opts.saidAs !== undefined && opts.understand !== false && opts.guards !== false;
-  const saidList: readonly Said[] = saidOn ? saidAs(opts.saidAs!, await queryVector(backend, query)) : [];
-  const saidTop = saidList[0];
-  const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
-  const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
   const saidUsed: ('card' | 'no-card' | 'opened' | 'offered' | 'minor')[] = [];
   // #152, round 3 (docs/results-unsure-label.md): an unsure top label is still
   // used where it is measured to be right. The no-card labels together: the
@@ -1600,8 +1608,11 @@ async function askCore(
   }
   // #101: an update on what Fred just showed a card for ("its swelling pretty
   // bad" after the sprain card) that would be declined or get the watch
-  // reply stays on that card, unless it names something new (setHere).
-  if (forcedCard === undefined && lastShown !== undefined && setHere.length === 0 && !petPatient &&
+  // reply stays on that card, unless it names something new (setHere). #100:
+  // or the matcher is sure of another card: "and now i sliced my thumb on the
+  // can lid" after the stings card (cut, 0.85) got the stings card again.
+  const saysAnother = saidSure !== undefined && saidKind === undefined && saidSure.label !== lastShown?.chunk.section;
+  if (forcedCard === undefined && lastShown !== undefined && setHere.length === 0 && !saysAnother && !petPatient &&
       (candidates.length === 0 || topScore < effectiveThreshold) &&
       (leansBack(query) || SYMPTOM_UPDATE.test(query))) {
     forcedCard = agreedCard = lastShown;

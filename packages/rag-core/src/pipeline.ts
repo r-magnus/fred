@@ -272,6 +272,15 @@ export interface CardOffer {
  * set, under the 0.29 gate, while the gate still refused them.
  */
 export const INTENT_CARD_FLOOR = 0.15;
+/**
+ * #100: an emergency whose own words and restated request lead with the same
+ * weather or terrain passage is answered from it a little under the gate.
+ * "we're up on the ridge and just heard thunder, what do we do" led both
+ * searches with the NWS lightning tips (0.268 and 0.288) and got the watch
+ * reply. Only the hazards pack: what to do about lightning, floods and fire,
+ * not care, where a lower gate made answers up (results-scope-scorer.md).
+ */
+export const HAZARD_AGREED_FLOOR = 0.25;
 
 /** An animal as the patient: no human first-aid card is forced open for it. */
 const ABOUT_A_PET = /\b(?:my|our|the|his|her|their)\s+(?:dog|cat|puppy|kitten|horse|pony|pet|mule|donkey|goat)s?\b/i;
@@ -624,7 +633,7 @@ export interface Diagnostics {
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
   /** The scope scorer's score, and what it changed, when it is on (scope.ts). */
-  readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate')[] };
+  readonly scope?: { readonly z: number; readonly used: readonly ('framed' | 'not-chat' | 'card' | 'gate' | 'hazard')[] };
   /**
    * The card matcher's top label and its share, what it changed, and whether
    * it took the message as a pet's (said-as.ts).
@@ -930,6 +939,28 @@ async function askCore(
   const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
   const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
 
+  // Routing is a hint, and a weak routed search is not evidence that Fred has
+  // nothing: search again across every unscoped pack, and keep that only if it
+  // clears the same gate. Routing picks packs by vocabulary, and some words
+  // point only at state packs: with California set, "there's a bear in front of
+  // me" and "how do I keep bears out of my food" searched the California
+  // species pack alone (bear biology, U=0.16) and declined, while the NPS
+  // food-storage page scores 0.59. Widening up front instead would reach the
+  // manuals on every species question, and ATP 3-50.21's plants chapter once
+  // outranked the species reviews for "what plants and animals are near me?".
+  let widenedTopScore: number | undefined;
+  const widenOn = opts.widenWeakSearch !== false;
+  const widen = async (
+    kw: readonly Keyword[], r: RouteResult, pool: readonly RoutablePack[], text: string,
+  ): Promise<{ routed: RouteResult; candidates: ScoredChunk[]; top: number } | undefined> => {
+    const extra = pool.filter((p) => p.scope.kind !== 'us-state' && !r.packIds.includes(p.id));
+    if (!widenOn || extra.length === 0) return undefined;
+    const packIds = [...r.packIds, ...extra.map((p) => p.id)];
+    const domains = [...new Set([...r.domains, ...extra.flatMap((p) => p.domains)])];
+    const cs = await retrieve(kw, packIds, store, backend, retrievalOpts, domains, text);
+    widenedTopScore = best(cs);
+    return { routed: { ...r, packIds, domains, reason: `${r.reason}; widened after a weak routed search` }, candidates: cs, top: widenedTopScore };
+  };
   // Conversation memory: search the follow-up joined to the previous question
   // too, and keep whichever scores higher.
   let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
@@ -944,11 +975,18 @@ async function askCore(
     const joined = opts.understand !== false && opts.guards !== false
       ? withExposures(`${opts.previous.question} ${query}`) : `${opts.previous.question} ${query}`;
     const keywordsJ = extractKeywords(joined);
-    const routedJ = route(keywordsJ, packs, {
+    let routedJ = route(keywordsJ, packs, {
       state: opts.state,
       ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
     });
-    const candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
+    let candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
+    // #100: widened as the message's own search is: "we're camping in bear
+    // country where do we keep the food" routed to the California species
+    // pack alone (0.155), while the NPS food-storage pages score 0.55.
+    if (best(candidatesJ) < effectiveThreshold) {
+      const w = await widen(keywordsJ, routedJ, packs, joined);
+      if (w !== undefined && w.top > best(candidatesJ)) { routedJ = w.routed; candidatesJ = w.candidates; }
+    }
     const joinedTop = best(candidatesJ);
     // A message with a strong match of its own keeps it: the joined search
     // may win only if it still holds that match. Without this, "find north
@@ -988,28 +1026,6 @@ async function askCore(
   }
   let earlier = followUp?.used === true && opts.previousInPrompt !== false ? opts.previous!.question : undefined;
 
-  // Routing is a hint, and a weak routed search is not evidence that Fred has
-  // nothing: search again across every unscoped pack, and keep that only if it
-  // clears the same gate. Routing picks packs by vocabulary, and some words
-  // point only at state packs: with California set, "there's a bear in front of
-  // me" and "how do I keep bears out of my food" searched the California
-  // species pack alone (bear biology, U=0.16) and declined, while the NPS
-  // food-storage page scores 0.59. Widening up front instead would reach the
-  // manuals on every species question, and ATP 3-50.21's plants chapter once
-  // outranked the species reviews for "what plants and animals are near me?".
-  let widenedTopScore: number | undefined;
-  const widenOn = opts.widenWeakSearch !== false;
-  const widen = async (
-    kw: readonly Keyword[], r: RouteResult, pool: readonly RoutablePack[], text: string,
-  ): Promise<{ routed: RouteResult; candidates: ScoredChunk[]; top: number } | undefined> => {
-    const extra = pool.filter((p) => p.scope.kind !== 'us-state' && !r.packIds.includes(p.id));
-    if (!widenOn || extra.length === 0) return undefined;
-    const packIds = [...r.packIds, ...extra.map((p) => p.id)];
-    const domains = [...new Set([...r.domains, ...extra.flatMap((p) => p.domains)])];
-    const cs = await retrieve(kw, packIds, store, backend, retrievalOpts, domains, text);
-    widenedTopScore = best(cs);
-    return { routed: { ...r, packIds, domains, reason: `${r.reason}; widened after a weak routed search` }, candidates: cs, top: widenedTopScore };
-  };
   if (topScore < effectiveThreshold) {
     const w = await widen(keywords, routed, packs, searchText);
     if (w !== undefined && w.top >= effectiveThreshold) {
@@ -1048,7 +1064,7 @@ async function askCore(
   // Never for a medicine or a procedure: those are declined on purpose.
   const scopeZ = opts.scope === undefined ? undefined : scopeScore(opts.scope, await queryVector(backend, query));
   const inScope = scopeZ !== undefined && scopeZ >= opts.scope!.threshold && !medicine && !BEYOND_FIRST_AID.test(query);
-  const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate')[] = [];
+  const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate' | 'hazard')[] = [];
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
   if (opts.secondSearch === true && topScore < effectiveThreshold) {
@@ -1152,6 +1168,8 @@ async function askCore(
   let u: Understood | undefined;
   // The request's search's leading card, for the agreement rule below.
   let requestCard: ScoredChunk | undefined;
+  /** The restated request's best passage, searched on its own. */
+  let requestTop: ScoredChunk | undefined;
   let agreedCard: ScoredChunk | undefined;
   // The leading card of the hiker's own thread, searched as one text.
   let threadCard: ScoredChunk | undefined;
@@ -1324,6 +1342,7 @@ async function askCore(
         ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
         (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
       requestCard = leadingCard(candR, isCard, await supportOf(candR));
+      requestTop = topR;
       understood = { intent: u.intent, request: u.request, ...(topR === undefined ? {} : { topScore: topR.score }), ...(ownScore === undefined ? {} : { ownScore }), ...(ownRank === undefined ? {} : { ownRank }), used };
       if (used) {
         keywords = kwR;
@@ -1703,6 +1722,12 @@ async function askCore(
     }
   }
 
+  const ownTop = candidates.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
+  if (guardsOn && forcedCard === undefined && intent === 'now' && inScope && ownTop !== undefined && topScore < effectiveThreshold &&
+      ownTop.chunk.packId === 'core-hazards' && ownTop.score >= HAZARD_AGREED_FLOOR && requestTop?.chunk.id === ownTop.chunk.id) {
+    effectiveThreshold = ownTop.score;
+    scopeUsed.push('hazard');
+  }
   if (forcedCard === undefined && (candidates.length === 0 || topScore < effectiveThreshold)) {
     const fromCard = await cardLinesReply();
     if (fromCard !== undefined) return fromCard;

@@ -372,10 +372,13 @@ function Screen() {
 
     const id = nextId.current++;
     const askState = withState === undefined ? state : withState;
-    // Conversation memory: the message just before, if Fred answered it. ask()
-    // decides whether this one is really a follow-up (docs/plan-memory.md).
+    // Conversation memory: the message just before, if Fred answered it or
+    // replied to it in conversation. ask() decides whether this one is really
+    // a follow-up, and only after a message whose search cleared the gate
+    // (docs/plan-memory.md). #100: "where do we keep the food" after "we're
+    // camping in bear country" (a chat reply) lost the bears.
     const last = turnsRef.current.at(-1);
-    const previous = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
+    const previous = last !== undefined && last.done && (last.kind === 'answer' || last.kind === 'chat') && !last.stopped &&
       last.topScore !== undefined && last.question !== question
       ? { question: last.question, topScore: last.topScore } : undefined;
     // The hiker's recent messages, answered or not, for the understanding step
@@ -429,7 +432,7 @@ function Screen() {
       if (res.kind === 'chat') {
         // Small talk: a fixed reply, never model-written advice, and the
         // matching card folded in case it's wanted (docs/results-intent-probe.md).
-        update(id, { kind: 'chat', text: res.reply, done: true, ...(res.offer === null ? {} : { offer: res.offer }) });
+        update(id, { kind: 'chat', text: res.reply, done: true, topScore: res.diagnostics.topScore, ...(res.offer === null ? {} : { offer: res.offer }) });
         return;
       }
       if (res.kind === 'abstain') {

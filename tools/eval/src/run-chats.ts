@@ -71,7 +71,8 @@ for (const set of sets) {
       for (const [i, q] of qs.entries()) {
         const turn = c.turns[i]!;
         const last = asked.at(-1);
-        const previous = last !== undefined && last.kind === 'answer' ? { question: last.q, topScore: last.topScore } : undefined;
+        // As App.tsx: after an answer or a chat reply (#100).
+        const previous = last !== undefined && (last.kind === 'answer' || last.kind === 'chat') ? { question: last.q, topScore: last.topScore } : undefined;
         const history = asked.slice(-CONDITION_HISTORY).map((a) => a.q);
         const t0 = Date.now();
         const r = await ask(q, harness, {

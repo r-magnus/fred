@@ -76,6 +76,13 @@ const PUBLISHERS: Record<Publisher, { source: string; license: LicenseEntry }> =
       sourceUrl: 'https://www.usda.gov/policies-and-links', attribution: 'USDA Forest Service, fs.usda.gov.', nonCommercial: false,
     },
   },
+  army: {
+    source: 'US Army',
+    license: {
+      id: 'army-web', license: 'Public domain (US Government work)', sourceTitle: 'The United States Army (army.mil)',
+      sourceUrl: 'https://www.army.mil/publicaffairs/', attribution: 'The United States Army, army.mil.', nonCommercial: false,
+    },
+  },
   nws: {
     source: 'National Weather Service',
     license: {
@@ -119,6 +126,10 @@ const DROP = new Set([
   'coach of outdoor sports team', 'motorcyclist/bicyclist', 'scuba divers', 'indoor lightning safety',
   // Home and workplace advice, not a hiker's.
   'reducing risk of tick exposure around homes', 'employer recommendations', 'staying safe during power outages',
+  // #100: a home, state programs and respirator fitting (a respirator page
+  // took over "hard to breathe" before), not a hiker's.
+  'if trapped at home', 'reducing indoor smoke exposure', 'what are states doing?', 'using personal protective equipment',
+  'things to remember about respirators', 'resources from other agencies',
 ]);
 
 /** NWS's program banner and breadcrumb, which survive as text across their tags. */
@@ -135,6 +146,14 @@ function body(page: CachedPage, publisher: Publisher): string {
   };
   if (publisher === 'nps') h = npsArticle(h).html;
   if (publisher === 'blm' || publisher === 'usfs') between('<main', /<\/main>/);
+  // army.mil: the article, up to the post's local rules; its headings are
+  // set as paragraphs ("If caught in the open").
+  if (publisher === 'army') {
+    between('<div class="article-body', /<p>\s*Plan, prepare, be aware/);
+    h = h.replace(/<p>\s*([A-Z][A-Za-z ,'-]{3,40})\s*<\/p>/g, '<h3>$1</h3>');
+  }
+  // cdc.gov fetched as a page, not through syndication.
+  if (publisher === 'cdc' && page.sourceUrl.includes('www.cdc.gov')) between('<main', /<\/main>/);
   if (publisher === 'epa' || publisher === 'fda' || publisher === 'nih') between('<main', /<\/main>|Content current as of|Last Reviewed/);
   // #100: a forecast office's page has its menus inside div-full; the
   // article is the cms-content block, before its links to other material.
@@ -169,7 +188,8 @@ export function healthChunks(count: (t: string) => number, pages: readonly Healt
   return pages.flatMap((p) => {
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
     const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*(?:\||-)\s*(?:US EPA|FDA|CDC|Rabies|NIDDK|NIAMS|National Institute[^|]*))+\s*$/, '')
-      .replace(/&amp;/g, '&').replace(/&#0?39;/g, "'")
+      .replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/\s*&#124;\s*Article\s*&#124;\s*The United States Army\s*$/, '')
+      .replace(/^Wildland Fire Smoke \| Outdoor$/, 'Wildland Fire Smoke for People Working Outdoors')
       .replace(/\s*(?:\|\s*(?:Bureau of Land Management|US Forest Service|Forest Service)|\(U\.S\. National Park Service\))\s*$/g, '')
       .replace(/^(?:Superior National Forest|Pacific Northwest Region)\s*\|\s*(.*?)(?:\s*\|\s*Forest Service)?$/, '$1')
       .replace(/\s+/g, ' ').trim();
@@ -201,7 +221,7 @@ async function main(): Promise<void> {
     const vz = await embedder.embed(hz.map((c) => documentText(EMBEDDING_GEMMA, c.section, c.text)));
     const used = [...new Set(HAZARD_PAGES.map((p) => p.publisher))].map((p) => PUBLISHERS[p].license);
     const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
-      id: 'core-hazards', version: '1.1.0', displayName: 'Weather and Terrain Hazards',
+      id: 'core-hazards', version: '1.2.0', displayName: 'Weather and Terrain Hazards',
       description: 'What to do on the spot about lightning, flash floods, river crossings and wildfire, from the National Weather Service, National Park Service, Bureau of Land Management and Forest Service.',
       domains: ['survival'], scope: { kind: 'global' }, source: 'National Weather Service',
       licenseId: PUBLISHERS.nws.license.id, licenses: used, embedding: embedder.spec,

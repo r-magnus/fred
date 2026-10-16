@@ -2094,7 +2094,7 @@ async function askCore(
     const card = usable.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
     return card !== undefined && card.score >= CLOSEST_CARD_FLOOR ? card : undefined;
   };
-  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
+  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(fireNear ? [WILDFIRE_NEAR] : []), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
   // information": "we cleaned out a mousy cabin last week and now i have a
   // fever and it's getting hard to breathe" found the hantavirus passages and

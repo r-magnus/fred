@@ -496,8 +496,8 @@ none:other	there is a mountain lion watching us
 none:other	a moose is blocking the trail
 none:other	we saw a rattlesnake on the path
 none:other	coyotes are howling near camp
-none:other	the sky is full of smoke
-none:other	a wildfire is on the next ridge
+wildfire	the sky is full of smoke
+wildfire	a wildfire is on the next ridge
 none:other	it started snowing hard
 none:other	the creek is rising fast next to our camp
 none:other	flash flood warning in the canyon
@@ -634,7 +634,7 @@ none:other	the wind picked up and the sky went green
 none:other	what do i do in a thunderstorm above treeline
 river-crossing	the creek we crossed this morning is way higher now
 river-crossing	how do i cross a fast river safely
-none:other	smoke is pouring over the ridge toward our camp
+wildfire	smoke is pouring over the ridge toward our camp
 none:other	there is a flash flood warning and we are in a slot canyon
 none:other	rocks keep falling on this section of trail
 hypothermia	my buddy went through thin ice on the lake
@@ -1016,7 +1016,7 @@ none:other	we are out of daylight and have no headlamp
 none:other	the sky is turning black and i hear rumbling
 none:other	we just heard a big crack of thunder close by
 none:other	clouds are stacking up dark over the peaks
-none:other	we smell smoke and see a glow over the hill
+wildfire	we smell smoke and see a glow over the hill
 water-purify	we have to get water from this pond
 none:gear	our tent ripped and its going to rain
 none:other	something large is moving in the bushes next to camp
@@ -1484,3 +1484,23 @@ none:minor	my back is stiff this morning from the hard ground
 none:minor	banged my little toe on the tent stake
 none:chat	we finally rolled into camp
 none:medicine	how many loperamide is safe per day
+wildfire	there is a fire burning down the slope from where we are
+wildfire	flames are moving through the brush toward the trail
+wildfire	the forest across the river is on fire
+wildfire	we got cut off by a wildfire and the trail behind us is blocked
+wildfire	a ranger said there's a fire nearby and we should leave
+wildfire	fire is coming up the canyon toward our camp
+wildfire	we keep breathing smoke and my chest feels tight from it
+wildfire	my kids eyes are stinging from all the wildfire smoke
+wildfire	how bad is it to keep backpacking through heavy smoke
+wildfire	the smoke is so thick we can barely see the trail
+wildfire	there's a big smoke column rising behind the next hill
+wildfire	burning pine needles are falling around our tent
+wildfire	we heard the fire is spreading fast near our trailhead
+wildfire	should we hide in the creek if the fire gets here
+wildfire	what do we do if a forest fire blocks our way out
+wildfire	i think the fire jumped the ridge toward us
+wildfire	the wind is pushing smoke and sparks right at us
+wildfire	there's a fire near the road and we're in the car
+wildfire	the air smells like burning and it's getting hazy fast
+wildfire	can we wait out a wildfire in a meadow

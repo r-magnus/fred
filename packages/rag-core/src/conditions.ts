@@ -193,14 +193,18 @@ const WILDFIRE = new RegExp([
 ].join('|'), 'i');
 
 /**
- * A wildfire near the hiker (#100). Not in CONDITIONS: it has no card, and the
- * record (record.ts) has nothing to keep for it. It only rules out what must
- * never answer it (NOT_AFTER, and FIRE_STARTING in the pipeline): "there's an
- * orange glow and ash falling on our camp" and "there's a fire on the
- * hillside above our camp" got the campfire card word for word.
+ * A wildfire near the hiker (#100). Not in CONDITIONS: the record (record.ts)
+ * has nothing to keep for it. It rules out what must never answer it
+ * (NOT_AFTER, and FIRE_STARTING in the pipeline): "there's an orange glow and
+ * ash falling on our camp" and "there's a fire on the hillside above our camp"
+ * got the campfire card word for word. A card it blocks gives way to its own.
  */
 export const WILDFIRE_NEAR: Condition = {
-  id: 'wildfire', label: 'wildfire', card: '', said: (ms) => ms.some((m) => WILDFIRE.test(m)), situation: true,
+  id: 'wildfire', label: 'wildfire', card: 'A wildfire or its smoke nearby', said: (ms) => ms.some((m) => WILDFIRE.test(m)), situation: true,
+  // "move to a large body of water or a hill to escape the fire's path" and
+  // "create smoke signals using a burning tree" (#100). The card sends the
+  // hiker to the place with the least to burn and says not to light a fire.
+  forbidden: /\bsmoke signals?\b|\b(?:signal|tree) (?:fire|torch)\b|\b(?:light|build|start|make|set)\w* (?:a |an |the )?(?:\w+ )?(?:fire|blaze)\b|\b(?:climb|go|move|head|hike|run|get)\w*\b(?:(?!\b(?:off|down|away|below|leave|out of)\b)[^.]){0,50}\b(?:uphill|hill(?:top|side)?s?|ridge(?:line)?s?|summit|peak|high(?:er)? ground)\b/i,
 };
 
 /**

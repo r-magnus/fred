@@ -151,7 +151,7 @@ for (const [at, c] of cards.entries()) {
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.8.0',
+  version: '0.9.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],

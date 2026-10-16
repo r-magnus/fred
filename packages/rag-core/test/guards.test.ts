@@ -300,3 +300,16 @@ test('a wildfire near rules out the campfire card and fire-starting passages (#1
   assert.equal(FIRE_STARTING.test('A burning tree (tree torch) is another way to attract attention. You can set pitch-bearing trees afire'), true);
   assert.equal(FIRE_STARTING.test('If you see a wildland fire, avoid traveling near it and report its location'), false);
 });
+
+test('a wildfire near guards against heading uphill and lighting fires (#100)', () => {
+  const w = [WILDFIRE_NEAR];
+  assert.equal(violatedCondition('If possible, move to a large body of water or a hill to escape the fire\'s path.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition('Try to create smoke signals using a burning tree.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition('Hike up the ridge to get above the smoke.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition("Don't light any fire, even to signal.", w), undefined);
+  assert.equal(violatedCondition('Go to the place with the least to burn, like bare rock or a large lake.', w), undefined);
+  assert.equal(violatedCondition('Leave the area by a route away from the fire and report it.', w), undefined);
+  assert.equal(violatedCondition('Get off the ridge and away from the fire.', w), undefined);
+  assert.equal(violatedCondition('Head down into the valley, away from the ridge.', w), undefined);
+  assert.equal(WILDFIRE_NEAR.card, 'A wildfire or its smoke nearby');
+});

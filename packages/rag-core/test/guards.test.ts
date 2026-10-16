@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockingCondition, conditionsIn, FIRE_STARTING, latestCondition, violatedCondition, WILDFIRE_NEAR } from '../src/conditions.ts';
+import { blockingCondition, conditionsIn, FIRE_STARTING, latestCondition, NO_FIRE, PAST_FIRE, violatedCondition, WILDFIRE_NEAR } from '../src/conditions.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
@@ -312,4 +312,12 @@ test('a wildfire near guards against heading uphill and lighting fires (#100)', 
   assert.equal(violatedCondition('Get off the ridge and away from the fire.', w), undefined);
   assert.equal(violatedCondition('Head down into the valley, away from the ridge.', w), undefined);
   assert.equal(WILDFIRE_NEAR.card, 'A wildfire or its smoke nearby');
+});
+
+test('the wildfire card is only for a fire in view, not one that is over (#100)', () => {
+  assert.equal(blockingCondition('A wildfire or its smoke nearby', [NO_FIRE])?.id, 'no-fire');
+  assert.equal(blockingCondition('A wildfire or its smoke nearby', [WILDFIRE_NEAR]), undefined);
+  assert.equal(PAST_FIRE.test('what should i watch out for hiking through an area that burned last year'), true);
+  assert.equal(PAST_FIRE.test('is the burn scar safe after rain'), true);
+  assert.equal(PAST_FIRE.test('the whole canyon filled with brown haze in the last hour'), false);
 });

@@ -4271,8 +4271,8 @@
       "Don't drive through heavy smoke.",
       "Don't light any fire, even to signal."
     ],
-    "getHelp": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off. Anyone with burns: see the burns card.",
-    "reviewerNote": "Written for #100: wildfire messages got the campfire card, the burns card, or model answers that told a hiker to make smoke signals with a burning tree or to tip a canoe. From the NPS visitor fire-safety page (don't investigate, report, avoid it, closures), the Forest Service's Boundary Waters steps (wind direction, another route, a large lake), the Army's Fort Huachuca fire-prevention article (caught in the open, backcountry depression, road ditch, vehicle) and NIOSH's outdoor-worker smoke page (less exertion, breaks out of the smoke, symptoms). 'Fire runs uphill' is not stated: no US agency source in the packs says it, and the card avoids the question by naming where to go (least fuel) instead. The Army's 'Do not attempt to outrun the fire' is said of a car; the card keeps it for a fire that is close, beside its backcountry advice to lie down while the fire approaches. No respirator step: a respirator page took over 'hard to breathe' before (#100).",
+    "getHelp": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off or anyone has real trouble breathing. Anyone with burns: see the burns card.",
+    "reviewerNote": "Written for #100: wildfire messages got the campfire card, the burns card, or model answers that told a hiker to make smoke signals with a burning tree or to tip a canoe. From the NPS visitor fire-safety page (don't investigate, report, avoid it, closures), the Forest Service's Boundary Waters steps (wind direction, another route, a large lake), the Army's Fort Huachuca fire-prevention article (caught in the open, backcountry depression, road ditch, vehicle) The smoke step follows NIOSH's outdoor-worker smoke page, which is left out of the packs (see unsourced). 'Fire runs uphill' is not stated: no US agency source in the packs says it, and the card avoids the question by naming where to go (least fuel) instead. The Army's 'Do not attempt to outrun the fire' is said of a car; the card keeps it for a fire that is close, beside its backcountry advice to lie down while the fire approaches. No respirator step: a respirator page took over 'hard to breathe' before (#100).",
     "sources": [
       {
         "source": "National Park Service",
@@ -4303,21 +4303,6 @@
         "source": "National Park Service",
         "page": null,
         "quote": "Pay attention to signs, do not enter closed areas. Follow directions given by emergency personnel if you are in the area of a wildfire or prescribed fire."
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "Reduce levels of physical activity when possible, especially strenuous and heavy work,"
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "take frequent breaks in places that are free from smoke"
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "Symptoms such as eye irritation, sore throat, wheeze, and cough,"
       },
       {
         "source": "US Army",
@@ -4377,12 +4362,16 @@
     ],
     "unsourced": [
       {
+        "text": "In smoke, slow down and take it easy, and rest where the air is clearer. Eye irritation, a sore throat, wheezing and coughing mean the smoke is getting to you.",
+        "why": "From NIOSH's wildfire-smoke page for outdoor workers ('Reduce levels of physical activity when possible', 'frequent breaks in places that are free from smoke', 'Symptoms such as eye irritation, sore throat, wheeze, and cough'). The page is not in the packs: written for employers, it was answered from as workplace policy ('Require and encourage workers...') for 'the smoke is so thick it's hard to breathe' (#100)."
+      },
+      {
         "text": "Don't light any fire, even to signal.",
         "why": "The survival manual's signalling pages (signal fires, the tree torch) reached wildfire answers; a fire lit near a wildfire is an obvious danger the sources do not say in words."
       },
       {
-        "text": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off.",
-        "why": "NPS says to call 911; SOS is added because the backcountry often has no signal, as in the other cards' get-help lines."
+        "text": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off or anyone has real trouble breathing.",
+        "why": "NPS says to call 911; SOS is added because the backcountry often has no signal, as in the other cards' get-help lines. Trouble breathing in smoke is a danger sign elsewhere in Fred; the card is what a danger sign about smoke now shows."
       },
       {
         "text": "bare ground, rock, a road",

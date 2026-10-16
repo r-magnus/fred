@@ -126,10 +126,8 @@ const DROP = new Set([
   'coach of outdoor sports team', 'motorcyclist/bicyclist', 'scuba divers', 'indoor lightning safety',
   // Home and workplace advice, not a hiker's.
   'reducing risk of tick exposure around homes', 'employer recommendations', 'staying safe during power outages',
-  // #100: a home, state programs and respirator fitting (a respirator page
-  // took over "hard to breathe" before), not a hiker's.
-  'if trapped at home', 'reducing indoor smoke exposure', 'what are states doing?', 'using personal protective equipment',
-  'things to remember about respirators', 'resources from other agencies',
+  // #100: the Army wildfire article's home section.
+  'if trapped at home',
 ]);
 
 /** NWS's program banner and breadcrumb, which survive as text across their tags. */
@@ -152,8 +150,6 @@ function body(page: CachedPage, publisher: Publisher): string {
     between('<div class="article-body', /<p>\s*Plan, prepare, be aware/);
     h = h.replace(/<p>\s*([A-Z][A-Za-z ,'-]{3,40})\s*<\/p>/g, '<h3>$1</h3>');
   }
-  // cdc.gov fetched as a page, not through syndication.
-  if (publisher === 'cdc' && page.sourceUrl.includes('www.cdc.gov')) between('<main', /<\/main>/);
   if (publisher === 'epa' || publisher === 'fda' || publisher === 'nih') between('<main', /<\/main>|Content current as of|Last Reviewed/);
   // #100: a forecast office's page has its menus inside div-full; the
   // article is the cms-content block, before its links to other material.
@@ -189,7 +185,6 @@ export function healthChunks(count: (t: string) => number, pages: readonly Healt
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
     const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*(?:\||-)\s*(?:US EPA|FDA|CDC|Rabies|NIDDK|NIAMS|National Institute[^|]*))+\s*$/, '')
       .replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/\s*&#124;\s*Article\s*&#124;\s*The United States Army\s*$/, '')
-      .replace(/^Wildland Fire Smoke \| Outdoor$/, 'Wildland Fire Smoke for People Working Outdoors')
       .replace(/\s*(?:\|\s*(?:Bureau of Land Management|US Forest Service|Forest Service)|\(U\.S\. National Park Service\))\s*$/g, '')
       .replace(/^(?:Superior National Forest|Pacific Northwest Region)\s*\|\s*(.*?)(?:\s*\|\s*Forest Service)?$/, '$1')
       .replace(/\s+/g, ' ').trim();

@@ -134,5 +134,21 @@
   "by": "Claude (self-review)",
   "change": "New card: a bear close by, charging or attacking (#96).",
   "why": "'there's a bear in front of me what do i do' was declined: no manual covers it, and the NPS page that does sits in a tips pack an emergency does not read. Written from NPS 'Staying Safe Around Bears' (public domain); black-bear and grizzly attack responses kept species-named inside each step. Every quote checked word for word; no serious conflict to escalate. askedAs no longer includes the sealed #98 test wording (\"there's a bear in front of me what do i do\")."
+ },
+ {
+  "id": "water-purify",
+  "rev": "9e661d633675",
+  "date": "2026-10-16",
+  "by": "Claude (self-review)",
+  "change": "Boil 3 minutes above about 5,000 feet (was 'at high altitude'); a line not to drink water that may hold fuel or chemicals (#51, commit 357e039, 2026-10-02).",
+  "why": "Both lines quoted from EPA in the health pack. Sources differ on the altitude (EPA 5,000 ft, CDC 6,500 ft, the 2018 Army manual 8,000 ft); the lowest is the safe choice. The entry was missed when the change was made, so a CARDS=approved build left the card out; found while adding the wildfire card."
+ },
+ {
+  "id": "wildfire",
+  "rev": "375ff658235f",
+  "date": "2026-10-16",
+  "by": "Claude (self-review)",
+  "change": "New card: a wildfire or its smoke nearby (#100). Ryan approved a card for this on 2026-10-16.",
+  "why": "Wildfire messages got the campfire card, the burns card, model answers that said to make smoke signals with a burning tree or to tip a canoe, or were declined. Written from NPS visitor fire safety, the Forest Service's Boundary Waters steps and the Army's Fort Huachuca fire-prevention article; 17 quotes checked word for word. Four lines are marked unsourced with reasons (the smoke step, from NIOSH's employer-facing page left out of the packs; no fire even to signal; SOS and trouble breathing; examples of bare ground). 'Fire runs uphill' is not claimed: no US agency source found says it. No serious conflict to escalate."
  }
 ]

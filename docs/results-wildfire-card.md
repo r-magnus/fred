@@ -68,7 +68,7 @@ this branch with core-hazards 1.2.0 and core-fieldcards 0.9.0.
 | | main | with the card |
 |---|---|---|
 | fresh wildfire messages with the card (16) | 0 | 9 |
-| fresh wildfire messages declined or small talk | 8 | 6 |
+| fresh wildfire messages declined or small talk | 9 | 6 |
 | replies changed outside wildfire messages | | 1 (an offer of the river card for "paddling across the lake to our campsite" went away) |
 
 The campfire questions keep the campfire card or the manuals; the two people

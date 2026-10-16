@@ -4240,5 +4240,143 @@
         "why": "Points to the wound cards; NPS covers the encounter, not injuries afterwards."
       }
     ]
+  },
+  {
+    "id": "wildfire",
+    "title": "A wildfire or its smoke nearby",
+    "domain": "survival",
+    "medical": false,
+    "askedAs": [
+      "we can see a wildfire from the trail",
+      "there's smoke and ash coming toward our camp",
+      "what do we do if a forest fire is near us",
+      "the sky is orange and smoky where we're hiking",
+      "the fire is getting close and we can't get out",
+      "should we keep hiking in this wildfire smoke"
+    ],
+    "summary": "Don't go closer or try to put it out. Leave by a route away from the fire and the way the wind is blowing, and report it. If it reaches you, get to the spot with the least to burn and lie face down, covered.",
+    "steps": [
+      "Don't go closer to look, and don't try to put the fire out yourself.",
+      "Note where the fire is as best you can and report it to a ranger, or call 911.",
+      "Leave the area. Fires mostly travel with the wind, so pick a route out in another direction, away from the fire.",
+      "Follow directions from fire crews and rangers, and stay out of closed areas.",
+      "In smoke, slow down and take it easy, and rest where the air is clearer. Eye irritation, a sore throat, wheezing and coughing mean the smoke is getting to you.",
+      "If the fire is closing in and you can't get away, go to the place with the least to burn: bare ground, rock, a road, or a large lake. Stay out of canyons, gullies that act like chimneys, and saddles.",
+      "In the backcountry, find a dip in the ground with little to burn. Clear away what plants you can while the fire is still coming, then lie face down in it and cover yourself. Stay down until the fire passes.",
+      "If a road is close, lie face down in the ditch on the uphill side. Cover yourself with anything that will shield you from the heat.",
+      "If you are in a car, stay in it rather than running on foot. Park away from trees and brush, close the windows and vents, get on the floor and cover up with a blanket or coat."
+    ],
+    "dont": [
+      "Don't try to outrun the fire once it is close.",
+      "Don't drive through heavy smoke.",
+      "Don't light any fire, even to signal."
+    ],
+    "getHelp": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off or anyone has real trouble breathing. Anyone with burns: see the burns card.",
+    "reviewerNote": "Written for #100: wildfire messages got the campfire card, the burns card, or model answers that told a hiker to make smoke signals with a burning tree or to tip a canoe. From the NPS visitor fire-safety page (don't investigate, report, avoid it, closures), the Forest Service's Boundary Waters steps (wind direction, another route, a large lake), the Army's Fort Huachuca fire-prevention article (caught in the open, backcountry depression, road ditch, vehicle) The smoke step follows NIOSH's outdoor-worker smoke page, which is left out of the packs (see unsourced). 'Fire runs uphill' is not stated: no US agency source in the packs says it, and the card avoids the question by naming where to go (least fuel) instead. The Army's 'Do not attempt to outrun the fire' is said of a car; the card keeps it for a fire that is close, beside its backcountry advice to lie down while the fire approaches. No respirator step: a respirator page took over 'hard to breathe' before (#100).",
+    "sources": [
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Do NOT investigate or attempt to contact suspicious people or try to put out a fire by yourself."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If you see smoke, fire, or suspicious activities, note the location as best you can and report it to authorities (such as a ranger) or call 911."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "If you see a wildland fire, avoid traveling near it and report its location to authorities (such as a ranger) or call 911."
+      },
+      {
+        "source": "US Forest Service",
+        "page": null,
+        "quote": "Most fires travel with the prevailing wind so have a route in mind that is in another direction."
+      },
+      {
+        "source": "US Forest Service",
+        "page": null,
+        "quote": "Look for an alternative route and if possible, travel out of the fire area."
+      },
+      {
+        "source": "National Park Service",
+        "page": null,
+        "quote": "Pay attention to signs, do not enter closed areas. Follow directions given by emergency personnel if you are in the area of a wildfire or prescribed fire."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "The best temporary shelter is in a sparsely vegetated area."
+      },
+      {
+        "source": "US Forest Service",
+        "page": null,
+        "quote": "If you feel threatened, find a large lake and keep out of the fire's path."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Avoid canyons, natural \"chimneys\" and saddles."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "If hiking in the back country, seek a depression with sparse fuel. Clear as much vegetation away from the area as possible while the fire is getting closer. Then lie face down in the depression and cover yourself. Stay down until the fire passes."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "If a road is nearby, go to it and lie face down along the road cut or in the ditch on the uphill side. Cover yourself with anything that will shield you from the fire's heat."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "it is far less dangerous than trying to run from a fire on foot."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Those who have to stop should park away from the heaviest trees and brush."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Roll up windows and close air vents."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Get on the floor and cover up with a blanket or coat. Stay in the vehicle until the main fire passes."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Do not attempt to outrun the fire."
+      },
+      {
+        "source": "US Army",
+        "page": null,
+        "quote": "Do not drive through heavy smoke."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "In smoke, slow down and take it easy, and rest where the air is clearer. Eye irritation, a sore throat, wheezing and coughing mean the smoke is getting to you.",
+        "why": "From NIOSH's wildfire-smoke page for outdoor workers ('Reduce levels of physical activity when possible', 'frequent breaks in places that are free from smoke', 'Symptoms such as eye irritation, sore throat, wheeze, and cough'). The page is not in the packs: written for employers, it was answered from as workplace policy ('Require and encourage workers...') for 'the smoke is so thick it's hard to breathe' (#100)."
+      },
+      {
+        "text": "Don't light any fire, even to signal.",
+        "why": "The survival manual's signalling pages (signal fires, the tree torch) reached wildfire answers; a fire lit near a wildfire is an obvious danger the sources do not say in words."
+      },
+      {
+        "text": "Call 911 or send an SOS as soon as you know a fire is near you, and again if you are cut off or anyone has real trouble breathing.",
+        "why": "NPS says to call 911; SOS is added because the backcountry often has no signal, as in the other cards' get-help lines. Trouble breathing in smoke is a danger sign elsewhere in Fred; the card is what a danger sign about smoke now shows."
+      },
+      {
+        "text": "bare ground, rock, a road",
+        "why": "Examples of the Army's 'sparsely vegetated area' and 'where fuel is scarce'; the road is from its own road step."
+      }
+    ]
   }
 ]

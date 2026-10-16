@@ -97,7 +97,7 @@ const BELLY = /\b(?:stabbed|impaled|gored)\b.*\b(?:belly|stomach|abdomen|gut|gut
  * stove grate" and "splashed hot coffee all over my wrist" never say "burn"
  * (confirmation chat set).
  */
-const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )(?<!\b(?:eyes?|throat|nose|lungs?)(?: (?:is|are|keep|keeps|started|start))? )(?<!\b(?:trees?|forest|woods|brush|grass|hillside|ridge|slope|mountain(?:side)?|canyon|valley|treeline|something)(?: (?:is|are|was|were|still|keep|keeps|started|start))? )burn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
+const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )(?<!\b(?:eyes?|throat|nose|lungs?)(?: (?:is|are|keep|keeps|started|start))? )(?<!\b(?:trees?|forest|woods|brush|grass|hillside|ridge|slope|mountain(?:side)?|canyon|valley|treeline|something)(?: (?:is|are|was|were|still|keep|keeps|started|start))? )burn(?:ed|t|s|ing)?\b(?! (?:last|this|a few|two|three) (?:\w+ )?(?:years?|seasons?|summers?|months?)\b| (?:area|scar|zone)s?\b)|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
 const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden|pale)\b|\b(?:white|waxy|pale)\b[^.]*\b(?:toes?|fingers?|fingertips?)\b|\bcan'?t feel (?:my|his|her|their) (?:toes?|fingers?|fingertips?|feet|hands?)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 
@@ -193,15 +193,31 @@ const WILDFIRE = new RegExp([
 ].join('|'), 'i');
 
 /**
- * A wildfire near the hiker (#100). Not in CONDITIONS: it has no card, and the
- * record (record.ts) has nothing to keep for it. It only rules out what must
- * never answer it (NOT_AFTER, and FIRE_STARTING in the pipeline): "there's an
- * orange glow and ash falling on our camp" and "there's a fire on the
- * hillside above our camp" got the campfire card word for word.
+ * A wildfire near the hiker (#100). Not in CONDITIONS: the record (record.ts)
+ * has nothing to keep for it. It rules out what must never answer it
+ * (NOT_AFTER, and FIRE_STARTING in the pipeline): "there's an orange glow and
+ * ash falling on our camp" and "there's a fire on the hillside above our camp"
+ * got the campfire card word for word. A card it blocks gives way to its own.
  */
 export const WILDFIRE_NEAR: Condition = {
-  id: 'wildfire', label: 'wildfire', card: '', said: (ms) => ms.some((m) => WILDFIRE.test(m)), situation: true,
+  id: 'wildfire', label: 'wildfire', card: 'A wildfire or its smoke nearby', said: (ms) => ms.some((m) => WILDFIRE.test(m)), situation: true,
+  // "move to a large body of water or a hill to escape the fire's path" and
+  // "create smoke signals using a burning tree" (#100). The card sends the
+  // hiker to the place with the least to burn and says not to light a fire.
+  forbidden: /\bsmoke signals?\b|\b(?:signal|tree) (?:fire|torch)\b|\b(?:light|build|start|make|set)\w* (?:a |an |the )?(?:\w+ )?(?:fire|blaze)\b|\b(?:climb|go|move|head|hike|run|get)\w*\b(?:(?!\b(?:off|down|away|below|leave|out of)\b)[^.]){0,50}\b(?:uphill|hill(?:top|side)?s?|ridge(?:line)?s?|summit|peak|high(?:er)? ground)\b/i,
 };
+
+/** A fire that is over: a burned area, a burn scar, a fire last year. */
+export const PAST_FIRE = /\b(?:burned|burnt) (?:last|this|a few|two|three) (?:\w+ )?(?:years?|seasons?|summers?|months?)\b|\bburn(?:ed)? (?:area|scar|zone)s?\b|\bthat (?:burned|burnt)\b|\bafter (?:a|the) (?:wild)?fire\b/i;
+
+/**
+ * No fire in view: neither WILDFIRE nor the card matcher says one (#100). The
+ * wildfire card is for a fire, but its words reach other things coming at the
+ * hiker: "a group on horses is coming toward us on the trail", "dark clouds
+ * piling up fast over the peak" and "a storm rolled in and we can barely see
+ * in the snow" opened it, with the matcher saying no card.
+ */
+export const NO_FIRE: Condition = { id: 'no-fire', label: 'no fire', card: '', said: () => true, situation: true };
 
 /**
  * A passage that tells the reader to start a fire or make smoke on purpose: a
@@ -219,6 +235,8 @@ export const NOT_AFTER: Readonly<Record<string, readonly string[]>> = {
   // Campfire: "Light the tinder from its bottom edge ... Add bigger wood as
   // the kindling catches." Nothing in it is for a fire the hiker did not light.
   'Starting a campfire': ['wildfire'],
+  // The wildfire card, only for a fire (NO_FIRE).
+  'A wildfire or its smoke nearby': ['no-fire'],
   // Sprain: "Ice ... Compression: wrap or splint it ... Elevation: raise the
   // injured part." Snakebite: "Don't put ice on it", "Keep the bitten arm or
   // leg slightly below the level of the heart".

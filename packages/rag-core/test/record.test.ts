@@ -49,6 +49,8 @@ test('burning something is not a burn (#100)', () => {
   assert.deepEqual(ids(['i can see trees burning across the lake from our site']), []);
   assert.deepEqual(ids(['the whole forest is burning on the far ridge']), []);
   assert.deepEqual(ids(['i smell something burning near camp']), []);
+  assert.deepEqual(ids(['what should i watch out for hiking through an area that burned last year']), []);
+  assert.deepEqual(ids(['is the old burn area safe to camp in']), []);
   assert.deepEqual(ids(['i burned my hand on the stove while the trees were burning']), ['burn']);
 });
 

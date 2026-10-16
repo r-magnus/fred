@@ -26,7 +26,7 @@ const OUT = 'corpora/health';
 const PAUSE_MS = 500;
 const USER_AGENT = 'fred-ingest/0.1 (CS-195 academic project; https://github.com/r-magnus/fred)';
 
-export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda' | 'nih' | 'nps' | 'blm' | 'usfs';
+export type Publisher = 'cdc' | 'epa' | 'nws' | 'fda' | 'nih' | 'nps' | 'blm' | 'usfs' | 'army';
 
 export interface HealthPage {
   /** A file name. */
@@ -120,6 +120,13 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   // (clean-air rooms, choosing a respirator): for "the smoke is so thick
   // it's hard to breathe" the answer became how to fit an N95.
   { key: 'nws-rnk-outdoors-lightning', publisher: 'nws', pack: 'core-hazards', url: 'https://www.weather.gov/rnk/outdoorslightning', domain: 'survival' },
+  // #100: a hiker who sees a wildfire, for the wildfire card: what to do when
+  // caught in the open or in the backcountry (Fort Huachuca's fire prevention
+  // office, army.mil). Left out: NIOSH's wildfire-smoke page for outdoor
+  // workers, written for employers; "the smoke is so thick it's hard to
+  // breathe", a danger sign, was answered with "Require and encourage workers
+  // to take frequent breaks".
+  { key: 'army-wildfire-survival', publisher: 'army', pack: 'core-hazards', url: 'https://www.army.mil/article/125204/Prepare_for_wildfire_survival_now/', domain: 'survival' },
 ];
 
 async function fetchText(url: string): Promise<string> {

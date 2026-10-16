@@ -14,7 +14,7 @@ import { isRefusal, DEAD_ENDS, CLOSEST_CARD_LEAD, NO_ANSWER_REPLY, SAFETY_NET_RE
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, CONDITIONS, FIRE_STARTING, violatedCondition, WILDFIRE_NEAR, type Condition } from './conditions.ts';
+import { blockingCondition, CONDITIONS, FIRE_STARTING, NO_FIRE, PAST_FIRE, violatedCondition, WILDFIRE_NEAR, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysResolved, sinceResolved } from './record.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, noCardShare, saidAs, type Said, type SaidAsModel } from './said-as.ts';
@@ -924,12 +924,6 @@ async function askCore(
   // The text the adopted search was run on: the question, or it joined to the
   // previous one, or restated (below).
   let searchText = searched;
-  let candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searched);
-  // The best score, not the first chunk's: a reserved field card goes first
-  // and may score below the top manual passage (retrieve.ts).
-  const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
-  let topScore = best(candidates);
-
   // #152 (said-as.ts): which card the message is about, or what kind of
   // message no card is for, when the matcher is sure. A pet and a medicine
   // are known by the word lists or by the matcher: "our lab tore a pad on
@@ -940,6 +934,26 @@ async function askCore(
   const saidTop = saidList[0];
   const saidSure = saidTop !== undefined && saidTop.p >= opts.saidAs!.sure ? saidTop : undefined;
   const saidKind = saidSure === undefined ? undefined : noCardKind(saidSure.label);
+
+  // #100: the wildfire card is for a fire, and its words reach other things
+  // coming at the hiker ("a group on horses is coming toward us on the
+  // trail", "a storm rolled in and we can barely see in the snow"). Unless
+  // WILDFIRE or the matcher says a fire, and not one that is over, it is left
+  // out of every search, and the rest runs as if it did not exist (NO_FIRE).
+  const fireCardOk = opts.understand === false || opts.guards === false ||
+    WILDFIRE_NEAR.said([...currentThread(query, opts.history ?? []), query]) ||
+    (saidTop?.label === WILDFIRE_NEAR.card && saidTop.p >= opts.saidAs!.leans && !PAST_FIRE.test(query));
+  const search: typeof retrieve = async (...a) => {
+    const cs = await retrieve(...a);
+    return fireCardOk ? cs : cs.filter((c) => !(c.chunk.packId === retrievalOpts.reserve?.packId && c.chunk.section === WILDFIRE_NEAR.card));
+  };
+
+  let candidates = await search(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searched);
+  // The best score, not the first chunk's: a reserved field card goes first
+  // and may score below the top manual passage (retrieve.ts).
+  const best = (cs: readonly ScoredChunk[]): number => cs.reduce((m, c) => Math.max(m, c.score), 0);
+  let topScore = best(candidates);
+
 
   // Conversation memory: search the follow-up joined to the previous question
   // too, and keep whichever scores higher.
@@ -959,7 +973,7 @@ async function askCore(
       state: opts.state,
       ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}),
     });
-    const candidatesJ = await retrieve(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
+    const candidatesJ = await search(keywordsJ, routedJ.packIds, store, backend, retrievalOpts, routedJ.domains, joined);
     const joinedTop = best(candidatesJ);
     // A message with a strong match of its own keeps it: the joined search
     // may win only if it still holds that match. Without this, "find north
@@ -1017,7 +1031,7 @@ async function askCore(
     if (!widenOn || extra.length === 0) return undefined;
     const packIds = [...r.packIds, ...extra.map((p) => p.id)];
     const domains = [...new Set([...r.domains, ...extra.flatMap((p) => p.domains)])];
-    const cs = await retrieve(kw, packIds, store, backend, retrievalOpts, domains, text);
+    const cs = await search(kw, packIds, store, backend, retrievalOpts, domains, text);
     widenedTopScore = best(cs);
     return { routed: { ...r, packIds, domains, reason: `${r.reason}; widened after a weak routed search` }, candidates: cs, top: widenedTopScore };
   };
@@ -1068,7 +1082,7 @@ async function askCore(
     rewrite = rewrite.trim();
     const keywords2 = extractKeywords(`${query} ${rewrite}`);
     const routed2 = route(keywords2, packs, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
-    const candidates2 = await retrieve(keywords2, routed2.packIds, store, backend, retrievalOpts, routed2.domains, rewrite);
+    const candidates2 = await search(keywords2, routed2.packIds, store, backend, retrievalOpts, routed2.domains, rewrite);
     secondSearch = { rewrite, topScore: best(candidates2) };
     // Only adopted if it clears the same gate. The rewrite is searched with,
     // never answered from: the prompt below still carries the hiker's question
@@ -1147,7 +1161,9 @@ async function askCore(
    * hillside above our camp" got the campfire card (#100).
    */
   const fireNear = guardsOn && WILDFIRE_NEAR.said([...history, query]);
-  const blockers: readonly Condition[] = fireNear ? [...active, WILDFIRE_NEAR] : active;
+  const blockers: readonly Condition[] = !guardsOn ? active : fireNear ? [...active, WILDFIRE_NEAR] : fireCardOk ? active : [...active, NO_FIRE];
+  /** What a situation (a wildfire near, or no fire in view) rules out, beyond the conditions. */
+  const situations = blockers.slice(active.length);
   /** Conditions this message itself sets (with the setting said earlier, for altitude and heat). */
   const setHere: readonly Condition[] = record.conditions.filter((r) => r.at === here && !r.resolved).map((r) => r.condition);
   /**
@@ -1264,7 +1280,7 @@ async function askCore(
       const noTips = packs.filter((p) => !tipsPackIds.has(p.id));
       routed = route(keywords, noTips, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
       effectiveThreshold = routed.fallback ? (opts.fallbackThreshold ?? DEFAULT_FALLBACK_THRESHOLD) : threshold;
-      candidates = await retrieve(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searchText);
+      candidates = await search(keywords, routed.packIds, store, backend, retrievalOpts, routed.domains, searchText);
       topScore = best(candidates);
       if (topScore < effectiveThreshold) {
         const w = await widen(keywords, routed, noTips, searchText);
@@ -1283,7 +1299,7 @@ async function askCore(
     if (guardsOn && (intent === 'question' || intent === 'prevent') && tipsLeftOut.length > 0 && u === undefined) {
       const packIds = [...routed.packIds, ...tipsLeftOut];
       const domains: DomainTag[] = [...new Set<DomainTag>([...routed.domains, 'outdoor-skills'])];
-      const cs = await retrieve(keywords, packIds, store, backend, retrievalOpts, domains, searchText);
+      const cs = await search(keywords, packIds, store, backend, retrievalOpts, domains, searchText);
       const lead = cs.reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
       if (lead !== undefined && tipsPackIds.has(lead.chunk.packId) && lead.score >= effectiveThreshold && lead.score >= topScore + EVERYDAY_MARGIN) {
         everyday = { routedTopScore: topScore, topScore: lead.score };
@@ -1306,7 +1322,7 @@ async function askCore(
       const pool = intent === 'now' ? noTipsPool() : packs;
       const kwR = extractKeywords(u.request);
       let routedR = route(kwR, pool, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
-      let candR = await retrieve(kwR, routedR.packIds, store, backend, retrievalOpts, routedR.domains, u.request);
+      let candR = await search(kwR, routedR.packIds, store, backend, retrievalOpts, routedR.domains, u.request);
       if (best(candR) < effectiveThreshold) {
         const w = await widen(kwR, routedR, pool, u.request);
         if (w !== undefined && w.top > best(candR)) { routedR = w.routed; candR = w.candidates; }
@@ -1332,7 +1348,7 @@ async function askCore(
         const kwO = extractKeywords(own);
         const ids = [...new Set([...routedR.packIds, ...pool.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
         const domains = [...new Set([...routedR.domains, ...pool.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
-        const candO = await retrieve(kwO, ids, store, backend, { ...retrievalOpts, topK: UNDERSTOOD_OWN_TOPK }, domains, own);
+        const candO = await search(kwO, ids, store, backend, { ...retrievalOpts, topK: UNDERSTOOD_OWN_TOPK }, domains, own);
         const ranked = [...candO].sort((a, b) => b.score - a.score);
         const at = topR === undefined ? -1 : ranked.findIndex((c) => c.chunk.id === topR.chunk.id);
         if (at >= 0) { ownScore = ranked[at]!.score; ownRank = at; }
@@ -1692,7 +1708,7 @@ async function askCore(
       const pool = intent === 'now' ? packs.filter((p) => !tipsPackIds.has(p.id)) : packs;
       const text = asRequest(searchText);
       const r0 = intent === 'now' ? route(keywords, pool, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) }) : routed;
-      let cs = await retrieve(keywords, r0.packIds, store, backend, retrievalOpts, r0.domains, text);
+      let cs = await search(keywords, r0.packIds, store, backend, retrievalOpts, r0.domains, text);
       let r = r0;
       if (best(cs) < effectiveThreshold) {
         const w = await widen(keywords, r0, pool, text);
@@ -1871,7 +1887,7 @@ async function askCore(
   // With a wildfire near, no passage that says to start a fire or make smoke,
   // and no card it rules out, reaches the model (FIRE_STARTING, NOT_AFTER).
   let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider' &&
-    !(fireNear && (FIRE_STARTING.test(c.chunk.text) || (isCard(c) && blockingCondition(c.chunk.section, blockers) !== undefined)))));
+    !(fireNear && FIRE_STARTING.test(c.chunk.text)) && !(isCard(c) && blockingCondition(c.chunk.section, situations) !== undefined)));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve, await supportOf(usable));
@@ -2094,7 +2110,7 @@ async function askCore(
     const card = usable.filter(isCard).reduce<ScoredChunk | undefined>((b, c) => (b === undefined || c.score > b.score ? c : b), undefined);
     return card !== undefined && card.score >= CLOSEST_CARD_FLOOR ? card : undefined;
   };
-  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(guardsOn ? exposureConditions([...history, query]) : [])];
+  const watched = [...active.filter((c) => c.forbidden !== undefined), ...(fireNear ? [WILDFIRE_NEAR] : []), ...(guardsOn ? exposureConditions([...history, query]) : [])];
   // #51: someone in danger is never left with "I don't have reliable
   // information": "we cleaned out a mousy cabin last week and now i have a
   // fever and it's getting hard to breathe" found the hantavirus passages and

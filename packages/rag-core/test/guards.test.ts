@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockingCondition, conditionsIn, FIRE_STARTING, latestCondition, violatedCondition, WILDFIRE_NEAR } from '../src/conditions.ts';
+import { blockingCondition, conditionsIn, FIRE_STARTING, latestCondition, NO_FIRE, PAST_FIRE, violatedCondition, WILDFIRE_NEAR } from '../src/conditions.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
@@ -299,4 +299,25 @@ test('a wildfire near rules out the campfire card and fire-starting passages (#1
   assert.equal(blockingCondition('Starting a campfire', []), undefined);
   assert.equal(FIRE_STARTING.test('A burning tree (tree torch) is another way to attract attention. You can set pitch-bearing trees afire'), true);
   assert.equal(FIRE_STARTING.test('If you see a wildland fire, avoid traveling near it and report its location'), false);
+});
+
+test('a wildfire near guards against heading uphill and lighting fires (#100)', () => {
+  const w = [WILDFIRE_NEAR];
+  assert.equal(violatedCondition('If possible, move to a large body of water or a hill to escape the fire\'s path.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition('Try to create smoke signals using a burning tree.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition('Hike up the ridge to get above the smoke.', w)?.id, 'wildfire');
+  assert.equal(violatedCondition("Don't light any fire, even to signal.", w), undefined);
+  assert.equal(violatedCondition('Go to the place with the least to burn, like bare rock or a large lake.', w), undefined);
+  assert.equal(violatedCondition('Leave the area by a route away from the fire and report it.', w), undefined);
+  assert.equal(violatedCondition('Get off the ridge and away from the fire.', w), undefined);
+  assert.equal(violatedCondition('Head down into the valley, away from the ridge.', w), undefined);
+  assert.equal(WILDFIRE_NEAR.card, 'A wildfire or its smoke nearby');
+});
+
+test('the wildfire card is only for a fire in view, not one that is over (#100)', () => {
+  assert.equal(blockingCondition('A wildfire or its smoke nearby', [NO_FIRE])?.id, 'no-fire');
+  assert.equal(blockingCondition('A wildfire or its smoke nearby', [WILDFIRE_NEAR]), undefined);
+  assert.equal(PAST_FIRE.test('what should i watch out for hiking through an area that burned last year'), true);
+  assert.equal(PAST_FIRE.test('is the burn scar safe after rain'), true);
+  assert.equal(PAST_FIRE.test('the whole canyon filled with brown haze in the last hour'), false);
 });

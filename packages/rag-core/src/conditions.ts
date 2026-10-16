@@ -97,7 +97,7 @@ const BELLY = /\b(?:stabbed|impaled|gored)\b.*\b(?:belly|stomach|abdomen|gut|gut
  * stove grate" and "splashed hot coffee all over my wrist" never say "burn"
  * (confirmation chat set).
  */
-const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )(?<!\b(?:eyes?|throat|nose|lungs?)(?: (?:is|are|keep|keeps|started|start))? )burn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
+const BURN = /\b(?<!\bto )(?<!\b(?:can|should|could) (?:i|we) )(?<!\b(?:eyes?|throat|nose|lungs?)(?: (?:is|are|keep|keeps|started|start))? )(?<!\b(?:trees?|forest|woods|brush|grass|hillside|ridge|slope|mountain(?:side)?|canyon|valley|treeline|something)(?: (?:is|are|was|were|still|keep|keeps|started|start))? )burn(?:ed|t|s|ing)?\b|\bscald(?:ed|ing)?\b|\bseared\b|\b(?:touched|brushed|grabbed|leaned on|put (?:his|her|my|their) hands? on|spilled|splashed|poured|knocked|fell (?:in|into|on))\b[^.]{0,40}\b(?:stove|grate|pan|pot|kettle|coals?|campfire|fire|flames?|embers|boiling|hot (?:water|coffee|tea|oil|soup))\b/i;
 const FROSTBITE = /\bfrost ?bit(?:e|ten)\b|\bfrostnip\b|\b(?:toes?|fingers?|fingertips?|nose|ears?|cheeks?|feet|foot)\b[^.]*\b(?:white|waxy|frozen|wooden|pale)\b|\b(?:white|waxy|pale)\b[^.]*\b(?:toes?|fingers?|fingertips?)\b|\bcan'?t feel (?:my|his|her|their) (?:toes?|fingers?|fingertips?|feet|hands?)\b/i;
 const HYPOTHERMIA = /\bhypotherm|\bcan'?t stop (?:shivering|shaking)\b|\b(?:shivering|shaking) (?:uncontrollably|like crazy|badly)\b|\bfell (?:in|into|through) (?:the |a )?(?:ice|lake|river|creek|stream|water)\b|\bwent through the ice\b/i;
 
@@ -187,6 +187,8 @@ const WILDFIRE = new RegExp([
   String.raw`\bash(?:es)? (?:is |are )?(?:falling|raining|coming down|landing|everywhere)\b|\bfalling ash\b|\bash (?:on|all over) (?:our|the|my)\b`,
   String.raw`\b(?:orange|red|brown) (?:glow|sky|haze)\b|\bsky (?:is |was |got |turned |turning |went |looks |looking )?(?:all |really |so )?(?:orange|brown|red)\b|\bglow(?:ing)?\b[^.?!]{0,40}\b(?:ridge|hill|hillside|sky|horizon|trees|mountain|valley)\b`,
   String.raw`(?:\bflames?|(?<!\b(?:build|start|make|light|have|keep|put out)\w*\s(?:a |the |our |my )?)\bfire|\bsmoke)\b[^.?!]{0,30}\b(?:on|over|across|up|down|in|behind|along|from) (?:the |that )?(?:next |other |far )?(?:ridge|hill|hillside|mountain(?:side)?|slope|valley|canyon|horizon|treeline|forest|woods)\b`,
+  String.raw`\bembers?\b[^.?!]{0,20}\b(?:drifting|blowing|falling|landing|raining|flying|coming)\b|\b(?:trees?|forest|woods|brush|grass|hillside|ridge|slope|mountain(?:side)?|canyon|valley|treeline)\b (?:is |are |was |were )?(?:burning|on fire|ablaze|in flames)\b`,
+  String.raw`\b(?:red|orange) (?:sun|moon)\b|\b(?:sun|moon) (?:is |went |turned |looks |got )?(?:all |really |so )?(?:red|orange)\b`,
   String.raw`\b(?:plume|column|wall|cloud) of smoke\b|\bsmell(?:s|ed|ing)? (?:smoke|something burning)\b|\bsmoky (?:air|sky|haze)\b|\b(?:air|sky) (?:is |got |was |getting )?(?:really |so |very )?smoky\b|\bsmoke (?:is )?(?:coming|blowing|rolling|pouring) (?:over|in|toward|towards|our way)\b`,
 ].join('|'), 'i');
 

@@ -283,6 +283,9 @@ test('a wildfire near rules out the campfire card and fire-starting passages (#1
     'we can see flames on the next ridge over',
     'is there a wildfire near yosemite',
     "smoke is rolling over the ridge toward us",
+    'embers are drifting into camp from somewhere upwind',
+    'i can see trees burning across the lake from our site',
+    'the sun went red and there is ash on our packs',
   ]) assert.equal(WILDFIRE_NEAR.said([m]), true, m);
   for (const m of [
     'how do i get a fire going with wet wood',

@@ -14,7 +14,7 @@ import { isRefusal, DEAD_ENDS, CLOSEST_CARD_LEAD, NO_ANSWER_REPLY, SAFETY_NET_RE
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
-import { blockingCondition, CONDITIONS, violatedCondition, type Condition } from './conditions.ts';
+import { blockingCondition, CONDITIONS, FIRE_STARTING, violatedCondition, WILDFIRE_NEAR, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysResolved, sinceResolved } from './record.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
 import { noCardKind, noCardShare, saidAs, type Said, type SaidAsModel } from './said-as.ts';
@@ -1141,6 +1141,13 @@ async function askCore(
   const record = buildRecord(guardsOn ? [...(opts.history ?? []), query] : []);
   const here = opts.history?.length ?? 0;
   const active: readonly Condition[] = guardsOn ? conditionsFor(record, query) : [];
+  /**
+   * A wildfire near (conditions.ts, WILDFIRE_NEAR) rules cards out like a
+   * condition does, without joining the record: "there's a fire on the
+   * hillside above our camp" got the campfire card (#100).
+   */
+  const fireNear = guardsOn && WILDFIRE_NEAR.said([...history, query]);
+  const blockers: readonly Condition[] = fireNear ? [...active, WILDFIRE_NEAR] : active;
   /** Conditions this message itself sets (with the setting said earlier, for altitude and heat). */
   const setHere: readonly Condition[] = record.conditions.filter((r) => r.at === here && !r.resolved).map((r) => r.condition);
   /**
@@ -1488,7 +1495,7 @@ async function askCore(
   // for (conditions.ts). A folded offer becomes the condition's own card.
   let blocked: { card: string; condition: string } | undefined;
   if (offer !== undefined) {
-    const by = blockingCondition(offer.title, active);
+    const by = blockingCondition(offer.title, blockers);
     const instead = by === undefined ? undefined : await cardByTitle(by.card);
     if (by !== undefined) {
       blocked = { card: offer.title, condition: by.id };
@@ -1555,7 +1562,7 @@ async function askCore(
       saidTop.p >= opts.saidAs!.leans && saidTop.p >= SAID_CLEARLY * (saidList.find((x) => x !== saidTop && noCardKind(x.label) === undefined)?.p ?? 0) &&
       !saysResolved(query) && !ACKNOWLEDGES.test(query)) {
     const card = ownCard(await cardByTitle(saidTop.label));
-    if (card !== undefined && blockingCondition(card.chunk.section, active) === undefined) { offer = toOffer(card, citeOf(card, 0)); saidUsed.push('offered'); }
+    if (card !== undefined && blockingCondition(card.chunk.section, blockers) === undefined) { offer = toOffer(card, citeOf(card, 0)); saidUsed.push('offered'); }
   }
 
   if (intent === 'chat') {
@@ -1584,7 +1591,7 @@ async function askCore(
     // check the breathing.
     if (toKind === undefined && (saidSure !== undefined || (saidTop.p >= opts.saidAs!.leans && saidTop.p >= SAID_CLEARLY * share))) {
       const other = ownCard(await cardByTitle(saidTop.label));
-      if (other !== undefined && blockingCondition(other.chunk.section, active) === undefined) { saidUsed.push('card'); return other; }
+      if (other !== undefined && blockingCondition(other.chunk.section, blockers) === undefined) { saidUsed.push('card'); return other; }
       return card;
     }
     // Sure it is something else, or the card has no share: no card. A message
@@ -1677,7 +1684,7 @@ async function askCore(
     // (cut, 0.66) got the watch reply.
     const overIsEarlier = saysAnother && lastShown !== undefined;
     const saidCard = saidSure !== undefined && saidKind === undefined && (!saysResolved(query) || overIsEarlier) ? ownCard(await cardByTitle(saidSure.label)) : undefined;
-    if (saidCard !== undefined && blockingCondition(saidCard.chunk.section, active) === undefined) {
+    if (saidCard !== undefined && blockingCondition(saidCard.chunk.section, blockers) === undefined) {
       forcedCard = agreedCard = saidCard;
       saidUsed.push('opened');
     }
@@ -1709,7 +1716,7 @@ async function askCore(
     const led = leading === undefined ? undefined : await supportedCard(leading);
     if (forcedCard !== undefined) {
       // The matcher's card, above.
-    } else if (led !== undefined && blockingCondition(led.chunk.section, active) === undefined) {
+    } else if (led !== undefined && blockingCondition(led.chunk.section, blockers) === undefined) {
       forcedCard = agreedCard = led;
       scopeUsed.push('card');
     } else if (topScore >= effectiveThreshold) {
@@ -1861,7 +1868,10 @@ async function askCore(
       diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
     };
   }
-  let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider'));
+  // With a wildfire near, no passage that says to start a fire or make smoke,
+  // and no card it rules out, reaches the model (FIRE_STARTING, NOT_AFTER).
+  let usable = tipsInTrustOrder(candidates.filter((c) => c.chunk.audience !== 'provider' &&
+    !(fireNear && (FIRE_STARTING.test(c.chunk.text) || (isCard(c) && blockingCondition(c.chunk.section, blockers) !== undefined)))));
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve, await supportOf(usable));
@@ -1886,7 +1896,7 @@ async function askCore(
   // the sprain card (ice, wrap, raise) on the phone. Fred shows the
   // condition's own card and asks, so a separate injury is a tap away.
   if (clear !== undefined) {
-    const by = blockingCondition(clear.chunk.section, active);
+    const by = blockingCondition(clear.chunk.section, blockers);
     if (by !== undefined) {
       blocked = { card: clear.chunk.section, condition: by.id };
       const instead = await cardByTitle(by.card);
@@ -1921,7 +1931,7 @@ async function askCore(
   // A model-written answer never reads a card that must not follow a
   // condition, and in the condition's thread it reads the condition's card.
   if (active.length > 0) {
-    usable = usable.filter((c) => !isCard(c) || blockingCondition(c.chunk.section, active) === undefined);
+    usable = usable.filter((c) => !isCard(c) || blockingCondition(c.chunk.section, blockers) === undefined);
     // Only the condition this message is about (conditionCardFor): "i have a
     // bad blister on my heel" after being lost was written from the lost card
     // first (conversation set, #101).

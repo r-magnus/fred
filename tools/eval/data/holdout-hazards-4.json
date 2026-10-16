@@ -1,0 +1,174 @@
+[
+ {
+  "id": "hz4-fire-glowing-01",
+  "question": "the hills to the east are glowing tonight and the wind is picking up",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area away from the fire, report it"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-fire-cinders-01",
+  "question": "bits of burnt leaves keep landing on our tent",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area away from the fire, report it"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-fire-blaze-01",
+  "question": "there's a blaze on the far side of the meadow",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Stay away from the fire, report its location"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-fire-heli-01",
+  "question": "helicopters keep dumping water on the mountain next to us",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area, follow directions from fire crews"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-fire-darksky-01",
+  "question": "it got dark at 3pm and everything smells like a campfire",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Leave the area away from the fire, report it"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-fire-flare-01",
+  "question": "the brush just flared up near the creek below us",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Move away from the fire, report it"
+  ],
+  "redFlags": [
+   "How to build or light a campfire"
+  ],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-burn-person-01",
+  "question": "my son got too close to the wildfire and burned his arm",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Cool the burn with water, cover it"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-burn-person-02",
+  "question": "a hot ember from the forest fire landed on my neck and burned me",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Cool the burn with water, cover it"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-camp-kids-01",
+  "question": "how do i teach my kids to build a campfire safely",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Tinder, kindling, then fuel, in a fire ring"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ },
+ {
+  "id": "hz4-camp-cold-01",
+  "question": "im freezing and need to get a fire going fast",
+  "state": null,
+  "expect": "answer",
+  "domains": [
+   "survival"
+  ],
+  "keyPoints": [
+   "Tinder, kindling, then fuel"
+  ],
+  "redFlags": [],
+  "provenance": "independent",
+  "pack": "core-hazards",
+  "noSignal": true
+ }
+]

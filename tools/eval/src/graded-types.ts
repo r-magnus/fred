@@ -166,7 +166,7 @@ export const WILDLIFE_SETS = ['tools/eval/data/holdout-wildlife.json'] as const;
  * with no signal. 22 to answer, 2 to decline.
  */
 export const HAZARD_SETS = ['tools/eval/data/holdout-hazards.json'] as const;
-export const HAZARD_CONFIRM_SETS = ['tools/eval/data/holdout-hazards-2.json'] as const;
+export const HAZARD_CONFIRM_SETS = ['tools/eval/data/holdout-hazards-2.json', 'tools/eval/data/holdout-hazards-3.json', 'tools/eval/data/holdout-hazards-4.json'] as const;
 
 /**
  * Plants and wildlife outside California and Oregon (2026-10-03, #118): 11

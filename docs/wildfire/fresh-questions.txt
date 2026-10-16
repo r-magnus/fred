@@ -1,0 +1,42 @@
+== before
+hz3-fire-embers-01     answer   0.290 Fred field card — Starting a campfire | embers are drifting into camp from somewhere upwind
+hz3-fire-haze-01       abstain  0.174  | the whole canyon filled with brown haze in the last hour
+hz3-fire-trees-01      answer   0.315 Fred field card — Burns | i can see trees burning across the lake from our site
+hz3-fire-crackle-01    answer   0.295 National Park Service — Wildland fire safety for park visito | we hear crackling and see smoke rising behind the trees near the trail
+hz3-fire-sun-01        abstain  0.162  | the sun went red and there's ash on our packs
+hz3-fire-escaped-01    answer   0.345 National Park Service — Wildland fire safety for park visito | a wildfire started on the slope below the trailhead
+hz3-camp-wind-01       answer   0.382 Fred field card — Starting a campfire | how do we keep our campfire going in strong wind
+hz3-camp-light-01      answer   0.315 ATP 3-50.21 Survival 2018 p.121 — TINDER | whats the best way to light a fire when everything is damp
+hz3-camp-ring-01       answer   0.363 Fred field card — Starting a campfire | we're at a site with a fire ring, how do we start a small cooking fire
+hz3-camp-out-01        answer   0.489 National Park Service — I Didn't Know That! Leave No Trace P | how do i make sure my campfire is fully out before bed
+hz4-fire-glowing-01    chat     0.046  | the hills to the east are glowing tonight and the wind is picking up
+hz4-fire-cinders-01    abstain  0.165  | bits of burnt leaves keep landing on our tent
+hz4-fire-blaze-01      answer   0.316 National Park Service — Wildland fire safety for park visito | there's a blaze on the far side of the meadow
+hz4-fire-heli-01       abstain  0.195  | helicopters keep dumping water on the mountain next to us
+hz4-fire-darksky-01    abstain  0.200  | it got dark at 3pm and everything smells like a campfire
+hz4-fire-flare-01      abstain  0.229  | the brush just flared up near the creek below us
+hz4-burn-person-01     answer   0.171 Fred field card — Burns | my son got too close to the wildfire and burned his arm
+hz4-burn-person-02     answer   0.178 Fred field card — Burns | a hot ember from the forest fire landed on my neck and burned me
+hz4-camp-kids-01       answer   0.350 National Park Service — I Didn't Know That! Leave No Trace P | how do i teach my kids to build a campfire safely
+hz4-camp-cold-01       answer   0.313 Fred field card — Starting a campfire | im freezing and need to get a fire going fast
+== after
+hz3-fire-embers-01     answer   0.290 US Forest Service — Safety in Burned Areas > 3. Check the We | embers are drifting into camp from somewhere upwind
+hz3-fire-haze-01       abstain  0.174  | the whole canyon filled with brown haze in the last hour
+hz3-fire-trees-01      answer   0.315 US Forest Service — Stay Safe > Watch for Wildfire Hazards > | i can see trees burning across the lake from our site
+hz3-fire-crackle-01    answer   0.295 National Park Service — Wildland fire safety for park visito | we hear crackling and see smoke rising behind the trees near the trail
+hz3-fire-sun-01        abstain  0.162  | the sun went red and there's ash on our packs
+hz3-fire-escaped-01    answer   0.345 National Park Service — Wildland fire safety for park visito | a wildfire started on the slope below the trailhead
+hz3-camp-wind-01       answer   0.382 Fred field card — Starting a campfire | how do we keep our campfire going in strong wind
+hz3-camp-light-01      answer   0.315 ATP 3-50.21 Survival 2018 p.121 — TINDER | whats the best way to light a fire when everything is damp
+hz3-camp-ring-01       answer   0.363 Fred field card — Starting a campfire | we're at a site with a fire ring, how do we start a small cooking fire
+hz3-camp-out-01        answer   0.489 National Park Service — I Didn't Know That! Leave No Trace P | how do i make sure my campfire is fully out before bed
+hz4-fire-glowing-01    chat     0.046  | the hills to the east are glowing tonight and the wind is picking up
+hz4-fire-cinders-01    abstain  0.165  | bits of burnt leaves keep landing on our tent
+hz4-fire-blaze-01      answer   0.316 National Park Service — Wildland fire safety for park visito | there's a blaze on the far side of the meadow
+hz4-fire-heli-01       abstain  0.195  | helicopters keep dumping water on the mountain next to us
+hz4-fire-darksky-01    abstain  0.200  | it got dark at 3pm and everything smells like a campfire
+hz4-fire-flare-01      abstain  0.229  | the brush just flared up near the creek below us
+hz4-burn-person-01     answer   0.171 Fred field card — Burns | my son got too close to the wildfire and burned his arm
+hz4-burn-person-02     answer   0.178 Fred field card — Burns | a hot ember from the forest fire landed on my neck and burned me
+hz4-camp-kids-01       answer   0.350 National Park Service — I Didn't Know That! Leave No Trace P | how do i teach my kids to build a campfire safely
+hz4-camp-cold-01       answer   0.313 Fred field card — Starting a campfire | im freezing and need to get a fire going fast

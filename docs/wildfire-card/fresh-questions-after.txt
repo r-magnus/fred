@@ -1,0 +1,24 @@
+hz3-fire-embers-01     answer              0.290 Fred field card — A wildfire or its smoke nearby
+hz3-fire-haze-01       abstain             0.174 
+hz3-fire-trees-01      answer              0.315 US Forest Service — Stay Safe > Watch for Wildfire Hazards > If You Se
+hz3-fire-crackle-01    answer              0.359 Fred field card — A wildfire or its smoke nearby
+hz3-fire-sun-01        answer              0.200 Fred field card — A wildfire or its smoke nearby
+hz3-fire-escaped-01    answer              0.244 Fred field card — A wildfire or its smoke nearby
+hz3-camp-wind-01       answer              0.382 Fred field card — Starting a campfire
+hz3-camp-light-01      answer              0.315 ATP 3-50.21 Survival 2018 p.121 — TINDER
+hz3-camp-ring-01       answer              0.363 Fred field card — Starting a campfire
+hz3-camp-out-01        answer              0.489 National Park Service — I Didn't Know That! Leave No Trace Principle #
+hz4-fire-glowing-01    chat                0.046 
+hz4-fire-cinders-01    abstain             0.165 
+hz4-fire-blaze-01      answer              0.171 Fred field card — A wildfire or its smoke nearby
+hz4-fire-heli-01       abstain             0.195 
+hz4-fire-darksky-01    answer              0.205 Fred field card — A wildfire or its smoke nearby
+hz4-fire-flare-01      abstain             0.229 
+hz4-burn-person-01     answer              0.171 Fred field card — Burns
+hz4-burn-person-02     answer              0.238 Fred field card — Burns
+hz4-camp-kids-01       answer              0.350 National Park Service — I Didn't Know That! Leave No Trace Principle #
+hz4-camp-cold-01       answer              0.313 Fred field card — Starting a campfire
+hz2-fire-glow-01       answer   Fred field card — A wildfire or its smoke nearby
+hz2-fire-smell-01      answer   Fred field card — A wildfire or its smoke nearby
+hz2-fire-cough-01      answer   Fred field card — A wildfire or its smoke nearby
+hz2-fire-plume-01      abstain  

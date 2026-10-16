@@ -1,0 +1,47 @@
+ailments: 23 replies, answered 14 -> 14, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 21 -> 21, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 1
+  gq-fire-after-01 [] answer(gen:Burns | Safety in Burned Areas | Safety in Burned Areas) -> answer(gen:Safety in Burned Areas | Safety in Burned Areas | Wildland fire safety f) said=A wildfire or its sm:0.67[]  "what should i watch out for hiking through an area that burned last year"
+hazards-confirm: 35 replies, answered 19 -> 22, changed 9
+  hz2-fire-glow-01 [] answer(gen:Fire > Be fire safe by | Wildland fire safety f | Safety in Burned Areas) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.56[]  "there's an orange glow and ash falling on our camp"
+  hz2-fire-smell-01 [] answer(gen:Stay Safe > Watch for  | Wildland fire safety f | Wildland fire safety f) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.93[]  "we smell smoke and the sky is turning brown"
+  hz2-fire-cough-01 [] abstain/low-score -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.76[opened]  "the air is so smoky we keep coughing, what should we do"
+  hz3-fire-embers-01 [] answer(gen:Safety in Burned Areas | Stay Safe > Watch for  | KINDLING) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.51[]  "embers are drifting into camp from somewhere upwind"
+  hz3-fire-crackle-01 [] answer(gen:Wildland fire safety f | Stay Safe > Watch for  | MEANS FOR SIGNALING) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.84[]  "we hear crackling and see smoke rising behind the trees near the trail"
+  hz3-fire-sun-01 [] abstain/watch -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.30[]  "the sun went red and there's ash on our packs"
+  hz3-fire-escaped-01 [] answer(gen:Wildland fire safety f | Safety in Burned Areas | Fire > Be fire safe by) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.84[]  "a wildfire started on the slope below the trailhead"
+  hz4-fire-blaze-01 [] answer(gen:Wildland fire safety f | Fire > Be fire safe by | Wildland fire safety f) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.83[]  "there's a blaze on the far side of the meadow"
+  hz4-fire-darksky-01 [] abstain/watch -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.47[]  "it got dark at 3pm and everything smells like a campfire"
+hazards: 24 replies, answered 17 -> 19, changed 3
+  hz-fire-smoke-01 [] chat -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.89[opened]  "we can see a column of smoke over the next ridge"
+  hz-fire-close-01 [] answer(gen:Wildland fire safety f | Wildland fire safety f | Stay Safe > Watch for ) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.94[]  "the wildfire is coming toward us and we can't outrun it"
+  hz-fire-air-01 [] abstain/safety-net -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.88[opened]  "the smoke is so thick it's hard to breathe"
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-10: 37 replies, answered 21 -> 21, changed 0, misses 1 -> 1
+holdout-chats-11: 36 replies, answered 35 -> 35, changed 0, misses 1 -> 1
+holdout-chats-12: 18 replies, answered 10 -> 11, changed 3, misses 2 -> 1
+  c12-ltg-lake#1 [any] chat{Crossing a river or st} -> chat said=none:other:0.27[]  "paddling across the lake to our campsite"
+  FIXED c12-smoke-two-messages#2 [answer] watch/watch -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.80[opened]  "the air got really smoky and my eyes and throat are burning"
+  c12-smoke-follow#1 [answer] answer(gen:Stay Safe > Watch for  | Wildland fire safety f | Wildland fire safety f) -> answer(card:A wildfire or its smoke nearby) said=A wildfire or its sm:0.95[]  "there's a lot of wildfire smoke where we're hiking"
+holdout-chats-2: 44 replies, answered 33 -> 33, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 17 -> 17, changed 0, misses 4 -> 4
+holdout-chats-4: 38 replies, answered 19 -> 19, changed 0, misses 5 -> 5
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 20 -> 20, changed 0, misses 1 -> 1
+holdout-chats-7: 28 replies, answered 12 -> 12, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 24 -> 24, changed 0, misses 1 -> 1
+holdout-chats-9: 17 replies, answered 15 -> 15, changed 0, misses 2 -> 2
+holdout-chats: 162 replies, answered 109 -> 109, changed 0, misses 6 -> 6
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 0
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+16 replies changed

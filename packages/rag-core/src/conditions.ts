@@ -179,10 +179,44 @@ export const CONDITIONS: readonly Condition[] = [
 ];
 
 /**
+ * A fire the hiker did not light: a wildfire named, its smoke, glow or ash, or
+ * flames on the land around them. Not "build a fire in the valley".
+ */
+const WILDFIRE = new RegExp([
+  String.raw`\b(?:wild|forest|brush|grass|bush|range)\s?fires?\b`,
+  String.raw`\bash(?:es)? (?:is |are )?(?:falling|raining|coming down|landing|everywhere)\b|\bfalling ash\b|\bash (?:on|all over) (?:our|the|my)\b`,
+  String.raw`\b(?:orange|red|brown) (?:glow|sky|haze)\b|\bsky (?:is |was |got |turned |turning |went |looks |looking )?(?:all |really |so )?(?:orange|brown|red)\b|\bglow(?:ing)?\b[^.?!]{0,40}\b(?:ridge|hill|hillside|sky|horizon|trees|mountain|valley)\b`,
+  String.raw`(?:\bflames?|(?<!\b(?:build|start|make|light|have|keep|put out)\w*\s(?:a |the |our |my )?)\bfire|\bsmoke)\b[^.?!]{0,30}\b(?:on|over|across|up|down|in|behind|along|from) (?:the |that )?(?:next |other |far )?(?:ridge|hill|hillside|mountain(?:side)?|slope|valley|canyon|horizon|treeline|forest|woods)\b`,
+  String.raw`\b(?:plume|column|wall|cloud) of smoke\b|\bsmell(?:s|ed|ing)? (?:smoke|something burning)\b|\bsmoky (?:air|sky|haze)\b|\b(?:air|sky) (?:is |got |was |getting )?(?:really |so |very )?smoky\b|\bsmoke (?:is )?(?:coming|blowing|rolling|pouring) (?:over|in|toward|towards|our way)\b`,
+].join('|'), 'i');
+
+/**
+ * A wildfire near the hiker (#100). Not in CONDITIONS: it has no card, and the
+ * record (record.ts) has nothing to keep for it. It only rules out what must
+ * never answer it (NOT_AFTER, and FIRE_STARTING in the pipeline): "there's an
+ * orange glow and ash falling on our camp" and "there's a fire on the
+ * hillside above our camp" got the campfire card word for word.
+ */
+export const WILDFIRE_NEAR: Condition = {
+  id: 'wildfire', label: 'wildfire', card: '', said: (ms) => ms.some((m) => WILDFIRE.test(m)), situation: true,
+};
+
+/**
+ * A passage that tells the reader to start a fire or make smoke on purpose: a
+ * signal fire, the survival manual's tree torch. With a wildfire near, "we
+ * smell smoke and the sky is turning brown" was told to "create smoke signals
+ * using a burning tree" (#100).
+ */
+export const FIRE_STARTING = /\btree torch\b|\bset\b[^.]{0,40}\b(?:afire|ablaze|on fire)\b|\bsignal fires?\b|\bsmoke signals?\b|\bproduce (?:more )?smoke\b|\bbuild a smoke\b/i;
+
+/**
  * Cards that must not follow a condition, by card title, with the conflict
  * each entry rests on (all quoted from the reviewed cards).
  */
 export const NOT_AFTER: Readonly<Record<string, readonly string[]>> = {
+  // Campfire: "Light the tinder from its bottom edge ... Add bigger wood as
+  // the kindling catches." Nothing in it is for a fire the hiker did not light.
+  'Starting a campfire': ['wildfire'],
   // Sprain: "Ice ... Compression: wrap or splint it ... Elevation: raise the
   // injured part." Snakebite: "Don't put ice on it", "Keep the bitten arm or
   // leg slightly below the level of the heart".

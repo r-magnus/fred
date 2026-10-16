@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { blockingCondition, conditionsIn, latestCondition, violatedCondition } from '../src/conditions.ts';
+import { blockingCondition, conditionsIn, FIRE_STARTING, latestCondition, violatedCondition, WILDFIRE_NEAR } from '../src/conditions.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, petIsPatient } from '../src/triage.ts';
 import { asksSpecifically } from '../src/pipeline.ts';
 
@@ -271,4 +271,29 @@ test('namesSpeaker: the speaker or their party, never a pet or someone else\'s p
     assert.ok(namesSpeaker(m), m);
   for (const m of ['the dog cut his paw', 'my dog is bleeding', "my friend's dog got bitten by a rattlesnake", 'our horse is limping', 'her cat ate a lily'])
     assert.ok(!namesSpeaker(m), m);
+});
+
+test('a wildfire near rules out the campfire card and fire-starting passages (#100)', () => {
+  for (const m of [
+    "there's an orange glow and ash falling on our camp",
+    "there's a fire on the hillside above our camp",
+    'we smell smoke and the sky is turning brown',
+    'the air is so smoky we keep coughing',
+    'a big plume of smoke just went up in the valley below us',
+    'we can see flames on the next ridge over',
+    'is there a wildfire near yosemite',
+    "smoke is rolling over the ridge toward us",
+  ]) assert.equal(WILDFIRE_NEAR.said([m]), true, m);
+  for (const m of [
+    'how do i get a fire going with wet wood',
+    'can we build a fire in the valley tonight',
+    'how do i start a fire on the hillside without it spreading',
+    'the smoke from our campfire keeps blowing in my face',
+    'is it ok to burn poison oak in the campfire',
+    'we put out the fire in the canyon before bed',
+  ]) assert.equal(WILDFIRE_NEAR.said([m]), false, m);
+  assert.equal(blockingCondition('Starting a campfire', [WILDFIRE_NEAR])?.id, 'wildfire');
+  assert.equal(blockingCondition('Starting a campfire', []), undefined);
+  assert.equal(FIRE_STARTING.test('A burning tree (tree torch) is another way to attract attention. You can set pitch-bearing trees afire'), true);
+  assert.equal(FIRE_STARTING.test('If you see a wildland fire, avoid traveling near it and report its location'), false);
 });

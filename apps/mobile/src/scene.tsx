@@ -20,7 +20,7 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { Animated, Easing, Image, PanResponder, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useReduceMotion } from './motion.ts';
-import { VEIL_COLOUR, follow, useTheme, veiled } from './theme.tsx';
+import { SUNSET, VEIL_COLOUR, follow, useTheme, veiled } from './theme.tsx';
 
 const HILL_BACK = require('../assets/ui/hill-back.png');
 const HILL_MID = require('../assets/ui/hill-mid.png');
@@ -48,12 +48,14 @@ const GULL_MS = 34_000;
 const TAP = 8;
 
 export function Scene(
-  { height, top, hint = false, children }: {
+  { height, top, hint = false, sunset = false, children }: {
     height: number;
     /** The status bar's height: nothing of the sky's furniture is drawn under the clock. */
     top: number;
     /** A slow ring round the sun or moon, for the page that teaches the switch (#196). */
     hint?: boolean;
+    /** #209: the sky held at sunset (the About page), whatever the time of day. */
+    sunset?: boolean;
     children?: ReactNode;
   },
 ): React.JSX.Element {
@@ -145,6 +147,7 @@ export function Scene(
         accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DUSK.sky, opacity: fx.dusk }]} />
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DAY.sky, opacity: fx.day }]} />
+        {sunset && <View style={[StyleSheet.absoluteFill, { backgroundColor: palette.night ? SUNSET.night.sky : SUNSET.day.sky }]} />}
 
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: fx.stars }]}>
           {STARS.map(([x, y], i) => (
@@ -211,7 +214,8 @@ export function Scene(
         <Animated.Image source={HILL_MID} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: DAY.mid, opacity: fx.dayHills }]} />
         {/* The nearest hill is the page, and hides behind the same veil as the page. */}
-        <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, { tintColor: palette.cream }]} />
+        <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
+          tintColor: !sunset ? palette.cream : palette.night ? SUNSET.night.page : SUNSET.day.page }]} />
         <Animated.Image source={HILL_FRONT} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: VEIL_COLOUR, opacity: fx.veil }]} />
       </View>

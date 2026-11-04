@@ -642,9 +642,6 @@ function Screen() {
       />
     );
   }
-  if (aboutOpen) {
-    return <AboutScreen onClose={() => setAboutOpen(false)} row={TOP_ROW} logoHeight={LOGO_HEIGHT} />;
-  }
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
@@ -951,6 +948,9 @@ function Screen() {
           if (id === chatId.current) showChat(null);
         }}
       />
+      {/* Over everything, the menu included; it eases in through sunset (#209). */}
+      <AboutScreen open={aboutOpen} onClose={() => setAboutOpen(false)}
+        skyHeight={insets.top + sky} row={TOP_ROW} logoHeight={LOGO_HEIGHT} />
     </View>
   );
 }

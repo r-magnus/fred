@@ -83,6 +83,17 @@ export const radius = { card: 18, control: 14, pill: 999 } as const;
 /** What the page hides behind while its colours change: the sky at dusk. */
 const VEIL = '#C9A0AE';
 
+/**
+ * #209: the About page sits at sunset. The sky is the dusk of the day-night
+ * change by day and a deeper twilight by night; the page under it is a warm
+ * tint that keeps the theme's own text colours readable (ink on it is about
+ * 13:1 by day and 12:1 by night, pine about 6:1 and 9:1).
+ */
+export const SUNSET = {
+  day: { sky: '#EDBFB4', page: '#FBEDE6' },
+  night: { sky: '#5B4560', page: '#2A2230' },
+} as const;
+
 export type Mode = 'day' | 'night';
 interface Theme {
   readonly palette: Palette;

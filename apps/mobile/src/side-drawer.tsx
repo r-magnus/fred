@@ -27,6 +27,8 @@ const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 /** The tab's size, and how far round it a touch still counts. */
 const TAB_WIDTH = 30;
 const TAB_HEIGHT = 52;
+/** For placing the tab: App.tsx centres it in the sky. */
+export const SIDE_TAB_HEIGHT = TAB_HEIGHT;
 const TAB_SLOP = 12;
 /** How wide the drawer is on a screen this wide. */
 const panelWidth = (screen: number): number => Math.min(340, screen * 0.84);

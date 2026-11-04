@@ -38,7 +38,7 @@ import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { ReplyText } from './src/reply-text.tsx';
 import { Scene } from './src/scene.tsx';
-import { SideDrawer, SideTab } from './src/side-drawer.tsx';
+import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { GuideScreen } from './src/guide.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
@@ -646,12 +646,15 @@ function Screen() {
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
+  // The open sky under the status bar: wide before the first question, a slim
+  // strip once the chat needs the room. The menu tab sits in its middle.
+  const sky = turns.length === 0 ? 236 : 112;
 
   return (
     <View style={styles.root}>
       {/* The horizon stands in for a header bar: wide open before the first
           question, a slim strip once the chat needs the room. */}
-      <Scene height={insets.top + (turns.length === 0 ? 236 : 112)} top={insets.top}>
+      <Scene height={insets.top + sky} top={insets.top}>
        <View style={[styles.header, { paddingTop: insets.top + 10 }]} pointerEvents="box-none">
         <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
           <Crossfade render={(p) => (
@@ -696,7 +699,9 @@ function Screen() {
             style={styles.turn}
             onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastTop = e.nativeEvent.layout.y; follow(); }}
           >
-            <Text style={styles.question}>{t.question}</Text>
+            <View style={styles.askedNote}>
+              <Text style={styles.question}>{t.question}</Text>
+            </View>
             <View style={styles.cards}>
 
             {t.kind === 'needs-location' && (
@@ -927,8 +932,8 @@ function Screen() {
       </KeyboardAvoidingView>
 
       <Veil />
-      {/* The bookmark on the left edge, hanging under the logo, and its drawer. */}
-      <SideTab top={insets.top + 50} open={drawer} slide={drawerSlide}
+      {/* The bookmark on the left edge, half way down the sky, and its drawer. */}
+      <SideTab top={insets.top + (sky - SIDE_TAB_HEIGHT) / 2} open={drawer} slide={drawerSlide}
         onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
       <SideDrawer
         open={drawer}
@@ -967,8 +972,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   loadSetupText: { color: palette.paper, fontSize: 16, fontWeight: '700' },
   loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
 
+  // #209: the logo at the top right, clear of the menu tab on the left.
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
     paddingHorizontal: 18,
   },
   thread: { flex: 1 },
@@ -980,7 +986,14 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   // #209: no icons, trail or labels down the side. The hiker's words in the
   // journal face and Fred's in the plain one are enough to tell them apart.
   turn: { marginBottom: 34 },
-  question: { fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, marginBottom: 12 },
+  // The hiker's words in a soft note on the right, the way a message you sent
+  // sits in any chat; Fred answers across the full width below it.
+  askedNote: {
+    alignSelf: 'flex-end', maxWidth: '86%', marginBottom: 16,
+    backgroundColor: palette.sage, borderRadius: radius.card, borderBottomRightRadius: 6,
+    paddingHorizontal: 16, paddingVertical: 10,
+  },
+  question: { fontFamily: JOURNAL, color: palette.ink, fontSize: 19, lineHeight: 26 },
   cards: { gap: 22 },
   card: {},
   thinking: { alignSelf: 'flex-start' },

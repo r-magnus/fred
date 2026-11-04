@@ -39,7 +39,6 @@ import { CalmLoader } from './src/calm-loader.tsx';
 import { ReplyText } from './src/reply-text.tsx';
 import { Scene } from './src/scene.tsx';
 import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
-import { GuideScreen } from './src/guide.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
@@ -186,11 +185,10 @@ function Screen() {
   const [recording, setRecording] = useState(isRecording());
   // The full-screen map: opened from a map in the chat, or by tapping the wordmark.
   const [mapOpen, setMapOpen] = useState(false);
-  // First-run setup (#196): shown once on a new phone, and again when asked
-  // for from the guide. The engine is not loaded under it: a download and a
+  // First-run setup (#196): shown once on a new phone, and again from the
+  // start screen when the guides are missing. The engine is not loaded under it: a download and a
   // model in memory at once is more than a small phone has room for.
   const [setup, setSetup] = useState(wizardWanted);
-  const [guideOpen, setGuideOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -641,15 +639,6 @@ function Screen() {
       />
     );
   }
-  if (guideOpen) {
-    return (
-      <GuideScreen
-        onClose={() => setGuideOpen(false)}
-        onMap={() => { setGuideOpen(false); setMapOpen(true); }}
-        onSetup={() => { setGuideOpen(false); setSetup(true); }}
-      />
-    );
-  }
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
@@ -950,7 +939,6 @@ function Screen() {
         current={chatId.current}
         onClose={() => setDrawer(false)}
         onMap={() => { setDrawer(false); setMapOpen(true); }}
-        onGuide={() => { setDrawer(false); setGuideOpen(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
         onRemoveChat={(id) => {

@@ -19,7 +19,6 @@ import { Crossfade, radius, sheetFor, useThemed, type Palette } from './theme.ts
 
 const LOGO = require('../assets/ui/fred-logo.png');
 const LEAF = require('../assets/ui/leaf.png');
-const TREE = require('../assets/ui/tree.png');
 const TRASH = require('../assets/ui/trash.png');
 const CHECK = require('../assets/ui/check.png');
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
@@ -111,7 +110,7 @@ export function SideTab(
 }
 
 export function SideDrawer<T>(
-  { open, peek, slide, chats, current, onClose, onMap, onGuide, onNewChat, onOpenChat, onRemoveChat }: {
+  { open, peek, slide, chats, current, onClose, onMap, onNewChat, onOpenChat, onRemoveChat }: {
     open: boolean;
     /** True while the tab is being pulled: the drawer is shown part-way, not yet open. */
     peek: boolean;
@@ -122,8 +121,6 @@ export function SideDrawer<T>(
     current: number | null;
     onClose: () => void;
     onMap: () => void;
-    /** The guide to Fred himself (src/guide.tsx). */
-    onGuide: () => void;
     onNewChat: () => void;
     onOpenChat: (chat: SavedChat<T>) => void;
     onRemoveChat: (id: number) => void;
@@ -212,16 +209,6 @@ export function SideDrawer<T>(
             </View>
           ))}
         </ScrollView>
-        {/* The guide sits at the foot, out of the way of the chats but always in the same place. */}
-        <Pressable style={styles.foot} onPress={onGuide} accessibilityRole="button"
-          accessibilityLabel="Guide: where everything is, day and night, setup">
-          <Image source={TREE} resizeMode="contain" style={styles.footGlyph} />
-          <View style={styles.footWords}>
-            <Text style={styles.footTitle}>Guide</Text>
-            <Text style={styles.footText}>Where everything is. Fred works offline; nothing here leaves your phone.</Text>
-          </View>
-          <Text style={styles.footGo}>▸</Text>
-        </Pressable>
       </Animated.View>
     </View>
   );
@@ -283,10 +270,4 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   removeSure: { backgroundColor: palette.blush },
   removeMark: { width: 20, height: 20, tintColor: palette.clay },
 
-  foot: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 12, paddingBottom: 4, borderTopWidth: 1, borderTopColor: palette.sand },
-  footGlyph: { width: 20, height: 20, tintColor: palette.fir },
-  footWords: { flex: 1 },
-  footTitle: { fontFamily: JOURNAL, color: palette.ink, fontSize: 17 },
-  footText: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 1 },
-  footGo: { color: palette.pine, fontSize: 15, fontWeight: '700' },
 });

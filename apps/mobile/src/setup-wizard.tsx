@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { STATE_NAMES } from '@fred/rag-core';
 import { CalmLoader } from './calm-loader.tsx';
-import { Tour } from './guide.tsx';
+import { Tour } from './tour.tsx';
 import { currentFix, lastKnownFix } from './location.ts';
 import {
   downloadBundle, fetchIndex, installState, remainingBytes,
@@ -427,7 +427,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
         <Text style={styles.lead}>
           {haveGuides
             ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Here’s where everything is.`
-            : 'The guides aren’t on this phone yet, so I can’t answer questions. You can still look around, and come back to setup from the guide in the menu.'}
+            : 'The guides aren’t on this phone yet, so I can’t answer questions. You can still look around; Fred offers setup again when you next open him.'}
         </Text>
         <View style={styles.card}><Tour /></View>
       </ScrollView>

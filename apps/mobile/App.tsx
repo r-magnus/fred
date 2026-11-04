@@ -42,6 +42,7 @@ import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { AboutScreen } from './src/about.tsx';
 import { GREETINGS, TOPICS, pick } from './src/words.ts';
 import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
 
@@ -183,8 +184,10 @@ function Screen() {
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
   const [recording, setRecording] = useState(isRecording());
-  // The full-screen map: opened from a map in the chat, or by tapping the wordmark.
+  // The full-screen map: opened from a map in the chat or from the menu.
   const [mapOpen, setMapOpen] = useState(false);
+  // #209: About Fred, opened by tapping the wordmark.
+  const [aboutOpen, setAboutOpen] = useState(false);
   // First-run setup (#196): shown once on a new phone, and again from the
   // start screen when the guides are missing. The engine is not loaded under it: a download and a
   // model in memory at once is more than a small phone has room for.
@@ -639,6 +642,9 @@ function Screen() {
       />
     );
   }
+  if (aboutOpen) {
+    return <AboutScreen onClose={() => setAboutOpen(false)} row={TOP_ROW} logoHeight={LOGO_HEIGHT} />;
+  }
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
@@ -652,9 +658,9 @@ function Screen() {
           question, a slim strip once the chat needs the room. */}
       <Scene height={insets.top + sky} top={insets.top}>
        <View style={[styles.header, { paddingTop: insets.top + TOP_ROW - LOGO_HEIGHT / 2 }]} pointerEvents="box-none">
-        <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
+        <Pressable onPress={() => setAboutOpen(true)} hitSlop={8} accessibilityRole="button">
           <Crossfade render={(p) => (
-            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. Open the map" />
+            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. About Fred" />
           )} />
         </Pressable>
        </View>

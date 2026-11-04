@@ -84,6 +84,18 @@ export const radius = { card: 18, control: 14, pill: 999 } as const;
 const VEIL = '#C9A0AE';
 
 /**
+ * #209: how far the page below the sky has turned, for a given point in the
+ * change to About: it is fully turned by half way (about.tsx). The nearest
+ * hill is the page's top edge, so it turns by this too, or a line shows.
+ */
+export const pageTurn = (p: Animated.Value): Animated.AnimatedInterpolation<number> =>
+  p.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 1] });
+
+/** #209: the light dusk veil that passes over the page (and its hill) half way to About. */
+export const pageVeil = (p: Animated.Value): Animated.AnimatedInterpolation<number> =>
+  p.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 0.45, 0] });
+
+/**
  * #209: the About page sits at sunset. The sky is the dusk of the day-night
  * change by day and a deeper twilight by night; the page under it is a warm
  * tint that keeps the theme's own text colours readable (ink on it is about
@@ -91,8 +103,9 @@ const VEIL = '#C9A0AE';
  */
 export const SUNSET = {
   // The hills turn with the sky: the far one paler, as distance does at dusk.
-  day: { sky: '#EDBFB4', page: '#FBE3E1', back: '#D8ADA6', mid: '#BC918D' },
-  night: { sky: '#5B4560', page: '#2A2230', back: '#4A3A55', mid: '#3A2E45' },
+  // The logo warms with them: a deep rust on the sunset sky by day, a pale blush by night.
+  day: { sky: '#EDBFB4', page: '#FBE3E1', back: '#D8ADA6', mid: '#BC918D', logo: '#8C4B3F' },
+  night: { sky: '#5B4560', page: '#2A2230', back: '#4A3A55', mid: '#3A2E45', logo: '#F4D3C6' },
 } as const;
 
 export type Mode = 'day' | 'night';

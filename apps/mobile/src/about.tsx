@@ -15,7 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Animated, BackHandler, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReduceMotion } from './motion.ts';
-import { SUNSET, VEIL_COLOUR, Veil, radius, useThemed, type Palette } from './theme.tsx';
+import { SUNSET, VEIL_COLOUR, Veil, pageTurn, pageVeil, radius, useThemed, type Palette } from './theme.tsx';
 
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 /** About as long as a tap on the sun takes to turn day to night. */
@@ -82,11 +82,11 @@ export function AboutScreen(
   const fx = useMemo(() => ({
     // The backdrop eases over the first half, covering the chat by half way;
     // the sky goes on turning across the whole change.
-    backdrop: p.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 1] }),
+    backdrop: pageTurn(p),
     // The words come in over the second half, so the chat's and these never show together.
     words: p.interpolate({ inputRange: [0, 0.55, 1], outputRange: [0, 0, 1] }),
     // A light dusk veil passes over half way, a nod to the day-night change.
-    veil: p.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 0.45, 0] }),
+    veil: pageVeil(p),
   }), [p]);
 
   if (!open && !shown) return null;

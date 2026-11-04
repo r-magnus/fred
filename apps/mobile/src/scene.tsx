@@ -20,7 +20,7 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { Animated, Easing, Image, PanResponder, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useReduceMotion } from './motion.ts';
-import { SUNSET, VEIL_COLOUR, follow, useTheme, veiled } from './theme.tsx';
+import { SUNSET, VEIL_COLOUR, follow, pageTurn, pageVeil, useTheme, veiled } from './theme.tsx';
 
 const HILL_BACK = require('../assets/ui/hill-back.png');
 const HILL_MID = require('../assets/ui/hill-mid.png');
@@ -98,6 +98,9 @@ export function Scene(
   const rim = hub - rest.y;
   // #209: the sunset colours for the time of day the page is in.
   const dusk = palette.night ? SUNSET.night : SUNSET.day;
+  // The nearest hill is the top of the page, so it turns with the page, not the sky.
+  const pageTurned = useMemo(() => (sunset === undefined ? 0 : pageTurn(sunset)), [sunset]);
+  const pageVeiled = useMemo(() => (sunset === undefined ? 0 : pageVeil(sunset)), [sunset]);
   // #209: how far the sun sinks at sunset, to sit half behind the back hill.
   const setDrop = height - hills.height * 0.62 - rest.y;
   // The second cloud runs half a lap behind the first.
@@ -248,7 +251,11 @@ export function Scene(
         <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, { tintColor: palette.cream }]} />
         {sunset !== undefined && (
           <Animated.Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
-            tintColor: dusk.page, opacity: sunset }]} />
+            tintColor: dusk.page, opacity: pageTurned }]} />
+        )}
+        {sunset !== undefined && (
+          <Animated.Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
+            tintColor: VEIL_COLOUR, opacity: pageVeiled }]} />
         )}
         <Animated.Image source={HILL_FRONT} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: VEIL_COLOUR, opacity: fx.veil }]} />

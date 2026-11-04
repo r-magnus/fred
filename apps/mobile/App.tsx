@@ -44,7 +44,7 @@ import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
 import { AboutScreen } from './src/about.tsx';
 import { GREETINGS, TOPICS, pick } from './src/words.ts';
-import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
+import { Crossfade, SUNSET, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
 
 /** The logo is 900 x 415; sized by height wherever it is shown. */
 const LOGO = require('./assets/ui/fred-logo.png');
@@ -664,6 +664,9 @@ function Screen() {
           <Crossfade render={(p) => (
             <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" />
           )} />
+          {/* At sunset (About) the logo warms with the sky. */}
+          <Animated.Image source={LOGO} resizeMode="contain" style={[styles.wordmarkSmall, styles.logoOver, {
+            tintColor: (palette.night ? SUNSET.night : SUNSET.day).logo, opacity: sunset }]} />
         </Pressable>
        </View>
       </Scene>
@@ -983,6 +986,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
     paddingHorizontal: 18,
   },
+  logoOver: { position: 'absolute', top: 0, left: 0 },
   thread: { flex: 1 },
   // Where the side tab's own zIndex (5) is kept, as when it sat on the page directly.
   tabLayer: { zIndex: 5 },

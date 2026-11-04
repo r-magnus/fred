@@ -36,6 +36,7 @@ import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { signalAdvice } from './src/coverage-layer.ts';
 import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
+import { ReplyText } from './src/reply-text.tsx';
 import { Scene } from './src/scene.tsx';
 import { SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { GuideScreen } from './src/guide.tsx';
@@ -75,10 +76,22 @@ function Waypoint({ who }: { who: 'hiker' | 'fred' }): React.JSX.Element {
  * kind of reply, so a card from the guides, a field card and "not in my
  * guides" can be told apart before a word is read.
  */
+/**
+ * #209: with no box around a reply, the pale tab colours would vanish into the
+ * screen, so the label's dot takes the stronger colour from the same family.
+ */
+function dotFor(palette: Palette, tone: string | undefined): string {
+  if (tone === palette.skyWash) return palette.sky;
+  if (tone === palette.butter) return palette.amber;
+  if (tone === palette.blush) return palette.clay;
+  return palette.leaf;
+}
+
 function Tab({ label, tone }: { label: string; tone?: string }): React.JSX.Element {
   const { palette, styles } = useThemed(makeStyles);
   return (
-    <View style={[styles.tab, { backgroundColor: tone ?? palette.sage }]}>
+    <View style={styles.tab}>
+      <View style={[styles.tabDot, { backgroundColor: dotFor(palette, tone) }]} />
       <Text style={styles.tabText}>{label}</Text>
     </View>
   );
@@ -777,7 +790,7 @@ function Screen() {
             {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
                 <Tab label="Fred" />
-                <Text style={styles.body}>{t.lead === undefined ? t.text : `${t.lead}\n${t.text}`}</Text>
+                <ReplyText text={t.lead === undefined ? t.text : `${t.lead}\n${t.text}`} />
               </View>
             )}
 
@@ -802,7 +815,7 @@ function Screen() {
             {t.kind === 'chat' && (
               <View style={styles.card}>
                 <Tab label="Fred" />
-                <Text style={styles.body}>{t.text}</Text>
+                <ReplyText text={t.text} />
               </View>
             )}
 
@@ -815,7 +828,7 @@ function Screen() {
                 </Pressable>
                 {t.offerOpen === true && (
                   <>
-                    <Text style={styles.body}>{t.offer.text}</Text>
+                    <ReplyText text={t.offer.text} />
                     <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
                     <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
                     {t.offer.citation.basis !== undefined && (
@@ -839,7 +852,7 @@ function Screen() {
                   tone={t.citations.length > 0 && t.citations[0]?.source !== 'Fred field card' ? palette.skyWash : palette.sage} />
                 {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
-                {t.text !== '' && <Text style={styles.body}>{t.waiting === true ? t.text.trimEnd() : t.text}</Text>}
+                {t.text !== '' && <ReplyText text={t.text} />}
                 {t.waiting === true && !t.done && (
                   <View style={styles.waiting} accessibilityRole="progressbar" accessibilityLabel="Fred is working on your answer">
                     <CalmLoader size={24} />
@@ -1046,19 +1059,13 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   // The hiker's own words, written large in the journal face beside a leaf.
   question: { flex: 1, fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, paddingTop: 1 },
   replied: { flexDirection: 'row', gap: 12 },
-  // Room above each card for its tab, which sits half over the top edge.
-  cards: { flex: 1, gap: 22, paddingTop: 12 },
-  card: {
-    backgroundColor: palette.paper, borderRadius: radius.card, borderTopLeftRadius: 6,
-    paddingHorizontal: 16, paddingTop: 22, paddingBottom: 16,
-    borderWidth: 1, borderColor: palette.sand,
-    boxShadow: `0 3 12 ${palette.shade}`,
-  },
-  tab: {
-    position: 'absolute', top: -12, left: 12, borderRadius: radius.pill,
-    paddingHorizontal: 11, paddingVertical: 4,
-  },
-  tabText: { color: palette.ink, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
+  // #209: replies sit straight on the screen, with no box, so there is less
+  // to look at. The label lines up with the tree waypoint beside it.
+  cards: { flex: 1, gap: 22, paddingTop: 7 },
+  card: { paddingRight: 4 },
+  tab: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  tabDot: { width: 7, height: 7, borderRadius: 4 },
+  tabText: { color: palette.moss, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
   thinking: { alignSelf: 'flex-start' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
   hint: { color: palette.moss, fontSize: 13, lineHeight: 18, marginTop: 8 },

@@ -90,8 +90,9 @@ const VEIL = '#C9A0AE';
  * 12:1 by day and 12:1 by night, pine about 5.5:1 and 9:1).
  */
 export const SUNSET = {
-  day: { sky: '#EDBFB4', page: '#FBE3E1' },
-  night: { sky: '#5B4560', page: '#2A2230' },
+  // The hills turn with the sky: the far one paler, as distance does at dusk.
+  day: { sky: '#EDBFB4', page: '#FBE3E1', back: '#D8ADA6', mid: '#BC918D' },
+  night: { sky: '#5B4560', page: '#2A2230', back: '#4A3A55', mid: '#3A2E45' },
 } as const;
 
 export type Mode = 'day' | 'night';

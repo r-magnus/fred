@@ -96,6 +96,8 @@ export function Scene(
   const rest = { x: width * ORB_ACROSS, y: top + ORB_DOWN * open };
   const hub = height + orb * 0.7;
   const rim = hub - rest.y;
+  // #209: the sunset colours for the time of day the page is in.
+  const dusk = palette.night ? SUNSET.night : SUNSET.day;
   // #209: how far the sun sinks at sunset, to sit half behind the back hill.
   const setDrop = height - hills.height * 0.62 - rest.y;
   // The second cloud runs half a lap behind the first.
@@ -156,8 +158,7 @@ export function Scene(
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DUSK.sky, opacity: fx.dusk }]} />
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DAY.sky, opacity: fx.day }]} />
         {sunset !== undefined && (
-          <Animated.View style={[StyleSheet.absoluteFill, { opacity: sunset,
-            backgroundColor: palette.night ? SUNSET.night.sky : SUNSET.day.sky }]} />
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: sunset, backgroundColor: dusk.sky }]} />
         )}
 
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: fx.stars }]}>
@@ -231,15 +232,23 @@ export function Scene(
           style={[styles.hill, hills, { tintColor: NIGHT.back, opacity: fx.nightHills }]} />
         <Animated.Image source={HILL_BACK} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: DAY.back, opacity: fx.dayHills }]} />
+        {sunset !== undefined && (
+          <Animated.Image source={HILL_BACK} resizeMode="stretch"
+            style={[styles.hill, hills, { tintColor: dusk.back, opacity: sunset }]} />
+        )}
         <Animated.Image source={HILL_MID} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: NIGHT.mid, opacity: fx.nightHills }]} />
         <Animated.Image source={HILL_MID} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: DAY.mid, opacity: fx.dayHills }]} />
+        {sunset !== undefined && (
+          <Animated.Image source={HILL_MID} resizeMode="stretch"
+            style={[styles.hill, hills, { tintColor: dusk.mid, opacity: sunset }]} />
+        )}
         {/* The nearest hill is the page, and hides behind the same veil as the page. */}
         <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, { tintColor: palette.cream }]} />
         {sunset !== undefined && (
           <Animated.Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
-            tintColor: palette.night ? SUNSET.night.page : SUNSET.day.page, opacity: sunset }]} />
+            tintColor: dusk.page, opacity: sunset }]} />
         )}
         <Animated.Image source={HILL_FRONT} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: VEIL_COLOUR, opacity: fx.veil }]} />

@@ -49,6 +49,13 @@ import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palet
 /** The logo is 900 x 415; sized by height wherever it is shown. */
 const LOGO = require('./assets/ui/fred-logo.png');
 const LOGO_RATIO = 900 / 415;
+/** The small logo's height in the sky. */
+const LOGO_HEIGHT = 28;
+/**
+ * #209: the line, below the status bar, that the logo (top right) and the menu
+ * tab (left edge) are both centred on, so they sit opposite each other.
+ */
+const TOP_ROW = 30;
 const ARROW = require('./assets/ui/arrow-up.png');
 /** The hiker's own words are set like a journal entry; Fred's stay in the plain reading face. */
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
@@ -647,7 +654,7 @@ function Screen() {
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
   // The open sky under the status bar: wide before the first question, a slim
-  // strip once the chat needs the room. The menu tab sits in its middle.
+  // strip once the chat needs the room.
   const sky = turns.length === 0 ? 236 : 112;
 
   return (
@@ -655,7 +662,7 @@ function Screen() {
       {/* The horizon stands in for a header bar: wide open before the first
           question, a slim strip once the chat needs the room. */}
       <Scene height={insets.top + sky} top={insets.top}>
-       <View style={[styles.header, { paddingTop: insets.top + 10 }]} pointerEvents="box-none">
+       <View style={[styles.header, { paddingTop: insets.top + TOP_ROW - LOGO_HEIGHT / 2 }]} pointerEvents="box-none">
         <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
           <Crossfade render={(p) => (
             <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. Open the map" />
@@ -932,8 +939,8 @@ function Screen() {
       </KeyboardAvoidingView>
 
       <Veil />
-      {/* The bookmark on the left edge, half way down the sky, and its drawer. */}
-      <SideTab top={insets.top + (sky - SIDE_TAB_HEIGHT) / 2} open={drawer} slide={drawerSlide}
+      {/* The bookmark on the left edge, level with the logo opposite it, and its drawer. */}
+      <SideTab top={insets.top + TOP_ROW - SIDE_TAB_HEIGHT / 2} open={drawer} slide={drawerSlide}
         onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
       <SideDrawer
         open={drawer}
@@ -964,7 +971,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.cream },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
-  wordmarkSmall: { height: 28, width: 28 * LOGO_RATIO, tintColor: palette.logo },
+  wordmarkSmall: { height: LOGO_HEIGHT, width: LOGO_HEIGHT * LOGO_RATIO, tintColor: palette.logo },
   loadShapes: { marginTop: 30, marginBottom: 20 },
   loadNote: { color: palette.ink, fontSize: 15, fontWeight: '600' },
   loadHint: { color: palette.moss, fontSize: 13, marginTop: 6 },

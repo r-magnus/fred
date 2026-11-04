@@ -166,7 +166,7 @@ function Screen() {
   turnsRef.current = turns;
   // An empty chat's title, and what the text box suggests (src/words.ts):
   // a new greeting for each fresh page, a new topic whenever the chat moves on.
-  const [greeting, setGreeting] = useState<string>(() => pick(GREETINGS));
+  const [greeting, setGreeting] = useState(() => pick(GREETINGS));
   const [topic, setTopic] = useState<string>(() => pick(TOPICS));
   const started = useRef(false);
   useEffect(() => {
@@ -682,10 +682,8 @@ function Screen() {
       >
         {turns.length === 0 && (
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyLead}>{greeting}</Text>
-            <Text style={styles.empty}>
-              Fred is here, with or without signal. He&apos;ll say when he doesn&apos;t know.
-            </Text>
+            <Text style={styles.emptyLead}>{greeting.line}</Text>
+            <Text style={styles.empty}>{greeting.more}</Text>
           </View>
         )}
 

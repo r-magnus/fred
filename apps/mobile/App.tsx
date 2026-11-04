@@ -18,7 +18,7 @@
  * in?" are useful answers, and collapsing them into a blank screen would hide the
  * abstention behaviour that most of the accuracy work went into.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated, Image, KeyboardAvoidingView, Linking, Platform, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
@@ -36,53 +36,30 @@ import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { signalAdvice } from './src/coverage-layer.ts';
 import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
+import { ReplyText } from './src/reply-text.tsx';
 import { Scene } from './src/scene.tsx';
-import { SideDrawer, SideTab } from './src/side-drawer.tsx';
-import { GuideScreen } from './src/guide.tsx';
+import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { AboutScreen } from './src/about.tsx';
 import { GREETINGS, TOPICS, pick } from './src/words.ts';
-import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
+import { Crossfade, SUNSET, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
 
 /** The logo is 900 x 415; sized by height wherever it is shown. */
 const LOGO = require('./assets/ui/fred-logo.png');
 const LOGO_RATIO = 900 / 415;
-const LEAF = require('./assets/ui/leaf.png');
-const TREE = require('./assets/ui/tree.png');
+/** The small logo's height in the sky. */
+const LOGO_HEIGHT = 28;
+/**
+ * #209: the line, below the status bar, that the logo (top right) and the menu
+ * tab (left edge) are both centred on, so they sit opposite each other.
+ */
+const TOP_ROW = 30;
 const ARROW = require('./assets/ui/arrow-up.png');
-const TRAIL_DOT = require('./assets/ui/trail-dot.png');
 /** The hiker's own words are set like a journal entry; Fred's stay in the plain reading face. */
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
-/**
- * A waypoint on the trail down the chat: a leaf where the hiker asked, the
- * logo's tree where Fred replied.
- */
-function Waypoint({ who }: { who: 'hiker' | 'fred' }): React.JSX.Element {
-  const { palette, styles } = useThemed(makeStyles);
-  return (
-    <View style={[styles.waypoint, who === 'fred' && styles.waypointFred]}
-      accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Image source={who === 'fred' ? TREE : LEAF} resizeMode="contain"
-        style={[styles.waypointGlyph, { tintColor: who === 'fred' ? palette.pine : palette.leaf }]} />
-    </View>
-  );
-}
-
-/**
- * The index tab on a reply, like the tab on a field-guide page. It names the
- * kind of reply, so a card from the guides, a field card and "not in my
- * guides" can be told apart before a word is read.
- */
-function Tab({ label, tone }: { label: string; tone?: string }): React.JSX.Element {
-  const { palette, styles } = useThemed(makeStyles);
-  return (
-    <View style={[styles.tab, { backgroundColor: tone ?? palette.sage }]}>
-      <Text style={styles.tabText}>{label}</Text>
-    </View>
-  );
-}
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
@@ -190,7 +167,7 @@ function Screen() {
   turnsRef.current = turns;
   // An empty chat's title, and what the text box suggests (src/words.ts):
   // a new greeting for each fresh page, a new topic whenever the chat moves on.
-  const [greeting, setGreeting] = useState<string>(() => pick(GREETINGS));
+  const [greeting, setGreeting] = useState(() => pick(GREETINGS));
   const [topic, setTopic] = useState<string>(() => pick(TOPICS));
   const started = useRef(false);
   useEffect(() => {
@@ -207,13 +184,17 @@ function Screen() {
   // Drive-test recording. Long-press the location chip to arm it; see
   // src/location.ts for why it is opt-in and what it writes.
   const [recording, setRecording] = useState(isRecording());
-  // The full-screen map: opened from a map in the chat, or by tapping the wordmark.
+  // The full-screen map: opened from a map in the chat or from the menu.
   const [mapOpen, setMapOpen] = useState(false);
-  // First-run setup (#196): shown once on a new phone, and again when asked
-  // for from the guide. The engine is not loaded under it: a download and a
+  // #209: About Fred, opened by tapping the wordmark.
+  const [aboutOpen, setAboutOpen] = useState(false);
+  // 0 the chat, 1 About: the sky sets its sun by it and the page eases in by it.
+  const sunset = useRef(new Animated.Value(0)).current;
+  const tabShown = useMemo(() => sunset.interpolate({ inputRange: [0, 0.4], outputRange: [1, 0], extrapolate: 'clamp' }), [sunset]);
+  // First-run setup (#196): shown once on a new phone, and again from the
+  // start screen when the guides are missing. The engine is not loaded under it: a download and a
   // model in memory at once is more than a small phone has room for.
   const [setup, setSetup] = useState(wizardWanted);
-  const [guideOpen, setGuideOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -664,29 +645,28 @@ function Screen() {
       />
     );
   }
-  if (guideOpen) {
-    return (
-      <GuideScreen
-        onClose={() => setGuideOpen(false)}
-        onMap={() => { setGuideOpen(false); setMapOpen(true); }}
-        onSetup={() => { setGuideOpen(false); setSetup(true); }}
-      />
-    );
-  }
   // Only the newest map in the chat is drawn live; older ones become a button,
   // so a long conversation does not hold a map renderer per lost message.
   const liveMap = turns.findLast((t) => t.map === true)?.id;
+  // The open sky under the status bar: wide before the first question, a slim
+  // strip once the chat needs the room.
+  const sky = turns.length === 0 ? 236 : 112;
 
   return (
     <View style={styles.root}>
       {/* The horizon stands in for a header bar: wide open before the first
           question, a slim strip once the chat needs the room. */}
-      <Scene height={insets.top + (turns.length === 0 ? 236 : 112)} top={insets.top}>
-       <View style={[styles.header, { paddingTop: insets.top + 10 }]} pointerEvents="box-none">
-        <Pressable onPress={() => setMapOpen(true)} hitSlop={8}>
+      <Scene height={insets.top + sky} top={insets.top} sunset={sunset}>
+       <View style={[styles.header, { paddingTop: insets.top + TOP_ROW - LOGO_HEIGHT / 2 }]} pointerEvents="box-none">
+        {/* Opens About Fred; tapped again, closes it. */}
+        <Pressable onPress={() => setAboutOpen((o) => !o)} hitSlop={8} accessibilityRole="button"
+          accessibilityLabel={aboutOpen ? 'Fred. Close About Fred' : 'Fred. About Fred'}>
           <Crossfade render={(p) => (
-            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. Open the map" />
+            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" />
           )} />
+          {/* At sunset (About) the logo warms with the sky. */}
+          <Animated.Image source={LOGO} resizeMode="contain" style={[styles.wordmarkSmall, styles.logoOver, {
+            tintColor: (palette.night ? SUNSET.night : SUNSET.day).logo, opacity: sunset }]} />
         </Pressable>
        </View>
       </Scene>
@@ -713,19 +693,8 @@ function Screen() {
       >
         {turns.length === 0 && (
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyLead}>{greeting}</Text>
-            <Text style={styles.empty}>
-              Fred is here, with or without signal. He&apos;ll say when he doesn&apos;t know.
-            </Text>
-          </View>
-        )}
-
-        {/* The trail: a dotted path down the left edge that the waypoints sit on. */}
-        {turns.length > 0 && (
-          // An image takes its file's height unless told otherwise, so the
-          // box sets the length and the dots fill it.
-          <View style={styles.trail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-            <Image source={TRAIL_DOT} resizeMode="repeat" style={styles.trailDots} />
+            <Text style={styles.emptyLead}>{greeting.line}</Text>
+            <Text style={styles.empty}>{greeting.more}</Text>
           </View>
         )}
 
@@ -735,17 +704,13 @@ function Screen() {
             style={styles.turn}
             onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastTop = e.nativeEvent.layout.y; follow(); }}
           >
-            <View style={styles.asked}>
-              <Waypoint who="hiker" />
+            <View style={styles.askedNote}>
               <Text style={styles.question}>{t.question}</Text>
             </View>
-            <View style={styles.replied}>
-            <Waypoint who="fred" />
             <View style={styles.cards}>
 
             {t.kind === 'needs-location' && (
               <View style={styles.card}>
-                <Tab label="Where are you?" tone={palette.skyWash} />
                 <Text style={styles.body}>
                   That depends on where you are. Which state?
                 </Text>
@@ -776,14 +741,12 @@ function Screen() {
 
             {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
-                <Tab label="Fred" />
-                <Text style={styles.body}>{t.lead === undefined ? t.text : `${t.lead}\n${t.text}`}</Text>
+                <ReplyText text={t.lead === undefined ? t.text : `${t.lead}\n${t.text}`} />
               </View>
             )}
 
             {t.kind === 'abstain' && t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY && (
               <View style={styles.card}>
-                {t.map === true ? <Tab label="Fred" /> : <Tab label="Not in my guides" tone={palette.butter} />}
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
@@ -801,21 +764,19 @@ function Screen() {
 
             {t.kind === 'chat' && (
               <View style={styles.card}>
-                <Tab label="Fred" />
-                <Text style={styles.body}>{t.text}</Text>
+                <ReplyText text={t.text} />
               </View>
             )}
 
             {t.offer !== undefined && t.done && (
               <View style={styles.card}>
-                <Tab label="Field card" />
                 <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} hitSlop={8}
                   accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}>
                   <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
                 </Pressable>
                 {t.offerOpen === true && (
                   <>
-                    <Text style={styles.body}>{t.offer.text}</Text>
+                    <ReplyText text={t.offer.text} />
                     <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
                     <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
                     {t.offer.citation.basis !== undefined && (
@@ -828,18 +789,15 @@ function Screen() {
 
             {t.kind === 'error' && (
               <View style={styles.card}>
-                <Tab label="Something went wrong" tone={palette.blush} />
                 <Text style={styles.error}>{t.text}</Text>
               </View>
             )}
 
             {t.kind === 'answer' && (
               <View style={styles.card}>
-                <Tab label={t.citations[0]?.source === 'Fred field card' ? 'Field card' : t.citations.length > 0 ? 'From the guides' : 'Fred'}
-                  tone={t.citations.length > 0 && t.citations[0]?.source !== 'Fred field card' ? palette.skyWash : palette.sage} />
                 {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
-                {t.text !== '' && <Text style={styles.body}>{t.waiting === true ? t.text.trimEnd() : t.text}</Text>}
+                {t.text !== '' && <ReplyText text={t.text} />}
                 {t.waiting === true && !t.done && (
                   <View style={styles.waiting} accessibilityRole="progressbar" accessibilityLabel="Fred is working on your answer">
                     <CalmLoader size={24} />
@@ -914,7 +872,6 @@ function Screen() {
 
             {t.map === true && (
               <View style={styles.card}>
-                <Tab label="Map" tone={palette.skyWash} />
                 {t.id === liveMap
                   ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} quiet={saidSignal(t)} />
                   : (
@@ -927,7 +884,6 @@ function Screen() {
                   )}
               </View>
             )}
-            </View>
             </View>
           </View>
         ))}
@@ -981,9 +937,12 @@ function Screen() {
       </KeyboardAvoidingView>
 
       <Veil />
-      {/* The bookmark on the left edge, hanging under the logo, and its drawer. */}
-      <SideTab top={insets.top + 50} open={drawer} slide={drawerSlide}
-        onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
+      {/* The bookmark on the left edge, level with the logo opposite it, and its drawer. */}
+      {/* The tab steps aside while About is open. */}
+      <Animated.View style={[StyleSheet.absoluteFill, styles.tabLayer, { opacity: tabShown }]} pointerEvents={aboutOpen ? 'none' : 'box-none'}>
+        <SideTab top={insets.top + TOP_ROW - SIDE_TAB_HEIGHT / 2} open={drawer} slide={drawerSlide}
+          onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
+      </Animated.View>
       <SideDrawer
         open={drawer}
         peek={drawerPeek}
@@ -992,7 +951,6 @@ function Screen() {
         current={chatId.current}
         onClose={() => setDrawer(false)}
         onMap={() => { setDrawer(false); setMapOpen(true); }}
-        onGuide={() => { setDrawer(false); setGuideOpen(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
         onRemoveChat={(id) => {
@@ -1001,6 +959,8 @@ function Screen() {
           if (id === chatId.current) showChat(null);
         }}
       />
+      {/* Over the chat below the sky; it eases in through sunset (#209). */}
+      <AboutScreen open={aboutOpen} onClose={() => setAboutOpen(false)} p={sunset} skyHeight={insets.top + sky} />
     </View>
   );
 }
@@ -1013,7 +973,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.cream },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
-  wordmarkSmall: { height: 28, width: 28 * LOGO_RATIO, tintColor: palette.logo },
+  wordmarkSmall: { height: LOGO_HEIGHT, width: LOGO_HEIGHT * LOGO_RATIO, tintColor: palette.logo },
   loadShapes: { marginTop: 30, marginBottom: 20 },
   loadNote: { color: palette.ink, fontSize: 15, fontWeight: '600' },
   loadHint: { color: palette.moss, fontSize: 13, marginTop: 6 },
@@ -1021,44 +981,33 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   loadSetupText: { color: palette.paper, fontSize: 16, fontWeight: '700' },
   loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
 
+  // #209: the logo at the top right, clear of the menu tab on the left.
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
     paddingHorizontal: 18,
   },
+  logoOver: { position: 'absolute', top: 0, left: 0 },
   thread: { flex: 1 },
-  threadInner: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8 },
+  // Where the side tab's own zIndex (5) is kept, as when it sat on the page directly.
+  tabLayer: { zIndex: 5 },
+  threadInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
   emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
   emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 32, lineHeight: 40 },
   empty: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 14 },
 
-  // The trail runs through the middle of the waypoints (14 in, 28 wide, 6 thick).
-  trail: { position: 'absolute', top: 10, bottom: 0, left: 25, width: 6 },
-  trailDots: { width: 6, height: '100%', tintColor: palette.trail },
-  waypoint: {
-    width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.cream, borderWidth: 1.5, borderColor: palette.trail,
+  // #209: no icons, trail or labels down the side. The hiker's words in the
+  // journal face and Fred's in the plain one are enough to tell them apart.
+  turn: { marginBottom: 34 },
+  // The hiker's words in a soft note on the right, the way a message you sent
+  // sits in any chat; Fred answers across the full width below it.
+  askedNote: {
+    alignSelf: 'flex-end', maxWidth: '86%', marginBottom: 16,
+    backgroundColor: palette.sage, borderRadius: radius.card, borderBottomRightRadius: 6,
+    paddingHorizontal: 16, paddingVertical: 10,
   },
-  waypointFred: { backgroundColor: palette.sage, borderColor: palette.sage },
-  waypointGlyph: { width: 15, height: 15 },
-
-  turn: { marginBottom: 26 },
-  asked: { flexDirection: 'row', gap: 12, marginBottom: 10 },
-  // The hiker's own words, written large in the journal face beside a leaf.
-  question: { flex: 1, fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, paddingTop: 1 },
-  replied: { flexDirection: 'row', gap: 12 },
-  // Room above each card for its tab, which sits half over the top edge.
-  cards: { flex: 1, gap: 22, paddingTop: 12 },
-  card: {
-    backgroundColor: palette.paper, borderRadius: radius.card, borderTopLeftRadius: 6,
-    paddingHorizontal: 16, paddingTop: 22, paddingBottom: 16,
-    borderWidth: 1, borderColor: palette.sand,
-    boxShadow: `0 3 12 ${palette.shade}`,
-  },
-  tab: {
-    position: 'absolute', top: -12, left: 12, borderRadius: radius.pill,
-    paddingHorizontal: 11, paddingVertical: 4,
-  },
-  tabText: { color: palette.ink, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
+  question: { fontFamily: JOURNAL, color: palette.ink, fontSize: 19, lineHeight: 26 },
+  cards: { gap: 22 },
+  card: {},
   thinking: { alignSelf: 'flex-start' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
   hint: { color: palette.moss, fontSize: 13, lineHeight: 18, marginTop: 8 },

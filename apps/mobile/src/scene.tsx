@@ -32,6 +32,8 @@ const DAY = { sky: '#DDEDF2', orb: '#FBE49C', back: '#C3DEC6', mid: '#A8CFA8' } 
 const DUSK = { sky: '#EDBFB4' } as const;
 const NIGHT = { sky: '#263250', orb: '#FFFCF4', back: '#34495C', mid: '#284338' } as const;
 const WHITE = '#FFFCF4';
+/** The sun low in the sky at sunset (#209). */
+const SETTING_SUN = '#F6A564';
 
 /** Where the sun or moon rests: across the screen, and down the open sky, as fractions. Left of the middle, lowish. */
 const ORB_ACROSS = 0.36;
@@ -48,14 +50,18 @@ const GULL_MS = 34_000;
 const TAP = 8;
 
 export function Scene(
-  { height, top, hint = false, sunset = false, children }: {
+  { height, top, hint = false, sunset, children }: {
     height: number;
     /** The status bar's height: nothing of the sky's furniture is drawn under the clock. */
     top: number;
     /** A slow ring round the sun or moon, for the page that teaches the switch (#196). */
     hint?: boolean;
-    /** #209: the sky held at sunset (the About page), whatever the time of day. */
-    sunset?: boolean;
+    /**
+     * #209: 0 the usual sky, 1 sunset (while About is open): the sky turns
+     * sunset colours, the sun sinks low and warm behind the hills, and the
+     * nearest hill takes the About page's colour.
+     */
+    sunset?: Animated.Value;
     children?: ReactNode;
   },
 ): React.JSX.Element {
@@ -90,6 +96,8 @@ export function Scene(
   const rest = { x: width * ORB_ACROSS, y: top + ORB_DOWN * open };
   const hub = height + orb * 0.7;
   const rim = hub - rest.y;
+  // #209: how far the sun sinks at sunset, to sit half behind the back hill.
+  const setDrop = height - hills.height * 0.62 - rest.y;
   // The second cloud runs half a lap behind the first.
   const lap = [-90, width + 10];
   const halfLap = (lap[0]! + lap[1]!) / 2;
@@ -147,7 +155,10 @@ export function Scene(
         accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DUSK.sky, opacity: fx.dusk }]} />
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: DAY.sky, opacity: fx.day }]} />
-        {sunset && <View style={[StyleSheet.absoluteFill, { backgroundColor: palette.night ? SUNSET.night.sky : SUNSET.day.sky }]} />}
+        {sunset !== undefined && (
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: sunset,
+            backgroundColor: palette.night ? SUNSET.night.sky : SUNSET.day.sky }]} />
+        )}
 
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: fx.stars }]}>
           {STARS.map(([x, y], i) => (
@@ -157,10 +168,21 @@ export function Scene(
 
         {/* The wheel, with the sun at the top of its rim and the moon at the bottom. */}
         <Animated.View style={[styles.wheel, { left: rest.x - rim, top: hub - rim, width: rim * 2, height: rim * 2,
-          transform: [{ rotate: fx.spin }] }]}>
+          transform: [
+            // At sunset the whole wheel sinks until the sun sits half behind the back hill.
+            { translateY: sunset === undefined ? 0 : sunset.interpolate({ inputRange: [0, 1], outputRange: [0, setDrop] }) },
+            { rotate: fx.spin },
+          ] }]}>
           <View style={[styles.orbBox, { left: rim - orb, top: -orb, width: orb * 2, height: orb * 2 }]}>
             <View style={[styles.glow, { width: orb * 1.7, height: orb * 1.7, borderRadius: orb, backgroundColor: DAY.orb }]} />
             <View style={{ width: orb, height: orb, borderRadius: orb / 2, backgroundColor: DAY.orb }} />
+            {sunset !== undefined && (
+              // The low sun warms to orange as it sets.
+              <Animated.View style={[StyleSheet.absoluteFill, styles.orbBox, { opacity: sunset }]}>
+                <View style={[styles.glow, { width: orb * 1.7, height: orb * 1.7, borderRadius: orb, backgroundColor: SETTING_SUN }]} />
+                <View style={{ width: orb, height: orb, borderRadius: orb / 2, backgroundColor: SETTING_SUN }} />
+              </Animated.View>
+            )}
           </View>
           <View style={[styles.orbBox, { left: rim - orb, top: rim * 2 - orb, width: orb * 2, height: orb * 2 }]}>
             <View style={[styles.glow, { width: orb * 1.6, height: orb * 1.6, borderRadius: orb, backgroundColor: NIGHT.orb, opacity: 0.16 }]} />
@@ -214,8 +236,11 @@ export function Scene(
         <Animated.Image source={HILL_MID} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: DAY.mid, opacity: fx.dayHills }]} />
         {/* The nearest hill is the page, and hides behind the same veil as the page. */}
-        <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
-          tintColor: !sunset ? palette.cream : palette.night ? SUNSET.night.page : SUNSET.day.page }]} />
+        <Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, { tintColor: palette.cream }]} />
+        {sunset !== undefined && (
+          <Animated.Image source={HILL_FRONT} resizeMode="stretch" style={[styles.hill, hills, {
+            tintColor: palette.night ? SUNSET.night.page : SUNSET.day.page, opacity: sunset }]} />
+        )}
         <Animated.Image source={HILL_FRONT} resizeMode="stretch"
           style={[styles.hill, hills, { tintColor: VEIL_COLOUR, opacity: fx.veil }]} />
       </View>

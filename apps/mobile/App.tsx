@@ -18,7 +18,7 @@
  * in?" are useful answers, and collapsing them into a blank screen would hide the
  * abstention behaviour that most of the accuracy work went into.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated, Image, KeyboardAvoidingView, Linking, Platform, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
@@ -188,6 +188,9 @@ function Screen() {
   const [mapOpen, setMapOpen] = useState(false);
   // #209: About Fred, opened by tapping the wordmark.
   const [aboutOpen, setAboutOpen] = useState(false);
+  // 0 the chat, 1 About: the sky sets its sun by it and the page eases in by it.
+  const sunset = useRef(new Animated.Value(0)).current;
+  const tabShown = useMemo(() => sunset.interpolate({ inputRange: [0, 0.4], outputRange: [1, 0], extrapolate: 'clamp' }), [sunset]);
   // First-run setup (#196): shown once on a new phone, and again from the
   // start screen when the guides are missing. The engine is not loaded under it: a download and a
   // model in memory at once is more than a small phone has room for.
@@ -653,11 +656,13 @@ function Screen() {
     <View style={styles.root}>
       {/* The horizon stands in for a header bar: wide open before the first
           question, a slim strip once the chat needs the room. */}
-      <Scene height={insets.top + sky} top={insets.top}>
+      <Scene height={insets.top + sky} top={insets.top} sunset={sunset}>
        <View style={[styles.header, { paddingTop: insets.top + TOP_ROW - LOGO_HEIGHT / 2 }]} pointerEvents="box-none">
-        <Pressable onPress={() => setAboutOpen(true)} hitSlop={8} accessibilityRole="button">
+        {/* Opens About Fred; tapped again, closes it. */}
+        <Pressable onPress={() => setAboutOpen((o) => !o)} hitSlop={8} accessibilityRole="button"
+          accessibilityLabel={aboutOpen ? 'Fred. Close About Fred' : 'Fred. About Fred'}>
           <Crossfade render={(p) => (
-            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" accessibilityLabel="Fred. About Fred" />
+            <Image source={LOGO} style={[styles.wordmarkSmall, { tintColor: p.logo }]} resizeMode="contain" />
           )} />
         </Pressable>
        </View>
@@ -930,8 +935,11 @@ function Screen() {
 
       <Veil />
       {/* The bookmark on the left edge, level with the logo opposite it, and its drawer. */}
-      <SideTab top={insets.top + TOP_ROW - SIDE_TAB_HEIGHT / 2} open={drawer} slide={drawerSlide}
-        onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
+      {/* The tab steps aside while About is open. */}
+      <Animated.View style={[StyleSheet.absoluteFill, styles.tabLayer, { opacity: tabShown }]} pointerEvents={aboutOpen ? 'none' : 'box-none'}>
+        <SideTab top={insets.top + TOP_ROW - SIDE_TAB_HEIGHT / 2} open={drawer} slide={drawerSlide}
+          onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
+      </Animated.View>
       <SideDrawer
         open={drawer}
         peek={drawerPeek}
@@ -948,9 +956,8 @@ function Screen() {
           if (id === chatId.current) showChat(null);
         }}
       />
-      {/* Over everything, the menu included; it eases in through sunset (#209). */}
-      <AboutScreen open={aboutOpen} onClose={() => setAboutOpen(false)}
-        skyHeight={insets.top + sky} row={TOP_ROW} logoHeight={LOGO_HEIGHT} />
+      {/* Over the chat below the sky; it eases in through sunset (#209). */}
+      <AboutScreen open={aboutOpen} onClose={() => setAboutOpen(false)} p={sunset} skyHeight={insets.top + sky} />
     </View>
   );
 }
@@ -977,6 +984,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 18,
   },
   thread: { flex: 1 },
+  // Where the side tab's own zIndex (5) is kept, as when it sat on the page directly.
+  tabLayer: { zIndex: 5 },
   threadInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
   emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
   emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 32, lineHeight: 40 },

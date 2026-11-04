@@ -49,53 +49,10 @@ import { Crossfade, ThemeProvider, Veil, radius, useTheme, useThemed, type Palet
 /** The logo is 900 x 415; sized by height wherever it is shown. */
 const LOGO = require('./assets/ui/fred-logo.png');
 const LOGO_RATIO = 900 / 415;
-const LEAF = require('./assets/ui/leaf.png');
-const TREE = require('./assets/ui/tree.png');
 const ARROW = require('./assets/ui/arrow-up.png');
-const TRAIL_DOT = require('./assets/ui/trail-dot.png');
 /** The hiker's own words are set like a journal entry; Fred's stay in the plain reading face. */
 const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
-/**
- * A waypoint on the trail down the chat: a leaf where the hiker asked, the
- * logo's tree where Fred replied.
- */
-function Waypoint({ who }: { who: 'hiker' | 'fred' }): React.JSX.Element {
-  const { palette, styles } = useThemed(makeStyles);
-  return (
-    <View style={[styles.waypoint, who === 'fred' && styles.waypointFred]}
-      accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Image source={who === 'fred' ? TREE : LEAF} resizeMode="contain"
-        style={[styles.waypointGlyph, { tintColor: who === 'fred' ? palette.pine : palette.leaf }]} />
-    </View>
-  );
-}
-
-/**
- * The index tab on a reply, like the tab on a field-guide page. It names the
- * kind of reply, so a card from the guides, a field card and "not in my
- * guides" can be told apart before a word is read.
- */
-/**
- * #209: with no box around a reply, the pale tab colours would vanish into the
- * screen, so the label's dot takes the stronger colour from the same family.
- */
-function dotFor(palette: Palette, tone: string | undefined): string {
-  if (tone === palette.skyWash) return palette.sky;
-  if (tone === palette.butter) return palette.amber;
-  if (tone === palette.blush) return palette.clay;
-  return palette.leaf;
-}
-
-function Tab({ label, tone }: { label: string; tone?: string }): React.JSX.Element {
-  const { palette, styles } = useThemed(makeStyles);
-  return (
-    <View style={styles.tab}>
-      <View style={[styles.tabDot, { backgroundColor: dotFor(palette, tone) }]} />
-      <Text style={styles.tabText}>{label}</Text>
-    </View>
-  );
-}
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
@@ -733,32 +690,17 @@ function Screen() {
           </View>
         )}
 
-        {/* The trail: a dotted path down the left edge that the waypoints sit on. */}
-        {turns.length > 0 && (
-          // An image takes its file's height unless told otherwise, so the
-          // box sets the length and the dots fill it.
-          <View style={styles.trail} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-            <Image source={TRAIL_DOT} resizeMode="repeat" style={styles.trailDots} />
-          </View>
-        )}
-
         {turns.map((t, i) => (
           <View
             key={t.id}
             style={styles.turn}
             onLayout={i !== turns.length - 1 ? undefined : (e) => { scrollAt.current.lastTop = e.nativeEvent.layout.y; follow(); }}
           >
-            <View style={styles.asked}>
-              <Waypoint who="hiker" />
-              <Text style={styles.question}>{t.question}</Text>
-            </View>
-            <View style={styles.replied}>
-            <Waypoint who="fred" />
+            <Text style={styles.question}>{t.question}</Text>
             <View style={styles.cards}>
 
             {t.kind === 'needs-location' && (
               <View style={styles.card}>
-                <Tab label="Where are you?" tone={palette.skyWash} />
                 <Text style={styles.body}>
                   That depends on where you are. Which state?
                 </Text>
@@ -789,14 +731,12 @@ function Screen() {
 
             {t.kind === 'abstain' && (t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY) && (
               <View style={styles.card}>
-                <Tab label="Fred" />
                 <ReplyText text={t.lead === undefined ? t.text : `${t.lead}\n${t.text}`} />
               </View>
             )}
 
             {t.kind === 'abstain' && t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY && (
               <View style={styles.card}>
-                {t.map === true ? <Tab label="Fred" /> : <Tab label="Not in my guides" tone={palette.butter} />}
                 {/* "Where am I?" is not in the manuals, but the map below answers
                     it, so saying "I don't know" first would contradict it. */}
                 <Text style={styles.body}>
@@ -814,14 +754,12 @@ function Screen() {
 
             {t.kind === 'chat' && (
               <View style={styles.card}>
-                <Tab label="Fred" />
                 <ReplyText text={t.text} />
               </View>
             )}
 
             {t.offer !== undefined && t.done && (
               <View style={styles.card}>
-                <Tab label="Field card" />
                 <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} hitSlop={8}
                   accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}>
                   <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
@@ -841,15 +779,12 @@ function Screen() {
 
             {t.kind === 'error' && (
               <View style={styles.card}>
-                <Tab label="Something went wrong" tone={palette.blush} />
                 <Text style={styles.error}>{t.text}</Text>
               </View>
             )}
 
             {t.kind === 'answer' && (
               <View style={styles.card}>
-                <Tab label={t.citations[0]?.source === 'Fred field card' ? 'Field card' : t.citations.length > 0 ? 'From the guides' : 'Fred'}
-                  tone={t.citations.length > 0 && t.citations[0]?.source !== 'Fred field card' ? palette.skyWash : palette.sage} />
                 {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
                 {t.text !== '' && <ReplyText text={t.text} />}
@@ -927,7 +862,6 @@ function Screen() {
 
             {t.map === true && (
               <View style={styles.card}>
-                <Tab label="Map" tone={palette.skyWash} />
                 {t.id === liveMap
                   ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} quiet={saidSignal(t)} />
                   : (
@@ -940,7 +874,6 @@ function Screen() {
                   )}
               </View>
             )}
-            </View>
             </View>
           </View>
         ))}
@@ -1039,33 +972,17 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 18,
   },
   thread: { flex: 1 },
-  threadInner: { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8 },
+  threadInner: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
   emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
   emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 32, lineHeight: 40 },
   empty: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 14 },
 
-  // The trail runs through the middle of the waypoints (14 in, 28 wide, 6 thick).
-  trail: { position: 'absolute', top: 10, bottom: 0, left: 25, width: 6 },
-  trailDots: { width: 6, height: '100%', tintColor: palette.trail },
-  waypoint: {
-    width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: palette.cream, borderWidth: 1.5, borderColor: palette.trail,
-  },
-  waypointFred: { backgroundColor: palette.sage, borderColor: palette.sage },
-  waypointGlyph: { width: 15, height: 15 },
-
-  turn: { marginBottom: 26 },
-  asked: { flexDirection: 'row', gap: 12, marginBottom: 10 },
-  // The hiker's own words, written large in the journal face beside a leaf.
-  question: { flex: 1, fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, paddingTop: 1 },
-  replied: { flexDirection: 'row', gap: 12 },
-  // #209: replies sit straight on the screen, with no box, so there is less
-  // to look at. The label lines up with the tree waypoint beside it.
-  cards: { flex: 1, gap: 22, paddingTop: 7 },
-  card: { paddingRight: 4 },
-  tab: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  tabDot: { width: 7, height: 7, borderRadius: 4 },
-  tabText: { color: palette.moss, fontSize: 10.5, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
+  // #209: no icons, trail or labels down the side. The hiker's words in the
+  // journal face and Fred's in the plain one are enough to tell them apart.
+  turn: { marginBottom: 34 },
+  question: { fontFamily: JOURNAL, color: palette.ink, fontSize: 20, lineHeight: 27, marginBottom: 12 },
+  cards: { gap: 22 },
+  card: {},
   thinking: { alignSelf: 'flex-start' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
   hint: { color: palette.moss, fontSize: 13, lineHeight: 18, marginTop: 8 },

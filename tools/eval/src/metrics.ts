@@ -14,11 +14,20 @@ interface Kr {
   value: number | string | null; unit?: string; target?: number;
   /** A second reading of the same KR, shown alongside. See A-KR2. */
   secondary?: { value: number; label: string };
-  lowerIsBetter?: boolean; bands?: string[]; grade: string; note: string;
+  lowerIsBetter?: boolean;
+  /** Grade bands, A to F, as in the proposal's grading criteria. */
+  bands?: string[]; grade: string; note: string;
+  /** What is measured, how it is verified, and the user stories it serves. */
+  measure?: string; verify?: string; connects?: string[];
 }
+interface Milestone { id: string; name: string; date: string; objective: string }
 interface Metrics {
   updated: string;
   config: Record<string, string | number>;
+  /** Which revision of the OKRs the KRs below follow. */
+  okrRevision?: string;
+  /** KRs are grouped under the milestone whose id prefixes theirs (A-KR1 → A). */
+  milestones?: Milestone[];
   krs: Kr[];
   akr2History: { label: string; overall: number; model: string }[];
   /** Caveat printed under the history, e.g. where the scoring method changed. */
@@ -77,9 +86,10 @@ function bar(pct: number, width = 28): string {
 /**
  * `built` exists because "not started" and "graded" are not the only states.
  *
- * B-KR2 and B-KR3 render on the device and are verified by driving, which has
- * not happened — calling that "not started" understates the work and calling it
- * a grade would claim a verification nobody has run.
+ * B-KR1 (directions to signal) and B-KR2 (the coverage map) run on the device
+ * and are verified in the field, which has not happened — calling that "not
+ * started" understates the work and calling it a grade would claim a
+ * verification nobody has run.
  */
 const GRADE_MARK: Record<string, string> = {
   A: '🟢 A', B: '🟡 B', C: '🟠 C', D: '🔴 D', F: '🔴 F',
@@ -100,9 +110,12 @@ p();
 
 p('## Milestone scorecard');
 p();
-p('| KR | What | Due | Now | Grade |');
-p('|---|---|---|---|---|');
-for (const k of m.krs) {
+if (m.okrRevision !== undefined) {
+  p(`> ${m.okrRevision}`);
+  p();
+}
+
+function krRow(k: Kr): string {
   const val = k.value === null ? '—'
     : typeof k.value === 'number' ? `**${k.value}${k.unit ?? ''}**${k.target !== undefined ? ` / ${k.target}${k.unit ?? ''}` : ''}`
     : `**${k.value}**`;
@@ -111,11 +124,48 @@ for (const k of m.krs) {
   const both = k.secondary === undefined
     ? val
     : `${val}<br><sub>${k.secondary.value}${k.unit ?? ''} ${k.secondary.label}</sub>`;
-  p(`| \`${k.id}\` | ${k.name} | ${k.due} | ${both} | ${GRADE_MARK[k.grade] ?? k.grade} |`);
+  return `| \`${k.id}\` | ${k.name} | ${k.due} | ${both} | ${GRADE_MARK[k.grade] ?? k.grade} |`;
 }
-p();
-for (const k of m.krs) if (k.note) p(`- \`${k.id}\` — ${k.note}`);
-p();
+
+const milestoneOf = (k: Kr): string => k.id.slice(0, k.id.indexOf('-'));
+const groups: { ms?: Milestone; krs: Kr[] }[] = m.milestones === undefined
+  ? [{ krs: m.krs }]
+  : m.milestones.map((ms) => ({ ms, krs: m.krs.filter((k) => milestoneOf(k) === ms.id) }));
+for (const g of groups) {
+  if (g.ms !== undefined) {
+    p(`### ${g.ms.name} — ${g.ms.date}`);
+    p();
+    p(`*${g.ms.objective}*`);
+    p();
+  }
+  p('| KR | What | Due | Now | Grade |');
+  p('|---|---|---|---|---|');
+  for (const k of g.krs) p(krRow(k));
+  p();
+  for (const k of g.krs) {
+    const measure = k.measure === undefined ? '' : `**${k.measure}** `;
+    if (k.note || measure) p(`- \`${k.id}\` — ${measure}${k.note}`);
+  }
+  p();
+}
+
+// The grading criteria, so a grade above can be checked against its band.
+const banded = m.krs.filter((k) => k.bands?.length === 5);
+if (banded.length > 0) {
+  p('### Grading bands');
+  p();
+  p('| KR | A | B | C | D | F |');
+  p('|---|---|---|---|---|---|');
+  for (const k of banded) p(`| \`${k.id}\` ${k.name} | ${k.bands!.join(' | ')} |`);
+  p();
+  const verified = m.krs.filter((k) => k.verify !== undefined);
+  if (verified.length > 0) {
+    p('| KR | How it is verified | Stories |');
+    p('|---|---|---|');
+    for (const k of verified) p(`| \`${k.id}\` | ${k.verify} | ${(k.connects ?? []).join(', ')} |`);
+    p();
+  }
+}
 
 p('## A-KR2 — answer accuracy over time');
 p();
@@ -297,7 +347,7 @@ if (m.location !== undefined) {
   p();
   p('---');
   p();
-  p('## Location (B-KR1)');
+  p('## Location fix (GPS)');
   p();
   p(`Implemented ${l.implemented}.`);
   p();

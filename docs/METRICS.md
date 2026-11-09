@@ -1,6 +1,6 @@
 # Fred — metrics at a glance
 
-*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-10-07**.*
+*Generated from `docs/metrics.json` — do not edit by hand. Last updated **2026-11-09**.*
 
 ```
 model              Qwen3-1.7B-Q4_K_M
@@ -15,27 +15,72 @@ akr2Target         70% (final proposal v1.2, 2026-09-27); an A needs more than 8
 
 ## Milestone scorecard
 
+> Revised milestone OKRs and grading bands, sections 06B and 07B (2026-11-07). The Beta and Release Candidate KRs were rewritten: Beta now measures what Fred does on a real phone (reaching signal, the coverage map against real bars, battery over a hike), Release Candidate what testers do (finish setup, say they would bring Fred, keep it). Alpha KRs are unchanged apart from A-KR1's band wording; they were graded before the revision.
+
+### Alpha — 2026-10-19
+
+*Local LLM RAG system is functional and accurate, with necessary corpora.*
+
 | KR | What | Due | Now | Grade |
 |---|---|---|---|---|
 | `A-KR1` | Necessary knowledge corpora | 2026-09-18 | **all 3 types, 50 states** | 🟢 A |
 | `A-KR2` | Response accuracy | 2026-10-12 | **73.8%** / 70%<br><sub>67.5% fresh breadth set, graded blind</sub> | 🟡 B |
 | `A-KR3` | Response time | 2026-10-19 | **15.3s** / 20s | 🟢 A |
-| `B-KR1` | Location while in service | 2026-10-26 | **9.5m** | 🟢 A |
-| `B-KR2` | Location in Fred's answers | 2026-11-10 | **state only** | 🔴 D |
-| `B-KR3` | Predicted service zone | 2026-11-16 | **on device** | 🔵 built, unverified |
-| `RC-KR1` | iOS and Android app | 2026-11-25 | — | ⚪ not started |
-| `RC-KR2` | User population | 2026-12-02 | — | ⚪ not started |
-| `RC-KR3` | Product page and promo | 2026-12-09 | — | ⚪ not started |
 
 - `A-KR1` — First aid, survival, signalling, flora/fauna. 5 core packs (WHO BEC, ATP 4-02.11, ATP 3-50.21, FM 21-76 ch.19 signalling, 27 reviewed field cards) and 50 state packs, all built for the EmbeddingGemma search model as of 2026-09-25: 55 packs, 408 MB. Plus two everyday-tips packs (2026-09-29, #96): National Park Service articles and Wikivoyage travel topics, 384 passages, 1 MB. CA and OR are on the phone; the other 48 wait for it to be connected.
 - `A-KR2` — Held-out set, 40 questions nothing was tuned on, four-part rubric. 50.0% (the old pipeline regraded on the rubric) -> 62.5% phase 1 (EmbeddingGemma, field cards) -> 61.3% phase 2 (card slot, survival-manual redactions) -> 66.3% phase 3 (verbatim card answers, clinical procedures referred on, state named in the prompt, signalling source) -> 67.5% re-measured 2026-09-26 on the current pipeline (the phase-3 number predates narrowing the state line; +0.5 on manzanita size), with drug, oxygen and IV steps removed from WHO BEC (#61), which changed no held-out answer. -> 68.8% with a note on plant-database passages about animals eating ("not food for people"): the last held-out safety failure (hff-bulrush-01) is gone. -> 71.3% with six field cards on syllabus topics (spinal, chest wound, pelvis, altitude, seizure, low blood sugar): the pelvis card answers a question that was declined. -> 70.0% with three more (belly wound, dehydration, signalling): the belly card answers "can I pack a wound in someone's belly?" with the whole card rather than "no" first (full -> partial). -> 72.5% with six more (eye injury, snow blindness, river crossing, knots and cord, staying healthy, chest pain and stroke): snow blindness partial -> full, plant cordage test declined -> partial. -> 72.5% with the everyday-tips packs (2026-09-29, #96): one held-out answer worse (hs-movement-01, left unfixed rather than tuned against), one better (hs-insects-01), graded blind (docs/results-tips.md). Safety failures 4 -> 1; tuning 38.5 -> 83.0 with none. One held-out answer is 2.5 points, and one grader who knew which run was which scored every run. docs/results-phase3.md. -> 73.8% re-measured 2026-10-06 on main (77f3e6b) with the packs in ~/fred-packs-g-all (field cards 0.8.0, health, hazards, wildlife safety and tips packs): 36 of 40 answers word for word those of 2026-09-29; the tick question, which asked for a location, is now answered (0 -> 1, graded full on the question asked, partial if the allergy point is required: 72.5%); CPR and belly-wound answers reworded at the same score, graded blind. No safety failures. Like for like the 2026-09-29 figure is 71.3%, not 72.5%: its GPS-battery answer was graded full in-session on 2026-09-27 and 0.5 blind. The phone's 12 packs were checked byte for byte against that folder on 2026-10-07: identical. A first run that day on the repo's packs/ folder (field cards 0.5.0, none of the newer packs) gave 71.3% and is kept for the record (docs/holdout-runs-2026-10-06.jsonl); it is not this pipeline. Runs and verdicts: docs/holdout-runs-2026-10-06-shipped.jsonl, docs/holdout-verdicts-2026-10-06-shipped.json. Checked blind on 57 fresh questions (2026-09-27): 61.4% for the pipeline as of 2026-09-25 -> 67.5% today, 4 wins, 0 losses, 0 unsafe; the held-out figure runs about 5 points above fresh questions. docs/results-breadth.md.
 - `A-KR3` — Phone mean for model-written answers on the 40 held-out questions, Nothing Phone (3), 2026-10-07, one app session each, the app as shipped (opener on): 17 answers, mean 15.3 s, median 14.3 s, range 8.2-24.1 s; two at or over 20 s (scalp bleeding 24.1 s, spoiled fish 20.0 s). Their first words came at 2.4 s (median): with the opening line shown (10 of 17) the answer itself starts at 13.4 s, without it at 11.5 s. Field-card answers: 12, mean 3.7 s (3.4-4.0 s). Declines, the watch reply, a referral and a location request: 10, mean 1.5 s. Every reply, 39 questions: mean 8.2 s, median 3.7 s. One off-topic question (a sourdough recipe) gave no log line in two tries and is not in these figures; asked again after the next build was installed, it was declined in 1.1 s. Every reply is the same kind as the desktop gave on 2026-10-06, and the phone's 12 packs are byte for byte those of ~/fred-packs-g-all. Log: docs/phone-holdout-2026-10-07.txt. Earlier figure: 15.4 s on 2026-09-24 (phase 1, before cards, intent and the opener).
-- `B-KR1` — 9.5 m median outdoors in airplane mode, best 5.6 m, five attempts (docs/results-bkr1-outdoor.md). The 33.5 m indoor figure was WiFi positioning, not GPS — indoors the 10 m early exit never fires. PROVISIONAL: one location. The KR is verified by driving to different physical locations and that has not happened. Proposal v1.2 also asks that the location be served to the LLM: today Fred's prompt gets the state only (see B-KR2).
-- `B-KR2` — Redefined in proposal v1.2: the user's location should shape Fred's answers. Planned (#77): when signal comes up, Fred says how far and which way the nearest reported coverage is, and prompts the user to open the map. Today the prompt names the user's state and picks the state's plant and animal pack. The map already shows the coverage zones and the nearest coverage, but Fred's answers don't use them.
-- `B-KR3` — Built and rendering on device. FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack. Nearest-coverage search reports bearing and distance offline. Unverified: needs the drive.
-- `RC-KR1` — iOS launches on the simulator (Xcode 27). Needed expo 57.0.24 + scene support; Android not rebuilt since. See results-ios-build.md.
-- `RC-KR2` — Redefined in proposal v1.2: at least 10 people using Fred across iOS and Android, with qualitative reviews collected. Not started.
-- `RC-KR3` — Proposal v1.2: a product page with at least 3 videos and 8 images of Fred in use. Not started.
+
+### Beta — 2026-11-16
+
+*The Fred application can help a user find signal, without any signal in the first place, and does so in a way that either conserves battery or makes the user mindful of it.*
+
+| KR | What | Due | Now | Grade |
+|---|---|---|---|---|
+| `B-KR1` | Directs a user to signal | 2026-10-26 | **0 of 6 starts** | 🔵 built, unverified |
+| `B-KR2` | Coverage map predicts real signal | 2026-11-10 | **0 of 12 checkpoints** | 🔵 built, unverified |
+| `B-KR3` | Battery lasts a day hike | 2026-11-16 | — | ⚪ not started |
+
+- `B-KR1` — **From 6+ starts in dead zones, following Fred's direction reaches signal in at least 4.** The direction is built: since 2026-10-11 (#77) a signal question ("which way do I go to get reception?") gets, in Fred's own reply, how far and which way the nearest reported coverage is, with the map under it, worked out offline from the coverage pack (docs/results-signal-in-chat.md). No dead-zone start has been run. The drive of 2026-10-09 and 10-11 never left the zone the map marks covered, and the one real loss of service it logged (10-11, about 16:07-16:20) came after the last recording stopped (docs/results-drive-test.md). The position the direction starts from is good: 1,819 driving readings, median 1-3 m from the road, none over 20 m; in airplane mode only one spot has been measured (9.5 m, docs/results-bkr1-outdoor.md).
+- `B-KR2` — **At 12+ checkpoints, at least 4 of them in no-service zones, the map is accurate to ~80%+ of real signal bars.** The map is built and renders on the device: FCC BDC hexagons aggregated to H3 res 7; all three major LTE carriers for California are 71,211 cells in a 7.1 KB pack (FCC filing of 2025-12-31). No checkpoint has been recorded: the drive took no signal-bar screenshots, and all 1,819 of its readings fall in cells the map marks covered for T-Mobile, so it could not have tested the no-service half. Owed: a visit to places the map shades "no service", noting real bars on the way in and out.
+- `B-KR3` — **On a ~5,000 mAh phone battery, Fred in frequent use with tracking on lasts a ~6 hour hike.** No full-day run yet. What is measured is the cost per reply on the Nothing Phone (3) (5,150 mAh), unplugged with the screen on: a written answer about 135 J (~0.2% of a full battery), a quick reply about 10 J (docs/results-battery-estimate.md, US-13). Tracking's cost has not been measured. The recorder runs only while Fred is on screen; tracking with the screen off would need an Android foreground service, which is not built.
+
+### Release Candidate — 2026-12-09
+
+*Users have Fred in their hands, as a packaged MVP, fully functional in intended no-WiFi environments, ready to run on private phones as "the real deal."*
+
+| KR | What | Due | Now | Grade |
+|---|---|---|---|---|
+| `RC-KR1` | Testers finish setup | 2026-11-25 | — | ⚪ not started |
+| `RC-KR2` | Testers would bring Fred | 2026-12-02 | — | ⚪ not started |
+| `RC-KR3` | Active user population | 2026-12-09 | — | ⚪ not started |
+
+- `RC-KR1` — **~80%+ of (loosely) invited testers with qualifying phones finish setup, including the large download.** No invitations sent. The first-run setup wizard is built (#196). iOS launches on the simulator (Xcode 27, expo 57.0.24 with scene support); Android has the field-test builds; neither is packaged for testers yet (results-ios-build.md).
+- `RC-KR2` — **~70%+ of test users say they'd bring Fred out on their next hike.** Not started; waits on RC-KR1's testers.
+- `RC-KR3` — **An active userbase of >500 hikers (the would-be real users of Fred) who keep coming back to the app.** Not started. The app reports no usage today (its only network call fetches the map download list), so this needs a way to report retention when in signal.
+
+### Grading bands
+
+| KR | A | B | C | D | F |
+|---|---|---|---|---|---|
+| `A-KR1` Necessary knowledge corpora | All listed corpora are functional | ~75% of listed corpora; core functional | Core corpora only | Some load, but other corpora are missing | None loading, or otherwise failing |
+| `A-KR2` Response accuracy | >80% | 79-60% | 59-50% | 49-30% | <30% |
+| `A-KR3` Response time | <20s | 20-40s | ~2m | ~5m | >5m |
+| `B-KR1` Directs a user to signal | 4/6 | 3/6 | 2/6 | 1/6 | 0/6 |
+| `B-KR2` Coverage map predicts real signal | >80% | 70-79% | 60-69% | 40-59% | <40% |
+| `B-KR3` Battery lasts a day hike | >6 hrs | 5-6 hrs | 4-5 hrs | 3-4 hrs | <3 hrs |
+| `RC-KR1` Testers finish setup | >80% | 60-70% | 50-60% | 25-50% | <25% |
+| `RC-KR2` Testers would bring Fred | >70% | 50-70% | 40-50% | 20-40% | <20% |
+| `RC-KR3` Active user population | >500 | 200-500 | 50-200 | 25-50 | <25 |
+
+| KR | How it is verified | Stories |
+|---|---|---|
+| `B-KR1` | Drive to different physical locations without signal, and follow directions given by Fred. | US-05 |
+| `B-KR2` | Per checkpoint, screenshot the phone's signal bars next to Fred's in-app map display, noting discrepancies. | US-05 |
+| `B-KR3` | Across multiple tests, begin at 100% battery with tracking on, logging battery usage. | US-05 |
+| `RC-KR1` | Send out invitations to local acquaintances; of the testers who complete the initial download, mark how many finish setup. | US-09, US-10 |
+| `RC-KR2` | A survey (in-app, by mailing list or in person) recording testers' sentiments and reviews. | US-09, US-10 |
+| `RC-KR3` | When in signal, send records of which users still have Fred downloaded after their first use. | US-09, US-10 |
 
 ## A-KR2 — answer accuracy over time
 
@@ -90,14 +135,6 @@ Measured separately: a second question that only makes sense after the first. He
 ### A friendly opening line (2026-10-06, #130)
 
 Before a model-written answer Fred now writes one short line about what the hiker asked ("Good question about making rope from plant fibers.", "Oh no, diarrhea on the trail is uncomfortable."). The model writes it from the hiker's words alone; the code picks its first words by what the message is (a question, a yes/no question, a problem, a worry) and fixed rules drop any line that is not about the message or that carries advice, a fact, a promise or a yes. No opener for emergencies, card replies, declines or small talk. Six sealed sets of messages, each written before the code it tested: on the last three, 29 of 40, 32 of 42 and 31 of 45 openers kept, none of them unsafe; the answer after the opener is word for word what Fred gave without it, so accuracy is unchanged. On the phone the first words come at about 2 s and the answer about 2 s later than before, with a "Working on your answer…" note in between. docs/results-friendly-opener.md.
-
-### The right card for a plain statement (2026-10-07, #152, #93, #145)
-
-Under the search's score bar, which field card came first was close to chance, and the emergency rules opened it: the shock card for a seizure, the sprain card for a scraped shin. A small matcher trained on 1,034 example messages now says which card a message is about, or that it is a pet's, a medicine question or something no card is for; it costs no model call. Everyday questions also search the tips packs ("how should i dress for a cold hike" had been answered "cotton or linen"), and "soaked through" is a danger sign only for blood. Across 847 replies in 19 sets, 31 change: about 20 clearly better, 1 slightly worse, none unsafe; the 40 held-out replies are unchanged, so A-KR2 stays 73.8%. On 48 fresh messages committed before the fix ran on them, replies of the right kind with no wrong card go **21 -> 31**, none worse; 17 are still wrong, mostly the matcher being right but not sure enough to act. On the phone every reply matched the desktop and the matcher added no measurable time. docs/results-said-as.md.
-
-### A battery estimate before sending (2026-10-07, US-13, #80)
-
-Measured on the Nothing Phone (3), unplugged, screen on: a written answer costs about **135 J** (21 answers, 92-194 J), roughly 0.2% of a full battery; a quick reply (a card, small talk, a decline) about **10 J** (27 replies), 0.015%. The app now measures each answer on the phone it runs on and shows one line under the text box while a message is typed (#161) with the share of battery and how many more like it the charge allows. Whether the reply will be written or quick is predicted from the search alone: right for 88.5% of 847 recorded replies on the desktop and 45 of 48 on the phone. Over three runs the meter, the phone's charge counter and the fall in battery level agree to within about 15%; there is no hardware power monitor. The iPhone half is written and has not been compiled or run. docs/results-battery-estimate.md.
 
 ### Where the remaining points are
 
@@ -215,7 +252,7 @@ PocketRAG reports 94.5% on the comparable measurement (MCQ, corpus-derived). Tha
 
 ---
 
-## Location (B-KR1)
+## Location fix (GPS)
 
 Implemented 2026-09-18.
 
@@ -238,7 +275,7 @@ Lock time is 15 s. Always the full window indoors, because the ≤10 m early exi
 
 **State accuracy** — a few hundred metres along a state line; up to ~9 km on a simplified coastline, recovered by a bounded 15 km snap. This is separate from the fix accuracy above: it bounds *which guide* Fred opens, not where it thinks you are.
 
-⚠️ Outdoor and driving samples are still owed — the proposal verifies this KR by driving to different physical locations. Every reading so far is indoors, which is the worst case for GPS.
+⚠️ GPS accuracy is no longer a KR of its own (revised OKRs, 2026-11-07); it is what B-KR1's directions start from. The indoor readings above are the earliest. Outdoors: 9.5 m median in airplane mode at one spot (docs/results-bkr1-outdoor.md); on the drive of 2026-10-09 and 10-11, 1,819 readings with signal on, median 1-3 m from the road, none over 20 m (docs/results-drive-test.md). GPS without signal is still one spot only.
 
 ---
 

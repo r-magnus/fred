@@ -493,7 +493,42 @@ sequenceDiagram
 | A-KR2 | Fred's responses are useful and accurate | > 70% LLM accuracy in all corpora-related questions | 10/12/2026 | Test Fred's inputs/outputs against an enterprise model armed with an answer sheet | US-01→04, US-08, US-11→12 |
 | A-KR3 | Fred's responses are quick and timely | < 20 s LLM response time, per query | 10/19/2026 | Run a series of queries, timing each response. | US-01→04, US-08, US-11→12 |
 
-### Beta — 11/16/2026
+### Beta — 11/16/2026 *(revised 11/7/2026)*
+
+**Objective:** The Fred application can help a user find signal, without any signal in
+the first place, and does so in a way that either conserves battery or makes the user
+mindful of it.
+
+| ID | Result | Measurement | Target · deadline | Verification | Connects to |
+|---|---|---|---|---|---|
+| B-KR1 | The Fred application can direct a user to signal. | From 6+ starts in dead zones, following Fred's direction reaches signal in at least 4. | 10/26/2026 | Drive to different physical locations without signal, and follow directions given by Fred. | US-05 |
+| B-KR2 | Fred's coverage map predicts real signal well enough to act on. | At 12+ checkpoints, at least 4 of which in no-service zones, are accurate to ~80%+ of real signal bars. | 11/10/2026 | Per checkpoint, screenshot the phone's signal bars next to Fred's in-app map display, noting discrepancies. | US-05 |
+| B-KR3 | The phone can maintain power for an average day hike, with the Fred app in frequent use. | On a ~5,000 mAh mobile battery, Fred + tracking lasts a ~6 hour hike. | 11/16/2026 | Across multiple tests, begin at 100% battery + tracking on, logging battery usage. | US-05 |
+
+### Release Candidate — 12/9/2026 *(revised 11/7/2026)*
+
+**Objective:** Users have Fred in their hands, as a packaged MVP, fully functional in
+intended no-WiFi environments, ready to run on private phones as "the real deal."
+
+| ID | Result | Measurement | Target · deadline | Verification | Connects to |
+|---|---|---|---|---|---|
+| RC-KR1 | Users who download Fred go through the setup funnel: downloading their area's information. | ~80%+ of (loosely) invited testers with qualifying phones finish setup, post large download. | 11/25/2026 | Send out invitations to local acquaintances; of the testers who complete initial download, mark how many finish setup. | US-09, US-10 |
+| RC-KR2 | Fred is positively received, with indication of further future and practical use, in the real world. | ~70%+ of test users say they'd bring Fred out on their next hike. | 12/2/2026 | Conduct a survey (either in-app, through a mailing list, or in person) recording personal sentiments and reviews from testers. | US-09, US-10 |
+| RC-KR3 | Fred is a successful application and project within the immediate community and beyond. | Fred has an active userbase of >500 hikers\* who use the Fred app on a semi-recursive basis. | 12/9/2026 | When in-signal, send records of which users still have Fred downloaded on their phone after initial first-time use. | US-09, US-10 |
+
+\*The term "hikers" serves as a nickname, referring to the would-be real user base of the Fred app.
+
+**Why the revision**
+- **B-KRn** — These have to do with practical user use cases, and how well things
+  actually perform on a real phone. The prior KRs were a little too loosey-goosey.
+- **RC-KRn** — These have to do with test/real user interaction with the Fred app: are
+  they downloading it, saying they like it, keeping it in the long run? The prior KRs
+  weren't specific or helpful enough.
+
+<details>
+<summary>Beta and Release Candidate KRs as submitted in v1.2 (9/27/2026), superseded</summary>
+
+#### Beta — 11/16/2026
 
 **Objective:** The application tracks the user's last known location, for the purposes
 of serving maps of the surrounding location, and providing suggestions on how to find
@@ -505,7 +540,7 @@ service.
 | B-KR2 | Fred can make the connection between a user's location and their queries. | When prompted, the recorded location of the user directs Fred's responses to become tailored to the specific user. | 11/10/2026 | Drive to different physical locations and run the estimation program, WiFi off, and ask questions. | US-05 |
 | B-KR3 | Fred can provide suggestions on where to go to find service. | The user can access a map with the estimated location zone alongside a shaded "possible service" region, within a several-km perimeter around the user. | 11/16/2026 | Drive to different physical locations and run the estimation program, WiFi off. Test service accuracy in and out of zones. | US-05 |
 
-### Release Candidate — 12/9/2026
+#### Release Candidate — 12/9/2026
 
 **Objective:** Users have Fred in their hands, as a packaged MVP, fully functional in
 intended no-WiFi environments. Fred additionally has a public product page & website,
@@ -517,9 +552,35 @@ with downloads available for an iOS & Android frontend application.
 | RC-KR2 | Fred has been user-tested and is live in the hands of a population of users. | Fred has a user base of at least 10 individuals across both iOS and Android. | 12/2/2026 | Outsource a testing population of peers and colleagues to collect qualitative review. | US-09, US-10 |
 | RC-KR3 | Fred has a product page, including professional promotional material. | Displayed on-page are at least 3 videos and 8 images of Fred use and content. | 12/9/2026 | Navigate through the site as an external user, and forward the site to non-stakeholders. | US-09, US-10 |
 
+</details>
+
+
 ---
 
 ## 07 · Milestone Grading Criteria
+
+*Revised 11/7/2026.* ↑ higher is better · ↓ lower is better
+
+| KR | Metric & evidence | A | B | C | D | F |
+|---|---|---|---|---|---|---|
+| A-KR1 | Necessary Knowledge Corpora | All listed corpora are functional. | ~75% of listed corpora; core functional. | Core corpora only. | Some load, but other corpora are missing. | None loading, or otherwise failing. |
+| A-KR2 | Accuracy ↑ | > 80% | 79–60% | 59–50% | 49–30% | < 30% |
+| A-KR3 | Response Time ↓ | < 20 s | 20–40 s | ~2 m | ~5 m | > 5 m |
+| B-KR1 | Signal Mapping ↑ | 4/6 | 3/6 | 2/6 | 1/6 | 0/6 |
+| B-KR2 | LLM & Location ↑ | > 80% | 70–79% | 60–69% | 40–59% | < 40% |
+| B-KR3 | Battery Mileage ↑ | > 6 hrs | 5–6 hrs | 4–5 hrs | 3–4 hrs | < 3 hrs |
+| RC-KR1 | Tester Setup Funnel ↑ | > 80% | 60–70% | 50–60% | 25–50% | < 25% |
+| RC-KR2 | User Sentiment ↑ | > 70% | 50–70% | 40–50% | 20–40% | < 20% |
+| RC-KR3 | User Population ↑ | > 500 | 200–500 | 50–200 | 25–50 | < 25 |
+
+**Notes**
+- **A-KRn** — Bands are largely unchanged: these KRs had already passed when the OKRs
+  were revised. In hindsight, A-KR1 would be better replaced by how often Fred responds,
+  balancing his refusal to respond against remaining helpful and cohesive to the user.
+- **A-KR1** — Less quantitative, so metrics are described instead of numeric.
+
+<details>
+<summary>Grading criteria as submitted in v1.2 (9/27/2026), superseded</summary>
 
 ↑ higher is better · ↓ lower is better
 
@@ -539,6 +600,8 @@ with downloads available for an iOS & Android frontend application.
 - **A-KR1** — Less quantitative, so metrics are described instead of numeric.
 - **RC-KR1** — May be up to debate due to unfamiliarity in this arena.
 
+</details>
+
 ---
 
 ## 08 · References & Acknowledgments
@@ -547,6 +610,8 @@ with downloads available for an iOS & Android frontend application.
 
 - **Draft.** Draft Proposal — as submitted 9/12/2026 (v0.5).
 - **Final.** v1.2 — submitted 9/27/2026, mirrored in this README.
+- **Revised OKRs.** Sections 06B and 07B — 11/7/2026: new Beta and Release Candidate KRs
+  and grading bands, shown above; the v1.2 versions are kept beneath them.
 
 ### References
 

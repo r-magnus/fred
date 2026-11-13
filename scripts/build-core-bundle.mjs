@@ -26,6 +26,13 @@
  *
  * PACKS_DIR defaults to packs/, MODELS_DIR to ~/models. Every pack must share
  * one encoder, the one whose file is bundled, or the app refuses to load.
+ *
+ * COMMERCIAL=1 builds a bundle that may be sold or used commercially: every
+ * pack with a nonCommercial licence entry (WHO BEC, docs/licensing.md) is left
+ * out and listed. The field cards are the one pack Fred cannot do without; if
+ * they are nonCommercial (a card still quotes WHO, #214) the build refuses
+ * rather than ship a Fred without them. Without COMMERCIAL the bundle is for a
+ * free release, and the nonCommercial packs in it are listed as a reminder.
  */
 import { createHash } from 'node:crypto';
 import { cpSync, createReadStream, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -49,6 +56,23 @@ for (const d of readdirSync(PACKS_DIR).filter((n) => /^core-.+-v\d/.test(n)).sor
   newest.set(manifest.id, { dir: d, manifest });
 }
 if (newest.size === 0) { console.error(`no core packs in ${PACKS_DIR}`); process.exit(1); }
+
+// Packs Fred cannot answer well without; a commercial build refuses rather than drop one.
+const REQUIRED = ['core-fieldcards'];
+const commercial = process.env.COMMERCIAL === '1';
+const nonCommercial = [...newest.values()].filter(({ manifest }) => (manifest.licenses ?? []).some((l) => l.nonCommercial === true));
+const ncNames = (ps) => ps.map(({ manifest }) => `${manifest.id} (${manifest.licenses.filter((l) => l.nonCommercial === true).map((l) => l.id).join(', ')})`).join('; ');
+if (commercial) {
+  const blocking = nonCommercial.filter(({ manifest }) => REQUIRED.includes(manifest.id));
+  if (blocking.length > 0) {
+    console.error(`commercial build refused: ${ncNames(blocking)} ${blocking.length === 1 ? 'is' : 'are'} nonCommercial and required. Re-back the WHO quotes first (#214).`);
+    process.exit(1);
+  }
+  for (const { manifest } of nonCommercial) newest.delete(manifest.id);
+  if (nonCommercial.length > 0) console.log(`commercial: left out ${ncNames(nonCommercial)}`);
+} else if (nonCommercial.length > 0) {
+  console.log(`free release only: ${ncNames(nonCommercial)} ${nonCommercial.length === 1 ? 'is' : 'are'} nonCommercial (COMMERCIAL=1 leaves them out)`);
+}
 const encoders = [...new Set([...newest.values()].map((p) => p.manifest.embedding.modelId))];
 if (encoders.length !== 1) { console.error(`core packs use different encoders: ${encoders.join(', ')}`); process.exit(1); }
 const encoderFiles = ENCODER_FILES[encoders[0]];
@@ -92,6 +116,7 @@ for (const { manifest } of newest.values()) for (const l of manifest.licenses ??
 const bundle = {
   schemaVersion: 1,
   builtAt: new Date().toISOString(),
+  commercial,
   components: {
     generator: { path: GENERATOR },
     encoder: { id: encoders[0], paths: encoderFiles },

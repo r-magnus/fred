@@ -37,12 +37,13 @@ export interface HealthPage {
   readonly url?: string;
   /** A PDF: its text is extracted, and its capitalised question lines become headings. */
   readonly pdf?: boolean;
-  /** The pack it goes in: the health pack unless said (#115's hazards pack). */
-  readonly pack?: 'core-hazards';
+  /** The pack it goes in: the health pack unless said (#115's hazards pack, #214's WHO-free first aid). */
+  readonly pack?: 'core-hazards' | 'core-firstaid-pd';
   readonly domain: DomainTag;
 }
 
 const cdc = (key: string, mediaId: number, domain: DomainTag = 'first-aid-physical'): HealthPage => ({ key, publisher: 'cdc', mediaId, domain });
+const pd = (p: HealthPage): HealthPage => ({ ...p, pack: 'core-firstaid-pd' });
 
 export const HEALTH_PAGES: readonly HealthPage[] = [
   // Ticks and tick-borne disease.
@@ -127,6 +128,15 @@ export const HEALTH_PAGES: readonly HealthPage[] = [
   // breathe", a danger sign, was answered with "Require and encourage workers
   // to take frequent breaks".
   { key: 'army-wildfire-survival', publisher: 'army', pack: 'core-hazards', url: 'https://www.army.mil/article/125204/Prepare_for_wildfire_survival_now/', domain: 'survival' },
+  // #214: public-domain first aid for the topics only WHO BEC covered among
+  // the packs (low blood sugar, heart attack) or covered thinly (seizure,
+  // stroke), so a commercial build can drop WHO. Chosen by the field cards
+  // that quote WHO most, before any eval was run.
+  pd(cdc('seizure-first-aid', 350661)),
+  pd(cdc('low-blood-sugar', 645637)),
+  pd(cdc('low-blood-sugar-treatment', 496783)),
+  pd(cdc('stroke-signs', 125431)),
+  pd({ key: 'nhlbi-heart-attack-symptoms', publisher: 'nih', url: 'https://www.nhlbi.nih.gov/health/heart-attack/symptoms', domain: 'first-aid-physical' }),
 ];
 
 async function fetchText(url: string): Promise<string> {

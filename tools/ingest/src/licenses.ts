@@ -22,6 +22,21 @@ export const ATP_SURVIVAL_LICENSE: LicenseEntry = {
   nonCommercial: false,
 };
 
+/**
+ * A WHO-free source for a commercial build (#214). Written for merchant crews
+ * far from a doctor; the 2003 edition keeps examination, fluids, heat and cold,
+ * wound care, dental care and cold-water immersion, and leaves acute trauma to
+ * other texts, so only those chapters are used.
+ */
+export const USPHS_SHIPS_LICENSE: LicenseEntry = {
+  id: 'usphs-ships',
+  license: 'Public domain (US Government work)',
+  sourceTitle: "The Ship's Medicine Chest and Medical Aid at Sea, 2003 Edition (US Department of Health and Human Services, Public Health Service, DHHS Publication No. (PHS) 03-2024)",
+  sourceUrl: 'https://www.govinfo.gov/app/details/GOVPUB-HE20-PURL-gpo20582',
+  attribution: "US Public Health Service, The Ship's Medicine Chest and Medical Aid at Sea (2003).",
+  nonCommercial: false,
+};
+
 export const ATP_FIRST_AID_LICENSE: LicenseEntry = {
   id: 'atp-4-02-11',
   license: 'Public domain (US Government work)',

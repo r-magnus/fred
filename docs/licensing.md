@@ -7,7 +7,8 @@ for the project report.**
 | id | Source | License | Commercial use |
 |---|---|---|---|
 | `who-bec` | WHO/ICRC *Basic Emergency Care* (2018) | CC BY-NC-SA 3.0 IGO | ❌ No |
-| `who-pfa` | WHO *Psychological First Aid: Guide for Field Workers* | CC BY-NC-SA 3.0 IGO | ❌ No |
+| `who-pfa` | WHO *Psychological First Aid: Guide for Field Workers* — **not shipped**: no pack or field card uses it (checked 2026-11-13). Kept here because the domain was planned. | CC BY-NC-SA 3.0 IGO | ❌ No |
+| `usphs-ships` | US Public Health Service, *The Ship's Medicine Chest and Medical Aid at Sea* (2003 edition, DHHS Publication No. (PHS) 03-2024), from [govinfo.gov](https://www.govinfo.gov/app/details/GOVPUB-HE20-PURL-gpo20582) — chapters on heat and cold illness, wound care, dental emergencies and cold-water immersion only, in the trial pack `core-firstaid-usphs` (#214) | Public domain (US Gov work) | ✅ Yes |
 | `atp-4-02-11` | US Army ATP 4-02.11 *Casualty Response, Tactical Combat Casualty Care, and First Aid* (Mar 2026) — used in `core-firstaid-army`, civilian-applicable chapters only | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `atp-3-50-21` | US Army ATP 3-50.21 *Survival* (Sept 2018) — used in `core-survival` | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `fm-21-76` | US Army FM 21-76 *Survival* (June 1992) — **Chapter 19, Signaling Techniques, only**, in `core-signaling`. ATP 3-50.21 (2018) has no signalling chapter. The intermediate FM 3-05.70 (2002) was *not* used: its cover carries "Distribution authorized to U.S. Government agencies and their contractors only", so it cannot ship despite commercial reprints. FM 21-76's cover reads "Approved for public release; distribution is unlimited." | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
@@ -18,16 +19,29 @@ for the project report.**
 | `osm` | OpenStreetMap via Geofabrik extracts | ODbL 1.0 | ✅ With attribution + share-alike |
 | `census-cb` | US Census Bureau TIGER/Line cartographic boundaries, 1:20,000,000 state outlines — used in `packages/geo` to turn a GPS fix into a state code offline, via the redistributed `us-states.json` from PublicaMundi/MappingAPI | Public domain (US Gov work) | ✅ Yes |
 | `nps` | National Park Service pages on nps.gov — `core-tips-nps` 1.1.0 adds horse and bike etiquette (Santa Monica Mountains) and hiking with pets; `core-wildlife-safety` (#117) uses 12 park wildlife-safety pages (mountain lions, moose, rattlesnakes, coyotes, fawns, Zion, Rocky Mountain, Yellowstone). Originally 28 national pages: hiking and camping safety, food storage, bears, wildlife distance, lightning, the *I Didn't Know That! Leave No Trace* series) — used in `core-tips-nps` (#96) | Public domain (US Gov work; [nps.gov disclaimer](https://www.nps.gov/aboutus/disclaimer.htm)). Credit "National Park Service". Photos and captions not ingested. | ✅ Yes |
-| `cdc` | US Centers for Disease Control and Prevention pages (18: ticks and Lyme disease, rabies, hantavirus, plague, mosquitoes, heat-related illness, Giardia, freshwater algal blooms, norovirus prevention) — used in `core-health` (#51). Fetched through the CDC content syndication API (tools.cdc.gov), its supported route for republishing; www.cdc.gov refuses automated requests and that is respected | Public domain (US Gov work). CDC's syndication terms ask that content be attributed and not altered in meaning; each chunk credits CDC | ✅ Yes |
+| `cdc` | US Centers for Disease Control and Prevention pages (18: ticks and Lyme disease, rabies, hantavirus, plague, mosquitoes, heat-related illness, Giardia, freshwater algal blooms, norovirus prevention) — used in `core-health` (#51); four more (*First Aid for Seizures*, *Low Blood Sugar*, *Treatment of Low Blood Sugar*, *Signs and Symptoms of Stroke*) in the trial pack `core-firstaid-pd` (#214). Fetched through the CDC content syndication API (tools.cdc.gov), its supported route for republishing; www.cdc.gov refuses automated requests and that is respected | Public domain (US Gov work). CDC's syndication terms ask that content be attributed and not altered in meaning; each chunk credits CDC | ✅ Yes |
 | `epa` | US EPA, *Emergency Disinfection of Drinking Water*; *Harmful Algal Blooms and Cyanotoxins FAQ* (PDF); *Action Steps for Sun Safety* (1.1.0) — used in `core-health` | Public domain (US Gov work) | ✅ Yes |
 | `fda` | US FDA, *Outsmarting Poison Ivy and Other Poisonous Plants*; *Tips to Stay Safe in the Sun*; *Sunscreen: How to Help Protect Your Skin from the Sun* (1.1.0) — used in `core-health` | Public domain (US Gov work) | ✅ Yes |
-| `nih` | National Institutes of Health pages (NIDDK: *Diarrhea*, *Symptoms & Causes*, *Treatment*; NIAMS: *Sports Injuries*, *Diagnosis, Treatment, and Steps to Take*) — used in `core-health` 1.1.0 (#116) | Public domain (US Gov work) | ✅ Yes |
+| `nih` | National Institutes of Health pages (NIDDK: *Diarrhea*, *Symptoms & Causes*, *Treatment*; NIAMS: *Sports Injuries*, *Diagnosis, Treatment, and Steps to Take*) — used in `core-health` 1.1.0 (#116); NHLBI *Heart Attack — Symptoms*, in the trial pack `core-firstaid-pd` (#214) | Public domain (US Gov work) | ✅ Yes |
 | `blm` | Bureau of Land Management, *Flash Floods: Tread Safely* — used in `core-hazards` (#115) | Public domain (US Gov work) | ✅ Yes |
 | `usfs-web` | Forest Service web pages: *Fire* (know before you go), Superior National Forest *Stay Safe*, Pacific Northwest *Safety in Burned Areas* — used in `core-hazards` (#115) | Public domain (US Gov work) | ✅ Yes |
 | `nws` | National Weather Service safety pages (*Heat Cramps, Exhaustion, Stroke*; *During Extremely Cold Weather*) — used in `core-health`; lightning (safety, outdoors, how it strikes people, tips, myths), flood (*Turn Around Don't Drown*, during a flood) and wildfire pages — used in `core-hazards` (#115) | Public domain (US Gov work) | ✅ Yes |
 | `wikivoyage:<Article>` | Wikivoyage travel topics (12 articles: Wilderness backpacking, Hiking, Camping, Wild camping, Leave-no-trace camping, Camping food, Outdoor cooking, Cold weather, Hot weather, Arid region safety, Pests, Orienteering) — used in `core-tips-wikivoyage` (#96). One licence entry per article, pinned to the revision fetched | CC BY-SA 4.0. Every use credits the article, "Wikivoyage contributors", the licence and a link. Share-alike: the pack is released under CC BY-SA 4.0. Text only. | ✅ With attribution + share-alike |
 
 Sentence index (#126): core packs carry `sentences.i8`/`sentences.idx`, vectors of the packs' own sentences; no new source text, same licences as the pack.
+
+## Release decision (2026-11-13)
+
+**The first public release is free.** WHO's NonCommercial licence allows that,
+so `core-firstaid` (WHO BEC) can ship in it with attribution, and the pack
+keeps its CC BY-NC-SA 3.0 IGO terms.
+
+**A later release must not need WHO.** Ryan asked for Fred to be set up so a
+paid or otherwise commercial release stays possible. That means: a WHO-free
+pack set measured against the shipped one (#33), public-domain replacements
+for what only WHO covers (#214), and a bundle build that leaves
+`nonCommercial` sources out of a commercial build. Results in
+`docs/results-no-who.md`.
 
 ## Two constraints to act on
 

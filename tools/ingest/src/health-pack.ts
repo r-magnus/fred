@@ -151,6 +151,8 @@ function body(page: CachedPage, publisher: Publisher): string {
     h = h.replace(/<p>\s*([A-Z][A-Za-z ,'-]{3,40})\s*<\/p>/g, '<h3>$1</h3>');
   }
   if (publisher === 'epa' || publisher === 'fda' || publisher === 'nih') between('<main', /<\/main>|Content current as of|Last Reviewed/);
+  // NHLBI (#214): the page's own menu and language switcher sit inside <main>.
+  if (page.sourceUrl.includes('nhlbi.nih.gov')) { const i = h.indexOf('language-switcher'); if (i >= 0) h = h.slice(h.indexOf('</ul>', i) + 5); }
   // #100: a forecast office's page has its menus inside div-full; the
   // article is the cms-content block, before its links to other material.
   if (publisher === 'nws' && !page.sourceUrl.includes('/safety/')) between('<div class="cms-content"', /<h1[^>]*>\s*Resource Materials/);
@@ -170,6 +172,8 @@ function body(page: CachedPage, publisher: Publisher): string {
 const HEALTH_ONLY = HEALTH_PAGES.filter((p) => p.pack === undefined);
 /** #115: the hazards pack's pages, built into core-hazards with the same cleaning. */
 const HAZARD_PAGES = HEALTH_PAGES.filter((p) => p.pack === 'core-hazards');
+/** #214: WHO-free first-aid pages, built into their own pack so a commercial build can swap it for WHO BEC. */
+const FIRSTAID_PD_PAGES = HEALTH_PAGES.filter((p) => p.pack === 'core-firstaid-pd');
 
 /**
  * Per-page repairs to extracted text. NWS's myths page sets its first myth's
@@ -183,7 +187,7 @@ const REPAIRS: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> 
 export function healthChunks(count: (t: string) => number, pages: readonly HealthPage[] = HEALTH_ONLY): DraftChunk[] {
   return pages.flatMap((p) => {
     const cached = JSON.parse(readFileSync(join(DIR, `${p.key}.json`), 'utf8')) as CachedPage;
-    const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*(?:\||-)\s*(?:US EPA|FDA|CDC|Rabies|NIDDK|NIAMS|National Institute[^|]*))+\s*$/, '')
+    const title = cached.title.replace(/<[^>]+>/g, '').replace(/(?:\s*(?:\||-)\s*(?:US EPA|FDA|CDC|Rabies|NIDDK|NIAMS|NHLBI, NIH|National Institute[^|]*))+\s*$/, '')
       .replace(/&amp;/g, '&').replace(/&#0?39;/g, "'").replace(/\s*&#124;\s*Article\s*&#124;\s*The United States Army\s*$/, '')
       .replace(/\s*(?:\|\s*(?:Bureau of Land Management|US Forest Service|Forest Service)|\(U\.S\. National Park Service\))\s*$/g, '')
       .replace(/^(?:Superior National Forest|Pacific Northwest Region)\s*\|\s*(.*?)(?:\s*\|\s*Forest Service)?$/, '$1')
@@ -222,6 +226,18 @@ async function main(): Promise<void> {
       licenseId: PUBLISHERS.nws.license.id, licenses: used, embedding: embedder.spec,
     }, hz, vz);
     console.log(`wrote ${dir}: ${manifest.chunkCount} chunks, ${(manifest.files.reduce((a, f) => a + f.bytes, 0) / 1048576).toFixed(2)} MB`);
+  }
+  if (which.includes('core-firstaid-pd')) {
+    const fa = healthChunks((t) => embedder.tokenCount(t), FIRSTAID_PD_PAGES);
+    const vf = await embedder.embed(fa.map((c) => documentText(EMBEDDING_GEMMA, c.section, c.text)));
+    const used = [...new Set(FIRSTAID_PD_PAGES.map((p) => p.publisher))].map((p) => PUBLISHERS[p].license);
+    const { dir, manifest } = await writePack(process.env.PACKS_OUT ?? 'packs', {
+      id: 'core-firstaid-pd', version: '0.1.0', displayName: 'First Aid from Public Health Agencies',
+      description: 'Public-domain CDC and NIH guidance on seizures, low blood sugar, stroke and heart attack.',
+      domains: ['first-aid-physical'], scope: { kind: 'global' }, source: 'CDC',
+      licenseId: PUBLISHERS.cdc.license.id, licenses: used, embedding: embedder.spec,
+    }, fa, vf);
+    console.log(`wrote ${dir}: ${manifest.chunkCount} chunks`);
   }
   if (!which.includes('core-health')) { await embedder.dispose(); return; }
   let chunks = healthChunks((t) => embedder.tokenCount(t), HEALTH_ONLY);

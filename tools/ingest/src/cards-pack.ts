@@ -18,9 +18,9 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
+import type { CardClarify, CardSource } from '@fred/pack-format';
 import { cardLines, parseCard, quantizeInt8 } from '@fred/rag-core';
-import { cardText, validateCards, type FieldCard, type PassageText } from './cards.ts';
+import { cardsLicense, cardText, validateCards, WHO_BEC_SOURCE, type FieldCard, type PassageText } from './cards.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
 import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
@@ -29,19 +29,6 @@ import type { DraftChunk } from './chunk.ts';
 
 const PACKS = process.env.PACKS_OUT ?? 'packs';
 
-/**
- * Cards paraphrase their sources, so they inherit the strictest terms among
- * them. WHO BEC is NonCommercial-ShareAlike, and at least one card draws on it,
- * so the pack as a whole is marked nonCommercial (docs/licensing.md).
- */
-const CARDS_LICENSE: LicenseEntry = {
-  id: 'fred-field-cards',
-  license: 'Derived work: CC-BY-NC-SA-3.0-IGO (from WHO BEC) and public domain (US Army ATP 3-50.21, ATP 4-02.11; US National Park Service)',
-  sourceTitle: 'Fred field cards, written from WHO BEC 2018, ATP 3-50.21, ATP 4-02.11 and National Park Service pages',
-  sourceUrl: 'corpora/cards/cards.json',
-  attribution: 'Adapted from WHO/ICRC Basic Emergency Care (2018), CC BY-NC-SA 3.0 IGO, and US Army ATP 3-50.21 (2018) and ATP 4-02.11 (2026), and US National Park Service pages (public domain).',
-  nonCommercial: true,
-};
 
 function revOf(c: FieldCard): string {
   const sorted = (v: unknown): unknown => Array.isArray(v) ? v.map(sorted)
@@ -108,6 +95,10 @@ for (const [id, entry] of Object.entries(clarifyFile)) {
   clarify[`core-fieldcards:${at}`] = { question: entry.question, choices: entry.choices };
 }
 
+// Strictest terms among the sources the cards in this build quote (cards.ts).
+const CARDS_LICENSE = cardsLicense(cards);
+const citesWho = cards.some((c) => c.sources.some((q) => q.source === WHO_BEC_SOURCE));
+
 // The manuals each card quotes, with the pages, for its citation in the app.
 // Taken from the same quotes validateCards has already checked word for word.
 const cardSources: Record<string, CardSource[]> = {};
@@ -158,7 +149,7 @@ const { dir } = await writePack(PACKS, {
   scope: { kind: 'global' },
   source: 'Fred field card',
   licenseId: CARDS_LICENSE.id,
-  licenses: [CARDS_LICENSE, WHO_BEC_LICENSE, ATP_SURVIVAL_LICENSE, ATP_FIRST_AID_LICENSE],
+  licenses: [CARDS_LICENSE, ...(citesWho ? [WHO_BEC_LICENSE] : []), ATP_SURVIVAL_LICENSE, ATP_FIRST_AID_LICENSE],
   embedding: embedder.spec,
   clarify,
   cardSources,

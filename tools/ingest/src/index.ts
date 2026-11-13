@@ -28,7 +28,7 @@ const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
 const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
 const EMBED_MODEL_ID = 'Supabase/gte-small';
 
-import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
+import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, USPHS_SHIPS_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
 import {
   ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, stripTreatmentSteps, WHO_BEC_PROVIDER_ONLY, WHO_BEC_TREATMENT_STEPS,
@@ -85,6 +85,42 @@ const CORPORA: Record<string, CorpusDef> = {
       source: 'WHO BEC 2018',
       licenseId: 'who-bec',
       licenses: [WHO_BEC_LICENSE],
+    },
+  },
+  // A public-domain stand-in for part of WHO BEC, for a commercial build
+  // (#214): heat and cold illness, wound care, dental emergencies, cold-water
+  // immersion and near-drowning. Examination, IV and injection technique,
+  // suturing, medication tables, ship sanitation and the STCW appendices are
+  // left out: none is something a hiker can act on.
+  'usphs-ships': {
+    pdf: 'corpora/usphs/ships.pdf',
+    domain: 'first-aid-physical',
+    pages: [
+      [43, 48], // Ch 1 hypothermia and hyperthermia
+      [59, 63], // Ch 1 wound care (suturing, 64-65, left out)
+      [119, 131], // Ch 5 dental care and emergencies
+      [215, 224], // Ch 10 immersion hypothermia, near-drowning, water survival
+    ],
+    clean: {
+      // Page labels ("1-17"), and chapter titles, which are letter-spaced
+      // ("I M M E R S I O N H Y P O T H E R M I A ,"): no sentence looks like that.
+      dropLines: [/^\d{1,2}-\d{1,2}$/, /^(?:[A-Z\u2019,&-]{1,2} ){2,}[A-Z\u2019,&-]{0,2}$/],
+      dropEdgeLines: [/^\d{1,2}$/],
+    },
+    // 2003 advice superseded by the Army manual Fred already carries (a
+    // tourniquet is no longer a last resort), and clinical steps a hiker has no
+    // means to carry out.
+    dropChunks: [/tourniquet/i, /intravenous|\bIV\b|inject|antibiotic|suture|anesthe|lidocaine|\bmg\b/i],
+    input: {
+      id: 'core-firstaid-usphs',
+      version: '0.1.0',
+      displayName: 'Medical Aid Far From Help',
+      description: "US Public Health Service, The Ship's Medicine Chest and Medical Aid at Sea (2003): heat and cold illness, wounds, dental emergencies, cold water and near-drowning.",
+      domains: ['first-aid-physical'],
+      scope: { kind: 'global' },
+      source: "Ship's Medicine Chest 2003",
+      licenseId: 'usphs-ships',
+      licenses: [USPHS_SHIPS_LICENSE],
     },
   },
   // Signalling for rescue only: the one survival topic the 2018 manual left out

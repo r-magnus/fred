@@ -1,0 +1,10 @@
+{
+  "grader": "Claude Opus 5.5 (in-session), blind: each question's distinct answers shown as A/B in random order against its answer sheet, key opened after grades were written",
+  "date": "2026-11-13",
+  "runs": "docs/no-who-runs-{with-who,no-who,replaced}-{holdout,breadth}.jsonl; main at ddd453d plus the trial packs; PACKS_DIR as named in docs/results-no-who.md; INTENT=1 STATE=CA, scope scorer, card matcher, VOICE=1",
+  "unchanged": "Every other answer is word for word the same in all three runs and is not regraded.",
+  "scores": {
+    "br-tq-01": { "with-who": 1, "no-who": 1, "replaced": 1, "note": "With WHO the model answers from a WHO passage; without it the bleeding card answers. Both carry placement, tighten until it stops, don't loosen, get care." },
+    "br-maggots-01": { "with-who": 0, "no-who": 0, "replaced": 0.5, "note": "With the Ship's Medicine Chest pack the model says maggots take dead tissue and that pain or bright red blood means healthy tissue; no flushing. The other two say 'removed promptly' and point to 'the SOURCES'." }
+  }
+}

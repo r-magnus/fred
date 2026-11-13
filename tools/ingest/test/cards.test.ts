@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardText, validateCards, type FieldCard } from '../src/cards.ts';
+import { cardsLicense, cardText, validateCards, WHO_BEC_SOURCE, type FieldCard } from '../src/cards.ts';
 
 const PASSAGES = [
   { source: 'ATP 3-50.21 Survival 2018', page: 25, text: 'Once you apply the dressing, do not remove it, even when the\ndressing becomes blood soaked.' },
@@ -36,4 +36,11 @@ test('a card with no steps or sources is refused', () => {
 
 test('card text keeps the don\'t as a word', () => {
   assert.match(cardText(card({ dont: ["Don't take off the dressing."] })), /Don't take off the dressing\./);
+});
+
+test('cards that quote WHO BEC make the card pack nonCommercial; without WHO quotes it is not (#214)', () => {
+  const who = card({ id: 'seizure', sources: [{ source: WHO_BEC_SOURCE, page: 100, quote: 'q' }] });
+  assert.equal(cardsLicense([card({}), who]).nonCommercial, true);
+  assert.equal(cardsLicense([card({})]).nonCommercial, false);
+  assert.equal(cardsLicense([card({})]).id, cardsLicense([who]).id);
 });

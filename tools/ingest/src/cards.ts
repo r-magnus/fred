@@ -14,7 +14,7 @@
  * by a person before they ship; this check is what makes the review about
  * judgement rather than about catching invented facts.
  */
-import type { DomainTag } from '@fred/pack-format';
+import type { DomainTag, LicenseEntry } from '@fred/pack-format';
 
 export interface CardSource {
   readonly source: string;
@@ -120,4 +120,36 @@ export function cardText(c: FieldCard): string {
   if (c.getHelp !== '') lines.push(c.getHelp);
   for (const u of c.unsourced ?? []) lines.push(u.text);
   return lines.join('\n');
+}
+
+/** The `source` a card quote names when it quotes WHO BEC. */
+export const WHO_BEC_SOURCE = 'WHO BEC 2018';
+
+/**
+ * The field-card pack's own licence entry. Cards paraphrase their sources, so
+ * they take the strictest terms among the sources they quote: while any card
+ * quotes WHO BEC (NonCommercial-ShareAlike) the pack is nonCommercial, and a
+ * commercial bundle refuses it (scripts/build-core-bundle.mjs). Once every
+ * WHO quote has been re-backed from public-domain sources (#214), the same
+ * build gives a pack a commercial release can ship.
+ */
+export function cardsLicense(cards: readonly FieldCard[]): LicenseEntry {
+  const who = cards.filter((c) => c.sources.some((q) => q.source === WHO_BEC_SOURCE)).map((c) => c.id);
+  return who.length > 0
+    ? {
+        id: 'fred-field-cards',
+        license: 'Derived work: CC-BY-NC-SA-3.0-IGO (from WHO BEC) and public domain (US Army ATP 3-50.21, ATP 4-02.11; US National Park Service)',
+        sourceTitle: 'Fred field cards, written from WHO BEC 2018, ATP 3-50.21, ATP 4-02.11 and National Park Service pages',
+        sourceUrl: 'corpora/cards/cards.json',
+        attribution: 'Adapted from WHO/ICRC Basic Emergency Care (2018), CC BY-NC-SA 3.0 IGO, and US Army ATP 3-50.21 (2018) and ATP 4-02.11 (2026), and US National Park Service pages (public domain).',
+        nonCommercial: true,
+      }
+    : {
+        id: 'fred-field-cards',
+        license: 'Written for Fred from public-domain sources (US Army ATP 3-50.21, ATP 4-02.11; US Government agency pages)',
+        sourceTitle: 'Fred field cards, written from public-domain US Government sources',
+        sourceUrl: 'corpora/cards/cards.json',
+        attribution: 'Adapted from US Army ATP 3-50.21 (2018) and ATP 4-02.11 (2026), and US Government agency pages (public domain).',
+        nonCommercial: false,
+      };
 }

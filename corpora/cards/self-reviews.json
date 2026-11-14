@@ -222,5 +222,21 @@
   "by": "Claude (self-review)",
   "change": "Re-backed from ATP 4-02.11 p.195 and NIDDK (#214): confusion, and being unable to drink enough.",
   "why": "Commercial build: 2 WHO quotes replaced; text unchanged. NIDDK states the can't-drink-enough sign for children."
+ },
+ {
+  "id": "spinal-injury",
+  "rev": "f0a53d691e96",
+  "date": "2026-11-14",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 pp.75-153, Navy Hospital Corpsman NAVEDTRA 14295 pp.146 and 192-193, and the JTS spine guideline p.7 (#214).",
+  "why": "Commercial build: 11 WHO quotes replaced; text unchanged. Tingling and the vomiting case are not worded in the new sources; numbness, weakness and rolling as a unit are. Army and Navy differ on a towel roll under the neck; the card mentions neither."
+ },
+ {
+  "id": "pelvis-injury",
+  "rev": "c241a0077cc9",
+  "date": "2026-11-14",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from Navy NAVEDTRA 14295 p.193, ATP 4-02.11 pp.75, 100 and 124, and the JTS Pelvic Fracture Care guideline 2026 pp.4 and 7 (#214).",
+  "why": "Commercial build: 10 WHO quotes replaced; text unchanged. The 2026 guideline backs wrapping with a binder or sheet; the 2000 Navy manual predates it (newer manual wins). How to place the sheet and not rocking the hips are standard practice, not worded in these sources."
  }
 ]

@@ -28,7 +28,10 @@ const EMBED_MODEL = `${process.env.HOME}/models/gte-small.onnx`;
 const EMBED_VOCAB = `${process.env.HOME}/models/gte-small-vocab.txt`;
 const EMBED_MODEL_ID = 'Supabase/gte-small';
 
-import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, USPHS_SHIPS_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
+import {
+  ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, FM_21_76_LICENSE, JTS_PELVIC_LICENSE, JTS_SPINE_LICENSE, NAVY_HM_LICENSE,
+  USPHS_SHIPS_LICENSE, WHO_BEC_LICENSE,
+} from './licenses.ts';
 import { asRewrites, SURVIVAL_REDACTIONS, survivingRedactions } from './redactions.ts';
 import {
   ATP_FIRST_AID_PROVIDER_ONLY, markProviderOnly, stripTreatmentSteps, WHO_BEC_PROVIDER_ONLY, WHO_BEC_TREATMENT_STEPS,
@@ -121,6 +124,65 @@ const CORPORA: Record<string, CorpusDef> = {
       source: "Ship's Medicine Chest 2003",
       licenseId: 'usphs-ships',
       licenses: [USPHS_SHIPS_LICENSE],
+    },
+  },
+  // Spine and pelvis first aid, so those two field cards need not quote WHO
+  // (#214). Build-time sources for the card quote check; not shipped. Navy
+  // 2000 edition: head injuries, spinal and pelvic fractures (pp.191-194), and
+  // "if the patient is unconscious, assume a spinal injury" (p.146).
+  'navedtra-14295': {
+    pdf: 'corpora/navy/navedtra-14295.pdf',
+    domain: 'first-aid-physical',
+    pages: [[146, 146], [191, 194]],
+    clean: { dropLines: [/^\d{1,2}-\d{1,3}$/, /^Figure \d+-\d+\./] },
+    input: {
+      id: 'core-firstaid-navy',
+      version: '0.1.0',
+      displayName: 'Navy Corpsman First Aid',
+      description: 'US Navy Hospital Corpsman, NAVEDTRA 14295 (2000): spinal and pelvic fractures, head injuries.',
+      domains: ['first-aid-physical'],
+      scope: { kind: 'global' },
+      source: 'NAVEDTRA 14295 Hospital Corpsman 2000',
+      licenseId: 'navedtra-14295',
+      licenses: [NAVY_HM_LICENSE],
+    },
+  },
+  // Current military guidance on wrapping a broken pelvis with a binder or a
+  // sheet, which the Navy's 2000 manual predates. Evaluation and temporary
+  // stabilization pages only (4, 7-8); the rest is surgery.
+  'jts-pelvic': {
+    pdf: 'corpora/jts/jts-pelvic-fracture.pdf',
+    domain: 'first-aid-physical',
+    pages: [[4, 4], [7, 8]],
+    clean: { dropLines: [/^Pelvic Fracture Care CPG ID: 34$/, /^Guideline Only\/Not a Substitute for Clinical Judgment \d+$/] },
+    input: {
+      id: 'core-firstaid-jts-pelvic',
+      version: '0.1.0',
+      displayName: 'Pelvic Fracture Care',
+      description: 'Joint Trauma System Pelvic Fracture Care guideline (2026): signs and temporary stabilization.',
+      domains: ['first-aid-physical'],
+      scope: { kind: 'global' },
+      source: 'JTS Pelvic Fracture Care 2026',
+      licenseId: 'jts-cpg-pelvic',
+      licenses: [JTS_PELVIC_LICENSE],
+    },
+  },
+  // One page: an injury painful enough to hide neck pain (p.7).
+  'jts-spine': {
+    pdf: 'corpora/jts/jts-spine-injury.pdf',
+    domain: 'first-aid-physical',
+    pages: [[7, 7]],
+    clean: { dropLines: [/^Cervical and Thoracolumbar Spine Injury .* CPG ID: 15$/, /^Guideline Only\/Not a Substitute for Clinical Judgment \d+$/] },
+    input: {
+      id: 'core-firstaid-jts-spine',
+      version: '0.1.0',
+      displayName: 'Spine Injury Care',
+      description: 'Joint Trauma System Cervical and Thoracolumbar Spine Injury guideline (2020): distracting injuries.',
+      domains: ['first-aid-physical'],
+      scope: { kind: 'global' },
+      source: 'JTS Spine Injury 2020',
+      licenseId: 'jts-cpg-spine',
+      licenses: [JTS_SPINE_LICENSE],
     },
   },
   // Signalling for rescue only: the one survival topic the 2018 manual left out

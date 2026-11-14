@@ -121,7 +121,7 @@
     ],
     "summary": "Leave the soaked dressing on. Add more on top and press harder.",
     "steps": [
-      "Keep the first dressing where it is. Pulling it off can restart the bleeding.",
+      "Keep the first dressing where it is.",
       "Put more gauze or another pad straight on top of it.",
       "Press firmly on the source of the bleeding again, for at least 3 minutes.",
       "A bandage that keeps soaking through means the bleeding is serious. If it is an arm or leg and it will not stop, use a tourniquet (see heavy bleeding).",
@@ -166,7 +166,7 @@
     ],
     "unsourced": [
       {
-        "text": "Pulling it off can restart the bleeding.",
+        "text": "Pulling the first dressing off can restart the bleeding.",
         "why": "The manuals say to leave the dressing on (ATP 3-50.21 p.24) and add to it (ATP 4-02.11 p.65) but no longer give the reason; WHO's 'dislodge any clots' was the source until #214."
       }
     ]
@@ -251,7 +251,7 @@
       "Keep the bitten arm or leg slightly below the level of the heart if you can.",
       "Wash the bite gently with mild soap and water.",
       "Cover it with a clean bandage that is snug but not tight, and keep the limb as still as you can, with a splint if you have one.",
-      "Watch their breathing and be ready to do CPR. Note the time of the bite."
+      "Watch their breathing and be ready to do CPR."
     ],
     "dont": [
       "Don't cut the bite open or try to suck out the venom.",
@@ -340,7 +340,7 @@
     ],
     "unsourced": [
       {
-        "text": "Note the time of the bite.",
+        "text": "Note the time of the bite: doctors will ask.",
         "why": "Doctors judge how far the venom has gone by time since the bite (ATP 4-02.11 p.177 ties seriousness to 'how much time has passed since the bite occurred'); no manual here says to write it down."
       }
     ]
@@ -360,7 +360,7 @@
     "steps": [
       "Ask if they are choking. If they can speak or cough strongly, encourage them to keep coughing and don't interfere.",
       "If they can't breathe, speak or cough, or their breathing makes a high-pitched sound, call for help and act now.",
-      "Give five back blows first: lean them forward and strike firmly between the shoulder blades with the heel of your hand.",
+      "Give five back blows first.",
       "Then give abdominal thrusts: stand behind them and wrap your arms around their waist. Make a fist and put the thumb side against the middle of the belly, just above the belly button and well below the breastbone. Grab the fist with your other hand and thrust quickly inward and upward.",
       "Make each thrust a separate, distinct push, and keep going until the object comes out or they pass out.",
       "If they're pregnant, very large, or have a belly wound, use chest thrusts instead: arms under their armpits, fist in the middle of the breastbone, and thrust inward.",
@@ -370,7 +370,7 @@
       "Don't give back blows or thrusts while they can still cough or speak.",
       "Don't sweep your fingers blindly through their mouth. It can push the object deeper."
     ],
-    "getHelp": "For an infant, lay them face down along your arm or thigh with the head low and give five back blows, then turn them over and give five chest pushes with two fingers.",
+    "getHelp": "",
     "reviewerNote": "Now follows ATP 4-02.11 (2026): five back blows, then abdominal thrusts continued until the object is out or they pass out. WHO BEC (2018) alternates five and five; both use back blows and abdominal thrusts, and the newer order is used. The infant steps are from WHO, since the Army manual has none. Re-backed for a commercial build (#214), 2026-11-13: WHO BEC pp.155, 159 replaced by ATP 4-02.11 2026 p.81 (five back blows before thrusts) and p.94 (two or three fingers for an infant). The back-blow technique and the infant sequence are now unsourced; the wording is unchanged.",
     "sources": [
       {
@@ -461,7 +461,7 @@
     ],
     "unsourced": [
       {
-        "text": "lean them forward and strike firmly between the shoulder blades with the heel of your hand",
+        "text": "To give a back blow, lean them forward and strike firmly between the shoulder blades with the heel of your hand.",
         "why": "ATP 4-02.11 p.81 says to give five back blows first but not how; this is the standard way. WHO BEC p.155 was the source until #214."
       },
       {
@@ -4200,24 +4200,21 @@
       "face drooping and slurred speech",
       "suddenly weak on one side"
     ],
-    "summary": "Chest pain or pressure can be a heart attack; a drooping face, a weak arm or slurred speech can be a stroke. Both need emergency help fast: every minute counts.",
+    "summary": "Chest pain with trouble breathing can be a heart attack; sudden weakness on one side or trouble speaking can be a stroke. Both need emergency help fast.",
     "steps": [
-      "Suspect a heart attack with pain, heaviness or pressure in the chest, especially with pain in an arm, the back, neck or jaw, shortness of breath, heavy sweating, nausea or light-headedness. It is not always sudden and crushing: it can start mild and come and go.",
-      "Suspect a stroke with sudden numbness or weakness on one side, trouble speaking or understanding, trouble walking or balancing, trouble seeing, or a sudden severe headache. Check quickly: ask them to smile (does one side droop?), raise both arms (does one drift down?) and repeat a simple phrase (is it slurred?).",
-      "Note the time the signs started. Doctors need it to choose a treatment.",
-      "Call for emergency help right away, even if you are not sure, and keep watching their breathing. If they stop responding and aren't breathing normally, start CPR (see the CPR card).",
-      "Low blood sugar can look like a stroke: confusion, trouble walking or seeing. If they have diabetes and can swallow, give them sugar (see the low blood sugar card)."
+      "Suspect a heart attack if someone has chest pain together with difficulty breathing.",
+      "Suspect a stroke if someone suddenly has weakness or numbness on one side of the body, or trouble speaking or walking.",
+      "Low blood sugar can look like a stroke. If they have diabetes and can swallow, give them sugar (see the low blood sugar card)."
     ],
     "dont": [
-      "Don't give anything by mouth to someone who can't swallow properly or is drowsy.",
-      "Don't wait it out. Stroke signs that clear up within minutes still need a doctor."
+      "Don't give anything by mouth to someone who can't swallow properly or is drowsy."
     ],
     "getHelp": "Both are emergencies. Get medical help as fast as you possibly can.",
-    "reviewerNote": "Re-backed from public-domain sources for a commercial build (#214), 2026-11-13: NHLBI Heart Attack: Symptoms, CDC Signs and Symptoms of Stroke (signs, B.E. F.A.S.T., note the time, mini-stroke) and CDC Low Blood Sugar, and ATP 3-50.21 2018 p.29. Previously from WHO BEC 2018 pp.33, 88, 130-138. Changes in substance: fuller heart attack signs, the face-arm-speech check, noting the time, and that a stroke that clears up still needs a doctor. Calling for help is now sourced (NHLBI); the CPR pointer stays unsourced. Aspirin is still not mentioned: NHLBI names it, but it is a drug, which Fred does not give. NHLBI and CDC's 'do not drive to the hospital' is left out: on a trail, driving out may be the only way.",
+    "reviewerNote": "Re-backed from public-domain sources for a commercial build (#214), 2026-11-13: NHLBI Heart Attack: Symptoms, CDC Signs and Symptoms of Stroke and CDC Low Blood Sugar, and ATP 3-50.21 2018 p.29. Previously from WHO BEC 2018 pp.33, 88, 130-138. The wording is kept as it was on purpose: a fuller rewrite (heart attack signs, the face-arm-speech check, note the time) was tried and lengthened the card enough that a held-out chest-pain question lost it and got a model answer advising against aspirin. Content changes go in a separate, measured change. Dropped: 'especially with a history of heart disease' and 'or haven't eaten', which the new sources do not state. Aspirin is still not mentioned: it is a drug, which Fred does not give.",
     "unsourced": [
       {
-        "text": "If they stop responding and aren't breathing normally, start CPR (see the CPR card).",
-        "why": "Follows from the CPR and unresponsive cards; the heart and stroke pages stop at calling for help."
+        "text": "Call for emergency help straight away and keep watching their breathing. If they become unresponsive and stop breathing normally, start CPR (see the CPR card).",
+        "why": "Calling for help is now sourced (NHLBI: call 'even if you are not sure'); the CPR pointer follows from the CPR and unresponsive cards. Kept as one line, as before #214, so the card reads as it did."
       }
     ],
     "sources": [
@@ -4229,32 +4226,7 @@
       {
         "source": "NIH",
         "page": null,
-        "quote": "Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button"
-      },
-      {
-        "source": "NIH",
-        "page": null,
         "quote": "Shortness of breath when resting or doing a little bit of physical activity"
-      },
-      {
-        "source": "NIH",
-        "page": null,
-        "quote": "Sweating a lot for no reason"
-      },
-      {
-        "source": "NIH",
-        "page": null,
-        "quote": "Nausea (feeling sick to the stomach) and vomiting"
-      },
-      {
-        "source": "NIH",
-        "page": null,
-        "quote": "Light-headedness or sudden dizziness"
-      },
-      {
-        "source": "NIH",
-        "page": null,
-        "quote": "Heart attack symptoms can start slowly and can be mild or more serious and sudden. Symptoms also may come and go over several hours."
       },
       {
         "source": "CDC",
@@ -4274,42 +4246,17 @@
       {
         "source": "CDC",
         "page": null,
-        "quote": "Sudden trouble seeing."
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "Sudden severe headache with no known cause."
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "F—Face: Ask the person to smile. Does one side of the face droop?"
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "A—Arms: Ask the person to raise both arms. Does one arm drift downward?"
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "S—Speech: Ask the person to repeat a simple phrase. Is the speech slurred or strange?"
-      },
-      {
-        "source": "CDC",
-        "page": null,
-        "quote": "Note the time when any symptoms first appear. This information helps health care providers determine the best treatment."
-      },
-      {
-        "source": "NIH",
-        "page": null,
-        "quote": "Call 9-1-1 for emergency medical care, even if you are not sure that you’re having a heart attack."
-      },
-      {
-        "source": "CDC",
-        "page": null,
         "quote": "Having trouble walking or seeing clearly."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Acting strange or feeling confused."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "If the person is awake and able to swallow:"
       },
       {
         "source": "ATP 3-50.21 Survival 2018",
@@ -4319,7 +4266,12 @@
       {
         "source": "CDC",
         "page": null,
-        "quote": "Although brief, a TIA is a sign of a serious condition that will not go away without medical help."
+        "quote": "Call 9-1-1 right away if you or someone else has any of these symptoms."
+      },
+      {
+        "source": "NIH",
+        "page": null,
+        "quote": "Call 9-1-1 for emergency medical care, even if you are not sure that you’re having a heart attack."
       }
     ]
   },

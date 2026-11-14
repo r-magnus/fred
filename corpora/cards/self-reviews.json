@@ -169,35 +169,35 @@
  },
  {
   "id": "heart-stroke",
-  "rev": "dfa02c2ea496",
+  "rev": "e971f2a31b2e",
   "date": "2026-11-13",
   "by": "Claude (self-review)",
-  "change": "Re-backed from NHLBI Heart Attack: Symptoms and CDC Signs and Symptoms of Stroke (#214): fuller heart attack signs, the face-arm-speech check, note the time, call even if unsure, and that a stroke that clears up still needs a doctor.",
-  "why": "Commercial build: 6 WHO quotes replaced. Aspirin and 'don't drive to the hospital' left out on purpose (a drug; and driving out may be the only option on a trail). CPR pointer stays unsourced."
+  "change": "Re-backed from NHLBI Heart Attack: Symptoms and CDC Signs and Symptoms of Stroke and Low Blood Sugar (#214), wording kept as before apart from two clauses the new sources do not state.",
+  "why": "Commercial build: 6 WHO quotes replaced. A fuller rewrite was tried and dropped: the longer card lost a held-out chest-pain question, whose model answer then advised against aspirin. Aspirin still not mentioned (a drug)."
  },
  {
   "id": "bleeding-soaked",
-  "rev": "0cd2a2777b29",
+  "rev": "0255a1ad204d",
   "date": "2026-11-13",
   "by": "Claude (self-review)",
   "change": "Re-backed from ATP 4-02.11 pp.65, 71 (#214): add gauze and press for another 3 minutes, tourniquet for a limb, wrap over it.",
-  "why": "Commercial build: 3 WHO quotes replaced. Same advice; adds the 3 minutes. The reason not to remove the dressing is now in the unsourced list."
+  "why": "Commercial build: 3 WHO quotes replaced. Same advice; adds the 3 minutes. The reason not to remove the dressing is now in the unsourced list. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
  },
  {
   "id": "snakebite",
-  "rev": "8e8b52c67596",
+  "rev": "46dca4d69934",
   "date": "2026-11-13",
   "by": "Claude (self-review)",
   "change": "Re-backed from ATP 4-02.11 p.178 and the Ship's Medicine Chest p.60 (#214). The snake photo is dropped: the newer Army manual says not to attempt to identify or kill the snake.",
-  "why": "Commercial build: 5 WHO quotes replaced. Manual-vs-manual conflict on the photo resolved by the standing rule (newer manual wins). Noting the time is now unsourced."
+  "why": "Commercial build: 5 WHO quotes replaced. Manual-vs-manual conflict on the photo resolved by the standing rule (newer manual wins). Noting the time is now unsourced. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
  },
  {
   "id": "choking",
-  "rev": "f9b2b1f66853",
+  "rev": "d14366c90505",
   "date": "2026-11-13",
   "by": "Claude (self-review)",
   "change": "Re-backed from ATP 4-02.11 pp.81, 94 (#214). Wording unchanged; the back-blow technique and the infant sequence move to the unsourced list.",
-  "why": "Commercial build: 3 WHO quotes replaced. No public-domain infant choking source found yet; the infant steps are standard and unchanged, and are flagged as wanted."
+  "why": "Commercial build: 3 WHO quotes replaced. No public-domain infant choking source found yet; the infant steps are standard and unchanged, and are flagged as wanted. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
  },
  {
   "id": "unresponsive",

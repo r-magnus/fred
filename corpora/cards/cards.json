@@ -121,9 +121,9 @@
     ],
     "summary": "Leave the soaked dressing on. Add more on top and press harder.",
     "steps": [
-      "Keep the first dressing where it is. Pulling it off tears away the clot that is starting to form.",
-      "Put another pad or more gauze straight on top of it.",
-      "Press firmly on the source of the bleeding again.",
+      "Keep the first dressing where it is. Pulling it off can restart the bleeding.",
+      "Put more gauze or another pad straight on top of it.",
+      "Press firmly on the source of the bleeding again, for at least 3 minutes.",
       "A bandage that keeps soaking through means the bleeding is serious. If it is an arm or leg and it will not stop, use a tourniquet (see heavy bleeding).",
       "When it stops, wrap a bandage firmly over everything to hold it in place."
     ],
@@ -131,13 +131,8 @@
       "Don't take off the soaked dressing."
     ],
     "getHelp": "Bleeding that soaks through a bandage counts as life-threatening. Get medical help as soon as you can.",
-    "reviewerNote": "",
+    "reviewerNote": " Re-backed for a commercial build (#214), 2026-11-13: WHO BEC p.169 replaced by ATP 4-02.11 2026 pp.65, 71 (add gauze and pressure for another 3 minutes, leave it in place, tourniquet for a limb, wrap over it). Adds the 3 minutes. The reason not to remove it is now unsourced.",
     "sources": [
-      {
-        "source": "WHO BEC 2018",
-        "page": 169,
-        "quote": "If the first dressing becomes soaked with blood, do not remove as this will dislodge any clots that have formed. Instead add another pad and apply firm pressure."
-      },
       {
         "source": "ATP 3-50.21 Survival 2018",
         "page": 25,
@@ -149,14 +144,30 @@
         "quote": "Bandages or makeshift bandages used to cover the wound are ineffective and steadily becoming soaked with blood."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 169,
-        "quote": "If bleeding does not stop, consider deep wound packing or tourniquet"
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 65,
+        "quote": "If the wound was previously packed with gauze or other materials, apply additional gauze or materials and pressure (for another 3 minutes) until bleeding has stopped."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 169,
-        "quote": "When bleeding stops, apply a bandage to keep the gauze/pad in place."
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 65,
+        "quote": "If bleeding has stopped, leave the hemostatic dressing in place while still maintaining pressure."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 71,
+        "quote": "If this fails to control the bleeding in an arm or leg, only then"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 65,
+        "quote": "Wrap the pressure/elastic bandage tightly around the extremity, focusing pressure over the wound"
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "Pulling it off can restart the bleeding.",
+        "why": "The manuals say to leave the dressing on (ATP 3-50.21 p.24) and add to it (ATP 4-02.11 p.65) but no longer give the reason; WHO's 'dislodge any clots' was the source until #214."
       }
     ]
   },
@@ -239,17 +250,17 @@
       "Take off rings, watches and anything tight near the bite before it swells.",
       "Keep the bitten arm or leg slightly below the level of the heart if you can.",
       "Wash the bite gently with mild soap and water.",
-      "Cover it with a clean bandage that is snug but not tight, and splint the limb so it stays still.",
-      "Note the time of the bite. Watch their breathing and be ready to do CPR."
+      "Cover it with a clean bandage that is snug but not tight, and keep the limb as still as you can, with a splint if you have one.",
+      "Watch their breathing and be ready to do CPR. Note the time of the bite."
     ],
     "dont": [
       "Don't cut the bite open or try to suck out the venom.",
       "Don't put a tourniquet on the limb.",
       "Don't put ice on it.",
-      "Don't try to catch or kill the snake. You risk a second bite. A photo from a safe distance is fine."
+      "Don't try to catch, kill or identify the snake. You risk a second bite."
     ],
     "getHelp": "Get medical help right away. Most snakebites are not deadly, but hospitals have the antivenom and you don't.",
-    "reviewerNote": "WHO BEC describes a firm pressure bandage up the whole limb, but only for snakes whose venom affects the nerves (like coral snakes), and says it is NOT recommended for snakes whose venom damages tissue near the bite (like rattlesnakes). A hiker can't tell which, so this card uses the snug bandage and splint from ATP 4-02.11 instead.",
+    "reviewerNote": "WHO BEC describes a firm pressure bandage up the whole limb, but only for snakes whose venom affects the nerves (like coral snakes), and says it is NOT recommended for snakes whose venom damages tissue near the bite (like rattlesnakes). A hiker can't tell which, so this card uses the snug bandage and splint from ATP 4-02.11 instead. Re-backed for a commercial build (#214), 2026-11-13: WHO BEC pp.199-200 replaced by ATP 4-02.11 2026 p.178 and the Ship's Medicine Chest 2003 p.60 (splinting). Change in substance: the photo of the snake is dropped, because the newer Army manual says not to attempt to identify or kill it (newer manual wins). Noting the time is now unsourced.",
     "sources": [
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -277,16 +288,6 @@
         "quote": "Apply a sterile bandage or dress over the bite, ensuring it is snug but not too tight."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 200,
-        "quote": "Bind a splint to the limb to immobilize as much of the limb as possible."
-      },
-      {
-        "source": "WHO BEC 2018",
-        "page": 200,
-        "quote": "Note the time the bandage was placed."
-      },
-      {
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 179,
         "quote": "Monitor\ntheir vital signs, such as breathing and heart rate, and be prepared to administer CPR if necessary."
@@ -297,19 +298,9 @@
         "quote": "DO NOT attempt to cut open the bite or suck out the venom."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 200,
-        "quote": "DO NOT put a tourniquet around the snake bite or limb."
-      },
-      {
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 179,
         "quote": "do not attempt to capture or kill the snake as it may increase the risk\nof further bites"
-      },
-      {
-        "source": "WHO BEC 2018",
-        "page": 199,
-        "quote": "When possible, take a picture of the snake and send with the patient."
       },
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -322,9 +313,35 @@
         "quote": "Deaths from snakebites are rare."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 199,
-        "quote": "This is NOT recommended if the snakes in your area produce toxins that primarily cause tissue\ndamage near the wound and do not cause body-wide symptoms."
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 178,
+        "quote": "Apply a sterile bandage or dress over the bite, ensuring it is snug but not too tight."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 178,
+        "quote": "This can help immobilize the area and reduce the spread of venom."
+      },
+      {
+        "source": "Ship's Medicine Chest 2003",
+        "page": 60,
+        "quote": "Splinting is used to decrease mobility and promote wound healing."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 178,
+        "quote": "Do not apply ice or use a TQ, as they are not effective and can cause additional harm."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 178,
+        "quote": "In the event you are bitten, do not attempt to identify and or kill the snake."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "Note the time of the bite.",
+        "why": "Doctors judge how far the venom has gone by time since the bite (ATP 4-02.11 p.177 ties seriousness to 'how much time has passed since the bite occurred'); no manual here says to write it down."
       }
     ]
   },
@@ -354,7 +371,7 @@
       "Don't sweep your fingers blindly through their mouth. It can push the object deeper."
     ],
     "getHelp": "For an infant, lay them face down along your arm or thigh with the head low and give five back blows, then turn them over and give five chest pushes with two fingers.",
-    "reviewerNote": "Now follows ATP 4-02.11 (2026): five back blows, then abdominal thrusts continued until the object is out or they pass out. WHO BEC (2018) alternates five and five; both use back blows and abdominal thrusts, and the newer order is used. The infant steps are from WHO, since the Army manual has none.",
+    "reviewerNote": "Now follows ATP 4-02.11 (2026): five back blows, then abdominal thrusts continued until the object is out or they pass out. WHO BEC (2018) alternates five and five; both use back blows and abdominal thrusts, and the newer order is used. The infant steps are from WHO, since the Army manual has none. Re-backed for a commercial build (#214), 2026-11-13: WHO BEC pp.155, 159 replaced by ATP 4-02.11 2026 p.81 (five back blows before thrusts) and p.94 (two or three fingers for an infant). The back-blow technique and the infant sequence are now unsourced; the wording is unchanged.",
     "sources": [
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -370,11 +387,6 @@
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 81,
         "quote": "Prior to applying abdominal thrust, first responders should administer five back blows."
-      },
-      {
-        "source": "WHO BEC 2018",
-        "page": 155,
-        "quote": "have the person bend at the waist and give five back blows (with the\nheel of your hand, strike the back between the shoulder blades"
       },
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -437,14 +449,24 @@
         "quote": "Perform a finger sweep only if there is visible obstruction in the mouth to avoid pushing the\nobstruction deeper."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 159,
-        "quote": "Lay the infant over your arm or thigh in the face down position\nwith the head lower than the abdomen."
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 81,
+        "quote": "Prior to applying abdominal thrust, first responders should administer five back blows."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 159,
-        "quote": "Give five chest thrusts with two fingers placed just below the\nnipple line in the middle of the chest."
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 94,
+        "quote": "For infants or children, use two or three fingers instead of the entire hand."
+      }
+    ],
+    "unsourced": [
+      {
+        "text": "lean them forward and strike firmly between the shoulder blades with the heel of your hand",
+        "why": "ATP 4-02.11 p.81 says to give five back blows first but not how; this is the standard way. WHO BEC p.155 was the source until #214."
+      },
+      {
+        "text": "For an infant, lay them face down along your arm or thigh with the head low and give five back blows, then turn them over and give five chest pushes with two fingers.",
+        "why": "No public-domain source here describes infant choking; ATP 4-02.11 p.94 gives two or three fingers for an infant's chest. WHO BEC p.159 was the source until #214. Wanted: a public-domain infant choking source."
       }
     ]
   },
@@ -1291,14 +1313,14 @@
       "If a neck or head injury is possible, open the airway by lifting the jaw forward at its angles instead, without tilting the head.",
       "Take out anything you can see in the mouth, but don't sweep blindly with your fingers.",
       "Check whether they are breathing. If they are not, start CPR.",
-      "If they are breathing and there's no sign of injury, roll them onto their side with the top leg bent forward and their head resting on their arm, mouth pointing down. This lets vomit drain out instead of choking them."
+      "If they are breathing and you don't suspect a back or neck injury, roll them onto their side as one unit, with the hand of their upper arm under their chin and the upper leg bent forward. This lets blood, mucus and vomit drain out instead of choking them."
     ],
     "dont": [
       "Don't twist their body when you move them. It can make a back, neck or spine injury worse.",
       "Don't push your fingers into the mouth to look for something you can't see. It can push it deeper."
     ],
     "getHelp": "Anyone who won't wake up needs medical help. Keep checking their breathing until help arrives.",
-    "reviewerNote": "",
+    "reviewerNote": " Re-backed for a commercial build (#214), 2026-11-13: WHO BEC p.189 replaced by ATP 4-02.11 2026 pp.78-79, 89. Change in substance: the recovery position follows the Army manual (hand of the upper arm under the chin, rolled as one unit) instead of WHO's (head on the outstretched arm) and keeps WHO's condition in the Army's words: not with a suspected back or neck injury (p.138).",
     "sources": [
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -1336,19 +1358,34 @@
         "quote": "Confirm if the casualty is not breathing and, if so, proceed to attempt rescue breathing"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 189,
-        "quote": "If the patient is unconscious or semiconscious and if there is NO TRAUMA, place the patient on"
-      },
-      {
-        "source": "WHO BEC 2018",
-        "page": 189,
-        "quote": "Stabilize the patient by bending the top leg forward. The left arm should be\nstraight with the patient's head resting on the arm to elevate the head and position the mouth\ndownward. This position will allow for vomit and other secretions to drain from the mouth with\nless risk of airway obstruction."
-      },
-      {
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 77,
         "quote": "Do not put your fingers\nin the mouth to try to find or remove any unseen objects that might be causing an obstruction as this may\npush the object further into the airway."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 78,
+        "quote": "If the casualty is unconscious but breathing, the casualty should be placed in the recovery position"
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 89,
+        "quote": "places the casualty in the recovery position by rolling the casualty as a single unit onto their side, placing the casualty's hand of the upper arm under the casualty's chin, and flexing the casualty's upper leg."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 79,
+        "quote": "The recovery position allows blood and mucus to drain out of the casualty's nose and mouth and not drain back into the airway."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 79,
+        "quote": "The recovery position also helps to protect against inhaling vomit if the casualty throws up."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 138,
+        "quote": "DO NOT move the casualty with a suspected back or neck injury."
       }
     ]
   },
@@ -2136,7 +2173,7 @@
     ],
     "dont": [],
     "getHelp": "Anaphylaxis can kill quickly. Get medical help even if the auto-injector seems to work.",
-    "reviewerNote": "Rewritten from your review. No doses: the card tells them to follow the injector's own instructions, and says what to do when there is no injector (get to help, because epinephrine is the treatment). Positioning simplified to lying down, or sitting if that helps breathing; the leg raise is dropped. The antihistamine line is not from the manuals and is marked as such.",
+    "reviewerNote": "Rewritten from your review. No doses: the card tells them to follow the injector's own instructions, and says what to do when there is no injector (get to help, because epinephrine is the treatment). Positioning simplified to lying down, or sitting if that helps breathing; the leg raise is dropped. The antihistamine line is not from the manuals and is marked as such. Re-backed for a commercial build (#214), 2026-11-13: WHO BEC p.26 (position of comfort) replaced by ATP 4-02.11 2026 p.79.",
     "sources": [
       {
         "source": "ATP 4-02.11 First Aid 2026",
@@ -2184,11 +2221,6 @@
         "quote": "Position the casualty supine with legs elevated if injuries permit."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 26,
-        "quote": "Allow the patient to stay in a\nposition of comfort"
-      },
-      {
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 102,
         "quote": "Inquire about any known allergies or recent exposures to potential allergens."
@@ -2202,6 +2234,11 @@
         "source": "ATP 4-02.11 First Aid 2026",
         "page": 102,
         "quote": "Anaphylaxis is life-threatening, and immediate action is crucial."
+      },
+      {
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 79,
+        "quote": "If a casualty can breathe on their own, let them assume the best position (position of comfort) that allows them to breathe, including sitting up."
       }
     ],
     "unsourced": [
@@ -2954,63 +2991,137 @@
       "shaking and jerking on the ground",
       "what to do during a seizure"
     ],
-    "summary": "Keep them from getting hurt while it happens. Put nothing in their mouth, and once it stops, turn them on their side.",
+    "summary": "Keep them from getting hurt while it happens. Don't hold them down or put anything in their mouth, and turn them on their side.",
     "steps": [
-      "Move hard or sharp things away from them and protect them from falling or hitting anything.",
-      "When the shaking stops, check they are breathing and roll them onto their side so the airway stays clear. If they fell or hit their head, move them as little as possible and treat it as a possible neck injury.",
-      "Stay with them. Confusion afterwards is normal and should clear over half an hour to a few hours."
+      "Clear away anything hard or sharp near them. If they are falling, ease them to the ground, and put something soft like a jacket under their head.",
+      "If they fell hard or hit their head, move them as little as possible and treat it as a possible neck injury.",
+      "Otherwise, turn them gently onto one side with the mouth pointing to the ground, so the airway stays clear. Loosen anything tight around the neck.",
+      "Time it. Most seizures stop within a few minutes.",
+      "Stay with them. When it is over, let them rest somewhere safe, and once they are alert, tell them what happened."
     ],
     "dont": [
-      "Don't put anything in their mouth, including your fingers."
+      "Don't hold them down or try to stop the movements.",
+      "Don't put anything in their mouth, including your fingers.",
+      "Don't give them food or water until they are fully alert."
     ],
-    "getHelp": "Get medical help if they were hurt, if they are pregnant, or if they are still confused after a few hours, which suggests something else is wrong.",
-    "reviewerNote": "Built from WHO BEC 2018 p.33 (seizure management, after the drug and oxygen steps were removed for #61) and p.133 (recovery time, falls, pregnancy). The WHO list also allows 'except to suction airway', a clinical step the card leaves out. 'Don't hold them down' is in the unsourced list: the manuals don't say it, but none say to restrain.",
-    "unsourced": [
-      {
-        "text": "Don't hold them down or try to stop the movements.",
-        "why": "Standard first-aid teaching. The manuals' stated goal is to 'prevent hypoxia and injury' (WHO p.33), and none of them say to restrain a seizing person."
-      }
-    ],
+    "getHelp": "Get emergency help if it lasts longer than 5 minutes, another seizure follows soon after, they have trouble breathing or waking up afterwards, they were hurt, it happened in water, it is their first seizure, they have diabetes and pass out, or they are pregnant.",
+    "reviewerNote": "Re-backed from public-domain sources for a commercial build (#214), 2026-11-13: CDC First Aid for Seizures (steps, what to avoid, when to call for help) and ATP 4-02.11 2026 p.125 (seizures after a head injury) and p.138 (suspected neck injury). Previously from WHO BEC 2018 pp.33, 133. Changes in substance: 'Don't hold them down' is now sourced (CDC) and leaves the unsourced list; CDC adds the 5-minute rule, a soft pad under the head, loosening the collar, and food and water only once fully alert. Dropped: WHO's recovery time ('half an hour to several hours'), which no public-domain source here states; CDC's 'trouble waking up after the seizure' covers the same danger. CDC's 'Don't give mouth-to-mouth breaths during the seizure' is left out so the card cannot be read against the CPR card.",
+    "unsourced": [],
     "sources": [
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "The goal in managing seizures/convulsions is to prevent hypoxia and injury."
+        "source": "CDC",
+        "page": null,
+        "quote": "Remove anything near them that can cause an injury."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "Protect the seizing person from falls and from any hard or sharp objects nearby."
+        "source": "CDC",
+        "page": null,
+        "quote": "Ease them to the ground if they appear to be falling."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "Place patient in recovery position if there is no trauma suspected."
+        "source": "CDC",
+        "page": null,
+        "quote": "Put something soft and flat under their head (like a jacket)."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "With a witnessed convulsion, ask about fall or head trauma."
+        "source": "CDC",
+        "page": null,
+        "quote": "Turn them gently onto one side with their mouth pointing to the ground. This will keep their airway clear."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "recovery of normal mental status after convulsions usually takes only a half hour to several hours at most"
+        "source": "CDC",
+        "page": null,
+        "quote": "Loosen anything around the neck that could block breathing."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "Do not place anything in the mouth of a person with active seizure"
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 125,
+        "quote": "Convulsions (seizures or involuntary jerking) may occur even after a mild head injury."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "Longer altered mental status suggests another cause."
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 138,
+        "quote": "DO NOT move the casualty with a suspected back or neck injury."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "High blood pressure during pregnancy can lead to eclampsia (or seizures/convulsions and high blood pressure) during pregnancy."
+        "source": "CDC",
+        "page": null,
+        "quote": "Most seizures last just a few minutes."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Time the seizure to track if it lasts more than 5 minutes."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Stay with the person."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "When the seizure is over, help them sit in a safe place to recover."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Once they are alert, comfort them and explain what happened."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Don't hold the person down or stop their movements."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Don't put anything in their mouth."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Don't offer water or food until they are fully alert."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "The seizure lasts longer than 5 minutes."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "They have another seizure soon after the first one."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "They have trouble breathing or waking up after the seizure."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "They are injured during the seizure."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "The seizure happens in water."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Has never had a seizure before."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Has diabetes and loses consciousness."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Is pregnant."
       }
     ]
   },
@@ -3025,54 +3136,125 @@
       "hypoglycemia",
       "confused and sweaty after not eating"
     ],
-    "summary": "Low blood sugar can make someone confused, sweaty or strange, and it can be fixed fast: if they can swallow, give them sugar.",
+    "summary": "Low blood sugar can make someone shaky, sweaty, confused or strange, and it can be fixed fast: if they can swallow, give them sugar.",
     "steps": [
-      "Suspect low blood sugar if someone becomes confused, sweaty or acts strangely, especially if they have diabetes or haven't eaten.",
-      "If they can talk and swallow, give them sugar by mouth right away.",
-      "They should improve quickly. If they don't, something else may be wrong.",
-      "If they are unconscious or can't swallow, give nothing by mouth. Put them on their side and get help."
+      "Suspect low blood sugar if someone gets shaky, sweaty, dizzy, irritable or confused, or starts acting strangely, especially if they have diabetes. Hard exercise, hot and humid weather and high altitude all make it more likely.",
+      "If they are awake and can swallow, give them fast sugar right away: half a cup of juice or regular soda, a tablespoon of sugar or honey, hard candies or jellybeans, or glucose tablets. Chocolate and other fatty or high-fibre snacks work more slowly.",
+      "Wait 15 minutes, then check again, with their meter if they have one. If it is still low, give sugar again.",
+      "Once they are better, have them eat a proper snack with carbs and protein, like crackers and cheese.",
+      "If they pass out or can't swallow, give nothing by mouth. Treat them as unresponsive (see that card) and get help."
     ],
     "dont": [
       "Don't give food or drink to someone who is unconscious or can't swallow."
     ],
-    "getHelp": "Get medical help if they don't improve quickly, can't swallow, pass out or have a seizure.",
-    "reviewerNote": "Built from WHO BEC 2018 p.33 (oral glucose, kept as lay care in #61), p.137 (signs, quick improvement), p.132-133 (diabetes, last meal) and ATP 3-50.21 2018 p.29 (no fluids when unconscious). Everyday sugar sources are in the unsourced list; WHO says only 'oral glucose'.",
-    "unsourced": [
-      {
-        "text": "Glucose tablets, a sweet drink, sugar, honey or candy all work.",
-        "why": "WHO says 'give oral glucose'; these are the forms of sugar a hiker actually carries."
-      }
-    ],
+    "getHelp": "Get emergency help if they pass out, have a seizure, can't swallow, or aren't getting better.",
+    "reviewerNote": "Re-backed from public-domain sources for a commercial build (#214), 2026-11-13: CDC Low Blood Sugar (symptoms, causes) and Treatment of Low Blood Sugar (15-15 rule, foods, severe lows), and ATP 3-50.21 2018 p.29 (nothing by mouth when unconscious). Previously from WHO BEC 2018 pp.33, 132-137. Changes in substance: the forms of sugar are now sourced (CDC) and leave the unsourced list; adds the wait-and-repeat rule, the follow-up snack, that fat and fibre slow it down, and the causes a hiker meets (activity, heat and humidity, altitude). Amounts are food portions from CDC, not drug doses. Glucagon is left out: it is a prescription injection, and Fred does not walk anyone through drugs (#176).",
+    "unsourced": [],
     "sources": [
       {
-        "source": "WHO BEC 2018",
-        "page": 132,
-        "quote": "In any patient with diabetes and altered mental status, suspect diabetic crisis, or low blood sugar caused by medications."
+        "source": "CDC",
+        "page": null,
+        "quote": "Shaking."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "Low blood glucose levels and dehydration can cause altered mental status."
+        "source": "CDC",
+        "page": null,
+        "quote": "Sweating."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 137,
-        "quote": "Sweating (diaphoresis)"
+        "source": "CDC",
+        "page": null,
+        "quote": "Irritability or confusion."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "Patients with hypoglycaemia (low blood sugar) need glucose immediately."
+        "source": "CDC",
+        "page": null,
+        "quote": "Dizziness."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "If the person can speak and swallow, give oral glucose."
+        "source": "CDC",
+        "page": null,
+        "quote": "Acting strange or feeling confused."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 137,
-        "quote": "Mental status improves quickly with glucose"
+        "source": "CDC",
+        "page": null,
+        "quote": "Low blood sugar is especially common in people with type 1 diabetes."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "The amount and timing of physical activity."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Hot and humid weather."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Spending time at a high altitude."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "If the person is awake and able to swallow:"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Give them a fast-acting source of sugar (regular, non-diet soda or fruit juice)."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "4 ounces (½ cup) of juice or regular (non-diet) soda."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "1 tablespoon of sugar, honey, or syrup."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Hard candies, jellybeans, or gumdrops"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "3-4 glucose tablets"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Foods high in fiber (such as fruit, beans, lentils) and foods high in fat (such as chocolate, baked goods) can slow down how fast you can absorb sugars."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Have 15 grams of carbs, then wait 15 minutes."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Check your blood sugar again. If it's still less than 70 mg/dL, repeat this process."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Then, have them eat a long-acting source of carbs with protein (ex. crackers and cheese, sandwich with meat)."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Blood sugar this low may make you faint (pass out). Often, you'll need someone to help you treat severe low blood sugar."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Having seizures."
       },
       {
         "source": "ATP 3-50.21 Survival 2018",
@@ -3221,7 +3403,7 @@
       "Don't force down huge amounts. Too much water can also be dangerous."
     ],
     "getHelp": "Get medical help for diarrhoea with blood or fever, or if someone can't drink enough or becomes confused.",
-    "reviewerNote": "Built from ATP 3-50.21 2018 p.51 (dehydration) and p.32 (dysentery), and WHO BEC 2018 pp.105 and 133. The manuals give no oral rehydration recipe that a layperson can use, so the card doesn't invent one. The survival manual's illness table suggests extreme measures (for example DDT powder for lice) meant for long isolation; none are used here.",
+    "reviewerNote": "Built from ATP 3-50.21 2018 p.51 (dehydration) and p.32 (dysentery), and WHO BEC 2018 pp.105 and 133. The manuals give no oral rehydration recipe that a layperson can use, so the card doesn't invent one. The survival manual's illness table suggests extreme measures (for example DDT powder for lice) meant for long isolation; none are used here. Re-backed for a commercial build (#214), 2026-11-13: WHO BEC pp.105, 133 replaced by ATP 4-02.11 2026 p.195 (confusion) and NIDDK (can't drink enough; stated there for children).",
     "sources": [
       {
         "source": "ATP 3-50.21 Survival 2018",
@@ -3299,14 +3481,14 @@
         "quote": "Bloody diarrhea, fever, stomach pain, rapid weight loss, can lead to death."
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 105,
-        "quote": "may be unable to drink enough fluids without assistance and are at risk of dehydration"
+        "source": "ATP 4-02.11 First Aid 2026",
+        "page": 195,
+        "quote": "Dehydration and fatigue can contribute to an altered mental status"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 133,
-        "quote": "Low blood glucose levels and dehydration can cause altered mental status."
+        "source": "NIH",
+        "page": null,
+        "quote": "seek a doctor’s help right away if the child can’t drink enough liquids or oral rehydration solutions to prevent dehydration."
       }
     ]
   },
@@ -4018,58 +4200,126 @@
       "face drooping and slurred speech",
       "suddenly weak on one side"
     ],
-    "summary": "Chest pain with trouble breathing can be a heart attack; sudden weakness on one side or trouble speaking can be a stroke. Both need emergency help fast.",
+    "summary": "Chest pain or pressure can be a heart attack; a drooping face, a weak arm or slurred speech can be a stroke. Both need emergency help fast: every minute counts.",
     "steps": [
-      "Suspect a heart attack if someone has chest pain together with difficulty breathing, especially with a history of heart disease.",
-      "Suspect a stroke if someone suddenly has weakness or numbness on one side of the body, or trouble speaking or walking.",
-      "Low blood sugar can look like a stroke. If they have diabetes or haven't eaten and can swallow, give them sugar (see the low blood sugar card)."
+      "Suspect a heart attack with pain, heaviness or pressure in the chest, especially with pain in an arm, the back, neck or jaw, shortness of breath, heavy sweating, nausea or light-headedness. It is not always sudden and crushing: it can start mild and come and go.",
+      "Suspect a stroke with sudden numbness or weakness on one side, trouble speaking or understanding, trouble walking or balancing, trouble seeing, or a sudden severe headache. Check quickly: ask them to smile (does one side droop?), raise both arms (does one drift down?) and repeat a simple phrase (is it slurred?).",
+      "Note the time the signs started. Doctors need it to choose a treatment.",
+      "Call for emergency help right away, even if you are not sure, and keep watching their breathing. If they stop responding and aren't breathing normally, start CPR (see the CPR card).",
+      "Low blood sugar can look like a stroke: confusion, trouble walking or seeing. If they have diabetes and can swallow, give them sugar (see the low blood sugar card)."
     ],
     "dont": [
-      "Don't give anything by mouth to someone who can't swallow properly or is drowsy."
+      "Don't give anything by mouth to someone who can't swallow properly or is drowsy.",
+      "Don't wait it out. Stroke signs that clear up within minutes still need a doctor."
     ],
     "getHelp": "Both are emergencies. Get medical help as fast as you possibly can.",
-    "reviewerNote": "The manuals describe heart attack and stroke mainly for diagnosis by health workers (WHO BEC 2018 pp.88, 130-138) and give no lay treatment beyond recognition and urgent referral. The card stays within that. Aspirin is not mentioned: it is a drug dose, which Fred does not give. 'Call for emergency help' and the CPR pointer are in the unsourced list.",
+    "reviewerNote": "Re-backed from public-domain sources for a commercial build (#214), 2026-11-13: NHLBI Heart Attack: Symptoms, CDC Signs and Symptoms of Stroke (signs, B.E. F.A.S.T., note the time, mini-stroke) and CDC Low Blood Sugar, and ATP 3-50.21 2018 p.29. Previously from WHO BEC 2018 pp.33, 88, 130-138. Changes in substance: fuller heart attack signs, the face-arm-speech check, noting the time, and that a stroke that clears up still needs a doctor. Calling for help is now sourced (NHLBI); the CPR pointer stays unsourced. Aspirin is still not mentioned: NHLBI names it, but it is a drug, which Fred does not give. NHLBI and CDC's 'do not drive to the hospital' is left out: on a trail, driving out may be the only way.",
     "unsourced": [
       {
-        "text": "Call for emergency help straight away and keep watching their breathing. If they become unresponsive and stop breathing normally, start CPR (see the CPR card).",
-        "why": "The manuals frame both as conditions for rapid transfer (WHO p.130 onward). Calling for help and starting CPR follow from the CPR and unresponsive cards."
+        "text": "If they stop responding and aren't breathing normally, start CPR (see the CPR card).",
+        "why": "Follows from the CPR and unresponsive cards; the heart and stroke pages stop at calling for help."
       }
     ],
     "sources": [
       {
-        "source": "WHO BEC 2018",
-        "page": 88,
-        "quote": "Difficulty in breathing with chest pain can suggest heart attack"
+        "source": "NIH",
+        "page": null,
+        "quote": "Chest pain, heaviness, or discomfort in the center or left side of the chest (this is the most common symptom)"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 88,
-        "quote": "Heart attack may present with difficulty in breathing."
+        "source": "NIH",
+        "page": null,
+        "quote": "Pain or discomfort in one or both arms, your back, shoulders, neck, jaw, or above your belly button"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 130,
-        "quote": "Weakness or loss of sensation on one side suggests a mass, bleeding, or blocked blood vessels in the brain (stroke), though hypoglycemia can also present this way."
+        "source": "NIH",
+        "page": null,
+        "quote": "Shortness of breath when resting or doing a little bit of physical activity"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 138,
-        "quote": "Weakness on one side of the body or speech problems"
+        "source": "NIH",
+        "page": null,
+        "quote": "Sweating a lot for no reason"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 131,
-        "quote": "Change in mental status with weakness or sensory loss in one area of the body, or problems with walking and balance"
+        "source": "NIH",
+        "page": null,
+        "quote": "Nausea (feeling sick to the stomach) and vomiting"
       },
       {
-        "source": "WHO BEC 2018",
-        "page": 33,
-        "quote": "If the person can speak and swallow, give oral glucose."
+        "source": "NIH",
+        "page": null,
+        "quote": "Light-headedness or sudden dizziness"
+      },
+      {
+        "source": "NIH",
+        "page": null,
+        "quote": "Heart attack symptoms can start slowly and can be mild or more serious and sudden. Symptoms also may come and go over several hours."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Sudden numbness or weakness in the face, arm, or leg, especially on one side of the body."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Sudden confusion, trouble speaking, or difficulty understanding speech."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Sudden trouble walking, dizziness, loss of balance, or lack of coordination."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Sudden trouble seeing."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Sudden severe headache with no known cause."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "F—Face: Ask the person to smile. Does one side of the face droop?"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "A—Arms: Ask the person to raise both arms. Does one arm drift downward?"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "S—Speech: Ask the person to repeat a simple phrase. Is the speech slurred or strange?"
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Note the time when any symptoms first appear. This information helps health care providers determine the best treatment."
+      },
+      {
+        "source": "NIH",
+        "page": null,
+        "quote": "Call 9-1-1 for emergency medical care, even if you are not sure that you’re having a heart attack."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Having trouble walking or seeing clearly."
       },
       {
         "source": "ATP 3-50.21 Survival 2018",
         "page": 29,
         "quote": "Do not give fluids or morphine to unconscious persons."
+      },
+      {
+        "source": "CDC",
+        "page": null,
+        "quote": "Although brief, a TIA is a sign of a serious condition that will not go away without medical help."
       }
     ]
   },

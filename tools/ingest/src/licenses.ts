@@ -61,3 +61,34 @@ export const FM_21_76_LICENSE: LicenseEntry = {
   attribution: 'US Army FM 21-76, Survival (1992). Approved for public release; distribution is unlimited.',
   nonCommercial: false,
 };
+
+/**
+ * WHO-free sources for the spine and pelvis field cards (#214). Build-time
+ * only: the card quote check reads them; no pack built from them ships.
+ */
+export const NAVY_HM_LICENSE: LicenseEntry = {
+  id: 'navedtra-14295',
+  license: 'Public domain (US Government work)',
+  sourceTitle: 'Hospital Corpsman, NAVEDTRA 14295 (Naval Education and Training Professional Development and Technology Center, August 2000)',
+  sourceUrl: 'https://archive.org/details/Hospital_Corpsman_NAVEDTRA_14295',
+  attribution: 'US Navy, Hospital Corpsman, NAVEDTRA 14295 (2000). Distribution Statement A: approved for public release; distribution is unlimited.',
+  nonCommercial: false,
+};
+
+export const JTS_PELVIC_LICENSE: LicenseEntry = {
+  id: 'jts-cpg-pelvic',
+  license: 'Public domain (US Government work)',
+  sourceTitle: 'Joint Trauma System Clinical Practice Guideline: Pelvic Fracture Care, CPG ID 34 (Defense Health Agency, 17 Feb 2026)',
+  sourceUrl: 'https://jts.health.mil/assets/docs/cpgs/Pelvic_Fracture_Care_17_Feb_2026_ID34v1.1.pdf',
+  attribution: 'Joint Trauma System, Pelvic Fracture Care Clinical Practice Guideline (2026).',
+  nonCommercial: false,
+};
+
+export const JTS_SPINE_LICENSE: LicenseEntry = {
+  id: 'jts-cpg-spine',
+  license: 'Public domain (US Government work)',
+  sourceTitle: 'Joint Trauma System Clinical Practice Guideline: Cervical and Thoracolumbar Spine Injury Evaluation, Transport and Surgery in the Deployed Setting, CPG ID 15 (19 Jun 2020)',
+  sourceUrl: 'https://jts.health.mil/assets/docs/cpgs/Cervical_Thoracolumbar_Spine_Injury_19_Jun_2020_ID15.pdf',
+  attribution: 'Joint Trauma System, Cervical and Thoracolumbar Spine Injury Clinical Practice Guideline (2020).',
+  nonCommercial: false,
+};

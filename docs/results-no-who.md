@@ -179,3 +179,37 @@ Baseline: the phone's packs (`~/fred-runs/phone-1018/packs`, field cards
    aspirin, against the NHLBI page. The old wording is kept on the new
    sources. Richer card content belongs in its own measured change, tried on
    fresh questions, not inside a re-sourcing.
+
+## Spine and pelvis re-backed (2026-11-14, field cards 0.11.0)
+
+**No field card quotes WHO any more.** The card pack's licence entry is now
+public domain (`nonCommercial: false`), so a commercial bundle can ship it.
+
+| Card | WHO quotes replaced | Now backed by |
+|---|---:|---|
+| spinal-injury | 11 | ATP 4-02.11 pp.75, 77, 121, 124-127, 151-153; Navy *Hospital Corpsman* NAVEDTRA 14295 (2000) pp.146, 192-193; JTS spine guideline (2020) p.7 |
+| pelvis-injury | 10 | Navy NAVEDTRA 14295 p.193; ATP 4-02.11 pp.75, 100, 124; JTS *Pelvic Fracture Care* (2026) pp.4, 7 |
+
+Card text is unchanged: only quotes and reviewer notes moved. The built card
+pack's passages and vectors are byte-identical to 0.10.0; only the licence
+and credit lines in the manifest differ. So retrieval, card choice and
+answers cannot change, and no sweep was run.
+
+**Sources.** The Navy manual's clean copy was found on archive.org (marked
+public domain, Distribution Statement A), not irp.fas.org. The JTS guidelines
+are Defense Health Agency documents written by military officers. All three
+go into build-time packs (`core-firstaid-navy`, `core-firstaid-jts-pelvic`,
+`core-firstaid-jts-spine`) that the quote check reads and that do not ship.
+
+**Where the sources disagree.**
+- The Navy manual (2000) predates pelvic wraps: it pads between the legs and
+  ties them together. The 2026 guideline uses a binder or sheet. The newer
+  source wins, and the card keeps its wrap.
+- The Army manual (2026) slips a towel roll under the neck; the Navy manual
+  says not to pad under the neck or head. The card says neither.
+
+**Not worded in the new sources, kept as reviewed before** (noted in each
+card's reviewer note): "tingling" as a sign (numbness and weakness are
+sourced); "if they vomit" as a reason to roll (rolling as a unit is
+sourced); how to place the sheet (centred on the hip bones, crossed at the
+front, firm but not very painful); and "don't press or rock the hips".

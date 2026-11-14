@@ -9,6 +9,9 @@ for the project report.**
 | `who-bec` | WHO/ICRC *Basic Emergency Care* (2018) | CC BY-NC-SA 3.0 IGO | ❌ No |
 | `who-pfa` | WHO *Psychological First Aid: Guide for Field Workers* — **not shipped**: no pack or field card uses it (checked 2026-11-13). Kept here because the domain was planned. | CC BY-NC-SA 3.0 IGO | ❌ No |
 | `usphs-ships` | US Public Health Service, *The Ship's Medicine Chest and Medical Aid at Sea* (2003 edition, DHHS Publication No. (PHS) 03-2024), from [govinfo.gov](https://www.govinfo.gov/app/details/GOVPUB-HE20-PURL-gpo20582) — chapters on heat and cold illness, wound care, dental emergencies and cold-water immersion only, in the trial pack `core-firstaid-usphs` (#214) | Public domain (US Gov work) | ✅ Yes |
+| `navedtra-14295` | US Navy *Hospital Corpsman*, NAVEDTRA 14295 (August 2000), from [archive.org](https://archive.org/details/Hospital_Corpsman_NAVEDTRA_14295) — pp.146 and 191-194 (spinal and pelvic fractures, head injuries) only, in the build-time pack `core-firstaid-navy`, which does not ship; field cards quote it (#214) | Public domain (US Gov work; Distribution Statement A, approved for public release, distribution unlimited) | ✅ Yes |
+| `jts-cpg-pelvic` | Joint Trauma System Clinical Practice Guideline *Pelvic Fracture Care*, CPG ID 34 (17 Feb 2026), from [jts.health.mil](https://jts.health.mil/assets/docs/cpgs/Pelvic_Fracture_Care_17_Feb_2026_ID34v1.1.pdf) — pp.4, 7-8 (signs, temporary stabilization) only, in the build-time pack `core-firstaid-jts-pelvic`, which does not ship; text only, the figures credited to other sites are not used (#214) | Public domain (US Gov work by military authors) | ✅ Yes |
+| `jts-cpg-spine` | Joint Trauma System Clinical Practice Guideline *Cervical and Thoracolumbar Spine Injury*, CPG ID 15 (19 Jun 2020), from [jts.health.mil](https://jts.health.mil/assets/docs/cpgs/Cervical_Thoracolumbar_Spine_Injury_19_Jun_2020_ID15.pdf) — p.7 only, in the build-time pack `core-firstaid-jts-spine`, which does not ship (#214) | Public domain (US Gov work by military authors) | ✅ Yes |
 | `atp-4-02-11` | US Army ATP 4-02.11 *Casualty Response, Tactical Combat Casualty Care, and First Aid* (Mar 2026) — used in `core-firstaid-army`, civilian-applicable chapters only | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `atp-3-50-21` | US Army ATP 3-50.21 *Survival* (Sept 2018) — used in `core-survival` | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
 | `fm-21-76` | US Army FM 21-76 *Survival* (June 1992) — **Chapter 19, Signaling Techniques, only**, in `core-signaling`. ATP 3-50.21 (2018) has no signalling chapter. The intermediate FM 3-05.70 (2002) was *not* used: its cover carries "Distribution authorized to U.S. Government agencies and their contractors only", so it cannot ship despite commercial reprints. FM 21-76's cover reads "Approved for public release; distribution is unlimited." | Public domain (US Gov work; approved for public release, distribution unlimited) | ✅ Yes |
@@ -42,6 +45,10 @@ pack set measured against the shipped one (#33), public-domain replacements
 for what only WHO covers (#214), and a bundle build that leaves
 `nonCommercial` sources out of a commercial build. Results in
 `docs/results-no-who.md`.
+
+*Status 2026-11-14:* no field card quotes WHO any more (field cards 0.11.0), so the
+card pack is no longer `nonCommercial`. Only the WHO pack itself (`core-firstaid`)
+is, and a commercial build leaves it out.
 
 ## Two constraints to act on
 

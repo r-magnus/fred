@@ -150,5 +150,77 @@
   "by": "Claude (self-review)",
   "change": "New card: a wildfire or its smoke nearby (#100). Ryan approved a card for this on 2026-10-16.",
   "why": "Wildfire messages got the campfire card, the burns card, model answers that said to make smoke signals with a burning tree or to tip a canoe, or were declined. Written from NPS visitor fire safety, the Forest Service's Boundary Waters steps and the Army's Fort Huachuca fire-prevention article; 17 quotes checked word for word. Four lines are marked unsourced with reasons (the smoke step, from NIOSH's employer-facing page left out of the packs; no fire even to signal; SOS and trouble breathing; examples of bare ground). 'Fire runs uphill' is not claimed: no US agency source found says it. No serious conflict to escalate."
+ },
+ {
+  "id": "seizure",
+  "rev": "ffb659320b30",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from CDC First Aid for Seizures and ATP 4-02.11 (#214). Adds the 5-minute rule, a soft pad under the head, loosening the collar, no food or water until fully alert, and CDC's call-for-help list; 'don't hold them down' is now sourced. Head-injury caution placed before turning them on their side.",
+  "why": "Commercial build: the card quoted WHO BEC (NonCommercial) 8 times. Every quote re-verified word for word. Checked against the CPR card: CDC's 'no mouth-to-mouth during the seizure' is left out so the cards cannot be read as conflicting. Dropped WHO's recovery time, which no public-domain source here states."
+ },
+ {
+  "id": "low-blood-sugar",
+  "rev": "c8e3a2fe19b6",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from CDC Low Blood Sugar and Treatment of Low Blood Sugar (#214): symptoms, hiking causes (activity, heat, altitude), the 15-15 rule, fast-sugar foods with CDC's portions, the follow-up snack, and that chocolate is slow.",
+  "why": "Commercial build: 6 WHO quotes replaced. Portions are food, not drug doses; glucagon left out (a prescription injection; #176). Nothing by mouth when unconscious kept (ATP 3-50.21)."
+ },
+ {
+  "id": "heart-stroke",
+  "rev": "e971f2a31b2e",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from NHLBI Heart Attack: Symptoms and CDC Signs and Symptoms of Stroke and Low Blood Sugar (#214), wording kept as before apart from two clauses the new sources do not state.",
+  "why": "Commercial build: 6 WHO quotes replaced. A fuller rewrite was tried and dropped: the longer card lost a held-out chest-pain question, whose model answer then advised against aspirin. Aspirin still not mentioned (a drug)."
+ },
+ {
+  "id": "bleeding-soaked",
+  "rev": "0255a1ad204d",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 pp.65, 71 (#214): add gauze and press for another 3 minutes, tourniquet for a limb, wrap over it.",
+  "why": "Commercial build: 3 WHO quotes replaced. Same advice; adds the 3 minutes. The reason not to remove the dressing is now in the unsourced list. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
+ },
+ {
+  "id": "snakebite",
+  "rev": "46dca4d69934",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 p.178 and the Ship's Medicine Chest p.60 (#214). The snake photo is dropped: the newer Army manual says not to attempt to identify or kill the snake.",
+  "why": "Commercial build: 5 WHO quotes replaced. Manual-vs-manual conflict on the photo resolved by the standing rule (newer manual wins). Noting the time is now unsourced. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
+ },
+ {
+  "id": "choking",
+  "rev": "ba44f1fdfc0d",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 pp.81, 94 (#214). Card text identical to before; the infant sequence moves from the get-help line to the unsourced list (same place in the card), and the back-blow how-to stays in step 3 with its missing source noted in the reviewer note.",
+  "why": "Commercial build: 3 WHO quotes replaced. No public-domain infant choking source found yet; the infant steps are standard and unchanged, and are flagged as wanted. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
+ },
+ {
+  "id": "unresponsive",
+  "rev": "8c131fdf97d5",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 pp.78-79, 89, 138 (#214). Recovery position now as the Army describes it (rolled as one unit, hand of the upper arm under the chin, upper leg bent), still only without a suspected back or neck injury.",
+  "why": "Commercial build: 2 WHO quotes replaced. Kept the spinal condition after first dropping it in this edit: ATP p.138 says not to move a suspected back or neck injury."
+ },
+ {
+  "id": "anaphylaxis",
+  "rev": "f984f5e4f005",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 p.79 (#214): position of comfort, including sitting up.",
+  "why": "Commercial build: 1 WHO quote replaced; text unchanged."
+ },
+ {
+  "id": "dehydration",
+  "rev": "1b550a16396c",
+  "date": "2026-11-13",
+  "by": "Claude (self-review)",
+  "change": "Re-backed from ATP 4-02.11 p.195 and NIDDK (#214): confusion, and being unable to drink enough.",
+  "why": "Commercial build: 2 WHO quotes replaced; text unchanged. NIDDK states the can't-drink-enough sign for children."
  }
 ]

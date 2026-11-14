@@ -119,3 +119,63 @@ irp.fas.org, which challenges automated downloads, so it was not fetched.
    by hand from a browser).
 3. Decide whether the trial packs ship. Neither costs anything measured, and
    `core-firstaid-pd` is what the re-backed cards would quote.
+
+## Nine cards re-backed (2026-11-13, field cards 0.10.0)
+
+Nine of the eleven cards no longer quote WHO; spinal and pelvis still do
+(21 quotes between them). Every new quote is checked word for word at build
+time; each card has a self-review entry (`corpora/cards/self-reviews.json`)
+and the review page shows the new wording.
+
+| Card | Now backed by | Wording |
+|---|---|---|
+| seizure | CDC *First Aid for Seizures*, ATP 4-02.11 pp.125, 138 | rewritten: 5-minute rule, soft pad under the head, no food or water until alert, CDC's call-for-help list; "don't hold them down" now sourced |
+| low-blood-sugar | CDC *Low Blood Sugar*, *Treatment of Low Blood Sugar*, ATP 3-50.21 p.29 | rewritten: trail causes (activity, heat, altitude), fast-sugar foods, the 15-minute recheck, the follow-up snack |
+| heart-stroke | NHLBI, CDC stroke and low blood sugar pages, ATP 3-50.21 p.29 | kept (two clauses the new sources don't state dropped) |
+| bleeding-soaked | ATP 4-02.11 pp.65, 71 | adds "for at least 3 minutes" |
+| snakebite | ATP 4-02.11 p.178, Ship's Medicine Chest p.60 | the snake photo dropped: the newer Army manual says not to try to identify it |
+| unresponsive | ATP 4-02.11 pp.78-79, 89, 138 | recovery position as the Army describes it |
+| choking | ATP 4-02.11 pp.81, 94 | identical text; the back-blow how-to and the infant steps have no public-domain quote yet |
+| anaphylaxis, dehydration | ATP 4-02.11 pp.79, 195; NIDDK | identical text |
+
+The card pack's licence list is now built from the sources the cards quote
+(12 entries, from each source's own pack), not a fixed list.
+
+**The CDC/NIH and Ship's Medicine Chest packs do not ship.** The cards quote
+them, but quotes are checked when the cards are built, so the packs need not
+be on the phone. Installed, the CDC pages sat close behind the cards on the
+same topics and took the card answer away three times (a model answer
+instead). The Ship's Medicine Chest pack has run-together capitalised
+headings and clinical steps a hiker should not attempt (trimming skin flaps,
+removing dead tissue from burns).
+
+### Measured
+
+Baseline: the phone's packs (`~/fred-runs/phone-1018/packs`, field cards
+0.9.0). New: the same with field cards 0.10.0. Code at `f346b6a`.
+
+- **Decision sweep, 29 sets, 1,129 replies:** one card choice changed. "the
+  bandage got wet in the creek and it opened up again" (held out, a second
+  turn that accepts any card) now gets the soaked-bandage card instead of the
+  cut card; reasonable for a cut that reopened, not unsafe.
+  `cards-reback-sweep-diff.txt`.
+- **Generated held-out (40) and breadth (57):** six answers changed, each the
+  new card text: unresponsive twice (recovery position), low blood sugar,
+  soaked bandage, rattlesnake, choking. None worse; low blood sugar fuller.
+  The choking change put the back-blow how-to after the don'ts and was
+  undone, so the card reads as before. `cards-reback-gen-*.jsonl`.
+
+### Caught on the way, and fixed
+
+1. **Unsourced lines are read out.** Fred says a card's unsourced lines at
+   the end of the card. Listing fragments of existing steps there repeated
+   them, and the repeats moved "guy here stopped breathing, help" from the
+   CPR card to the choking card. Each unsourced line is now a sentence of its
+   own.
+2. **A longer card loses its questions.** A fuller heart and stroke card
+   (heart attack signs, the face-arm-speech check, noting the time) fell from
+   0.326 to 0.293 on a held-out chest-pain question, under the 0.32 a card
+   needs to be shown as written; the model answer then advised against
+   aspirin, against the NHLBI page. The old wording is kept on the new
+   sources. Richer card content belongs in its own measured change, tried on
+   fresh questions, not inside a re-sourcing.

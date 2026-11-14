@@ -18,12 +18,11 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import type { CardClarify, CardSource } from '@fred/pack-format';
+import type { CardClarify, CardSource, LicenseEntry } from '@fred/pack-format';
 import { cardLines, parseCard, quantizeInt8 } from '@fred/rag-core';
-import { cardsLicense, cardText, validateCards, WHO_BEC_SOURCE, type FieldCard, type PassageText } from './cards.ts';
+import { cardsLicense, cardText, validateCards, type FieldCard, type PassageText } from './cards.ts';
 import { loadOnnxEmbedder } from './onnx-embed.ts';
 import { documentText, EMBEDDING_GEMMA, loadGgufEmbedder } from './gguf-embed.ts';
-import { ATP_FIRST_AID_LICENSE, ATP_SURVIVAL_LICENSE, WHO_BEC_LICENSE } from './licenses.ts';
 import { writePack } from './pack.ts';
 import type { DraftChunk } from './chunk.ts';
 
@@ -40,9 +39,18 @@ function revOf(c: FieldCard): string {
 // Passages to validate against: the core packs in PACKS_SOURCE (default packs/).
 const source = process.env.PACKS_SOURCE ?? 'packs';
 const passages: PassageText[] = [];
+// The licence of each source a card can quote, from the pack its passages are in,
+// so the card pack credits every source its cards quote (#214).
+const licenceOfSource = new Map<string, LicenseEntry>();
 for (const d of readdirSync(source).filter((d) => d.startsWith('core-') && existsSync(join(source, d, 'chunks.sqlite')))) {
   const db = new DatabaseSync(join(source, d, 'chunks.sqlite'), { readOnly: true });
   passages.push(...(db.prepare('SELECT source, page, text FROM chunks').all() as unknown as PassageText[]));
+  const manifest = JSON.parse(readFileSync(join(source, d, 'manifest.json'), 'utf8')) as { licenses?: LicenseEntry[] };
+  const byId = new Map((manifest.licenses ?? []).map((l) => [l.id, l]));
+  for (const r of db.prepare('SELECT DISTINCT source, license_id FROM chunks').all() as { source: string; license_id: string }[]) {
+    const l = byId.get(r.license_id);
+    if (l !== undefined && !licenceOfSource.has(r.source)) licenceOfSource.set(r.source, l);
+  }
   db.close();
 }
 
@@ -97,7 +105,9 @@ for (const [id, entry] of Object.entries(clarifyFile)) {
 
 // Strictest terms among the sources the cards in this build quote (cards.ts).
 const CARDS_LICENSE = cardsLicense(cards);
-const citesWho = cards.some((c) => c.sources.some((q) => q.source === WHO_BEC_SOURCE));
+// Every source the cards in this build quote, by its pack's licence entry.
+const cited = [...new Map(cards.flatMap((c) => c.sources.map((q) => licenceOfSource.get(q.source)))
+  .filter((l): l is LicenseEntry => l !== undefined).map((l) => [l.id, l])).values()];
 
 // The manuals each card quotes, with the pages, for its citation in the app.
 // Taken from the same quotes validateCards has already checked word for word.
@@ -142,14 +152,14 @@ for (const [at, c] of cards.entries()) {
 
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
-  version: '0.9.0',
+  version: '0.10.0',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],
   scope: { kind: 'global' },
   source: 'Fred field card',
   licenseId: CARDS_LICENSE.id,
-  licenses: [CARDS_LICENSE, ...(citesWho ? [WHO_BEC_LICENSE] : []), ATP_SURVIVAL_LICENSE, ATP_FIRST_AID_LICENSE],
+  licenses: [CARDS_LICENSE, ...cited],
   embedding: embedder.spec,
   clarify,
   cardSources,

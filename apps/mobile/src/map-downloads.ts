@@ -16,6 +16,7 @@
  * hundreds of megabytes into JavaScript.
  */
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
+import { downloadError } from './download-errors.ts';
 
 export const INDEX_URL = 'https://raw.githubusercontent.com/r-magnus/fred-maps/main/index.json';
 
@@ -62,8 +63,14 @@ export interface MapIndex {
 const SCHEMA = 1;
 
 export async function fetchIndex(signal?: AbortSignal): Promise<MapIndex> {
-  const res = await fetch(INDEX_URL, signal === undefined ? {} : { signal });
-  if (!res.ok) throw new Error(`Couldn't reach the map list (HTTP ${res.status}).`);
+  let res: Response;
+  try {
+    res = await fetch(INDEX_URL, signal === undefined ? {} : { signal });
+  } catch (e) {
+    if (signal?.aborted === true) throw e;
+    throw new Error('Fred can’t reach the downloads right now. Check your connection and try again.');
+  }
+  if (!res.ok) throw new Error('Fred can’t reach the downloads right now. Try again in a few minutes.');
   const idx = await res.json() as MapIndex;
   if (idx.schemaVersion !== SCHEMA) throw new Error('This version of Fred is too old for the current maps. Update the app.');
   return idx;
@@ -185,9 +192,10 @@ async function fetchChecked(url: string, partial: File, bytes: number, md5: stri
     if (info.size !== bytes || info.md5 !== md5) throw new Error(`${label} arrived damaged. Try again.`);
   } catch (e) {
     if (partial.exists) partial.delete();
-    throw signal.aborted ? new Error('Download cancelled.') : e;
+    throw signal.aborted ? new Error('Download cancelled.') : downloadError(e);
   }
 }
+
 
 /** Join a file's pieces in order into the file itself, check it whole, then drop the pieces. */
 const JOIN_CHUNK = 8 * 1024 * 1024;

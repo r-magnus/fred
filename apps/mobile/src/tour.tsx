@@ -32,12 +32,12 @@ export function Tour(): React.JSX.Element {
   const { palette, styles } = useThemed(makeStyles);
   return (
     <View>
-      <Place title="The tab on the left edge" mark={(
+      <Place title="The menu button, top left" mark={(
         <View style={styles.miniTab}>
           <View style={styles.miniTabLine} /><View style={styles.miniTabLine} /><View style={styles.miniTabLine} />
         </View>
       )}>
-        Tap it or pull it out for a new chat, the map, About Fred and your past chats.
+        A new chat, the map, About Fred and your past chats.
       </Place>
       <Place title="The box at the bottom" mark={(
         <View style={styles.miniSend}><Image source={ARROW} resizeMode="contain" style={styles.miniSendMark} /></View>
@@ -60,12 +60,12 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   placeWords: { flex: 1 },
   placeTitle: { fontFamily: JOURNAL, color: palette.ink, fontSize: 18 },
   placeNote: { color: palette.moss, fontSize: 13, lineHeight: 19, marginTop: 2 },
-  // The side tab, the Ask button and the sun, at a third of their size.
+  // The menu button, the Ask button and the sun, at about half their size.
   miniTab: {
-    width: 16, height: 26, gap: 3, alignItems: 'center', justifyContent: 'center', paddingRight: 1,
-    backgroundColor: palette.pine, borderTopRightRadius: 9, borderBottomRightRadius: 9,
+    width: 26, height: 26, gap: 3, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: palette.pine, borderRadius: 13,
   },
-  miniTabLine: { width: 7, height: 1.5, borderRadius: 1, backgroundColor: palette.paper },
+  miniTabLine: { width: 10, height: 1.5, borderRadius: 1, backgroundColor: palette.paper },
   miniSend: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.pine },
   miniSendMark: { width: 14, height: 14, tintColor: palette.paper },
   miniSun: { width: 20, height: 20, borderRadius: 10, backgroundColor: palette.night ? '#FFFCF4' : '#F2C94C' },

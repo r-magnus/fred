@@ -53,6 +53,9 @@ where it comes from, so a finding can be argued with.
 - **Respect the system font size.** Don't set `allowFontScaling={false}`;
   avoid fixed heights around text (badges, pills) that clip when text grows.
   Test at the largest setting (iOS Dynamic Type can reach about 200%).
+- When swapping a fixed size for `minWidth`/`minHeight` so a shape can grow,
+  add `alignSelf: 'flex-start'` inside a row: a row stretches its children
+  to its own height, and a round step badge became a long pill (2026-11-14).
 - Avoid ALL CAPS for anything longer than a two-word label: it reads slower
   under stress (Robin Camille Davis; NN/g on scannability).
 - Plain words. No error codes, model names or internal terms on screen.
@@ -128,6 +131,18 @@ destinations a menu is a fair trade.
   tapping the logo or swiping, it also needs a labelled entry somewhere.
 - The menu closes on back, on a tap outside, and has a visible way out.
 - Label each entry in words; an icon is a helper, not the label.
+- **Open a menu with a button where people look for one** (a top corner),
+  not an edge tab or a drag. On Android a swipe from the screen's edge is
+  "back", so anything pulled from the edge fights the system (Fred's
+  bookmark tab, replaced in the 2026-11-14 second pass after a UX
+  designer's review).
+
+## 7a. Affordance
+
+- Something you can open should look openable: a card with an edge and a
+  clear +/− or chevron in its own spot, not a "▸" typed into a sentence.
+- Tappable and static text must not look the same. Links get a colour and
+  an underline or a button shape.
 
 ## 8. Accessibility basics
 

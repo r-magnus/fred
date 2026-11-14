@@ -39,7 +39,7 @@ import { CalmLoader } from './src/calm-loader.tsx';
 import { ReplyText } from './src/reply-text.tsx';
 import { Sources } from './src/sources.tsx';
 import { Scene } from './src/scene.tsx';
-import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
+import { MENU_BUTTON_SIZE, MenuButton, SideDrawer } from './src/side-drawer.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
 import { loadChats, removeChat, restoreChat, saveChat, type SavedChat } from './src/chat-log.ts';
@@ -230,7 +230,6 @@ function Screen() {
   const [drawer, setDrawer] = useState(false);
   // The drawer's position, shared so that pulling the side tab drags it out (src/side-drawer.tsx).
   const drawerSlide = useRef(new Animated.Value(0)).current;
-  const [drawerPeek, setDrawerPeek] = useState(false);
   const [chats, setChats] = useState<SavedChat<Turn>[]>(() => loadChats<Turn>());
   const chatsRef = useRef(chats);
   chatsRef.current = chats;
@@ -773,12 +772,20 @@ function Screen() {
               </View>
             )}
 
+            {/* A folded field card looks like a card you can open, not a line of
+                text with an arrow in it (ux-ui-review: affordance, targets). */}
             {t.offer !== undefined && t.done && (
-              <View style={styles.card}>
-                <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} style={styles.rowButton}
+              <View style={styles.offerCard}>
+                <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} style={styles.offerHead}
                   accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}
                   accessibilityLabel={`What to do: ${t.offer.title}`}>
-                  <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
+                  <View style={styles.offerWords}>
+                    <Text style={styles.offerKicker}>What to do</Text>
+                    <Text style={styles.offerTitle}>{t.offer.title}</Text>
+                  </View>
+                  <View style={styles.offerChevron} importantForAccessibility="no">
+                    <Text style={styles.offerChevronText}>{t.offerOpen === true ? '−' : '+'}</Text>
+                  </View>
                 </Pressable>
                 {t.offerOpen === true && (
                   <>
@@ -937,15 +944,13 @@ function Screen() {
       </KeyboardAvoidingView>
 
       <Veil />
-      {/* The bookmark on the left edge, level with the logo opposite it, and its drawer. */}
-      {/* The tab steps aside while About is open. */}
+      {/* The menu button, level with the logo opposite it; it steps aside while About is open. */}
       <Animated.View style={[StyleSheet.absoluteFill, styles.tabLayer, { opacity: tabShown }]} pointerEvents={aboutOpen ? 'none' : 'box-none'}>
-        <SideTab top={insets.top + TOP_ROW - SIDE_TAB_HEIGHT / 2} open={drawer} slide={drawerSlide}
-          onOpen={() => setDrawer(true)} onClose={() => setDrawer(false)} onPeek={setDrawerPeek} />
+        <MenuButton top={insets.top + TOP_ROW - MENU_BUTTON_SIZE / 2} open={drawer} slide={drawerSlide}
+          onOpen={() => setDrawer(true)} />
       </Animated.View>
       <SideDrawer
         open={drawer}
-        peek={drawerPeek}
         slide={drawerSlide}
         chats={chats}
         current={chatId.current}
@@ -969,6 +974,15 @@ function Screen() {
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
   offerTitle: { color: palette.pine, fontSize: 16, fontWeight: '700' },
+  offerCard: {
+    backgroundColor: palette.paper, borderRadius: radius.card, borderWidth: 1, borderColor: palette.sand,
+    paddingHorizontal: 14, paddingBottom: 4,
+  },
+  offerHead: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 60, paddingVertical: 8 },
+  offerWords: { flex: 1 },
+  offerKicker: { color: palette.moss, fontSize: 13, fontWeight: '600', marginBottom: 2 },
+  offerChevron: { width: 32, height: 32, borderRadius: 16, backgroundColor: palette.sage, alignItems: 'center', justifyContent: 'center' },
+  offerChevronText: { color: palette.pine, fontSize: 20, fontWeight: '700', lineHeight: 22 },
   // A tappable line of text made a 48-high target (ux-ui-review, touch targets).
   rowButton: { minHeight: 48, justifyContent: 'center' },
   clarify: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 12 },

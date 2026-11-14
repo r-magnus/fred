@@ -65,9 +65,10 @@ Ask the account owner to do these, and confirm each before going on:
    Developer Mode; the phone restarts). It needs about 3 GB free.
 4. **The App Store Connect app record**, needed only before uploading:
    appstoreconnect.apple.com › Apps › + › New App. Platform iOS, bundle ID
-   `dev.fred.app`, SKU `fred`, and the **name Ryan chooses**. The name must be
-   unique across the whole App Store, and plain "Fred" is probably taken. The
-   name under the app icon stays "Fred" either way.
+   `dev.fred.app`, SKU `fred`. For the name, **try "Fred" first**. The name
+   must be unique across the whole App Store, and App Store Connect says at
+   once if it is taken. If it is, check with Ryan before using a backup such
+   as "Forest Fred". The name under the app icon stays "Fred" either way.
 5. If Xcode says `dev.fred.app` belongs to someone else, stop and tell Ryan.
 
 ## Part B · Getting the Mac ready (you can do these)

@@ -193,10 +193,10 @@
  },
  {
   "id": "choking",
-  "rev": "d14366c90505",
+  "rev": "ba44f1fdfc0d",
   "date": "2026-11-13",
   "by": "Claude (self-review)",
-  "change": "Re-backed from ATP 4-02.11 pp.81, 94 (#214). Wording unchanged; the back-blow technique and the infant sequence move to the unsourced list.",
+  "change": "Re-backed from ATP 4-02.11 pp.81, 94 (#214). Card text identical to before; the infant sequence moves from the get-help line to the unsourced list (same place in the card), and the back-blow how-to stays in step 3 with its missing source noted in the reviewer note.",
   "why": "Commercial build: 3 WHO quotes replaced. No public-domain infant choking source found yet; the infant steps are standard and unchanged, and are flagged as wanted. Unsourced lines are whole sentences of the card, as Fred says them, not fragments of other lines."
  },
  {

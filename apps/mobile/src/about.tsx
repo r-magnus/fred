@@ -45,6 +45,21 @@ const SECTIONS: readonly { readonly heading: string; readonly text: readonly str
         'Ryan still remembers the maps he made, hung on the walls of his home in Wisconsin.',
     ],
   },
+  // Credits the sources need and the terms the models' licences ask to be passed on (#198,
+  // docs/licensing.md). The full texts ship in the core download's licenses/ folder.
+  {
+    heading: 'Credits and terms',
+    text: [
+      'His guides come from US Government sources (US Army field manuals, the CDC, NIH, National Park Service, ' +
+        'National Weather Service, Forest Service and others), WHO/ICRC Basic Emergency Care (2018, CC BY-NC-SA 3.0 IGO, ' +
+        'used non-commercially) and Wikivoyage (CC BY-SA 4.0). Maps © OpenStreetMap contributors (ODbL); terrain from Mapterhorn.',
+      'He writes his answers with Qwen3-1.7B by the Qwen team, under the Apache License 2.0.',
+      'He searches his guides with Google’s EmbeddingGemma. Gemma is provided under and subject to the Gemma Terms of Use ' +
+        'found at ai.google.dev/gemma/terms. By using Fred you agree not to use him, or Gemma, for anything the Gemma ' +
+        'Prohibited Use Policy forbids (ai.google.dev/gemma/prohibited_use_policy).',
+      'The full licences and terms come with Fred’s download, in its licenses folder.',
+    ],
+  },
 ];
 
 export function AboutScreen(

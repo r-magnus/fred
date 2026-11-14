@@ -68,7 +68,7 @@ export function MenuButton(
 }
 
 export function SideDrawer<T>(
-  { open, slide, chats, current, onClose, onMap, onAbout, onNewChat, onOpenChat, onRemoveChat, onRestoreChat }: {
+  { open, slide, chats, current, onClose, onMap, onAbout, onSetup, onNewChat, onOpenChat, onRemoveChat, onRestoreChat }: {
     open: boolean;
     /** Where the drawer is, 0 shut to 1 open. Shared with MenuButton, which fades as it opens. */
     slide: Animated.Value;
@@ -78,6 +78,8 @@ export function SideDrawer<T>(
     onClose: () => void;
     onMap: () => void;
     onAbout: () => void;
+    /** Opens first-run setup again: downloads and states, without clearing anything. */
+    onSetup: () => void;
     onNewChat: () => void;
     onOpenChat: (chat: SavedChat<T>) => void;
     onRemoveChat: (id: number) => void;
@@ -190,6 +192,11 @@ export function SideDrawer<T>(
             </View>
           ))}
         </ScrollView>
+        {/* Quiet, at the foot: rarely needed, but setup is otherwise seen once. */}
+        <Pressable style={styles.setupAgain} onPress={onSetup} accessibilityRole="button"
+          accessibilityLabel="Run setup again: guides, states and downloads">
+          <Text style={styles.setupAgainText}>Run setup again</Text>
+        </Pressable>
         {removed !== null && (
           <View style={styles.undoBar} accessibilityLiveRegion="polite">
             <Text style={styles.undoText} numberOfLines={1}>Chat removed</Text>
@@ -267,6 +274,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   chatNote: { color: palette.moss, fontSize: 13, marginTop: 3 },
   remove: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   removeMark: { width: 20, height: 20, tintColor: palette.clay },
+  setupAgain: { minHeight: 48, justifyContent: 'center', alignSelf: 'flex-start', marginTop: 4 },
+  setupAgainText: { color: palette.pine, fontSize: 15, fontWeight: '600', textDecorationLine: 'underline' },
   undoBar: {
     flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, paddingLeft: 16, paddingRight: 6,
     backgroundColor: palette.ink, borderRadius: radius.control, minHeight: 52,

@@ -957,6 +957,7 @@ function Screen() {
         onClose={() => setDrawer(false)}
         onMap={() => { setDrawer(false); setMapOpen(true); }}
         onAbout={() => { setDrawer(false); setAboutOpen(true); }}
+        onSetup={() => { setDrawer(false); setSetup(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
         onRemoveChat={(id) => {

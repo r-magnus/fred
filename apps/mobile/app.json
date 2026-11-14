@@ -18,7 +18,13 @@
     },
     "ios": {
       "bundleIdentifier": "dev.fred.app",
-      "supportsTablet": false
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
     },
     "plugins": [
       [

@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom } from '../src/setup-plan.ts';
+import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, timeLeft } from '../src/setup-plan.ts';
 
 test('the pages run welcome to ready and stop at both ends', () => {
   assert.equal(stepFrom('welcome', -1), null);
   assert.equal(stepFrom('welcome', 1), 'guides');
   assert.equal(stepFrom('ready', 1), null);
-  assert.equal(stepFrom('ready', -1), 'sky');
+  assert.equal(stepFrom('ready', -1), 'place');
   assert.equal(new Set(STEPS).size, STEPS.length);
 });
 
@@ -49,4 +49,14 @@ test('names are joined the way they are said', () => {
   assert.equal(listNames(['Utah']), 'Utah');
   assert.equal(listNames(['Utah', 'Oregon']), 'Utah and Oregon');
   assert.equal(listNames(['Utah', 'Oregon', 'Idaho']), 'Utah, Oregon and Idaho');
+});
+
+test('time left waits for a real speed, then speaks in whole minutes', () => {
+  assert.equal(timeLeft(1e6, 1e9, 2000), null); // too soon to know the speed
+  assert.equal(timeLeft(0, 1e9, 10_000), null);
+  assert.equal(timeLeft(1e9, 1e9, 10_000), null); // done
+  // 100 MB in 20 s is 5 MB/s; 1.2 GB left is 240 s.
+  assert.equal(timeLeft(100e6, 1.3e9, 20_000), 'about 4 min left');
+  assert.equal(timeLeft(900e6, 1e9, 20_000), 'under a minute left');
+  assert.equal(timeLeft(1e6, 1e9, 10_000), 'about 3 hours left');
 });

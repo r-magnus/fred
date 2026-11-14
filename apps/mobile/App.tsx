@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated, Image, KeyboardAvoidingView, Linking, Platform, Pressable,
+  Animated, Image, KeyboardAvoidingView, Platform, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -37,13 +37,14 @@ import { signalAdvice } from './src/coverage-layer.ts';
 import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
 import { ReplyText } from './src/reply-text.tsx';
+import { Sources } from './src/sources.tsx';
 import { Scene } from './src/scene.tsx';
 import { SIDE_TAB_HEIGHT, SideDrawer, SideTab } from './src/side-drawer.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
 import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
-import { loadChats, removeChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { loadChats, removeChat, restoreChat, saveChat, type SavedChat } from './src/chat-log.ts';
 import { AboutScreen } from './src/about.tsx';
-import { GREETINGS, TOPICS, pick } from './src/words.ts';
+import { GREETINGS, STARTERS, TOPICS, pick } from './src/words.ts';
 import { Crossfade, SUNSET, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
 
 /** The logo is 900 x 415; sized by height wherever it is shown. */
@@ -127,15 +128,6 @@ const SIGNAL_REPLY_WINDOW_MS = 2 * 60_000;
 function saidSignal(t: Turn): boolean {
   return t.signal !== undefined && t.kind === 'abstain' &&
     t.text !== REFER_REPLY && t.text !== SAFETY_NET_REPLY && t.text !== WATCH_REPLY;
-}
-
-/**
- * A field card's sources, as the reader would look them up: "ATP 3-50.21
- * pp. 28, 29 · WHO BEC 2018 p. 94".
- */
-function describeBasis(basis: NonNullable<Citation['basis']>): string {
-  return basis.map((b) => b.pages.length === 0 ? b.source
-    : `${b.source} ${b.pages.length === 1 ? 'p.' : 'pp.'} ${b.pages.join(', ')}`).join(' · ');
 }
 
 /** The provider has to sit above anything calling useSafeAreaInsets. */
@@ -672,7 +664,7 @@ function Screen() {
       </Scene>
 
       {locNote !== null && (
-        <Pressable onPress={() => setLocNote(null)}>
+        <Pressable onPress={() => setLocNote(null)} accessibilityRole="button" accessibilityHint="Dismisses this note">
           <Text style={styles.locNote}>{locNote}</Text>
         </Pressable>
       )}
@@ -695,6 +687,17 @@ function Screen() {
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyLead}>{greeting.line}</Text>
             <Text style={styles.empty}>{greeting.more}</Text>
+            {/* A blank box is the hardest place to start, and hardest of all
+                when frightened: a few things to tap (ux-ui-review, states). */}
+            <Text style={styles.startersLabel}>Try asking</Text>
+            <View style={styles.starters}>
+              {STARTERS.map((q) => (
+                <Pressable key={q} style={styles.starter} onPress={() => void send(q)}
+                  disabled={busy} accessibilityRole="button" accessibilityLabel={`Ask: ${q}`}>
+                  <Text style={styles.starterText}>{q}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         )}
 
@@ -716,6 +719,7 @@ function Screen() {
                 </Text>
                 <Pressable
                   style={styles.locateButton}
+                  accessibilityRole="button"
                   disabled={locating}
                   onPress={() => void locate().then((s) => { if (s !== null) void send(t.question, s); })}
                 >
@@ -730,6 +734,7 @@ function Screen() {
                       <Pressable
                         key={s}
                         style={styles.stateButton}
+                        accessibilityRole="button" accessibilityLabel={`Answer for ${s}`}
                         onPress={() => { setState(s); void send(t.question, s); }}
                       >
                         <Text style={styles.stateButtonText}>{s}</Text>
@@ -770,26 +775,34 @@ function Screen() {
 
             {t.offer !== undefined && t.done && (
               <View style={styles.card}>
-                <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} hitSlop={8}
-                  accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}>
+                <Pressable onPress={() => update(t.id, { offerOpen: !t.offerOpen })} style={styles.rowButton}
+                  accessibilityRole="button" accessibilityState={{ expanded: t.offerOpen === true }}
+                  accessibilityLabel={`What to do: ${t.offer.title}`}>
                   <Text style={styles.offerTitle}>{t.offerOpen === true ? '▾' : '▸'} What to do: {t.offer.title}</Text>
                 </Pressable>
                 {t.offerOpen === true && (
                   <>
                     <ReplyText text={t.offer.text} />
                     <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>
-                    <Text style={styles.source}>{t.offer.citation.source} — {t.offer.citation.section}</Text>
-                    {t.offer.citation.basis !== undefined && (
-                      <Text style={styles.sourceBasis}>from {describeBasis(t.offer.citation.basis)}</Text>
-                    )}
+                    <Sources citations={[t.offer.citation]} />
                   </>
                 )}
               </View>
             )}
 
+            {/* Plain words and a way on, never a raw exception (ux-ui-review, states).
+                The message itself stays, small, for a bug report. */}
             {t.kind === 'error' && (
               <View style={styles.card}>
-                <Text style={styles.error}>{t.text}</Text>
+                <Text style={styles.body}>Something went wrong while Fred was answering.</Text>
+                <Text style={styles.hint}>Try asking again. If it keeps happening, closing and reopening Fred usually clears it.</Text>
+                {t.id === turns.at(-1)?.id && (
+                  <Pressable style={styles.retry} onPress={() => void send(t.question)} disabled={busy}
+                    accessibilityRole="button" accessibilityLabel="Ask again">
+                    <Text style={styles.retryText}>Ask again</Text>
+                  </Pressable>
+                )}
+                {t.text !== '' && <Text style={styles.errorDetail}>Details: {t.text}</Text>}
               </View>
             )}
 
@@ -809,11 +822,19 @@ function Screen() {
                     early gets no text at all. Rendering an empty body plus
                     "incomplete" reads as a bug; say what actually happened. */}
                 {t.stopped && (
-                  <Text style={styles.stoppedNote}>
-                    {t.text === ''
-                      ? 'Stopped before Fred began answering.'
-                      : 'Stopped — this answer is incomplete.'}
-                  </Text>
+                  <>
+                    <Text style={styles.stoppedNote}>
+                      {t.text === ''
+                        ? 'Stopped before Fred began answering.'
+                        : 'Stopped — this answer is incomplete.'}
+                    </Text>
+                    {t.id === turns.at(-1)?.id && (
+                      <Pressable style={styles.retry} onPress={() => void send(t.question)} disabled={busy}
+                        accessibilityRole="button" accessibilityLabel="Ask again">
+                        <Text style={styles.retryText}>Ask again</Text>
+                      </Pressable>
+                    )}
+                  </>
                 )}
 
                 {t.done && t.clarify !== undefined && !t.clarifyUsed && t.id === turns.at(-1)?.id && (
@@ -823,16 +844,18 @@ function Screen() {
                     </Text>
                     <View style={styles.stateRow}>
                       {t.clarify.choices.filter((c) => c.label !== t.clarify!.picked).map((c) => (
-                        <Pressable key={c.label} style={styles.stateButton} onPress={() => choose(t, c.label, c.text)}>
+                        <Pressable key={c.label} style={styles.stateButton} onPress={() => choose(t, c.label, c.text)}
+                          accessibilityRole="button">
                           <Text style={styles.stateButtonText}>{c.label}</Text>
                         </Pressable>
                       ))}
                       {/* Can't tell: the whole card is the safe answer. */}
-                      <Pressable style={styles.stateButton}
+                      <Pressable style={styles.stateButton} accessibilityRole="button"
                         onPress={() => choose(t, t.clarify!.picked === null ? 'Not sure' : 'Show the whole card', t.clarify!.whole)}>
                         <Text style={styles.stateButtonText}>{t.clarify.picked === null ? 'Not sure' : 'Whole card'}</Text>
                       </Pressable>
-                      <Pressable style={styles.stateButton} onPress={() => input.current?.focus()}>
+                      <Pressable style={styles.stateButton} onPress={() => input.current?.focus()}
+                        accessibilityRole="button" accessibilityLabel="Something else: type your own answer">
                         <Text style={styles.clarifyOther}>Something else…</Text>
                       </Pressable>
                     </View>
@@ -841,32 +864,8 @@ function Screen() {
 
                 {t.medical && t.done && <Text style={styles.disclaimer}>{MEDICAL_DISCLAIMER}</Text>}
 
-                {t.done && t.citations.length > 0 && (
-                  <View style={styles.sources}>
-                    {/* US-03. The only way a reader can tell a good answer from a
-                        confident wrong one, so it is not hidden behind a tap. */}
-                    <Text style={styles.sourcesTitle}>Sources</Text>
-                    {/* Two chunks can share a page and section, which renders as
-                        the same line twice. Dedupe on what the reader sees. */}
-                    {[...new Map(t.citations.map((c) => [
-                      `${c.source}|${c.page}|${c.section}`, c,
-                    ])).values()].map((c) => (
-                      <View key={c.chunkId}>
-                        <Text style={styles.source}>
-                          {c.source}{c.page === null ? '' : `, p. ${c.page}`} — {c.section}
-                        </Text>
-                        {c.basis !== undefined && <Text style={styles.sourceBasis}>from {describeBasis(c.basis)}</Text>}
-                        {/* Required by CC BY-SA for Wikivoyage passages: article, authors,
-                            licence, and a link to the revision quoted (docs/licensing.md). */}
-                        {c.credit !== undefined && (
-                          <Text style={styles.sourceBasis} onPress={() => void Linking.openURL(c.credit!.url)}>
-                            {c.credit.text} <Text style={styles.sourceLink}>Open article</Text>
-                          </Text>
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                )}
+                {/* US-03, #215: the basis stays in sight as one line; the passages open on a tap. */}
+                {t.done && t.citations.length > 0 && <Sources citations={t.citations} />}
               </View>
             )}
 
@@ -877,7 +876,8 @@ function Screen() {
                   : (
                     <>
                       {t.signal !== undefined && !saidSignal(t) && <Text style={styles.body}>{t.signal}</Text>}
-                      <Pressable onPress={() => setMapOpen(true)} hitSlop={8} accessibilityRole="button">
+                      <Pressable onPress={() => setMapOpen(true)} style={styles.rowButton} accessibilityRole="button"
+                        accessibilityLabel="Open the map">
                         <Text style={styles.offerTitle}>▸ Open the map</Text>
                       </Pressable>
                     </>
@@ -951,6 +951,7 @@ function Screen() {
         current={chatId.current}
         onClose={() => setDrawer(false)}
         onMap={() => { setDrawer(false); setMapOpen(true); }}
+        onAbout={() => { setDrawer(false); setAboutOpen(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
         onRemoveChat={(id) => {
@@ -958,6 +959,7 @@ function Screen() {
           // Removing the chat on screen clears the page too.
           if (id === chatId.current) showChat(null);
         }}
+        onRestoreChat={(c) => setChats(restoreChat(chatsRef.current, c))}
       />
       {/* Over the chat below the sky; it eases in through sunset (#209). */}
       <AboutScreen open={aboutOpen} onClose={() => setAboutOpen(false)} p={sunset} skyHeight={insets.top + sky} />
@@ -966,17 +968,19 @@ function Screen() {
 }
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
-  offerTitle: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  offerTitle: { color: palette.pine, fontSize: 16, fontWeight: '700' },
+  // A tappable line of text made a 48-high target (ux-ui-review, touch targets).
+  rowButton: { minHeight: 48, justifyContent: 'center' },
   clarify: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 12 },
-  clarifyQ: { color: palette.ink, fontSize: 14, fontWeight: '600' },
-  clarifyOther: { color: palette.moss, fontSize: 13, fontWeight: '600' },
+  clarifyQ: { color: palette.ink, fontSize: 15, fontWeight: '600' },
+  clarifyOther: { color: palette.moss, fontSize: 14, fontWeight: '600' },
   root: { flex: 1, backgroundColor: palette.cream },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
   wordmarkSmall: { height: LOGO_HEIGHT, width: LOGO_HEIGHT * LOGO_RATIO, tintColor: palette.logo },
   loadShapes: { marginTop: 30, marginBottom: 20 },
   loadNote: { color: palette.ink, fontSize: 15, fontWeight: '600' },
-  loadHint: { color: palette.moss, fontSize: 13, marginTop: 6 },
+  loadHint: { color: palette.moss, fontSize: 14, marginTop: 6 },
   loadSetup: { marginTop: 22, borderRadius: radius.pill, backgroundColor: palette.pine, paddingHorizontal: 26, paddingVertical: 14 },
   loadSetupText: { color: palette.paper, fontSize: 16, fontWeight: '700' },
   loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
@@ -994,6 +998,13 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   emptyWrap: { marginTop: 18, paddingHorizontal: 14 },
   emptyLead: { fontFamily: JOURNAL, color: palette.ink, fontSize: 32, lineHeight: 40 },
   empty: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 14 },
+  startersLabel: { color: palette.moss, fontSize: 14, fontWeight: '600', marginTop: 28, marginBottom: 10 },
+  starters: { gap: 10, alignItems: 'flex-start' },
+  starter: {
+    minHeight: 48, justifyContent: 'center', paddingHorizontal: 16, paddingVertical: 10,
+    backgroundColor: palette.paper, borderRadius: radius.card, borderWidth: 1, borderColor: palette.sand,
+  },
+  starterText: { color: palette.ink, fontSize: 15, lineHeight: 21 },
 
   // #209: no icons, trail or labels down the side. The hiker's words in the
   // journal face and Fred's in the plain one are enough to tell them apart.
@@ -1010,31 +1021,34 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   card: {},
   thinking: { alignSelf: 'flex-start' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
-  hint: { color: palette.moss, fontSize: 13, lineHeight: 18, marginTop: 8 },
-  error: { color: palette.clay, fontSize: 14, lineHeight: 20 },
+  hint: { color: palette.moss, fontSize: 14, lineHeight: 20, marginTop: 8 },
+  errorDetail: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 10 },
+  retry: {
+    alignSelf: 'flex-start', marginTop: 12, minHeight: 48, justifyContent: 'center',
+    borderRadius: radius.control, backgroundColor: palette.oat, paddingHorizontal: 16,
+  },
+  retryText: { color: palette.ink, fontSize: 15, fontWeight: '700' },
   disclaimer: {
-    color: palette.plum, fontSize: 12, lineHeight: 17, marginTop: 14,
+    color: palette.plum, fontSize: 13, lineHeight: 19, marginTop: 14,
     borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 10,
   },
 
-  sources: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 10 },
-  sourcesTitle: { color: palette.pine, fontSize: 11, fontWeight: '700', letterSpacing: 0.6, marginBottom: 6 },
-  source: { color: palette.moss, fontSize: 12, lineHeight: 18 },
-  sourceBasis: { color: palette.moss, fontSize: 12, lineHeight: 18, marginLeft: 12 },
-  sourceLink: { color: palette.pine, textDecorationLine: 'underline' },
 
   locNote: {
     color: palette.amber, fontSize: 13, lineHeight: 18, backgroundColor: palette.butter,
     paddingHorizontal: 20, paddingVertical: 10,
   },
   locateButton: {
-    alignSelf: 'flex-start', marginTop: 12, borderRadius: radius.control,
-    backgroundColor: palette.pine, paddingHorizontal: 14, paddingVertical: 10,
+    alignSelf: 'flex-start', marginTop: 12, borderRadius: radius.control, minHeight: 48, justifyContent: 'center',
+    backgroundColor: palette.pine, paddingHorizontal: 16, paddingVertical: 10,
   },
-  locateButtonText: { color: palette.paper, fontSize: 14, fontWeight: '700' },
+  locateButtonText: { color: palette.paper, fontSize: 15, fontWeight: '700' },
   stateRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  stateButton: { backgroundColor: palette.oat, borderRadius: radius.control, paddingHorizontal: 14, paddingVertical: 10 },
-  stateButtonText: { color: palette.ink, fontSize: 14, fontWeight: '600' },
+  stateButton: {
+    backgroundColor: palette.oat, borderRadius: radius.control, paddingHorizontal: 16, paddingVertical: 10,
+    minHeight: 48, minWidth: 48, alignItems: 'center', justifyContent: 'center',
+  },
+  stateButtonText: { color: palette.ink, fontSize: 15, fontWeight: '600' },
 
   composer: { paddingHorizontal: 12, paddingTop: 8 },
   // One floating pill: the text box with the Ask button inside it.
@@ -1045,17 +1059,17 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     boxShadow: `0 4 16 ${palette.shade}`,
   },
   input: {
-    flex: 1, color: palette.ink, fontSize: 16, maxHeight: 120, minHeight: 44,
+    flex: 1, color: palette.ink, fontSize: 16, maxHeight: 120, minHeight: 48,
     paddingHorizontal: 14, paddingVertical: 10,
   },
-  costLine: { color: palette.moss, fontSize: 12, paddingHorizontal: 26, paddingTop: 6 },
+  costLine: { color: palette.moss, fontSize: 13, paddingHorizontal: 26, paddingTop: 6 },
   costFigure: { color: palette.pine, fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   sendOff: { backgroundColor: palette.sand },
   sendStop: { backgroundColor: palette.clay },
   waiting: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
-  waitingText: { color: palette.moss, fontSize: 13, fontStyle: 'italic' },
-  stoppedNote: { color: palette.clay, fontSize: 12, marginTop: 10, fontStyle: 'italic' },
+  waitingText: { color: palette.moss, fontSize: 14, fontStyle: 'italic' },
+  stoppedNote: { color: palette.clay, fontSize: 14, marginTop: 10 },
   sendMark: { width: 22, height: 22, tintColor: palette.paper },
   sendMarkOff: { tintColor: palette.moss },
   stopMark: { width: 14, height: 14, borderRadius: 3, backgroundColor: palette.paper },

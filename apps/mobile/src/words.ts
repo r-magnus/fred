@@ -91,3 +91,15 @@ export function pick<T>(from: readonly T[], not?: T): T {
   const rest = from.length > 1 && not !== undefined ? from.filter((x) => x !== not) : from;
   return rest[Math.floor(Math.random() * rest.length)]!;
 }
+
+/**
+ * Things to tap on an empty chat. A blank text box is the hardest place to
+ * start, more so when frightened (ux-ui-review skill, states). One from each
+ * kind of thing Fred carries: first aid, water, and finding your way.
+ * Each gets its field card at once (checked with tools/eval probe, 0.43-0.58), so a first tap is fast.
+ */
+export const STARTERS: readonly string[] = [
+  'How do I treat a bee sting?',
+  'How do I make stream water safe to drink?',
+  'Which way is north without a compass?',
+];

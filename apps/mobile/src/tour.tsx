@@ -37,7 +37,7 @@ export function Tour(): React.JSX.Element {
           <View style={styles.miniTabLine} /><View style={styles.miniTabLine} /><View style={styles.miniTabLine} />
         </View>
       )}>
-        Tap it or pull it out for the map, a new chat and your past chats.
+        Tap it or pull it out for a new chat, the map, About Fred and your past chats.
       </Place>
       <Place title="The box at the bottom" mark={(
         <View style={styles.miniSend}><Image source={ARROW} resizeMode="contain" style={styles.miniSendMark} /></View>

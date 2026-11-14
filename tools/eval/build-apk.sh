@@ -17,6 +17,7 @@ FIELD=false
 [ "${1:-}" = "--field-test" ] && FIELD=true
 
 node "$ROOT/scripts/patch-android-fieldtest.mjs" >/dev/null
+node "$ROOT/scripts/patch-android-signing.mjs" >/dev/null
 # Gradle reuses a stale JS bundle unless it is removed (docs/results-phase1.md).
 rm -f "$ROOT/apps/mobile/android/app/build/generated/assets/react/release/index.android.bundle"
 (cd "$ROOT/apps/mobile/android" && ./gradlew assembleRelease -q -Pfred.fieldTest=$FIELD)
@@ -33,4 +34,12 @@ if [ "$debuggable" != "$FIELD" ]; then
   echo "APK debuggable=$debuggable, expected $FIELD" >&2
   exit 1
 fi
-echo "built $APK (debuggable=$debuggable)"
+# Who signed it (#29): a shippable build must carry Fred's own key, never the
+# shared debug key, or testers could not take an update over it.
+APKSIGNER=$(ls "$(dirname "$AAPT2")"/apksigner 2>/dev/null | head -1)
+signer=$("$APKSIGNER" verify --print-certs "$APK" | sed -n 's/^Signer #1 certificate DN: //p')
+if [ "$FIELD" = false ] && grep -q 'Android Debug' <<<"$signer"; then
+  echo "APK is signed with the debug key ($signer); set FRED_RELEASE_* in ~/.gradle/gradle.properties" >&2
+  exit 1
+fi
+echo "built $APK (debuggable=$debuggable, signed by $signer)"

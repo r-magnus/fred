@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fred",
     "slug": "fred",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
@@ -13,7 +13,8 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#316C33"
-      }
+      },
+      "versionCode": 2
     },
     "ios": {
       "bundleIdentifier": "dev.fred.app",

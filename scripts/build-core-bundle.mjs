@@ -19,6 +19,13 @@
  * (apps/mobile/src/map-downloads.ts), so publishing is: upload core-upload/ to
  * the maps release, and add index-core.json to index.json as "core".
  *
+ * Files over PART_MB (default 100) are also cut into pieces, `<asset>.p000`,
+ * `.p001`..., listed under the file's `parts` with their own size and MD5, so
+ * a phone that loses its connection resumes from the last whole piece (#198).
+ * The whole file is still uploaded beside its pieces. RELEASE (default
+ * core-YYYY-MM) names the release the files go in; the core entry carries that
+ * release's download address, so it can live apart from the maps release.
+ *
  * Nothing here publishes anything. Whether these files may be put on a public
  * host is a licensing question first (docs/licensing.md): the packs' own
  * licence entries are copied into bundle.json so it can be answered from one
@@ -35,7 +42,7 @@
  * free release, and the nonCommercial packs in it are listed as a reminder.
  */
 import { createHash } from 'node:crypto';
-import { cpSync, createReadStream, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { closeSync, cpSync, createReadStream, existsSync, linkSync, mkdirSync, openSync, readdirSync, readFileSync, readSync, rmSync, statSync, writeFileSync, writeSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const [outRoot = 'dist'] = process.argv.slice(2);
@@ -94,12 +101,60 @@ for (const m of models) place(join(MODELS_DIR, m), join(dir, m));
 // Followed through links: a packs folder may be links to packs built elsewhere.
 for (const [id, p] of newest) cpSync(join(PACKS_DIR, p.dir), join(dir, 'packs', id), { recursive: true, dereference: true });
 
+// Licence texts and the notice the models' terms require (#198): Gemma's Terms
+// of Use 3.1 asks for a copy of the terms and a Notice file with its exact
+// sentence; Apache-2.0 (Qwen3) for a copy of the licence. The notice also
+// credits every source in the packs, from their licence entries.
+mkdirSync(join(dir, 'licenses'), { recursive: true });
+for (const n of readdirSync(join(ROOT, 'licenses'))) cpSync(join(ROOT, 'licenses', n), join(dir, 'licenses', n));
+const packLicences = new Map();
+for (const { manifest } of newest.values()) for (const l of manifest.licenses ?? []) packLicences.set(l.id, l);
+writeFileSync(join(dir, 'licenses', 'NOTICE.txt'), [
+  'Fred: models and guides',
+  '',
+  'Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms',
+  `  ${encoderFiles.join(', ')}: Google EmbeddingGemma 300M, unmodified. Terms: GEMMA-TERMS-OF-USE.txt.`,
+  '  Its use is subject to the Gemma Prohibited Use Policy (GEMMA-PROHIBITED-USE-POLICY.txt), which binds everyone who uses Fred.',
+  '',
+  `${GENERATOR}: Qwen3-1.7B (Alibaba Qwen team), Apache License 2.0 (APACHE-2.0.txt), unmodified.`,
+  '',
+  'Guides, with their sources:',
+  ...[...packLicences.values()].map((l) => `- ${l.attribution} [${l.license}]${l.nonCommercial ? ' Non-commercial use only.' : ''}`),
+  '',
+].join('\n'));
+
 const digest = (algo, path) => new Promise((resolve, reject) => {
   const h = createHash(algo);
   createReadStream(path).on('data', (b) => h.update(b)).on('end', () => resolve(h.digest('hex'))).on('error', reject);
 });
 const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? walk(join(d, e.name)) : [join(d, e.name)]);
+const PART_BYTES = Number(process.env.PART_MB ?? 100) * 1024 * 1024;
+const now = new Date();
+const RELEASE = process.env.RELEASE ?? `core-${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+const BASE_URL = `https://github.com/r-magnus/fred-maps/releases/download/${RELEASE}/`;
+/** Cut `src` into PART_BYTES pieces named `<dest>.pNNN`; returns their names in order. */
+const cut = (src, dest) => {
+  const size = statSync(src).size;
+  const names = [];
+  const fd = openSync(src, 'r');
+  const buf = Buffer.alloc(8 * 1024 * 1024);
+  try {
+    for (let start = 0, i = 0; start < size; start += PART_BYTES, i++) {
+      const name = `${dest}.p${String(i).padStart(3, '0')}`;
+      const out = openSync(name, 'w');
+      try {
+        for (let at = start, end = Math.min(size, start + PART_BYTES); at < end;) {
+          const n = readSync(fd, buf, 0, Math.min(buf.length, end - at), at);
+          writeSync(out, buf, 0, n);
+          at += n;
+        }
+      } finally { closeSync(out); }
+      names.push(name);
+    }
+  } finally { closeSync(fd); }
+  return names;
+};
 const files = [];
 for (const f of walk(dir).sort()) {
   const path = relative(dir, f);
@@ -107,7 +162,12 @@ for (const f of walk(dir).sort()) {
   const asset = `core--${path.replaceAll('/', '__')}`;
   place(f, join(upload, asset));
   // The app checks size and MD5 (the phone computes MD5 natively); SHA-256 is for people.
-  files.push({ path, asset, bytes: statSync(f).size, sha256: await digest('sha256', f), md5: await digest('md5', f) });
+  const entry = { path, asset, bytes: statSync(f).size, sha256: await digest('sha256', f), md5: await digest('md5', f) };
+  if (entry.bytes > PART_BYTES) {
+    entry.parts = [];
+    for (const p of cut(f, join(upload, asset))) entry.parts.push({ asset: relative(upload, p), bytes: statSync(p).size, md5: await digest('md5', p) });
+  }
+  files.push(entry);
 }
 const bytes = files.reduce((s, f) => s + f.bytes, 0);
 
@@ -127,5 +187,5 @@ const bundle = {
   bytes,
 };
 writeFileSync(join(dir, 'bundle.json'), JSON.stringify(bundle, null, 2) + '\n');
-writeFileSync(join(outRoot, 'index-core.json'), JSON.stringify({ bytes, builtAt: bundle.builtAt, components: bundle.components, missing: [], files }, null, 1) + '\n');
-console.log(`core: ${files.length} files, ${(bytes / 1e9).toFixed(2)} GB, ${newest.size} packs, encoder ${encoders[0]}`);
+writeFileSync(join(outRoot, 'index-core.json'), JSON.stringify({ bytes, builtAt: bundle.builtAt, release: RELEASE, baseUrl: BASE_URL, components: bundle.components, missing: [], files }, null, 1) + '\n');
+console.log(`core (${RELEASE}): ${files.length} files, ${files.reduce((a, f) => a + (f.parts?.length ?? 0), 0)} pieces, ${(bytes / 1e9).toFixed(2)} GB, ${newest.size} packs, encoder ${encoders[0]}`);

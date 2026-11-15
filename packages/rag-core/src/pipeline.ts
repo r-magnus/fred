@@ -452,6 +452,10 @@ const SYMPTOM_UPDATE = /\b(?:swell\w*|swollen|bigger|puffy|puffing|redder|worse|
  * and hurting" also scored under AGREED_CARD_FLOOR, and the thread it followed
  * (a bear in camp) opened the bear card for a burn (sealed chat set). Five
  * words alone was too blunt: it lost the heat-stroke follow-up.
+ * #212: a longer question must still be on the thread's topic (the joined
+ * search keeps FOLLOW_UP_ON_TOPIC of the earlier match). "how do I tell if
+ * canned fish has gone bad" right after the head-injury card asked something
+ * and scored under AGREED_CARD_FLOOR, and reopened the head-injury card.
  */
 const THREAD_CARD_WORDS = 5;
 const THREAD_CARD_MIN = 0.05;
@@ -958,6 +962,9 @@ async function askCore(
   // Conversation memory: search the follow-up joined to the previous question
   // too, and keep whichever scores higher.
   let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
+  // #212: joining the message to the earlier question diluted that question's
+  // own match, so the message is about something else.
+  let leftTopic = false;
   let standalone = candidates;
   // Memory applies only after a question Fred could answer: a follow-up to a
   // declined question has no topic to build on. With a knot question that
@@ -987,6 +994,7 @@ async function askCore(
     // tuning sets, 17 of 20 follow-ups kept 0.91 or more; the choking switch
     // kept 0.69, and four out-of-scope follow-ups 0.76-0.85.
     const staysOnTopic = joinedTop >= FOLLOW_UP_ON_TOPIC * opts.previous.topScore;
+    leftTopic = !staysOnTopic;
     // Memory exists to answer: a joined search that still falls under the gate
     // must not change how Fred declines (into a location request, say, from the
     // joined query's routing). None of the 29 measured follow-ups needed it.
@@ -1441,7 +1449,7 @@ async function askCore(
         forcedCard = agreedCard = own;
         forcedOwn = true;
       } else if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
-          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
+          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || (asksSomething(query) && !leftTopic))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
         // im lost" / "phone at 15%" / "its getting dark" / "what do i do".
@@ -1471,7 +1479,7 @@ async function askCore(
     else if (guardsOn && topCard === undefined && intent === 'question' && !aboutPet) {
       const said = setHere[0];
       if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
-          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
+          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || (asksSomething(query) && !leftTopic))) {
         forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
         // "splashed hot coffee all over my wrist" was read as a question and

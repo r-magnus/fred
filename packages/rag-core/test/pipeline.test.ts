@@ -627,6 +627,26 @@ test('with intent off, nothing changes', async () => {
   assert.equal(res.kind, 'abstain');
 });
 
+// #212: a new, unrelated question right after a card does not reopen it.
+// On the phone, "how do I tell if canned fish has gone bad" after the
+// head-injury card found nothing of its own (0.000), and joining it to the
+// head-injury question kept only 0.292 of that question's match.
+const BLED = 'my friend is bleeding badly from his leg';
+const threadOpts = { ...intentOpts, understand: true, abstainThreshold: 0.3, fallbackThreshold: 0.3,
+  previous: { question: BLED, topScore: 0.95 }, history: [BLED], lastCard: 'Heavy bleeding' } as const;
+
+test('#212: an unrelated question after a card does not reopen it', async () => {
+  const res = await ask('how do i tell if canned fish has gone bad', { backend: saying('QUESTION'), store: intentStore(), packs: clinicalPacks }, threadOpts);
+  assert.equal(res.diagnostics.followUp?.used, false, 'fixture: the joined search must leave the topic');
+  assert.equal(res.diagnostics.agreedCard, undefined);
+  assert.notEqual(res.kind, 'answer');
+});
+
+test('#212: a short message after a card still keeps it', async () => {
+  const res = await ask('what now', { backend: saying('QUESTION'), store: intentStore(), packs: clinicalPacks }, threadOpts);
+  assert.equal(res.diagnostics.agreedCard, 'Heavy bleeding');
+});
+
 // Tips packs (#96, docs/plan-tips.md).
 const tipsPacks = [
   { id: 'core-firstaid', domains: ['first-aid-physical'] as const, scope: { kind: 'global' } as const },

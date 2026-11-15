@@ -1,0 +1,87 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import type { Route, RouteStretch } from '@fred/geo/route';
+import {
+  ALWAYS_CAVEAT, climbWords, distanceWords, failureWords, routeBounds, routeGeoJSON, routeWarnings, timeWords, trailNames,
+} from '../src/route-view.ts';
+
+const stretch = (over: Partial<RouteStretch>): RouteStretch => ({
+  kind: 'path', sure: true, cls: 'trail', detail: 'path', name: null, meters: 1000, seconds: 720,
+  ascent: 0, descent: 0, notes: [], coords: [[-119.55, 37.73], [-119.54, 37.735]], ...over,
+});
+
+const route = (stretches: RouteStretch[], over: Partial<Route> = {}): Route => ({
+  stretches,
+  meters: stretches.reduce((a, s) => a + s.meters, 0),
+  seconds: stretches.reduce((a, s) => a + s.seconds, 0),
+  ascent: 0, descent: 0,
+  offTrailMeters: stretches.reduce((a, s) => a + (s.kind === 'off-trail' ? s.meters : 0), 0),
+  unsureMeters: stretches.reduce((a, s) => a + (s.sure ? 0 : s.meters), 0),
+  straightMeters: 1000,
+  notes: [...new Set(stretches.flatMap((s) => s.notes))],
+  hasElevation: true,
+  ...over,
+});
+
+test('distances read the way a trail sign does', () => {
+  assert.equal(distanceWords(4), '10 m');
+  assert.equal(distanceWords(437), '440 m');
+  assert.equal(distanceWords(2310), '2.3 km');
+  assert.equal(distanceWords(11_394), '11 km');
+});
+
+test('times are a range, never one confident number', () => {
+  assert.equal(timeWords(20 * 60), 'about 20–30 min');
+  // Half Dome: Tobler says 4 h 17; the card says 4½–6½ h, which brackets the 5–6 h hikers are told.
+  assert.equal(timeWords(4 * 3600 + 17 * 60), 'about 4½–6½ h');
+  assert.equal(timeWords(40 * 60), 'about 40 min–1 h');
+});
+
+test('climb is rounded, and missing heights say nothing rather than "0 m"', () => {
+  assert.equal(climbWords(route([stretch({})], { ascent: 1575, descent: 169 })), '1,580 m up, 170 m down');
+  assert.equal(climbWords(route([stretch({})], { ascent: 8, descent: 4 })), 'Mostly level');
+  assert.equal(climbWords(route([stretch({})], { hasElevation: false })), null);
+});
+
+test('an all-trail route has no warnings beyond the standing caveat', () => {
+  assert.deepEqual(routeWarnings(route([stretch({ name: 'Mist Trail' })])), []);
+  assert.match(ALWAYS_CAVEAT, /private land/);
+});
+
+test('off-trail and guessed parts are named, with the colour they are drawn in', () => {
+  const r = route([
+    stretch({}),
+    stretch({ kind: 'off-trail', sure: false, meters: 470, notes: ['steep', 'stream'] }),
+    stretch({ kind: 'guessed-join', sure: false, meters: 6 }),
+  ]);
+  const w = routeWarnings(r);
+  assert.match(w[0]!, /^470 m has no trail on the map \(shown in orange\)/);
+  assert.ok(w.some((x) => /guessed/.test(x)));
+  assert.ok(w.includes('Steep ground off the trail.'));
+  assert.ok(w.includes('Crosses a stream with no bridge on the map.'));
+  for (const line of w) assert.match(line, /[.)]$/);
+});
+
+test('trail names: longest first, short scraps left out', () => {
+  const r = route([
+    stretch({ name: 'John Muir Trail', meters: 3500 }),
+    stretch({ name: 'Mist Trail', meters: 2500 }),
+    stretch({ name: 'Connector', meters: 90 }),
+    stretch({ name: 'John Muir Trail', meters: 2000 }),
+  ]);
+  assert.deepEqual(trailNames(r), ['John Muir Trail', 'Mist Trail']);
+});
+
+test('the line has one feature per stretch, flagged sure or not, and bounds that hold it', () => {
+  const r = route([stretch({}), stretch({ kind: 'off-trail', sure: false, coords: [[-119.54, 37.735], [-119.53, 37.74]] })]);
+  const g = routeGeoJSON(r);
+  assert.deepEqual(g.features.map((f) => f.properties.sure), [true, false]);
+  assert.deepEqual(routeBounds(r), [-119.55, 37.73, -119.53, 37.74]);
+});
+
+test('every failure but a cancel has words, and they say what to do or why', () => {
+  for (const reason of ['too-far', 'no-map', 'start-unwalkable', 'destination-unwalkable', 'no-route'] as const) {
+    assert.ok(failureWords(reason).length > 20, reason);
+  }
+  assert.equal(failureWords('cancelled'), '');
+});

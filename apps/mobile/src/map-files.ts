@@ -14,7 +14,7 @@
  * into the next shows no seam, and past the last one the map still has roads.
  */
 import { File, Paths } from 'expo-file-system';
-import { placeKey, type RegionOutlines } from './regions.ts';
+import { edgeAhead, placeKey, regionAt, splitKey, type EdgeAhead, type RegionOutline, type RegionOutlines } from './regions.ts';
 
 /** One map file to draw, with the contours that go with it. */
 export interface MapArchive {
@@ -90,4 +90,37 @@ export function outlinesOnPhone(state: string): RegionOutlines | null {
 /** Every state whose region outlines are on the phone. */
 export function outlinedStates(): string[] {
   return names().map((n) => OUTLINE.exec(n)?.[1]).filter((s): s is string => s !== undefined).sort();
+}
+
+/**
+ * What the map has where the hiker stands, for what the map and the chat say
+ * about it:
+ * - `none`: no position, or outside the US;
+ * - `detail`: a downloaded state or region, nowhere near its edge;
+ * - `edge`: in a downloaded region, within EDGE_WARN_KM of one that is not;
+ * - `region-missing`: in a region of a split state that is not downloaded
+ *   (the state-wide part is, so the outlines and the zoom-10 map are here);
+ * - `state-missing`: nothing detailed for this state on the phone.
+ */
+export type WhereOnMap =
+  | { readonly kind: 'none' }
+  | { readonly kind: 'detail' }
+  | { readonly kind: 'edge'; readonly state: string; readonly edge: EdgeAhead }
+  | { readonly kind: 'region-missing'; readonly state: string; readonly region: RegionOutline }
+  | { readonly kind: 'state-missing'; readonly state: string };
+
+export function whereOnMap(fix: { readonly latitude: number; readonly longitude: number; readonly state: string | null } | null): WhereOnMap {
+  if (fix === null || fix.state === null) return { kind: 'none' };
+  const state = fix.state;
+  const have = detailOnPhone();
+  if (have.has(state)) return { kind: 'detail' };
+  const outlines = outlinesOnPhone(state);
+  if (outlines === null) return { kind: 'state-missing', state };
+  const region = regionAt(outlines, fix.longitude, fix.latitude);
+  // Offshore or just over the state line: nothing better to say than the broad map.
+  if (region === null) return { kind: 'detail' };
+  if (!have.has(placeKey(state, region.id))) return { kind: 'region-missing', state, region };
+  const regionsHere = new Set([...have].map(splitKey).filter((k) => k.state === state && k.region !== null).map((k) => k.region!));
+  const edge = edgeAhead(outlines, fix.longitude, fix.latitude, regionsHere);
+  return edge === null ? { kind: 'detail' } : { kind: 'edge', state, edge };
 }

@@ -9,7 +9,6 @@
  * thumbnail the chat shows when someone says they are lost (US-05).
  */
 import { Map, Camera, GeoJSONSource, Layer, Marker, type CameraRef } from '@maplibre/maplibre-react-native';
-import { File, Paths } from 'expo-file-system';
 import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +20,9 @@ import { loadCoverage, coverageNear, carrierName, type CoverageView } from './co
 import { loadCarrier, saveCarrier, forgetCarrier, type CarrierChoice } from './carrier.ts';
 import type { LocationFix } from './location.ts';
 import { MapDownloads } from './map-downloads-panel.tsx';
+import { detailOnPhone, mapArchives, outlinedStates, outlinesOnPhone, whereOnMap, type MapArchive } from './map-files.ts';
+import { labelPoint, placeKey, roughKm, type RegionOutline } from './regions.ts';
+import { RegionOffer } from './region-offer.tsx';
 import { Compass, useHeading, type Heading } from './compass.tsx';
 import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
@@ -71,7 +73,6 @@ const emptyStyle = (c: MapColours): StyleSpecification => ({
   layers: [{ id: 'bg', type: 'background', paint: { 'background-color': c.land } }],
 });
 
-export const mapFile = (state: string): string => `map-${state}-z14.pmtiles`;
 
 /**
  * Minimal style rather than @protomaps/basemaps.
@@ -89,22 +90,21 @@ const LINES: FilterSpecification = ['==', ['geometry-type'], 'LineString'];
 const TRAILS: FilterSpecification = ['==', ['get', 'kind'], 'path'];
 const ROADS: FilterSpecification = ['in', ['get', 'kind'], ['literal', ['highway', 'major_road', 'minor_road', 'other']]];
 
-const style = (uri: string, contoursUri: string | null, c: MapColours): StyleSpecification => ({
-  version: 8,
-  sources: {
-    proto: { type: 'vector', url: `pmtiles://${uri}` },
-    ...(contoursUri === null ? {} : {
-      contours: { type: 'vector', url: `pmtiles://${contoursUri}` },
-    }),
-  },
-  layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': c.water } },
-    { id: 'earth', type: 'fill', source: 'proto', 'source-layer': 'earth',
+/**
+ * One map file's layers, named after it. Each file is drawn whole, land first,
+ * so a detailed region covers the broader maps under it: its land and its sea
+ * are both painted, and nothing of the coarser map shows through.
+ */
+const stack = (a: MapArchive, c: MapColours): StyleSpecification['layers'] => {
+  const src = `m-${a.id}`;
+  const id = (name: string): string => `${a.id}-${name}`;
+  return [
+    { id: id('earth'), type: 'fill', source: src, 'source-layer': 'earth',
       filter: POLYGONS, paint: { 'fill-color': c.land } },
     // Topographic map (docs/results-topo-research.md, option B). Land cover is
     // already in the basemap archive, so it is always drawn; contours come
-    // from a separate per-state archive and are drawn when it is present.
-    { id: 'landuse', type: 'fill', source: 'proto', 'source-layer': 'landuse',
+    // from a separate archive and are drawn when it is present.
+    { id: id('landuse'), type: 'fill', source: src, 'source-layer': 'landuse',
       filter: POLYGONS,
       paint: { 'fill-color': ['match', ['get', 'kind'],
         ['forest', 'wood'], c.forest,
@@ -113,32 +113,50 @@ const style = (uri: string, contoursUri: string | null, c: MapColours): StyleSpe
         'glacier', c.glacier,
         'wetland', c.wetland,
         c.land] } },
-    ...(contoursUri === null ? [] : [
-      { id: 'contours', type: 'line', source: 'contours', 'source-layer': 'contours',
+    ...(a.contoursUri === null ? [] : [
+      { id: id('contours'), type: 'line', source: `c-${a.id}`, 'source-layer': 'contours',
         paint: {
           'line-color': c.contour,
           'line-opacity': ['case', ['==', ['get', 'idx'], 1], 0.55, 0.26],
           'line-width': ['case', ['==', ['get', 'idx'], 1], 1, 0.5],
         } },
     ] as StyleSpecification['layers']),
-    { id: 'water', type: 'fill', source: 'proto', 'source-layer': 'water',
+    { id: id('water'), type: 'fill', source: src, 'source-layer': 'water',
       filter: POLYGONS, paint: { 'fill-color': c.water } },
-    { id: 'waterways', type: 'line', source: 'proto', 'source-layer': 'water',
+    { id: id('waterways'), type: 'line', source: src, 'source-layer': 'water',
       filter: LINES, paint: { 'line-color': c.stream, 'line-width': 1.2 } },
     // Cliffs, from earth's line features. On a topo map they matter as much as
     // contours, so they are drawn dark and a little heavier than a contour.
-    { id: 'cliffs', type: 'line', source: 'proto', 'source-layer': 'earth',
+    { id: id('cliffs'), type: 'line', source: src, 'source-layer': 'earth',
       filter: LINES, paint: { 'line-color': c.cliff, 'line-width': 1.3 } },
     // Roads are white with a soft edge, and widen as the map is zoomed in, so
     // they can't be taken for contour lines. Trails are the dashed ones.
-    { id: 'road-edge', type: 'line', source: 'proto', 'source-layer': 'roads', filter: ROADS,
+    { id: id('road-edge'), type: 'line', source: src, 'source-layer': 'roads', filter: ROADS,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': c.roadEdge, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.4, 14, 5] } },
-    { id: 'roads', type: 'line', source: 'proto', 'source-layer': 'roads', filter: ROADS,
+    { id: id('roads'), type: 'line', source: src, 'source-layer': 'roads', filter: ROADS,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': c.road, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.6, 14, 3] } },
-    { id: 'trails', type: 'line', source: 'proto', 'source-layer': 'roads', filter: TRAILS,
+    { id: id('trails'), type: 'line', source: src, 'source-layer': 'roads', filter: TRAILS,
       paint: { 'line-color': c.trail, 'line-width': 1.5, 'line-dasharray': [2.5, 1.5] } },
+  ];
+};
+
+/**
+ * Every map on the phone at once (#224), broadest first: the country, then
+ * whole states, then regions. Two downloaded regions side by side meet with
+ * no seam, and where nothing detailed is downloaded the coarser map still
+ * shows the roads and towns.
+ */
+const style = (archives: readonly MapArchive[], c: MapColours): StyleSpecification => ({
+  version: 8,
+  sources: Object.fromEntries(archives.flatMap((a) => [
+    [`m-${a.id}`, { type: 'vector', url: `pmtiles://${a.uri}` }],
+    ...(a.contoursUri === null ? [] : [[`c-${a.id}`, { type: 'vector', url: `pmtiles://${a.contoursUri}` }]]),
+  ])),
+  layers: [
+    { id: 'bg', type: 'background', paint: { 'background-color': c.water } },
+    ...archives.flatMap((a) => stack(a, c)),
   ],
 });
 
@@ -188,10 +206,32 @@ function Dots(): React.JSX.Element {
   );
 }
 
+/** Flat [lon, lat, ...] to GeoJSON pairs. */
+const pairs = (flat: readonly number[]): [number, number][] => {
+  const out: [number, number][] = [];
+  for (let i = 0; i + 1 < flat.length; i += 2) out.push([flat[i]!, flat[i + 1]!]);
+  return out;
+};
+
+/** Regions of states with outlines on the phone, which are not downloaded themselves. */
+function regionsToOffer(): { readonly place: string; readonly region: RegionOutline }[] {
+  const have = detailOnPhone();
+  return outlinedStates().flatMap((s) => {
+    const o = outlinesOnPhone(s);
+    if (o === null || have.has(s)) return [];
+    return o.regions.filter((r) => !have.has(placeKey(s, r.id))).map((region) => ({ place: placeKey(s, region.id), region }));
+  });
+}
+
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
+    /**
+     * Given on the full map: regions not on the phone are drawn washed out with
+     * a dashed edge and a name tag, and a tap on either offers that region.
+     */
+    onRegion?: (place: string) => void;
     /** The map-data credit button. The chat preview leaves it to the full map it opens. */
     credit?: boolean;
     /** How far the credit button sits above the bottom edge: clear of the sheet. */
@@ -201,15 +241,9 @@ function FredMap(
     heading?: Heading;
   },
 ): React.JSX.Element {
-  // No state means no map to choose; an absent file means that state has not
-  // been downloaded. Both render the terrain-less background rather than
-  // failing, because a missing map must not take the location zone with it.
-  const archive = fix?.state == null ? null : mapFile(fix.state);
-  const haveMap = archive !== null && new File(Paths.document, archive).exists;
-  const uri = archive === null ? null : `${Paths.document.uri}${archive}`;
-  const contours = fix?.state == null ? null : `contours-${fix.state}.pmtiles`;
-  const contoursUri = contours !== null && new File(Paths.document, contours).exists
-    ? `${Paths.document.uri}${contours}` : null;
+  // Every map on the phone, drawn together (#224). Read once per mount: the
+  // full map is remounted after a download or a removal.
+  const archives = useMemo(() => mapArchives(), []);
   // B-KR2's "estimated location zone". The radius is the GPS's own 68%
   // confidence figure, so the circle is a claim the hardware already makes
   // rather than one invented for the display. Outdoors this is single-digit
@@ -221,8 +255,17 @@ function FredMap(
   const colours = coloursFor(palette);
   // Built once per map and colour set: a new style object makes the map reload.
   const mapStyle = useMemo(
-    () => (haveMap && uri !== null ? style(uri, contoursUri, colours) : emptyStyle(colours)),
-    [haveMap, uri, contoursUri, colours]);
+    () => (archives.length > 0 ? style(archives, colours) : emptyStyle(colours)),
+    [archives, colours]);
+  // The regions of downloaded states that are not on the phone themselves.
+  const offered = useMemo(() => (onRegion === undefined ? [] : regionsToOffer()), [onRegion === undefined]);
+  const offeredShapes = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: offered.flatMap(({ place, region }) => region.rings.map((ring) => ({
+      type: 'Feature' as const, properties: { place },
+      geometry: { type: 'Polygon' as const, coordinates: [pairs(ring)] },
+    }))),
+  }), [offered]);
 
   return (
     <>
@@ -243,6 +286,27 @@ function FredMap(
           // searched); 13 showed three hexagons and no context.
           zoom: fix === null ? 9 : zoom,
         }} />
+        {/* Regions not on the phone, under everything else drawn on top:
+            washed out, with a dashed edge, and tappable. */}
+        {offered.length > 0 && (
+          <GeoJSONSource id="regions-offered" data={offeredShapes}
+            onPress={(e) => {
+              const place = e.nativeEvent.features[0]?.properties?.place;
+              if (typeof place === 'string') onRegion?.(place);
+            }}>
+            <Layer id="offered-wash" type="fill" paint={{ 'fill-color': colours.cliff, 'fill-opacity': palette.night ? 0.28 : 0.1 }} />
+            <Layer id="offered-edge" type="line"
+              paint={{ 'line-color': colours.cliff, 'line-width': 1.6, 'line-dasharray': [3, 2] }} />
+          </GeoJSONSource>
+        )}
+        {offered.map(({ place, region }) => (
+          <Marker key={place} id={`tag-${place}`} lngLat={labelPoint(region) as [number, number]} onPress={() => onRegion?.(place)}>
+            <View collapsable={false} style={styles.tag}>
+              <Text style={styles.tagName}>{region.name}</Text>
+              <Text style={styles.tagAction}>Tap to download</Text>
+            </View>
+          </Marker>
+        ))}
         {/* Under the location ring in draw order, so the user's own zone
             stays readable on top of the shading. Unshaded means assumed
             covered; the two zones never overlap. */}
@@ -337,6 +401,8 @@ export function MapScreen(
   const { pack, carrier, coverage, reloadCarrier } = useCoverage(fix, files);
   const [picking, setPicking] = useState(false);
   const [managing, setManaging] = useState(false);
+  /** A region being offered for download, e.g. "CA/bay". */
+  const [offer, setOffer] = useState<string | null>(null);
   const camera = useRef<CameraRef | null>(null);
   const heading = useHeading();
   // The sheet's height, so the map's credit button can sit just above it.
@@ -370,13 +436,14 @@ export function MapScreen(
       onPanResponderTerminate: () => rest(fold.current.folded),
     });
   }, [drop]);
-  const haveMap = fix?.state == null ? true : new File(Paths.document, mapFile(fix.state)).exists;
+  // What the map has here, read again after each download.
+  const onMap = useMemo(() => whereOnMap(fix), [fix, files]);
   const choose = (id: string | null | 'sim'): void => {
     setPicking(false);
     if (id === 'sim') forgetCarrier(); else saveCarrier(id);
     reloadCarrier();
   };
-  const panel = picking || managing;
+  const panel = picking || managing || offer !== null;
   // Iteration 4: ask for location only once the hiker knows why. With access
   // already given, the map looks at once, as before; without it, the sheet
   // explains and the system's question comes from "Find where I am". Blocked
@@ -411,14 +478,15 @@ export function MapScreen(
   // The phone's back button closes whatever is on top: a panel, then the map.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (picking) setPicking(false); else if (managing) setManaging(false); else onClose();
+      if (offer !== null) setOffer(null); else if (picking) setPicking(false); else if (managing) setManaging(false); else onClose();
       return true;
     });
     return () => sub.remove();
-  }, [picking, managing, onClose]);
+  }, [offer, picking, managing, onClose]);
   return (
     <View style={styles.root}>
-      <FredMap key={files} fix={fix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8} />
+      <FredMap key={files} fix={fix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
+        onRegion={setOffer} />
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}
@@ -506,13 +574,36 @@ export function MapScreen(
             <Text style={styles.sheetText}>Tap the round target button, top right, to find where you are.</Text>
           )}
           {/* The map for where you are isn't on the phone: offer it right here. */}
-          {!haveMap && (
+          {onMap.kind === 'state-missing' && (
             <>
-              <Text style={styles.sheetText}>The {fix?.state} map isn&apos;t on this phone yet, so only your position and the signal zones are drawn.</Text>
+              <Text style={styles.sheetText}>The {onMap.state} map isn&apos;t on this phone yet, so only your position and the signal zones are drawn.</Text>
               <Pressable style={styles.getMap} onPress={() => setManaging(true)} accessibilityRole="button">
-                <Text style={styles.getMapText}>Download the {fix?.state} map</Text>
+                <Text style={styles.getMapText}>Download the {onMap.state} map</Text>
               </Pressable>
             </>
+          )}
+          {onMap.kind === 'region-missing' && (
+            <>
+              <Text style={styles.sheetText}>
+                You&apos;re in {onMap.region.name}. Its detailed map isn&apos;t on this phone, so only main roads are drawn.
+              </Text>
+              <Pressable style={styles.getMap} onPress={() => setOffer(placeKey(onMap.state, onMap.region.id))} accessibilityRole="button">
+                <Text style={styles.getMapText}>Download {onMap.region.name}</Text>
+              </Pressable>
+            </>
+          )}
+          {/* Near the edge of what is downloaded (#224): said before the
+              detail runs out, with words and a shape, not colour alone. */}
+          {onMap.kind === 'edge' && (
+            <View style={styles.edge} accessibilityLiveRegion="polite">
+              <Text style={styles.edgeTitle}>Your detailed map ends {roughKm(onMap.edge.km)} from here</Text>
+              <Text style={styles.edgeText}>
+                Past that line, in {onMap.edge.to.name}, the map shows main roads only. Get it while you have signal.
+              </Text>
+              <Pressable style={styles.edgeButton} onPress={() => setOffer(placeKey(onMap.state, onMap.edge.to.id))} accessibilityRole="button">
+                <Text style={styles.edgeButtonText}>Download {onMap.edge.to.name}</Text>
+              </Pressable>
+            </View>
           )}
           {coverage !== null && (
             <>
@@ -553,9 +644,14 @@ export function MapScreen(
       {managing && (
         <MapDownloads
           here={fix?.state ?? null}
+          at={fix}
           onClose={() => setManaging(false)}
           onChanged={() => { setFiles((n) => n + 1); onPacksChanged(); }}
         />
+      )}
+      {offer !== null && (
+        <RegionOffer place={offer} onClose={() => setOffer(null)}
+          onInstalled={() => { setFiles((n) => n + 1); onPacksChanged(); }} />
       )}
       {picking && pack !== null && (
         <View style={[styles.picker, { top: insets.top + 70 }]}>
@@ -590,11 +686,16 @@ export function MapPreview(
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const { coverage } = useCoverage(fix);
+  const onMap = useMemo(() => whereOnMap(fix), [fix]);
+  const within = fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`;
   const caption = coverage !== null ? coverage.advice
     : fix === null ? 'Finding your location…'
-    : fix.state !== null && !new File(Paths.document, mapFile(fix.state)).exists
-      ? `You are here, within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m. The ${fix.state} map isn't on this phone yet.`
-    : `You are here, within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m.`;
+    : onMap.kind === 'state-missing' ? `You are here, ${within}. The ${onMap.state} map isn't on this phone yet.`
+    : onMap.kind === 'region-missing' ? `You are here, ${within}. The detailed map of ${onMap.region.name} isn't on this phone yet.`
+    : `You are here, ${within}.`;
+  // Said in the chat too: someone who asked because they're lost may not open the map.
+  const edgeNote = onMap.kind === 'edge'
+    ? `Your detailed map ends ${roughKm(onMap.edge.km)} from here; past it, the map shows main roads only.` : null;
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Open the map">
       <View style={styles.preview} pointerEvents="none">
@@ -602,6 +703,7 @@ export function MapPreview(
       </View>
       {/* #77: left out when Fred's reply above has already said it. */}
       {quiet && coverage !== null ? null : <Text style={styles.previewCaption}>{caption}</Text>}
+      {edgeNote !== null && <Text style={styles.previewEdge}>{edgeNote}</Text>}
       <Text style={styles.previewOpen}>Tap to open the map</Text>
     </Pressable>
   );
@@ -625,6 +727,7 @@ const makeStyles = (palette: Palette) => {
   return StyleSheet.create({
   preview: { height: 190, borderRadius: radius.control, overflow: 'hidden', backgroundColor: land },
   previewCaption: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 10 },
+  previewEdge: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 6 },
   previewOpen: { color: palette.pine, fontSize: 13, fontWeight: '700', marginTop: 4 },
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: land },
   map: { flex: 1 },
@@ -682,6 +785,26 @@ const makeStyles = (palette: Palette) => {
     backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 20, paddingVertical: 11,
   },
   getMapText: { color: palette.paper, fontSize: 15, fontWeight: '700' },
+  // The edge warning: a block with a heading, so it is not carried by colour alone.
+  edge: {
+    marginTop: 12, padding: 12, borderRadius: radius.control,
+    backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
+  },
+  edgeTitle: { color: palette.ink, fontSize: 15, fontWeight: '700', lineHeight: 21 },
+  edgeText: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  edgeButton: {
+    alignSelf: 'flex-start', marginTop: 10, minHeight: 48, justifyContent: 'center',
+    borderRadius: radius.pill, paddingHorizontal: 18, borderWidth: 1.5, borderColor: palette.pine, backgroundColor: palette.paper,
+  },
+  edgeButtonText: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  // A region's name tag on the map: tappable, so it looks like a button (ux-ui-review 7a), and 48 dp tall.
+  tag: {
+    minHeight: 48, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: palette.paper, borderRadius: radius.control, borderWidth: 1.5, borderColor: palette.pine,
+    paddingHorizontal: 12, paddingVertical: 6, boxShadow: `0 2 8 ${palette.shade}`,
+  },
+  tagName: { color: palette.ink, fontSize: 14, fontWeight: '700' },
+  tagAction: { color: palette.pine, fontSize: 13, fontWeight: '600', marginTop: 1 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6, marginTop: 10 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   swatch: { width: 14, height: 14, borderRadius: 4, borderWidth: 1.5 },

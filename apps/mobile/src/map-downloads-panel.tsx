@@ -2,22 +2,32 @@
  * The offline-maps panel on the map screen (issue #26): see which states are
  * on the phone, download one, cancel, or remove one to free space.
  *
- * Your own state is listed first. Sizes are shown before anything starts,
- * because a state is 20 MB to 1.3 GB and a hiker may be on mobile data.
+ * A state split into regions (#224) is listed as its name with its regions
+ * under it, each downloaded or removed on its own. Your own state is listed
+ * first, and your own region first within it. Sizes are shown before
+ * anything starts, because a state is 20 MB to 1.3 GB and a hiker may be on
+ * mobile data.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { STATE_NAMES } from '@fred/rag-core';
 import {
-  downloadState, fetchIndex, installState, remainingBytes, removeState,
+  downloadBundle, fetchIndex, installState, placeState, removePlace,
   type MapIndex, type Progress,
 } from './map-downloads.ts';
+import { orderPlaces, placeBundle, placeName } from './places.ts';
+import { placeKey, regionAt, splitKey } from './regions.ts';
 import { CalmLoader } from './calm-loader.tsx';
 import { orderStates, size } from './setup-plan.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
 export function MapDownloads(
-  { here, onClose, onChanged }: { here: string | null; onClose: () => void; onChanged: () => void },
+  { here, at = null, onClose, onChanged }: {
+    here: string | null;
+    /** Where the hiker is, to put their own region first. */
+    at?: { readonly latitude: number; readonly longitude: number } | null;
+    onClose: () => void; onChanged: () => void;
+  },
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const [idx, setIdx] = useState<MapIndex | null>(null);
@@ -46,13 +56,32 @@ export function MapDownloads(
     setProgress(null);
     const ctrl = new AbortController();
     abort.current = ctrl;
-    downloadState(idx, state, setProgress, ctrl.signal)
+    const bundle = placeBundle(idx, state);
+    if (bundle === undefined) { setBusy(null); return; }
+    downloadBundle(idx, bundle, setProgress, ctrl.signal)
       .then(() => onChanged())
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => { setBusy(null); setProgress(null); abort.current = null; setTick((t) => t + 1); });
   }, [idx, onChanged]);
 
   const states = idx === null ? [] : orderStates(Object.keys(idx.states), here, STATE_NAMES);
+  const outline = here === null ? undefined : idx?.regions?.[here]?.outline;
+  const hereRegion = outline === undefined || at === null || here === null ? null
+    : (() => { const r = regionAt(outline, at.longitude, at.latitude); return r === null ? null : placeKey(here, r.id); })();
+  // A split state is a heading with its regions under it. A whole-state map
+  // downloaded before the split is still listed, so it can be removed.
+  const rows: ({ readonly kind: 'head'; readonly state: string } | { readonly kind: 'place'; readonly key: string; readonly older?: boolean })[] =
+    idx === null ? [] : orderPlaces(idx, states, hereRegion).flatMap((key, i, all) => {
+      const { state, region } = splitKey(key);
+      if (region === null) return [{ kind: 'place' as const, key }];
+      const first = i === 0 || splitKey(all[i - 1]!).state !== state;
+      const older = first && idx.states[state] !== undefined && installState(idx.states[state]!) !== 'none';
+      return [
+        ...(first ? [{ kind: 'head' as const, state }] : []),
+        ...(older ? [{ kind: 'place' as const, key: state, older: true }] : []),
+        { kind: 'place' as const, key },
+      ];
+    });
 
   return (
     <View style={styles.panel}>
@@ -65,26 +94,38 @@ export function MapDownloads(
       </View>
       <Text style={styles.hint}>
         Each state has its map, contour lines, cell coverage and plant and animal guide.
+        Big states come in regions, so you can take just the part you walk in.
         Download on Wi-Fi if you can.
       </Text>
       {error !== null && <Text style={styles.error}>{error}</Text>}
       {idx === null && error === null && <CalmLoader size={40} style={styles.loading} />}
       <ScrollView style={styles.list}>
-        {states.map((s) => {
-          const bundle = idx!.states[s]!;
-          const status = installState(bundle);
-          const left = remainingBytes(bundle);
+        {rows.map((row) => {
+          if (row.kind === 'head') {
+            return (
+              <Text key={`head-${row.state}`} style={styles.head2} accessibilityRole="header">
+                {STATE_NAMES[row.state] ?? row.state}{row.state === here ? '  · you are here' : ''}
+              </Text>
+            );
+          }
+          const s = row.key;
+          const where = placeState(idx!, s);
+          if (where === undefined) return null;
+          const { status, left, bytes } = where;
           const mine = busy === s;
+          const inRegion = splitKey(s).region !== null;
+          const name = row.older ? `${STATE_NAMES[s] ?? s}, whole state (older download)` : placeName(idx, s, STATE_NAMES);
+          const youAreHere = inRegion ? s === hereRegion : s === here;
           return (
-            <View key={s} style={styles.row}>
+            <View key={s} style={[styles.row, inRegion && styles.rowRegion]}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.name}>{STATE_NAMES[s] ?? s}{s === here ? '  · you are here' : ''}</Text>
+                <Text style={styles.name}>{name}{youAreHere ? '  · you are here' : ''}</Text>
                 <Text style={styles.meta}>
                   {mine && progress !== null
                     ? `${size(progress.done)} of ${size(progress.total)}`
-                    : status === 'installed' ? `On this phone · ${size(bundle.bytes)}`
+                    : status === 'installed' ? `On this phone · ${size(bytes)}`
                     : status === 'partial' ? `Partly downloaded · ${size(left)} to go`
-                    : size(bundle.bytes)}
+                    : size(left)}
                 </Text>
                 {mine && progress !== null && (
                   <View style={styles.bar}><View style={[styles.fill, { width: `${Math.round((progress.done / Math.max(1, progress.total)) * 100)}%` }]} /></View>
@@ -101,25 +142,26 @@ export function MapDownloads(
                 // Iteration 4: what arrived is kept (it shows as "Partly downloaded"), so this
                 // pauses rather than cancels, in the setup wizard's words.
                 <Pressable onPress={() => abort.current?.abort()} style={styles.outline} accessibilityRole="button"
-                  accessibilityLabel={`Pause the ${STATE_NAMES[s] ?? s} download`}>
+                  accessibilityLabel={`Pause the ${name} download`}>
                   <Text style={styles.action}>Pause</Text>
                 </Pressable>
               ) : status === 'installed' ? (
                 <Pressable disabled={busy !== null} style={[styles.outline, confirm === s && styles.outlineWarn]}
                   accessibilityRole="button" accessibilityState={{ disabled: busy !== null }}
-                  accessibilityLabel={confirm === s ? `Remove the ${STATE_NAMES[s] ?? s} map now` : `Remove the ${STATE_NAMES[s] ?? s} map`}
+                  accessibilityLabel={confirm === s ? `Remove the ${name} map now` : `Remove the ${name} map`}
                   onPress={() => {
                     // Asks first, like Download: a mis-tap out of signal can't be undone.
                     if (confirm !== s) { setConfirm(s); return; }
                     setConfirm(null);
-                    removeState(bundle); onChanged(); setTick((t) => t + 1);
+                    removePlace(idx!, s); onChanged(); setTick((t) => t + 1);
                   }}>
                   <Text style={[styles.remove, busy !== null && styles.dim]}>{confirm === s ? 'Remove now' : 'Remove'}</Text>
                 </Pressable>
-              ) : (
+              ) : row.older ? null : (
                 // Outlined until it asks to start: fifty filled buttons in a column shouted.
                 <Pressable disabled={busy !== null} style={[confirm === s ? styles.filled : styles.outline, busy !== null && styles.dim]}
                   accessibilityRole="button" accessibilityState={{ disabled: busy !== null }}
+                  accessibilityLabel={confirm === s ? `Start downloading ${name}` : `Download ${name}, ${size(left)}`}
                   onPress={() => (confirm === s ? start(s) : setConfirm(s))}>
                   <Text style={confirm === s ? styles.filledText : styles.action}>
                     {confirm === s ? 'Start' : status === 'partial' ? 'Resume' : 'Download'}
@@ -150,6 +192,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   list: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
   name: { color: palette.ink, fontSize: 15 },
+  // A split state's name, over its regions.
+  head2: { color: palette.ink, fontSize: 16, fontWeight: '700', paddingTop: 14, paddingBottom: 2, borderTopWidth: 1, borderTopColor: palette.sand },
+  rowRegion: { paddingLeft: 12, borderTopColor: palette.oat },
   meta: { color: palette.moss, fontSize: 13, marginTop: 2 },
   confirm: { color: palette.amber, fontSize: 13, lineHeight: 18, marginTop: 4 },
   bar: { height: 6, backgroundColor: palette.oat, borderRadius: 3, marginTop: 6, overflow: 'hidden' },

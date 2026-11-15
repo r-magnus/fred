@@ -18,7 +18,8 @@
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import { downloadError } from './download-errors.ts';
 
-import type { RegionalState } from './places.ts';
+import { placeBundle, placesOf, regionOnly, type RegionalState } from './places.ts';
+import { splitKey } from './regions.ts';
 
 /**
  * The published list, unless a build names another: the test app is built
@@ -254,4 +255,38 @@ export function removeState(bundle: StateBundle): void {
     const d = new Directory(Paths.document, ...dir.split('/'));
     if (d.exists && d.list().length === 0) d.delete();
   }
+}
+
+/**
+ * Where a place stands (#224). Whether it is installed is judged by its own
+ * files: a region is not "partly downloaded" just because its state's guide
+ * arrived with a neighbour. What is left counts everything its download
+ * would fetch, the state-wide part and the overview included.
+ */
+export function placeState(idx: MapIndex, key: string):
+  { readonly status: InstallState; readonly left: number; readonly bytes: number } | undefined {
+  const full = placeBundle(idx, key);
+  const own = regionOnly(idx, key) ?? idx.states[splitKey(key).state];
+  if (full === undefined || own === undefined) return undefined;
+  return { status: installState(own), left: remainingBytes(full), bytes: own.bytes };
+}
+
+/**
+ * Remove a place to free space. A region takes its own files, and the
+ * state-wide part too once no region of that state is left. The nationwide
+ * overview stays: it is small, and it is what keeps the map from going blank.
+ */
+export function removePlace(idx: MapIndex, key: string): void {
+  const { state, region } = splitKey(key);
+  if (region === null) {
+    const whole = idx.states[state];
+    if (whole !== undefined) removeState(whole);
+    return;
+  }
+  const own = regionOnly(idx, key);
+  if (own !== undefined) removeState(own);
+  const split = idx.regions?.[state];
+  if (split === undefined) return;
+  const othersLeft = placesOf(idx, state).some((k) => k !== key && installState(regionOnly(idx, k)!) !== 'none');
+  if (!othersLeft) removeState(split.base);
 }

@@ -3,7 +3,8 @@
  *
  *   welcome  who Fred is
  *   guides   the models and the guides that are the same everywhere
- *   place    the hiker's state or states: map, contours, coverage, local guide
+ *   place    the hiker's state or states: map, contours, coverage, local guide;
+ *            a big state is offered as regions, the hiker's own ticked (#224)
  *   ready    all set; the app is left to discover (no tour, 2026-11-15)
  *
  * The day and night page is gone (ux-ui-review pass, 2026-11-14): a page
@@ -36,9 +37,12 @@ import { STATE_NAMES } from '@fred/rag-core';
 import { CalmLoader } from './calm-loader.tsx';
 import { currentFix, lastKnownFix } from './location.ts';
 import {
-  downloadBundle, fetchIndex, installState, remainingBytes,
+  downloadBundle, fetchIndex, placeState, remainingBytes,
   type MapIndex, type Progress, type StateBundle,
 } from './map-downloads.ts';
+import { detailOnPhone } from './map-files.ts';
+import { mergeBundles, orderPlaces, placeBundle, placeName } from './places.ts';
+import { placeKey, regionAt, splitKey } from './regions.ts';
 import { Scene } from './scene.tsx';
 import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, timeLeft, type IndexState, type Step } from './setup-plan.ts';
 import { guidesOnPhone, statesOnPhone } from './setup.ts';
@@ -56,11 +60,12 @@ const AWAKE = 'setup-download';
 const NEAR_ENOUGH_M = 3000;
 const LOCATE_MS = 12_000;
 
-/** One thing to download: the guides, or a state by its code. */
-interface Item { readonly what: string; readonly bundle: StateBundle }
+/** One thing to download: the guides, or a place ("NV", "CA/south"), with its name for the strip. */
+interface Item { readonly what: string; readonly name: string; readonly bundle: StateBundle }
 /** What is downloading now, and where it stands in the queue. */
 interface Job {
   readonly what: string;
+  readonly name: string;
   readonly progress: Progress | null;
   /** This one's place in the run, and how many the run holds now. */
   readonly n: number;
@@ -129,7 +134,6 @@ function Promise_({ glyph, tone, title, children }: { glyph: number; tone: strin
 }
 
 /** What a download is called on the strip. */
-const nameOf = (what: string): string => (what === GUIDES ? 'the guides' : STATE_NAMES[what] ?? what);
 
 /**
  * One place that says how the downloads are going, on every page after the
@@ -152,7 +156,7 @@ function DownloadStrip(
       <View style={styles.strip} accessibilityLiveRegion="polite">
         <View style={styles.grow}>
           <Text style={styles.stripTitle} numberOfLines={1}>
-            Downloading {nameOf(job.what)}{job.of > 1 ? ` · ${job.n} of ${job.of}` : ''}
+            Downloading {job.name}{job.of > 1 ? ` · ${job.n} of ${job.of}` : ''}
           </Text>
           <Bar progress={job.progress} startedAt={job.startedAt} />
         </View>
@@ -162,7 +166,7 @@ function DownloadStrip(
       </View>
     );
   }
-  const what = stopped!.items.map((i) => nameOf(i.what));
+  const what = stopped!.items.map((i) => i.name);
   return (
     <View style={[styles.strip, stopped!.why === 'failed' && styles.stripFailed]} accessibilityLiveRegion="polite">
       <View style={styles.grow}>
@@ -236,10 +240,10 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
           n += 1;
           const of = n + pending.current.length - 1;
           const startedAt = Date.now();
-          setJob({ what: item.what, progress: null, n, of, startedAt });
+          setJob({ what: item.what, name: item.name, progress: null, n, of, startedAt });
           try {
             await downloadBundle(index, item.bundle,
-              (progress) => setJob({ what: item.what, progress, n, of: n + pending.current.length - 1, startedAt }), ctrl.signal);
+              (progress) => setJob({ what: item.what, name: item.name, progress, n, of: n + pending.current.length - 1, startedAt }), ctrl.signal);
           } catch (e) {
             const items = [...pending.current];
             pending.current = [];
@@ -270,41 +274,58 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
   const inQueue = (what: string): boolean => job?.what === what || pending.current.some((i) => i.what === what);
   const free = Paths.availableDiskSpace;
 
-  // The place page: where the hiker is, and the states they have ticked.
+  // The place page: where the hiker is, and the places they have ticked:
+  // states, or regions of a split state ("CA/south").
   const [here, setHere] = useState<string | null>(null);
+  const [at, setAt] = useState<{ readonly latitude: number; readonly longitude: number } | null>(null);
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   const [locating, setLocating] = useState(false);
   const [locNote, setLocNote] = useState<string | null>(null);
-  const found = useCallback((state: string) => {
-    setHere(state);
-    setPicked((was) => new Set(was).add(state));
+  const found = useCallback((fix: { readonly latitude: number; readonly longitude: number; readonly state: string | null }) => {
+    if (fix.state === null) return;
+    setHere(fix.state);
+    setAt({ latitude: fix.latitude, longitude: fix.longitude });
   }, []);
+  // The region the hiker is in, once both the position and the list are here.
+  const hereKey = useMemo(() => {
+    if (here === null) return null;
+    const outline = idx?.regions?.[here]?.outline;
+    if (outline === undefined || at === null) return idx === null ? null : here;
+    const r = regionAt(outline, at.longitude, at.latitude);
+    return r === null ? null : placeKey(here, r.id);
+  }, [here, at, idx]);
+  useEffect(() => { if (hereKey !== null) setPicked((was) => new Set(was).add(hereKey)); }, [hereKey]);
   // A phone that has already granted location (setup run again) knows without asking.
   useEffect(() => {
     let live = true;
-    void lastKnownFix().then((f) => { if (live && f?.state != null) found(f.state); }).catch(() => {});
+    void lastKnownFix().then((f) => { if (live && f !== null) found(f); }).catch(() => {});
     return () => { live = false; };
   }, [found]);
   const locate = useCallback(() => {
     setLocating(true);
     setLocNote(null);
     void currentFix({ targetMeters: NEAR_ENOUGH_M, timeoutMs: LOCATE_MS }).then((res) => {
-      if (!res.ok) setLocNote(`${res.message} You can pick your state from the list instead.`);
+      if (!res.ok) setLocNote(`${res.message} You can pick from the list instead.`);
       else if (res.fix.state === null) setLocNote('You’re outside the states Fred has maps for. Pick any you plan to visit.');
-      else found(res.fix.state);
-    }).catch(() => setLocNote('Fred couldn’t find you just now. Pick your state from the list instead.'))
+      else found(res.fix);
+    }).catch(() => setLocNote('Fred couldn’t find you just now. Pick from the list instead.'))
       .finally(() => setLocating(false));
   }, [found]);
 
   const order = useMemo(
-    () => (idx === null ? [] : orderStates(Object.keys(idx.states), here, STATE_NAMES)),
-    [idx, here]);
-  const left = (s: string): number => {
-    const b = idx?.states[s];
-    return b === undefined ? 0 : remainingBytes(b);
-  };
-  // `disk` is read through `left`, so the queue shrinks as states arrive.
-  const queue = useMemo(() => queueFor(picked, order, (st) => (inQueue(st) ? 0 : left(st))), [picked, order, disk, idx, job]);
+    () => (idx === null ? [] : orderPlaces(idx, orderStates(Object.keys(idx.states), here, STATE_NAMES), hereKey)),
+    [idx, here, hereKey]);
+  const left = (key: string): number => (idx === null ? 0 : placeState(idx, key)?.left ?? 0);
+  // `disk` is read through `left`, so the queue shrinks as places arrive. Two
+  // regions of one state share its guide and the overview: counted once.
+  const queue = useMemo(() => {
+    const q = queueFor(picked, order, (k) => (inQueue(k) ? 0 : left(k)));
+    const parts = q.states.map((k) => placeBundle(idx!, k)).filter((b): b is StateBundle => b !== undefined);
+    return { states: q.states, bytes: parts.length === 0 ? 0 : remainingBytes(mergeBundles(parts)) };
+  }, [picked, order, disk, idx, job]);
+  const named = (key: string): string => placeName(idx, key, STATE_NAMES);
+  const hereName = hereKey === null ? (here === null ? null : STATE_NAMES[here] ?? here) : named(hereKey);
+  const hereOnPhone = hereKey !== null && (detailOnPhone().has(hereKey) || (here !== null && detailOnPhone().has(here)));
 
   const index: IndexState = idx !== null
     ? { kind: 'loaded', coreBytesLeft: idx.core === undefined ? null : remainingBytes(idx.core) || idx.core.bytes }
@@ -333,7 +354,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
     : step === 'guides' ? (guides.kind === 'ready' || guidesComing ? { label: 'Next', onPress: () => go(1) }
       : { label: 'Skip for now', onPress: () => go(1), quiet: true })
     : step === 'place' ? (queue.states.length > 0
-      ? { label: `Download ${size(queue.bytes)}`, onPress: () => enqueue(queue.states.map((st) => ({ what: st, bundle: idx!.states[st]! }))) }
+      ? { label: `Download ${size(queue.bytes)}`, onPress: () => enqueue(queue.states.map((k) => ({ what: k, name: named(k), bundle: placeBundle(idx!, k)! }))) }
       : haveStates.length > 0 || busy ? { label: 'Next', onPress: () => go(1) }
       : { label: 'Skip for now', onPress: () => go(1), quiet: true })
     : busy ? { label: 'Finishing downloads…', onPress: () => {}, off: true }
@@ -389,7 +410,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
                 : <Text style={styles.note}>This phone has {size(free)} free.</Text>}
               <Pressable style={[styles.action, free < guides.bytes * 1.1 && styles.dim]} accessibilityRole="button"
                 disabled={free < guides.bytes * 1.1}
-                onPress={() => enqueue([{ what: GUIDES, bundle: idx!.core! }])}>
+                onPress={() => enqueue([{ what: GUIDES, name: 'the guides', bundle: idx!.core! }])}>
                 <Text style={styles.actionText}>Download {size(guides.bytes)}</Text>
               </Pressable>
             </>
@@ -423,19 +444,20 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
         <Text style={styles.title}>Where do you walk?</Text>
         <Text style={styles.lead}>
           Each state brings its map, contour lines, cell coverage and a guide to its plants and animals.
+          Big states come in regions, so you only take the part you walk in.
         </Text>
         {here === null ? (
           <View style={styles.row}>
             <Pressable style={[styles.action, styles.actionInline]} disabled={locating} onPress={locate} accessibilityRole="button">
-              <Text style={styles.actionText}>{locating ? 'Finding you…' : 'Find my state'}</Text>
+              <Text style={styles.actionText}>{locating ? 'Finding you…' : 'Find where I am'}</Text>
             </Pressable>
             <Text style={[styles.note, styles.grow]}>Your location stays on this phone.</Text>
           </View>
         ) : (
           <Text style={styles.note}>
-            {haveStates.includes(here)
-              ? `You\u2019re in ${STATE_NAMES[here] ?? here}, which is already on this phone.`
-              : `You\u2019re in ${STATE_NAMES[here] ?? here}, so it\u2019s first in the list and ticked.`}
+            {hereOnPhone
+              ? `You\u2019re in ${hereName}, which is already on this phone.`
+              : `You\u2019re in ${hereName}, so it\u2019s first in the list and ticked.`}
           </Text>
         )}
         {locNote !== null && <Text style={styles.caution}>{locNote}</Text>}
@@ -452,37 +474,48 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
           {idx !== null && (
             <ScrollView>
               {order.map((s, i) => {
-                const bundle = idx.states[s]!;
-                const status = installState(bundle);
+                const where = placeState(idx, s);
+                if (where === undefined) return null;
+                const { status, left: toGo, bytes } = where;
                 const on = status === 'installed' || picked.has(s);
                 const mine = job !== null && job.what === s;
                 const waiting = !mine && inQueue(s);
-                const name = STATE_NAMES[s] ?? s;
+                const { state, region } = splitKey(s);
+                const name = named(s);
+                // A split state's name heads its regions.
+                const head = region !== null && (i === 0 || splitKey(order[i - 1]!).state !== state);
                 return (
-                  <Pressable key={s} style={[styles.state, i === 0 && styles.stateFirst]}
-                    disabled={status === 'installed' || mine || waiting}
-                    accessibilityRole="checkbox" accessibilityState={{ checked: on, disabled: status === 'installed' }}
-                    accessibilityLabel={`${name}, ${status === 'installed' ? 'on this phone' : size(remainingBytes(bundle))}`}
-                    onPress={() => setPicked((was) => {
-                      const now = new Set(was);
-                      if (!now.delete(s)) now.add(s);
-                      return now;
-                    })}>
-                    <View style={styles.grow}>
-                      <Text style={styles.stateName}>{name}{s === here ? '  · you are here' : ''}</Text>
-                      {mine || waiting ? <Text style={styles.meta}>{mine ? 'Downloading now' : 'Waiting its turn'}</Text> : (
-                        <Text style={styles.meta}>
-                          {status === 'installed' ? `On this phone · ${size(bundle.bytes)}`
-                            : status === 'partial' ? `Partly here · ${size(remainingBytes(bundle))} to go`
-                            : size(bundle.bytes)}
-                        </Text>
-                      )}
-                    </View>
-                    <View style={[styles.box, on && styles.boxOn, status === 'installed' && styles.boxHere]}>
-                      {on && <Image source={CHECK} resizeMode="contain"
-                        style={[styles.boxMark, status === 'installed' && styles.boxMarkHere]} />}
-                    </View>
-                  </Pressable>
+                  <View key={s}>
+                    {head && (
+                      <Text style={[styles.stateHead, i === 0 && styles.stateFirst]} accessibilityRole="header">
+                        {STATE_NAMES[state] ?? state}
+                      </Text>
+                    )}
+                    <Pressable style={[styles.state, i === 0 && !head && styles.stateFirst, region !== null && styles.stateRegion]}
+                      disabled={status === 'installed' || mine || waiting}
+                      accessibilityRole="checkbox" accessibilityState={{ checked: on, disabled: status === 'installed' }}
+                      accessibilityLabel={`${name}, ${status === 'installed' ? 'on this phone' : size(toGo)}`}
+                      onPress={() => setPicked((was) => {
+                        const now = new Set(was);
+                        if (!now.delete(s)) now.add(s);
+                        return now;
+                      })}>
+                      <View style={styles.grow}>
+                        <Text style={styles.stateName}>{name}{s === hereKey ? '  · you are here' : ''}</Text>
+                        {mine || waiting ? <Text style={styles.meta}>{mine ? 'Downloading now' : 'Waiting its turn'}</Text> : (
+                          <Text style={styles.meta}>
+                            {status === 'installed' ? `On this phone · ${size(bytes)}`
+                              : status === 'partial' ? `Partly here · ${size(toGo)} to go`
+                              : size(toGo)}
+                          </Text>
+                        )}
+                      </View>
+                      <View style={[styles.box, on && styles.boxOn, status === 'installed' && styles.boxHere]}>
+                        {on && <Image source={CHECK} resizeMode="contain"
+                          style={[styles.boxMark, status === 'installed' && styles.boxMarkHere]} />}
+                      </View>
+                    </Pressable>
+                  </View>
                 );
               })}
             </ScrollView>
@@ -494,7 +527,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
       </View>
     );
   } else {
-    const names = haveStates.map((s) => STATE_NAMES[s] ?? s);
+    const names = [...detailOnPhone()].sort().map(named);
     page = (
       <ScrollView style={styles.page} contentContainerStyle={styles.pageInner}>
         <Text style={styles.title}>{haveGuides ? 'You’re all set.' : 'Nearly there.'}</Text>
@@ -592,6 +625,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
 
   listCard: { flex: 1, paddingVertical: 4 },
   state: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
+  // A split state's name over its regions; the regions sit in under it.
+  stateHead: { color: palette.ink, fontSize: 15, fontWeight: '700', paddingTop: 14, paddingBottom: 2, borderTopWidth: 1, borderTopColor: palette.sand },
+  stateRegion: { paddingLeft: 12, borderTopColor: palette.oat },
   stateFirst: { borderTopWidth: 0 },
   stateName: { color: palette.ink, fontSize: 15 },
   meta: { color: palette.moss, fontSize: 13, marginTop: 2 },

@@ -14,5 +14,5 @@
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true
   },
-  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "tools/eval/**/*.ts", "tools/ingest/**/*.ts"]
+  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts", "tools/eval/**/*.ts", "tools/ingest/**/*.ts", "tools/route/**/*.ts"]
 }

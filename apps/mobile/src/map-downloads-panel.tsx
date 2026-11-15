@@ -58,7 +58,8 @@ export function MapDownloads(
     <View style={styles.panel}>
       <View style={styles.head}>
         <Text style={styles.title}>Offline maps</Text>
-        <Pressable onPress={onClose} hitSlop={12} disabled={busy !== null}>
+        <Pressable onPress={onClose} disabled={busy !== null} style={styles.done} accessibilityRole="button"
+          accessibilityState={{ disabled: busy !== null }}>
           <Text style={[styles.close, busy !== null && styles.dim]}>Done</Text>
         </Pressable>
       </View>
@@ -97,11 +98,16 @@ export function MapDownloads(
                 )}
               </View>
               {mine ? (
-                <Pressable onPress={() => abort.current?.abort()} hitSlop={8}>
-                  <Text style={styles.action}>Cancel</Text>
+                // Iteration 4: what arrived is kept (it shows as "Partly downloaded"), so this
+                // pauses rather than cancels, in the setup wizard's words.
+                <Pressable onPress={() => abort.current?.abort()} style={styles.outline} accessibilityRole="button"
+                  accessibilityLabel={`Pause the ${STATE_NAMES[s] ?? s} download`}>
+                  <Text style={styles.action}>Pause</Text>
                 </Pressable>
               ) : status === 'installed' ? (
-                <Pressable disabled={busy !== null} hitSlop={8}
+                <Pressable disabled={busy !== null} style={[styles.outline, confirm === s && styles.outlineWarn]}
+                  accessibilityRole="button" accessibilityState={{ disabled: busy !== null }}
+                  accessibilityLabel={confirm === s ? `Remove the ${STATE_NAMES[s] ?? s} map now` : `Remove the ${STATE_NAMES[s] ?? s} map`}
                   onPress={() => {
                     // Asks first, like Download: a mis-tap out of signal can't be undone.
                     if (confirm !== s) { setConfirm(s); return; }
@@ -111,9 +117,12 @@ export function MapDownloads(
                   <Text style={[styles.remove, busy !== null && styles.dim]}>{confirm === s ? 'Remove now' : 'Remove'}</Text>
                 </Pressable>
               ) : (
-                <Pressable disabled={busy !== null} hitSlop={8}
+                <Pressable disabled={busy !== null} style={[styles.filled, busy !== null && styles.dim]}
+                  accessibilityRole="button" accessibilityState={{ disabled: busy !== null }}
                   onPress={() => (confirm === s ? start(s) : setConfirm(s))}>
-                  <Text style={[styles.action, busy !== null && styles.dim]}>{confirm === s ? 'Start' : 'Download'}</Text>
+                  <Text style={styles.filledText}>
+                    {confirm === s ? 'Start' : status === 'partial' ? 'Resume' : 'Download'}
+                  </Text>
                 </Pressable>
               )}
             </View>
@@ -131,18 +140,24 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { color: palette.ink, fontSize: 17, fontWeight: '700' },
-  close: { color: palette.pine, fontSize: 14, fontWeight: '700' },
-  hint: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 6, marginBottom: 8 },
+  // Buttons look like buttons and are 48 dp tall (ux-ui-review: touch targets, affordance).
+  done: { minHeight: 48, minWidth: 64, justifyContent: 'center', alignItems: 'flex-end' },
+  close: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  hint: { color: palette.moss, fontSize: 13, lineHeight: 19, marginTop: 6, marginBottom: 8 },
   error: { color: palette.clay, fontSize: 13, marginBottom: 8 },
   loading: { alignSelf: 'center', marginVertical: 16 },
   list: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
   name: { color: palette.ink, fontSize: 15 },
-  meta: { color: palette.moss, fontSize: 12, marginTop: 2 },
-  confirm: { color: palette.amber, fontSize: 12, marginTop: 4 },
+  meta: { color: palette.moss, fontSize: 13, marginTop: 2 },
+  confirm: { color: palette.amber, fontSize: 13, lineHeight: 18, marginTop: 4 },
   bar: { height: 6, backgroundColor: palette.oat, borderRadius: 3, marginTop: 6, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3, backgroundColor: palette.leaf },
   action: { color: palette.pine, fontSize: 14, fontWeight: '700' },
-  remove: { color: palette.clay, fontSize: 13 },
+  filled: { minHeight: 48, minWidth: 96, paddingHorizontal: 16, borderRadius: radius.pill, backgroundColor: palette.pine, alignItems: 'center', justifyContent: 'center' },
+  filledText: { color: palette.paper, fontSize: 14, fontWeight: '700' },
+  outline: { minHeight: 48, minWidth: 96, paddingHorizontal: 16, borderRadius: radius.pill, borderWidth: 1.5, borderColor: palette.sand, alignItems: 'center', justifyContent: 'center' },
+  outlineWarn: { borderColor: palette.clay, backgroundColor: palette.blush },
+  remove: { color: palette.clay, fontSize: 14, fontWeight: '600' },
   dim: { opacity: 0.4 },
 });

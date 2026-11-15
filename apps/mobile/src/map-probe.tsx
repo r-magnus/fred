@@ -10,7 +10,8 @@
  */
 import { Map, Camera, GeoJSONSource, Layer, Marker, type CameraRef } from '@maplibre/maplibre-react-native';
 import { File, Paths } from 'expo-file-system';
-import { Animated, BackHandler, Easing, Image, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
 import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
@@ -376,8 +377,25 @@ export function MapScreen(
     reloadCarrier();
   };
   const panel = picking || managing;
-  // A map with no position is no use: look for one as soon as it opens.
-  useEffect(() => { if (fix === null && !where.locating) where.locate(); }, []);
+  // Iteration 4: ask for location only once the hiker knows why. With access
+  // already given, the map looks at once, as before; without it, the sheet
+  // explains and the system's question comes from "Find where I am". Blocked
+  // for good, it offers the Settings page instead of a dead end.
+  const [access, setAccess] = useState<'checking' | 'granted' | 'ask' | 'blocked'>('checking');
+  const readAccess = (): void => {
+    void Location.getForegroundPermissionsAsync().then((p) =>
+      setAccess(p.granted ? 'granted' : p.canAskAgain ? 'ask' : 'blocked'));
+  };
+  useEffect(() => {
+    void Location.getForegroundPermissionsAsync().then((p) => {
+      setAccess(p.granted ? 'granted' : p.canAskAgain ? 'ask' : 'blocked');
+      // A map with no position is no use: look for one as soon as it opens.
+      if (p.granted && fix === null && !where.locating) where.locate();
+    });
+  }, []);
+  // After the system's question is answered, and on coming back from Settings.
+  const wasLocating = useRef(where.locating);
+  useEffect(() => { if (wasLocating.current && !where.locating) readAccess(); wasLocating.current = where.locating; }, [where.locating]);
   // The map follows a new position. It drew the one it opened with itself;
   // opened with none, it starts far out and has to be brought in to the first.
   const seen = useRef(fix === null ? 'none' : 'drawn');
@@ -464,14 +482,34 @@ export function MapScreen(
               <Text style={styles.note}>{where.note}</Text>
             </Pressable>
           )}
-          {fix === null && !where.locating && where.note === null && (
+          {fix === null && !where.locating && access === 'ask' && (
+            <>
+              <Text style={styles.sheetText}>
+                Fred can show where you are, the signal near you, and pick your state&apos;s guide. Your location stays on this phone.
+              </Text>
+              <Pressable style={styles.getMap} onPress={where.locate} accessibilityRole="button" accessibilityLabel="Find where I am">
+                <Text style={styles.getMapText}>Find where I am</Text>
+              </Pressable>
+            </>
+          )}
+          {fix === null && !where.locating && access === 'blocked' && (
+            <>
+              <Text style={styles.sheetText}>
+                Location is turned off for Fred. To see where you are on the map, allow it in Settings.
+              </Text>
+              <Pressable style={styles.getMap} onPress={() => { void Linking.openSettings(); }} accessibilityRole="button" accessibilityLabel="Open Settings">
+                <Text style={styles.getMapText}>Open Settings</Text>
+              </Pressable>
+            </>
+          )}
+          {fix === null && !where.locating && where.note === null && access === 'granted' && (
             <Text style={styles.sheetText}>Tap the round target button, top right, to find where you are.</Text>
           )}
           {/* The map for where you are isn't on the phone: offer it right here. */}
           {!haveMap && (
             <>
               <Text style={styles.sheetText}>The {fix?.state} map isn&apos;t on this phone yet, so only your position and the signal zones are drawn.</Text>
-              <Pressable style={styles.getMap} onPress={() => setManaging(true)}>
+              <Pressable style={styles.getMap} onPress={() => setManaging(true)} accessibilityRole="button">
                 <Text style={styles.getMapText}>Download the {fix?.state} map</Text>
               </Pressable>
             </>
@@ -495,7 +533,7 @@ export function MapScreen(
           )}
           <View style={styles.links}>
             {pack !== null && carrier !== null && (
-              <Pressable onPress={() => setPicking(true)} hitSlop={10} style={styles.link}>
+              <Pressable onPress={() => setPicking(true)} hitSlop={10} style={styles.link} accessibilityRole="button">
                 <Text style={styles.linkLabel}>Carrier</Text>
                 <Text style={styles.linkValue} numberOfLines={1}>
                   {carrier.id === null ? 'Not set' : carrierName(pack, carrier.id) ?? carrier.id}
@@ -503,7 +541,7 @@ export function MapScreen(
                 </Text>
               </Pressable>
             )}
-            <Pressable onPress={() => setManaging(true)} hitSlop={10} style={styles.link}>
+            <Pressable onPress={() => setManaging(true)} hitSlop={10} style={styles.link} accessibilityRole="button">
               <Text style={styles.linkLabel}>Offline maps</Text>
               <Text style={styles.linkValue}>Download or remove</Text>
             </Pressable>
@@ -579,7 +617,7 @@ const JOURNAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
 const makeStyles = (palette: Palette) => {
   const round = {
-    width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center',
+    width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center',
     backgroundColor: palette.paper, borderWidth: 1, borderColor: palette.sand,
     boxShadow: `0 3 12 ${palette.shade}`,
   } as const;
@@ -637,20 +675,20 @@ const makeStyles = (palette: Palette) => {
     backgroundColor: palette.oat, borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 5,
   },
   meDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: ME, borderWidth: 2, borderColor: palette.paper },
-  wherePillText: { color: palette.ink, fontSize: 12, fontWeight: '700' },
+  wherePillText: { color: palette.ink, fontSize: 13, fontWeight: '700' },
   sheetText: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 10 },
   getMap: {
-    alignSelf: 'flex-start', marginTop: 12,
-    backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 18, paddingVertical: 11,
+    alignSelf: 'flex-start', marginTop: 12, minHeight: 48, justifyContent: 'center',
+    backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 20, paddingVertical: 11,
   },
-  getMapText: { color: palette.paper, fontSize: 14, fontWeight: '700' },
+  getMapText: { color: palette.paper, fontSize: 15, fontWeight: '700' },
   legend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6, marginTop: 10 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   swatch: { width: 14, height: 14, borderRadius: 4, borderWidth: 1.5 },
-  legendText: { color: palette.moss, fontSize: 12 },
+  legendText: { color: palette.moss, fontSize: 13 },
   links: { flexDirection: 'row', gap: 10, marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 12 },
   link: { flex: 1, backgroundColor: palette.cream, borderRadius: radius.control, paddingHorizontal: 12, paddingVertical: 9 },
-  linkLabel: { color: palette.moss, fontSize: 11, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
+  linkLabel: { color: palette.moss, fontSize: 13 },
   linkValue: { color: palette.pine, fontSize: 14, fontWeight: '700', marginTop: 2 },
 
   picker: {
@@ -659,8 +697,8 @@ const makeStyles = (palette: Palette) => {
     borderWidth: 1, borderColor: palette.sand, padding: 16,
   },
   pickerTitle: { color: palette.ink, fontSize: 16, fontWeight: '700' },
-  pickerHint: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 4, marginBottom: 6 },
-  pickerRow: { paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
+  pickerHint: { color: palette.moss, fontSize: 13, lineHeight: 19, marginTop: 4, marginBottom: 6 },
+  pickerRow: { minHeight: 48, justifyContent: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
   pickerText: { color: palette.ink, fontSize: 15 },
   pickerSub: { color: palette.pine, fontSize: 14, fontWeight: '600' },
   });

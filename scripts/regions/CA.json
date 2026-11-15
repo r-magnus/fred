@@ -1,0 +1,18 @@
+{
+  "state": "CA",
+  "stateFips": "06",
+  "note": "Counties grouped by how Californians name the state's parts, balanced by map size (measured 2026-11-15, #224). Every county appears exactly once.",
+  "regions": [
+    { "id": "south", "name": "Southern California",
+      "counties": ["Los Angeles", "Orange", "San Diego", "Riverside", "San Bernardino", "Imperial", "Ventura"] },
+    { "id": "bay", "name": "Bay Area and Central Coast",
+      "counties": ["San Francisco", "San Mateo", "Santa Clara", "Alameda", "Contra Costa", "Marin", "Sonoma", "Napa", "Solano", "Santa Cruz",
+                   "Monterey", "San Benito", "San Luis Obispo", "Santa Barbara"] },
+    { "id": "sierra", "name": "Sierra Nevada and Central Valley",
+      "counties": ["Kern", "Tulare", "Kings", "Fresno", "Madera", "Merced", "Mariposa", "Tuolumne", "Stanislaus", "San Joaquin", "Calaveras",
+                   "Amador", "Alpine", "Mono", "Inyo", "El Dorado", "Placer", "Nevada", "Sacramento", "Yolo", "Sutter", "Yuba", "Sierra"] },
+    { "id": "north", "name": "Northern California",
+      "counties": ["Del Norte", "Siskiyou", "Modoc", "Humboldt", "Trinity", "Shasta", "Lassen", "Tehama", "Plumas", "Glenn", "Butte", "Colusa",
+                   "Lake", "Mendocino"] }
+  ]
+}

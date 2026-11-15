@@ -18,7 +18,15 @@
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import { downloadError } from './download-errors.ts';
 
-export const INDEX_URL = 'https://raw.githubusercontent.com/r-magnus/fred-maps/main/index.json';
+import type { RegionalState } from './places.ts';
+
+/**
+ * The published list, unless a build names another: the test app is built
+ * with EXPO_PUBLIC_FRED_INDEX_URL pointing at a list served from the desktop
+ * (scripts/build-test-index.mjs), to try downloads nobody else can see yet.
+ */
+export const INDEX_URL = process.env.EXPO_PUBLIC_FRED_INDEX_URL
+  ?? 'https://raw.githubusercontent.com/r-magnus/fred-maps/main/index.json';
 
 /** One piece of a large file, published as its own release file (#198). */
 export interface FilePart {
@@ -38,6 +46,8 @@ export interface BundleFile {
    * and the pieces are joined and the whole file checked at the end.
    */
   readonly parts?: readonly FilePart[];
+  /** Where this file is, when not its bundle's or the index's: set when bundles are joined (places.ts). */
+  readonly baseUrl?: string;
 }
 export interface StateBundle {
   readonly bytes: number;
@@ -57,6 +67,14 @@ export interface MapIndex {
    * phone without them can then only be set up by cable.
    */
   readonly core?: StateBundle;
+  /**
+   * States split into regions (#224), by USPS code. A newer field: a build
+   * that predates it reads `states` alone, which still lists every state
+   * whole, so the two never disagree.
+   */
+  readonly regions?: Readonly<Record<string, RegionalState>>;
+  /** The nationwide map to zoom 7, drawn under everything else so the map is never blank (#224). */
+  readonly overview?: StateBundle;
 }
 
 /** The index format this build understands. A newer one is refused, not guessed at. */
@@ -158,7 +176,7 @@ export async function downloadBundle(
     const parent = final.parentDirectory;
     if (!parent.exists) parent.create({ intermediates: true });
     if (f.parts === undefined) {
-      await fetchChecked(`${base}${f.asset}`, new File(parent, `${final.name}.partial`), f.bytes, f.md5, f.path,
+      await fetchChecked(`${f.baseUrl ?? base}${f.asset}`, new File(parent, `${final.name}.partial`), f.bytes, f.md5, f.path,
         (n) => onProgress({ done: done + n, total, file: f.path }), signal);
       if (final.exists) final.delete();
       new File(parent, `${final.name}.partial`).move(final);
@@ -169,7 +187,7 @@ export async function downloadBundle(
         if (partPresent(f, i)) continue;
         const piece = partFile(f, i);
         const partial = new File(parent, `${piece.name}.partial`);
-        await fetchChecked(`${base}${part.asset}`, partial, part.bytes, part.md5, f.path,
+        await fetchChecked(`${f.baseUrl ?? base}${part.asset}`, partial, part.bytes, part.md5, f.path,
           (n) => onProgress({ done: done + n, total, file: f.path }), signal);
         if (piece.exists) piece.delete();
         partial.move(piece);

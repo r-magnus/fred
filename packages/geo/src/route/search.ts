@@ -32,6 +32,10 @@ export interface SearchGraph {
   /** CSR lists of the trail nodes inside each cell. */
   readonly cellNodeStart: Int32Array;
   readonly cellNodes: Int32Array;
+  /** Per cell: 1 if it can be stood in off trail. */
+  readonly walk: Uint8Array;
+  /** Per cell: off-trail speed multiplier (off-path × cover), 0 where not walkable. */
+  readonly speed: Float32Array;
 }
 
 export function buildSearchGraph(grid: Grid, net: TrailNetwork, mPerUnit: number): SearchGraph {
@@ -53,7 +57,15 @@ export function buildSearchGraph(grid: Grid, net: TrailNetwork, mPerUnit: number
     const c = cellOf[k]!;
     if (c >= 0) cellNodes[fill[c]!++] = k;
   }
-  return { grid, net, mPerUnit, nodeElev, cellNodeStart: counts, cellNodes };
+  const walk = new Uint8Array(cells);
+  const speed = new Float32Array(cells);
+  for (let c = 0; c < cells; c++) {
+    if (walkableCell(grid, c)) {
+      walk[c] = 1;
+      speed[c] = OFF_PATH_FACTOR * COVER_FACTOR[grid.cover[c]! as keyof typeof COVER_FACTOR];
+    }
+  }
+  return { grid, net, mPerUnit, nodeElev, cellNodeStart: counts, cellNodes, walk, speed };
 }
 
 /** Whether a cell can be stood in off trail. */
@@ -105,10 +117,9 @@ export interface Step {
   readonly weight: number;
 }
 
-const DIRS: ReadonlyArray<readonly [number, number, number]> = [
-  [1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1],
-  [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2],
-];
+// The eight neighbours: four straight, then four diagonal.
+const DX = [1, -1, 0, 0, 1, 1, -1, -1] as const;
+const DY = [0, 0, 1, -1, 1, -1, 1, -1] as const;
 
 /** Off-trail step between two points, or null when it can't be walked. */
 export function offTrailStep(
@@ -142,10 +153,29 @@ export interface Endpoint {
   readonly weight: number;
 }
 
+/**
+ * Lets the caller's event loop run during a long search. The phone runs this
+ * on the JS thread the screen also uses, so a search that never yields would
+ * freeze the map for seconds. `aborted` is checked at the same points.
+ */
+export interface Pacing {
+  /** Resolves on the next turn of the event loop. */
+  readonly pause: () => Promise<void>;
+  /** Pops between pauses. */
+  readonly every: number;
+  readonly signal?: { readonly aborted: boolean } | undefined;
+}
+
+/** Thrown out of a paced search when its signal aborts. */
+export class SearchCancelled extends Error {
+  constructor() { super('route search cancelled'); this.name = 'SearchCancelled'; }
+}
+
 /** A* from any of `starts` to any of `goals`. */
-export function search(
+export async function search(
   sg: SearchGraph, starts: readonly Endpoint[], goals: readonly Endpoint[], goalX: number, goalY: number,
-): SearchResult | null {
+  pacing?: Pacing,
+): Promise<SearchResult | null> {
   const { grid, net, mPerUnit, nodeElev } = sg;
   const cells = grid.cols * grid.rows;
   const total = cells + net.nodeCount;
@@ -168,12 +198,20 @@ export function search(
     const k = v - cells;
     return [net.xy[2 * k]!, net.xy[2 * k + 1]!];
   };
+  const hk = mPerUnit / MAX_SPEED;
   const h = (v: number): number => {
-    const [x, y] = posOf(v);
-    return (Math.hypot(x - goalX, y - goalY) * mPerUnit) / MAX_SPEED;
+    if (v < cells) {
+      const cx = v % grid.cols, cy = (v - cx) / grid.cols;
+      return Math.hypot(grid.x0 + (cx + 0.5) * grid.cell - goalX, grid.y0 + (cy + 0.5) * grid.cell - goalY) * hk;
+    }
+    const k = v - cells;
+    return Math.hypot(net.xy[2 * k]! - goalX, net.xy[2 * k + 1]! - goalY) * hk;
   };
 
   const cellMeters = grid.cell * mPerUnit;
+  const diagMeters = cellMeters * Math.SQRT2;
+  const { walk, speed } = sg;
+  const { cols, rows, elev, flags } = grid;
   const heap = new Heap();
   for (const s of starts) {
     if (s.weight < best[s.node]!) {
@@ -192,7 +230,12 @@ export function search(
     }
   };
 
+  let pops = 0;
   while (heap.size > 0) {
+    if (pacing !== undefined && ++pops % pacing.every === 0) {
+      await pacing.pause();
+      if (pacing.signal?.aborted === true) throw new SearchCancelled();
+    }
     const u = heap.pop();
     if (done[u]) continue;
     if (heap.lastKey >= bestGoalWeight) break;
@@ -203,18 +246,28 @@ export function search(
       bestGoal = u;
     }
     if (u < cells) {
-      // Off-trail neighbours.
-      const cx = u % grid.cols, cy = (u - cx) / grid.cols;
-      for (const [dx, dy, len] of DIRS) {
+      // Off-trail neighbours. The hottest loop in the engine, so written out
+      // by hand over the precomputed arrays: the same rule as offTrailStep.
+      const cx = u % cols, cy = (u - cx) / cols;
+      const eu = elev[u]!, bu = best[u]!, tu = time[u]!;
+      for (let d = 0; d < 8; d++) {
+        const dx = DX[d]!, dy = DY[d]!;
         const nx = cx + dx, ny = cy + dy;
-        if (nx < 0 || ny < 0 || nx >= grid.cols || ny >= grid.rows) continue;
-        const v = ny * grid.cols + nx;
-        if (done[v] || !walkableCell(grid, v)) continue;
+        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+        const v = ny * cols + nx;
+        if (done[v] || walk[v] === 0) continue;
         // No cutting a corner past a blocked cell (a cliff drawn diagonally).
-        if (dx !== 0 && dy !== 0 && (!walkableCell(grid, cy * grid.cols + nx) || !walkableCell(grid, ny * grid.cols + cx))) continue;
-        const meters = len * grid.cell * mPerUnit;
-        const step = offTrailStep(meters, grid.elev[v]! - grid.elev[u]!, grid.cover[v]!, (grid.flags[v]! & CELL_STREAM) !== 0);
-        if (step !== null) relax(u, v, step, VIA_GRID);
+        if (d >= 4 && (walk[cy * cols + nx] === 0 || walk[ny * cols + cx] === 0)) continue;
+        const meters = d >= 4 ? diagMeters : cellMeters;
+        const grade = (elev[v]! - eu) / meters;
+        if (grade > MAX_OFF_TRAIL_GRADE || grade < -MAX_OFF_TRAIL_GRADE) continue;
+        let t = meters / (toblerSpeed(grade) * speed[v]!);
+        if ((flags[v]! & CELL_STREAM) !== 0) t += STREAM_CROSSING_S;
+        const w = bu + t * OFF_TRAIL_WEIGHT;
+        if (w < best[v]!) {
+          best[v] = w; time[v] = tu + t; prev[v] = u; via[v] = VIA_GRID;
+          heap.push(w + Math.hypot(grid.x0 + (nx + 0.5) * grid.cell - goalX, grid.y0 + (ny + 0.5) * grid.cell - goalY) * hk, v);
+        }
       }
       // Onto a trail in this cell.
       for (let p = sg.cellNodeStart[u]!; p < sg.cellNodeStart[u + 1]!; p++) {

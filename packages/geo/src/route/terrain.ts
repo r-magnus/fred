@@ -129,16 +129,30 @@ class GridWriter {
     for (const r of rings) for (const p of r) { if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1]; }
     const r0 = Math.max(0, Math.floor((minY - y0) / cell));
     const r1 = Math.min(rows - 1, Math.floor((maxY - y0) / cell));
-    const xsAt: number[] = [];
-    for (let row = r0; row <= r1; row++) {
-      const yc = y0 + (row + 0.5) * cell;
-      xsAt.length = 0;
-      for (const ring of rings) {
-        for (let i = 1; i < ring.length; i++) {
-          const [ax, ay] = ring[i - 1]!, [bx, by] = ring[i]!;
-          if ((ay <= yc) !== (by <= yc)) xsAt.push(ax + ((yc - ay) / (by - ay)) * (bx - ax));
+    if (r1 < r0) return;
+    // Each ring edge adds its crossing to only the rows it spans, rather than
+    // every row testing every edge: big forest polygons have thousands of
+    // vertices and the grid hundreds of rows.
+    const crossings: number[][] = Array.from({ length: r1 - r0 + 1 }, () => []);
+    for (const ring of rings) {
+      for (let i = 1; i < ring.length; i++) {
+        const [ax, ay] = ring[i - 1]!, [bx, by] = ring[i]!;
+        if (ay === by) continue;
+        const lo = Math.min(ay, by), hi = Math.max(ay, by);
+        // Rows whose centre yc satisfies lo < yc <= hi (half-open, so a vertex
+        // shared by two edges is counted once).
+        const first = Math.max(r0, Math.ceil((lo - y0) / cell - 0.5));
+        const last = Math.min(r1, Math.floor((hi - y0) / cell - 0.5));
+        for (let row = first; row <= last; row++) {
+          const yc = y0 + (row + 0.5) * cell;
+          if (yc <= lo || yc > hi) continue;
+          crossings[row - r0]!.push(ax + ((yc - ay) / (by - ay)) * (bx - ax));
         }
       }
+    }
+    for (let row = r0; row <= r1; row++) {
+      const xsAt = crossings[row - r0]!;
+      if (xsAt.length < 2) continue;
       xsAt.sort((p, q) => p - q);
       for (let k = 0; k + 1 < xsAt.length; k += 2) {
         const c0 = Math.max(0, Math.ceil((xsAt[k]! - x0) / cell - 0.5));

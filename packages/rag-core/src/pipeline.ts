@@ -1498,7 +1498,12 @@ async function askCore(
     // Fred must decline ("walk me through stitching a cut"), a safe
     // alternative (the cuts card: clean it and cover it). Only an answer
     // leaves it out; a pet still never gets a human card.
-    else if (topCard !== undefined && !aboutPet) offer = toOffer(topCard, citeOf(topCard, 0));
+    // #152: nor when the matcher says the message is a small ailment no card
+    // is for: "feet are throbbing after 15 miles today" was declined with the
+    // trench-foot card folded under it, "calves are tight and sore after all
+    // that climbing" with the sprain card. Only the minor label: a question
+    // Fred must decline still gets its safe alternative (the cuts card).
+    else if (topCard !== undefined && !aboutPet && !(guardsOn && saidNoCard && saidTopKind === 'minor')) offer = toOffer(topCard, citeOf(topCard, 0));
     // A prevention question takes the normal path, cards included: several
     // cards are prevention guidance ("staying warm on a cold night", "staying
     // healthy", "river crossing"), and hiding them cost three tuning answers.

@@ -202,3 +202,15 @@ test('no map for the area is its own failure, not "no route"', async () => {
 test('metres per unit shrinks with latitude', () => {
   assert.ok(metersPerUnit(60) < metersPerUnit(30));
 });
+
+test('a plan can be cancelled mid-search, and the screen gets turns while it runs', async () => {
+  const { sources, from, to } = fixture('half-dome');
+  const signal = { aborted: false };
+  let pauses = 0;
+  const res = await planRoute(sources, from, to, {
+    signal,
+    pause: async () => { pauses++; if (pauses === 3) signal.aborted = true; },
+  });
+  assert.equal(!res.ok && res.reason, 'cancelled');
+  assert.ok(pauses >= 3);
+});

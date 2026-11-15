@@ -22,7 +22,10 @@ import {
 } from './tiles.ts';
 import { buildNetwork, projectOnSegment, type TileLines, type Way, type WayClass } from './trails.ts';
 import { buildGrid, cellAt, COVER, CELL_STREAM, type Grid, type TileFeatures } from './terrain.ts';
-import { buildSearchGraph, search, walkableCell, VIA_CONNECT, VIA_GRID, type Endpoint, type SearchGraph } from './search.ts';
+import {
+  buildSearchGraph, search, walkableCell, SearchCancelled, VIA_CONNECT, VIA_GRID,
+  type Endpoint, type Pacing, type SearchGraph,
+} from './search.ts';
 
 /** Decompressed tile bytes, or null where the archive has no tile. */
 export type TileReader = (z: number, x: number, y: number) => Promise<Uint8Array | null>;
@@ -74,14 +77,19 @@ export type PlanFailure =
   | 'no-map'
   | 'start-unwalkable'
   | 'destination-unwalkable'
-  | 'no-route';
+  | 'no-route'
+  | 'cancelled';
 
 export interface PlanStats {
   readonly basemapTiles: number;
   readonly contourTiles: number;
   readonly cells: number;
   readonly trailNodes: number;
+  /** Total, and by phase: reading + decoding tiles, building the graph, searching. */
   readonly ms: number;
+  readonly readMs: number;
+  readonly buildMs: number;
+  readonly searchMs: number;
 }
 
 export type PlanResult =
@@ -101,7 +109,22 @@ export interface PlanOptions {
   readonly zoom?: number;
   /** Contour zoom to read. Default 12. */
   readonly contourZoom?: number;
+  /**
+   * Abort a plan in progress (the pin moved, the sheet closed). Checked
+   * between phases and every few thousand search steps.
+   */
+  readonly signal?: { readonly aborted: boolean };
+  /**
+   * How to give the event loop a turn. Default `setTimeout(0)`, which in React
+   * Native lets touches and JS animations through between search chunks.
+   */
+  readonly pause?: () => Promise<void>;
 }
+
+const defaultPause = (): Promise<void> => new Promise((resolve) => { setTimeout(resolve, 0); });
+
+/** Read through a function: the signal changes while we await, and TS would narrow a direct read. */
+const isCancelled = (opts: PlanOptions): boolean => opts.signal?.aborted === true;
 
 const ROUTE_LAYERS = ['roads', 'landuse', 'water', 'earth'];
 
@@ -252,6 +275,7 @@ export async function planRoute(
 
   let margin = Math.max(1500, 0.35 * straightMeters);
   for (let attempt = 0; ; attempt++) {
+    if (isCancelled(opts)) return { ok: false, reason: 'cancelled', stats: null };
     const result = await planWithin(sources, fx, fy, tx, ty, margin / mPerUnit, mPerUnit, straightMeters, zoom, contourZoom, opts, t0);
     // A detour the box was too small for: one retry with room to go round.
     if (result.ok || result.reason !== 'no-route' || attempt >= 1) return result;
@@ -270,6 +294,7 @@ async function planWithin(
   const area = ((box.maxX - box.minX) * mPerUnit) * ((box.maxY - box.minY) * mPerUnit);
   const cellMeters = Math.max(opts.cellMeters ?? 30, Math.sqrt(area / (opts.maxCells ?? 300_000)));
 
+  const tRead = Date.now();
   const baseTiles = await readTiles(sources.basemap, tilesCovering(zoom, box.minX, box.minY, box.maxX, box.maxY), ROUTE_LAYERS);
   const contourTiles = sources.contours === undefined ? []
     : await readTiles(sources.contours, tilesCovering(contourZoom, box.minX, box.minY, box.maxX, box.maxY), ['contours']);
@@ -288,12 +313,20 @@ async function planWithin(
     if (layer !== undefined) contours.push({ tile, extent: layer.extent, layer: 'contours', features: layer.features });
   }
 
+  const pause = opts.pause ?? defaultPause;
+  const tBuild = Date.now();
   const net = buildNetwork(lines, { mPerUnit });
+  await pause();
+  if (isCancelled(opts)) return { ok: false, reason: 'cancelled', stats: null };
   const grid = buildGrid({ box, cell: cellMeters / mPerUnit, basemap: ground, contours });
+  await pause();
   const sg = buildSearchGraph(grid, net, mPerUnit);
+  const tSearch = Date.now();
+  let searchMs = 0;
   const stats = (): PlanStats => ({
     basemapTiles: baseTiles.length, contourTiles: contourTiles.length,
     cells: grid.cols * grid.rows, trailNodes: net.nodeCount, ms: Date.now() - t0,
+    readMs: tBuild - tRead, buildMs: tSearch - tBuild, searchMs,
   });
   if (baseTiles.length === 0) return { ok: false, reason: 'no-map', stats: stats() };
 
@@ -303,7 +336,17 @@ async function planWithin(
   if (start.ends.length === 0) return { ok: false, reason: 'start-unwalkable', stats: stats() };
   if (goal.ends.length === 0) return { ok: false, reason: 'destination-unwalkable', stats: stats() };
 
-  const found = search(sg, start.ends, goal.ends, tx, ty);
+  const pacing: Pacing = { pause: opts.pause ?? defaultPause, every: 4096, signal: opts.signal };
+  await pacing.pause();
+  if (isCancelled(opts)) return { ok: false, reason: 'cancelled', stats: stats() };
+  let found;
+  try {
+    found = await search(sg, start.ends, goal.ends, tx, ty, pacing);
+  } catch (e) {
+    if (e instanceof SearchCancelled) return { ok: false, reason: 'cancelled', stats: stats() };
+    throw e;
+  }
+  searchMs = Date.now() - tSearch;
   if (found === null) return { ok: false, reason: 'no-route', stats: stats() };
 
   const route = assemble(sg, found.nodes, found.via, start, goal, straightMeters);

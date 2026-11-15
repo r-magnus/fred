@@ -4,14 +4,15 @@
  *   welcome  who Fred is
  *   guides   the models and the guides that are the same everywhere
  *   place    the hiker's state or states: map, contours, coverage, local guide
- *   ready    where everything is
+ *   ready    all set; the app is left to discover (no tour, 2026-11-15)
  *
- * The day and night page is gone (ux-ui-review pass, 2026-11-14): the last
- * page's tour already points at the sun, and a page about a colour switch
- * was a page between someone and their downloads.
+ * The day and night page is gone (ux-ui-review pass, 2026-11-14): a page
+ * about a colour switch was a page between someone and their downloads. The
+ * last page's tour of the controls went too (2026-11-15, Ryan): the menu
+ * button, the Ask box and the sun are clear or fun to find on their own.
  *
  * Downloads run in a queue that carries on while the hiker moves through the
- * pages, so picking states and reading the tour happen during the gigabyte,
+ * pages, so picking states happens during the gigabyte,
  * not after it. One strip above the buttons says what is downloading, how
  * far along, and roughly how long is left, with Pause; a pause or a failure
  * keeps every file that arrived and offers to carry on.
@@ -33,7 +34,6 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Paths } from 'expo-file-system';
 import { STATE_NAMES } from '@fred/rag-core';
 import { CalmLoader } from './calm-loader.tsx';
-import { Tour } from './tour.tsx';
 import { currentFix, lastKnownFix } from './location.ts';
 import {
   downloadBundle, fetchIndex, installState, remainingBytes,
@@ -500,10 +500,9 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
         <Text style={styles.title}>{haveGuides ? 'You’re all set.' : 'Nearly there.'}</Text>
         <Text style={styles.lead}>
           {haveGuides
-            ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Here’s where everything is.`
+            ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Have a look around.`
             : 'The guides aren’t on this phone yet, so I can’t answer questions. You can still look around; Fred offers setup again when you next open him.'}
         </Text>
-        <View style={styles.card}><Tour /></View>
       </ScrollView>
     );
   }

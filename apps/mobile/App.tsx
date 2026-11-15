@@ -36,6 +36,7 @@ import { MapPreview, MapScreen } from './src/map-probe.tsx';
 import { signalAdvice } from './src/coverage-layer.ts';
 import { JumpToEnd } from './src/jump-to-end.tsx';
 import { CalmLoader } from './src/calm-loader.tsx';
+import { WaitLine } from './src/wait-line.tsx';
 import { ReplyText } from './src/reply-text.tsx';
 import { Sources } from './src/sources.tsx';
 import { Scene } from './src/scene.tsx';
@@ -815,14 +816,11 @@ function Screen() {
 
             {t.kind === 'answer' && (
               <View style={styles.card}>
-                {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
+                {t.text === '' && !t.done && <WaitLine step="reading" size={34} />}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
                 {t.text !== '' && <ReplyText text={t.text} />}
                 {t.waiting === true && !t.done && (
-                  <View style={styles.waiting} accessibilityRole="progressbar" accessibilityLabel="Fred is working on your answer">
-                    <CalmLoader size={24} />
-                    <Text style={styles.waitingText}>Working on your answer…</Text>
-                  </View>
+                  <View style={styles.waiting}><WaitLine step="writing" /></View>
                 )}
 
                 {/* Time-to-first-token is ~7 s on device, so a reader who stops
@@ -1034,7 +1032,6 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   question: { fontFamily: JOURNAL, color: palette.ink, fontSize: 19, lineHeight: 26 },
   cards: { gap: 22 },
   card: {},
-  thinking: { alignSelf: 'flex-start' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
   hint: { color: palette.moss, fontSize: 14, lineHeight: 20, marginTop: 8 },
   errorDetail: { color: palette.moss, fontSize: 12, lineHeight: 17, marginTop: 10 },
@@ -1082,8 +1079,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   sendOff: { backgroundColor: palette.sand },
   sendStop: { backgroundColor: palette.clay },
-  waiting: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
-  waitingText: { color: palette.moss, fontSize: 14, fontStyle: 'italic' },
+  waiting: { marginTop: 12 },
   stoppedNote: { color: palette.clay, fontSize: 14, marginTop: 10 },
   sendMark: { width: 22, height: 22, tintColor: palette.paper },
   sendMarkOff: { tintColor: palette.moss },

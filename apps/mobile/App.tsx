@@ -953,6 +953,7 @@ function Screen() {
         onMap={() => { setDrawer(false); setMapOpen(true); }}
         onNewChat={() => showChat(null)}
         onOpenChat={showChat}
+        onAbout={() => { setDrawer(false); setAboutOpen(true); }}
         onRemoveChat={(id) => {
           setChats(removeChat(chatsRef.current, id));
           // Removing the chat on screen clears the page too.

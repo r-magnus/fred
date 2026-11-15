@@ -117,10 +117,11 @@ export function MapDownloads(
                   <Text style={[styles.remove, busy !== null && styles.dim]}>{confirm === s ? 'Remove now' : 'Remove'}</Text>
                 </Pressable>
               ) : (
-                <Pressable disabled={busy !== null} style={[styles.filled, busy !== null && styles.dim]}
+                // Outlined until it asks to start: fifty filled buttons in a column shouted.
+                <Pressable disabled={busy !== null} style={[confirm === s ? styles.filled : styles.outline, busy !== null && styles.dim]}
                   accessibilityRole="button" accessibilityState={{ disabled: busy !== null }}
                   onPress={() => (confirm === s ? start(s) : setConfirm(s))}>
-                  <Text style={styles.filledText}>
+                  <Text style={confirm === s ? styles.filledText : styles.action}>
                     {confirm === s ? 'Start' : status === 'partial' ? 'Resume' : 'Download'}
                   </Text>
                 </Pressable>

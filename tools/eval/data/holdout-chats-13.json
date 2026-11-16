@@ -189,7 +189,7 @@
    "kind": "control",
    "turns": [
     {
-     "q": "there's a bear standing on the trail about 30 yards ahead of us",
+     "q": "we just came around a bend and there's a big bear maybe 30 yards up from us",
      "expect": "help-now",
      "card": "A bear close by, charging or attacking",
      "keyPoints": []

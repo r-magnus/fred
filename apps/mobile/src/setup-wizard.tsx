@@ -1,11 +1,21 @@
 /**
- * First-run setup (#196): five short pages under the horizon.
+ * First-run setup (#196): four short pages under the horizon.
  *
  *   welcome  who Fred is
  *   guides   the models and the guides that are the same everywhere
  *   place    the hiker's state or states: map, contours, coverage, local guide
- *   sky      the day and night switch, tried on the sun itself
- *   ready    where everything is
+ *   ready    all set; the app is left to discover (no tour, 2026-11-15)
+ *
+ * The day and night page is gone (ux-ui-review pass, 2026-11-14): a page
+ * about a colour switch was a page between someone and their downloads. The
+ * last page's tour of the controls went too (2026-11-15, Ryan): the menu
+ * button, the Ask box and the sun are clear or fun to find on their own.
+ *
+ * Downloads run in a queue that carries on while the hiker moves through the
+ * pages, so picking states happens during the gigabyte,
+ * not after it. One strip above the buttons says what is downloading, how
+ * far along, and roughly how long is left, with Pause; a pause or a failure
+ * keeps every file that arrived and offers to carry on.
  *
  * A trail of waypoints across the top marks the way, like the trail down the
  * chat. Nothing is downloaded without its size being shown first, because the
@@ -21,18 +31,18 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { BackHandler, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { Paths } from 'expo-file-system';
 import { STATE_NAMES } from '@fred/rag-core';
 import { CalmLoader } from './calm-loader.tsx';
-import { Tour } from './tour.tsx';
 import { currentFix, lastKnownFix } from './location.ts';
 import {
   downloadBundle, fetchIndex, installState, remainingBytes,
   type MapIndex, type Progress, type StateBundle,
 } from './map-downloads.ts';
 import { Scene } from './scene.tsx';
-import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, type IndexState, type Step } from './setup-plan.ts';
+import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, timeLeft, type IndexState, type Step } from './setup-plan.ts';
 import { guidesOnPhone, statesOnPhone } from './setup.ts';
-import { Crossfade, Veil, radius, useTheme, useThemed, type Palette } from './theme.tsx';
+import { Crossfade, Veil, radius, useThemed, type Palette } from './theme.tsx';
 
 const LOGO = require('../assets/ui/fred-logo.png');
 const LEAF = require('../assets/ui/leaf.png');
@@ -46,11 +56,20 @@ const AWAKE = 'setup-download';
 const NEAR_ENOUGH_M = 3000;
 const LOCATE_MS = 12_000;
 
-/** What is downloading now: the guides, or a state by its code. */
+/** One thing to download: the guides, or a state by its code. */
+interface Item { readonly what: string; readonly bundle: StateBundle }
+/** What is downloading now, and where it stands in the queue. */
 interface Job {
   readonly what: string;
   readonly progress: Progress | null;
+  /** This one's place in the run, and how many the run holds now. */
+  readonly n: number;
+  readonly of: number;
+  /** When this one began (ms), for the time left. */
+  readonly startedAt: number;
 }
+/** Downloads that stopped, kept to carry on from: paused by the hiker, or failed. */
+interface Stopped { readonly items: readonly Item[]; readonly why: 'paused' | 'failed'; readonly message?: string }
 const GUIDES = 'guides';
 
 /** The waypoints across the top: passed, here, and still ahead. */
@@ -78,14 +97,16 @@ function Trail({ step }: { step: Step }): React.JSX.Element {
 }
 
 /** A filling bar with the figures under it. */
-function Bar({ progress }: { progress: Progress | null }): React.JSX.Element {
+function Bar({ progress, startedAt }: { progress: Progress | null; startedAt?: number }): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const share = progress === null ? 0 : progress.done / Math.max(1, progress.total);
+  const left = progress === null || startedAt === undefined ? null
+    : timeLeft(progress.done, progress.total, Date.now() - startedAt);
   return (
     <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: Math.round(share * 100) }}>
       <View style={styles.bar}><View style={[styles.fill, { width: `${Math.round(share * 100)}%` }]} /></View>
       <Text style={styles.meta}>
-        {progress === null ? 'Starting…' : `${size(progress.done)} of ${size(progress.total)}`}
+        {progress === null ? 'Starting…' : `${size(progress.done)} of ${size(progress.total)}${left === null ? '' : ` · ${left}`}`}
       </Text>
     </View>
   );
@@ -107,10 +128,63 @@ function Promise_({ glyph, tone, title, children }: { glyph: number; tone: strin
   );
 }
 
+/** What a download is called on the strip. */
+const nameOf = (what: string): string => (what === GUIDES ? 'the guides' : STATE_NAMES[what] ?? what);
+
+/**
+ * One place that says how the downloads are going, on every page after the
+ * first: what, how far, roughly how long, and Pause; or, once stopped, why,
+ * and Resume. Pausing keeps every file that has arrived.
+ */
+function DownloadStrip(
+  { job, stopped, onPause, onResume }: { job: Job | null; stopped: Stopped | null; onPause: () => void; onResume: () => void },
+): React.JSX.Element {
+  const { styles } = useThemed(makeStyles);
+  // The time left is worked out at each render; a tick keeps it moving between progress reports.
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (job === null) return;
+    const t = setInterval(() => tick((n) => n + 1), 5000);
+    return () => clearInterval(t);
+  }, [job]);
+  if (job !== null) {
+    return (
+      <View style={styles.strip} accessibilityLiveRegion="polite">
+        <View style={styles.grow}>
+          <Text style={styles.stripTitle} numberOfLines={1}>
+            Downloading {nameOf(job.what)}{job.of > 1 ? ` · ${job.n} of ${job.of}` : ''}
+          </Text>
+          <Bar progress={job.progress} startedAt={job.startedAt} />
+        </View>
+        <Pressable style={styles.stripButton} onPress={onPause} accessibilityRole="button" accessibilityLabel="Pause the download">
+          <Text style={styles.stripButtonText}>Pause</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  const what = stopped!.items.map((i) => nameOf(i.what));
+  return (
+    <View style={[styles.strip, stopped!.why === 'failed' && styles.stripFailed]} accessibilityLiveRegion="polite">
+      <View style={styles.grow}>
+        <Text style={styles.stripTitle} numberOfLines={2}>
+          {stopped!.why === 'paused' ? `Paused: ${listNames(what)}` : `The download of ${what[0]} stopped`}
+        </Text>
+        <Text style={styles.meta}>
+          {stopped!.why === 'paused' ? 'What already arrived is kept.'
+            : `${stopped!.message?.startsWith('Not enough space') ? stopped!.message : 'The connection may have dropped.'} What arrived is kept.`}
+        </Text>
+      </View>
+      <Pressable style={styles.stripButton} onPress={onResume} accessibilityRole="button"
+        accessibilityLabel={stopped!.why === 'paused' ? 'Resume the download' : 'Try the download again'}>
+        <Text style={styles.stripButtonText}>{stopped!.why === 'paused' ? 'Resume' : 'Try again'}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Element {
   const insets = useSafeAreaInsets();
   const { palette, styles } = useThemed(makeStyles);
-  const { mode } = useTheme();
   const [step, setStep] = useState<Step>('welcome');
 
   // The list of downloads. Asked for at once, so it is usually here by the
@@ -136,35 +210,65 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
   const haveStates = useMemo(() => statesOnPhone(), [disk]);
 
   const [job, setJob] = useState<Job | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [stopped, setStopped] = useState<Stopped | null>(null);
   const abort = useRef<AbortController | null>(null);
+  // The queue lives in a ref: items join while another is downloading.
+  const pending = useRef<Item[]>([]);
+  const running = useRef(false);
+  const idxRef = useRef(idx);
+  idxRef.current = idx;
   useEffect(() => () => { abort.current?.abort(); void deactivateKeepAwake(AWAKE).catch(() => {}); }, []);
 
-  /** Downloads one after another; stops at the first that fails, keeping what arrived. */
-  const fetchAll = useCallback((list: readonly { what: string; bundle: StateBundle }[]) => {
-    if (idx === null || list.length === 0) return;
+  /** Downloads the queue one after another; a pause or failure keeps what arrived and what was left. */
+  const run = useCallback(() => {
+    const index = idxRef.current;
+    if (running.current || index === null) return;
+    running.current = true;
     const ctrl = new AbortController();
     abort.current = ctrl;
-    setError(null);
     // A phone that sleeps mid-download drops the connection.
     void activateKeepAwakeAsync(AWAKE).catch(() => {});
     void (async () => {
+      let n = 0;
       try {
-        for (const { what, bundle } of list) {
-          setJob({ what, progress: null });
-          await downloadBundle(idx, bundle, (progress) => setJob({ what, progress }), ctrl.signal);
-          setDisk((n) => n + 1);
+        while (pending.current.length > 0) {
+          const item = pending.current[0]!;
+          n += 1;
+          const of = n + pending.current.length - 1;
+          const startedAt = Date.now();
+          setJob({ what: item.what, progress: null, n, of, startedAt });
+          try {
+            await downloadBundle(index, item.bundle,
+              (progress) => setJob({ what: item.what, progress, n, of: n + pending.current.length - 1, startedAt }), ctrl.signal);
+          } catch (e) {
+            const items = [...pending.current];
+            pending.current = [];
+            setStopped(ctrl.signal.aborted ? { items, why: 'paused' }
+              : { items, why: 'failed', message: e instanceof Error ? e.message : String(e) });
+            return;
+          }
+          pending.current.shift();
+          setDisk((d) => d + 1);
         }
-      } catch (e) {
-        if (!ctrl.signal.aborted) setError(e instanceof Error ? e.message : String(e));
       } finally {
+        running.current = false;
         abort.current = null;
         setJob(null);
-        setDisk((n) => n + 1);
+        setDisk((d) => d + 1);
         void deactivateKeepAwake(AWAKE).catch(() => {});
       }
     })();
-  }, [idx]);
+  }, []);
+  /** Adds to the queue (anything already in it is not added twice) and starts it if idle. */
+  const enqueue = useCallback((items: readonly Item[]) => {
+    const queued = new Set(pending.current.map((i) => i.what));
+    pending.current.push(...items.filter((i) => !queued.has(i.what)));
+    setStopped(null);
+    run();
+  }, [run]);
+  /** What is downloading or waiting its turn. */
+  const inQueue = (what: string): boolean => job?.what === what || pending.current.some((i) => i.what === what);
+  const free = Paths.availableDiskSpace;
 
   // The place page: where the hiker is, and the states they have ticked.
   const [here, setHere] = useState<string | null>(null);
@@ -200,42 +304,39 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
     return b === undefined ? 0 : remainingBytes(b);
   };
   // `disk` is read through `left`, so the queue shrinks as states arrive.
-  const queue = useMemo(() => queueFor(picked, order, left), [picked, order, disk, idx]);
+  const queue = useMemo(() => queueFor(picked, order, (st) => (inQueue(st) ? 0 : left(st))), [picked, order, disk, idx, job]);
 
   const index: IndexState = idx !== null
     ? { kind: 'loaded', coreBytesLeft: idx.core === undefined ? null : remainingBytes(idx.core) || idx.core.bytes }
     : idxError !== null ? { kind: 'unreachable', message: idxError } : { kind: 'loading' };
   const guides = guidesStatus(haveGuides, index);
 
-  // The sky page says so once the switch has been tried.
-  const startedIn = useRef(mode);
-  const [turned, setTurned] = useState(false);
-  useEffect(() => { if (step === 'sky' && mode !== startedIn.current) setTurned(true); }, [mode, step]);
-  useEffect(() => { if (step === 'sky') startedIn.current = mode; }, [step]);
-
   const busy = job !== null;
   const go = useCallback((by: 1 | -1) => {
-    setError(null);
     setStep((s) => stepFrom(s, by) ?? s);
   }, []);
   // The phone's back button is the wizard's Back; on the first page it leaves the app as usual.
+  // A download carries on whichever page is showing.
   useEffect(() => {
     if (step === 'welcome') return;
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => { if (!busy) go(-1); return true; });
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => { go(-1); return true; });
     return () => sub.remove();
-  }, [step, busy, go]);
+  }, [step, go]);
 
   /** The big button at the foot of each page. */
+  // Downloads carry on between pages, so Next is never held up by one.
+  // Only Start waits: Fred loads the guides when setup ends, and a download
+  // and the model in memory at once is more than a small phone has room for.
+  const guidesComing = inQueue(GUIDES);
   const next: { label: string; onPress: () => void; quiet?: boolean; off?: boolean } =
     step === 'welcome' ? { label: 'Let’s set up', onPress: () => go(1) }
-    : busy ? { label: 'Downloading…', onPress: () => {}, off: true }
-    : step === 'guides' ? (guides.kind === 'ready' ? { label: 'Next', onPress: () => go(1) }
+    : step === 'guides' ? (guides.kind === 'ready' || guidesComing ? { label: 'Next', onPress: () => go(1) }
       : { label: 'Skip for now', onPress: () => go(1), quiet: true })
     : step === 'place' ? (queue.states.length > 0
-      ? { label: `Download ${size(queue.bytes)}`, onPress: () => fetchAll(queue.states.map((s) => ({ what: s, bundle: idx!.states[s]! }))) }
-      : haveStates.length > 0 ? { label: 'Next', onPress: () => go(1) }
+      ? { label: `Download ${size(queue.bytes)}`, onPress: () => enqueue(queue.states.map((st) => ({ what: st, bundle: idx!.states[st]! }))) }
+      : haveStates.length > 0 || busy ? { label: 'Next', onPress: () => go(1) }
       : { label: 'Skip for now', onPress: () => go(1), quiet: true })
-    : step === 'sky' ? { label: 'Next', onPress: () => go(1) }
+    : busy ? { label: 'Finishing downloads…', onPress: () => {}, off: true }
     : { label: 'Start', onPress: onDone };
 
   let page: ReactNode;
@@ -267,10 +368,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
     page = (
       <ScrollView style={styles.page} contentContainerStyle={styles.pageInner}>
         <Text style={styles.title}>First, the guides.</Text>
-        <Text style={styles.lead}>
-          The first aid and survival guides, and the part of me that reads them and writes your
-          answer. I can&apos;t answer anything without these.
-        </Text>
+        <Text style={styles.lead}>Everything I need to answer you, kept on this phone.</Text>
         <View style={styles.card}>
           <View style={styles.cardHead}>
             <Text style={styles.cardTitle}>Fred&apos;s guides</Text>
@@ -282,23 +380,24 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
           {guides.kind === 'checking' && (
             <View style={styles.row}><CalmLoader size={30} /><Text style={styles.note}>Looking for the downloads…</Text></View>
           )}
-          {guides.kind === 'offer' && job?.what !== GUIDES && (
+          {guides.kind === 'offer' && !guidesComing && (
             <>
-              <Text style={styles.body}>{size(guides.bytes)} to download, once. Use Wi-Fi if you can.</Text>
-              <Pressable style={styles.action} accessibilityRole="button"
-                onPress={() => fetchAll([{ what: GUIDES, bundle: idx!.core! }])}>
+              <Text style={styles.body}>{size(guides.bytes)}, downloaded once. Wi-Fi is best.</Text>
+              {/* Room is checked before the tap, not after it (ux-ui-review, states). */}
+              {free < guides.bytes * 1.1
+                ? <Text style={styles.caution}>This phone has {size(free)} free, which isn&apos;t enough. Free up some space, then come back.</Text>
+                : <Text style={styles.note}>This phone has {size(free)} free.</Text>}
+              <Pressable style={[styles.action, free < guides.bytes * 1.1 && styles.dim]} accessibilityRole="button"
+                disabled={free < guides.bytes * 1.1}
+                onPress={() => enqueue([{ what: GUIDES, bundle: idx!.core! }])}>
                 <Text style={styles.actionText}>Download {size(guides.bytes)}</Text>
               </Pressable>
             </>
           )}
-          {job?.what === GUIDES && (
-            <>
-              <Bar progress={job.progress} />
-              <Text style={styles.note}>Keep Fred open while this runs. The screen will stay on.</Text>
-              <Pressable onPress={() => abort.current?.abort()} hitSlop={10} accessibilityRole="button">
-                <Text style={styles.link}>Cancel</Text>
-              </Pressable>
-            </>
+          {guidesComing && (
+            <Text style={styles.body}>
+              Downloading. You can carry on: it keeps going while you choose your states.
+            </Text>
           )}
           {guides.kind === 'offline' && (
             <>
@@ -314,7 +413,6 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
               cable. You can carry on and look around, and the map will still work.
             </Text>
           )}
-          {error !== null && <Text style={styles.error}>{error}</Text>}
         </View>
       </ScrollView>
     );
@@ -341,7 +439,6 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
           </Text>
         )}
         {locNote !== null && <Text style={styles.caution}>{locNote}</Text>}
-        {error !== null && <Text style={styles.error}>{error}</Text>}
         <View style={[styles.card, styles.listCard]}>
           {idx === null && idxError === null && <CalmLoader size={40} style={styles.centred} />}
           {idx === null && idxError !== null && (
@@ -358,11 +455,12 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
                 const bundle = idx.states[s]!;
                 const status = installState(bundle);
                 const on = status === 'installed' || picked.has(s);
-                const mine = job !== null && job.what === s ? job : null;
+                const mine = job !== null && job.what === s;
+                const waiting = !mine && inQueue(s);
                 const name = STATE_NAMES[s] ?? s;
                 return (
                   <Pressable key={s} style={[styles.state, i === 0 && styles.stateFirst]}
-                    disabled={busy || status === 'installed'}
+                    disabled={status === 'installed' || mine || waiting}
                     accessibilityRole="checkbox" accessibilityState={{ checked: on, disabled: status === 'installed' }}
                     accessibilityLabel={`${name}, ${status === 'installed' ? 'on this phone' : size(remainingBytes(bundle))}`}
                     onPress={() => setPicked((was) => {
@@ -372,7 +470,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
                     })}>
                     <View style={styles.grow}>
                       <Text style={styles.stateName}>{name}{s === here ? '  · you are here' : ''}</Text>
-                      {mine !== null ? <Bar progress={mine.progress} /> : (
+                      {mine || waiting ? <Text style={styles.meta}>{mine ? 'Downloading now' : 'Waiting its turn'}</Text> : (
                         <Text style={styles.meta}>
                           {status === 'installed' ? `On this phone · ${size(bundle.bytes)}`
                             : status === 'partial' ? `Partly here · ${size(remainingBytes(bundle))} to go`
@@ -390,34 +488,10 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
             </ScrollView>
           )}
         </View>
-        {busy
-          ? (
-            <Pressable onPress={() => abort.current?.abort()} hitSlop={10} accessibilityRole="button">
-              <Text style={styles.link}>Cancel the download</Text>
-            </Pressable>
-          )
-          : <Text style={styles.note}>More can be added any time from the map, under Offline maps.</Text>}
-      </View>
-    );
-  } else if (step === 'sky') {
-    page = (
-      <ScrollView style={styles.page} contentContainerStyle={styles.pageInner}>
-        <Text style={styles.title}>{turned ? 'There it goes.' : 'Day and night.'}</Text>
-        <Text style={styles.lead}>
-          {mode === 'night'
-            ? 'That’s the moon up there, and it’s a switch. Swipe it sideways, or tap it, and the sun comes back up.'
-            : 'That’s the sun up there, and it’s a switch. Swipe it sideways, or tap it, and night falls.'}
+        <Text style={styles.note}>
+          {queue.states.length > 0 ? `${size(free)} free on this phone. ` : ''}More can be added any time from the map, under Offline maps.
         </Text>
-        <View style={styles.card}>
-          <Text style={styles.body}>
-            Day colours are for bright light on the trail. Night colours are easier on your eyes in a
-            tent.
-          </Text>
-          <Text style={styles.note}>
-            Until you choose, I go by the clock. Once you&apos;ve chosen, I remember.
-          </Text>
-        </View>
-      </ScrollView>
+      </View>
     );
   } else {
     const names = haveStates.map((s) => STATE_NAMES[s] ?? s);
@@ -426,17 +500,16 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
         <Text style={styles.title}>{haveGuides ? 'You’re all set.' : 'Nearly there.'}</Text>
         <Text style={styles.lead}>
           {haveGuides
-            ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Here’s where everything is.`
+            ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Have a look around.`
             : 'The guides aren’t on this phone yet, so I can’t answer questions. You can still look around; Fred offers setup again when you next open him.'}
         </Text>
-        <View style={styles.card}><Tour /></View>
       </ScrollView>
     );
   }
 
   return (
     <View style={styles.root}>
-      <Scene height={insets.top + 168} top={insets.top} hint={step === 'sky' && !turned}>
+      <Scene height={insets.top + 168} top={insets.top}>
         <View style={[styles.header, { paddingTop: insets.top + 10 }]} pointerEvents="none">
           <Crossfade render={(p) => (
             <Image source={LOGO} resizeMode="contain" style={[styles.logo, { tintColor: p.logo }]} accessibilityLabel="Fred" />
@@ -445,12 +518,17 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
       </Scene>
       <Trail step={step} />
       {page}
+      {step !== 'welcome' && (job !== null || stopped !== null) && (
+        <DownloadStrip job={job} stopped={stopped}
+          onPause={() => abort.current?.abort()}
+          onResume={() => { if (stopped !== null) enqueue(stopped.items); }} />
+      )}
       <View style={[styles.foot, { paddingBottom: insets.bottom + 14 }]}>
         {step === 'welcome'
           // Someone set up by cable, or who only wants a look, is not made to walk the pages.
           ? <Pressable onPress={onDone} hitSlop={10} accessibilityRole="button"><Text style={styles.back}>Skip setup</Text></Pressable>
-          : <Pressable onPress={() => go(-1)} disabled={busy} hitSlop={10} accessibilityRole="button">
-              <Text style={[styles.back, busy && styles.dim]}>Back</Text>
+          : <Pressable onPress={() => go(-1)} hitSlop={10} accessibilityRole="button">
+              <Text style={styles.back}>Back</Text>
             </Pressable>}
         <Pressable style={[styles.next, next.quiet === true && styles.nextQuiet, next.off === true && styles.dim]}
           disabled={next.off === true} onPress={next.onPress} accessibilityRole="button">
@@ -516,7 +594,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   state: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: 1, borderTopColor: palette.sand },
   stateFirst: { borderTopWidth: 0 },
   stateName: { color: palette.ink, fontSize: 15 },
-  meta: { color: palette.moss, fontSize: 12, marginTop: 2 },
+  meta: { color: palette.moss, fontSize: 13, marginTop: 2 },
   box: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, borderColor: palette.trail, alignItems: 'center', justifyContent: 'center' },
   boxOn: { backgroundColor: palette.pine, borderColor: palette.pine },
   boxHere: { backgroundColor: palette.sage, borderColor: palette.sage },
@@ -525,8 +603,20 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   bar: { height: 6, backgroundColor: palette.oat, borderRadius: 3, marginTop: 6, overflow: 'hidden' },
   fill: { height: 6, borderRadius: 3, backgroundColor: palette.leaf },
 
+  strip: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, marginTop: 6,
+    paddingLeft: 16, paddingRight: 8, paddingVertical: 10,
+    backgroundColor: palette.paper, borderRadius: radius.card, borderWidth: 1, borderColor: palette.sand,
+  },
+  stripFailed: { borderColor: palette.clay },
+  stripTitle: { color: palette.ink, fontSize: 15, fontWeight: '600' },
+  stripButton: {
+    minHeight: 48, minWidth: 72, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center',
+    borderRadius: radius.control, backgroundColor: palette.oat,
+  },
+  stripButtonText: { color: palette.ink, fontSize: 15, fontWeight: '700' },
   foot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
-  back: { color: palette.moss, fontSize: 15, fontWeight: '600', paddingVertical: 10 },
+  back: { color: palette.moss, fontSize: 15, fontWeight: '600', paddingVertical: 14 },
   next: { borderRadius: radius.pill, backgroundColor: palette.pine, paddingHorizontal: 26, paddingVertical: 14, boxShadow: `0 4 14 ${palette.shade}` },
   nextQuiet: { backgroundColor: palette.oat, boxShadow: 'none' },
   nextText: { color: palette.paper, fontSize: 16, fontWeight: '700' },

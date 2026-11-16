@@ -141,12 +141,12 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   // A round close button level with the title; the X is two crossed strokes.
   close: {
-    width: 36, height: 36, borderRadius: radius.pill, backgroundColor: palette.night ? '#3D3245' : '#F4D0CE',
+    width: 44, height: 44, borderRadius: radius.pill, backgroundColor: palette.night ? '#3D3245' : '#F4D0CE',
     alignItems: 'center', justifyContent: 'center',
   },
   closeLine: { position: 'absolute', width: 14, height: 2, borderRadius: 1, backgroundColor: palette.ink },
   title: { flexShrink: 1, fontFamily: JOURNAL, color: palette.ink, fontSize: 30, lineHeight: 38 },
   section: { gap: 10 },
-  heading: { color: palette.pine, fontSize: 11, fontWeight: '700', letterSpacing: 0.9, textTransform: 'uppercase' },
+  heading: { color: palette.pine, fontSize: 15, fontWeight: '700' },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
 });

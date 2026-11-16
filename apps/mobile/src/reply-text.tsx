@@ -55,17 +55,18 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   wrap: { gap: 10 },
   body: { color: palette.ink, fontSize: 16, lineHeight: 24 },
   bold: { fontWeight: '700' },
-  heading: { color: palette.pine, fontSize: 11, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase', marginTop: 4 },
+  heading: { color: palette.pine, fontSize: 14, fontWeight: '700', marginTop: 4 },
   row: { flexDirection: 'row', gap: 10 },
   rowText: { flex: 1 },
-  // A 22 pt disc, its number centred on the line's first baseline (24 pt line).
+  // A disc on the step's first line. alignSelf keeps the row from stretching
+  // it down the whole step; min sizes let it grow with the system font size.
   badge: {
-    width: 22, height: 22, borderRadius: 11, marginTop: 1,
+    alignSelf: 'flex-start', minWidth: 22, minHeight: 22, borderRadius: 11, marginTop: 1, paddingHorizontal: 4,
     backgroundColor: palette.sage, alignItems: 'center', justifyContent: 'center',
   },
   badgeText: { color: palette.pine, fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  dotBox: { width: 22, height: 24, alignItems: 'center', justifyContent: 'center' },
+  dotBox: { alignSelf: 'flex-start', width: 22, height: 24, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: palette.leaf },
   warn: { backgroundColor: palette.blush, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, gap: 6 },
-  warnBold: { fontWeight: '700', color: palette.clay },
+  warnBold: { fontWeight: '700', color: palette.warn },
 });

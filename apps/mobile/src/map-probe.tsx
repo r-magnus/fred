@@ -26,6 +26,10 @@ import { RegionOffer } from './region-offer.tsx';
 import { Compass, useHeading, type Heading } from './compass.tsx';
 import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
+import { RouteLayers } from './route-layer.tsx';
+import { RouteCard } from './route-card.tsx';
+import { routeBounds } from './route-view.ts';
+import { useRoute, type LngLat, type RouteState } from './use-route.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
 /**
@@ -225,8 +229,12 @@ function regionsToOffer(): { readonly place: string; readonly region: RegionOutl
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
+    /** A dropped pin and the walking route to it (#226), drawn under the hiker. */
+    route?: RouteState;
+    /** Long-press on the map: drops the route pin. */
+    onLongPress?: (at: LngLat) => void;
     /**
      * Given on the full map: regions not on the phone are drawn washed out with
      * a dashed edge and a name tag, and a tap on either offers that region.
@@ -277,7 +285,11 @@ function FredMap(
         attribution={credit} attributionPosition={{ bottom: creditBottom, right: 10 }} logo={false}
         // North stays up and the map stays flat: the compass dial shows which
         // way the phone points, and a turned map would make it read wrongly.
-        touchRotate={false} touchPitch={false}>
+        touchRotate={false} touchPitch={false}
+        onLongPress={onLongPress === undefined ? undefined : (e) => {
+          const [lon, lat] = e.nativeEvent.lngLat;
+          onLongPress([lon, lat]);
+        }}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
         <Camera ref={camera} initialViewState={{
@@ -346,6 +358,7 @@ function FredMap(
               paint={{ 'line-color': ME, 'line-width': 2 }} />
           </GeoJSONSource>
         )}
+        {route !== undefined && <RouteLayers state={route} night={palette.night} />}
         {/* The accuracy ring is metres wide and vanishes when zoomed out to
             see the coverage zones, so the position also gets a fixed-size dot. */}
         {fix !== null && heading != null && heading.facing !== null && (
@@ -405,6 +418,8 @@ export function MapScreen(
   const [offer, setOffer] = useState<string | null>(null);
   const camera = useRef<CameraRef | null>(null);
   const heading = useHeading();
+  // A dropped pin and the walking route to it (#226).
+  const route = useRoute();
   // The sheet's height, so the map's credit button can sit just above it.
   const [sheet, setSheet] = useState(0);
   // The sheet folds down to its title, to give the map the screen: drag its
@@ -436,6 +451,19 @@ export function MapScreen(
       onPanResponderTerminate: () => rest(fold.current.folded),
     });
   }, [drop]);
+  // A new pin opens the sheet, where its card is.
+  const dropPin = (at: LngLat): void => {
+    route.dropPin(at);
+    drop.setValue(0);
+    setFolded(false);
+  };
+  // A finished route is shown whole: from the hiker to the pin, clear of the sheet.
+  useEffect(() => {
+    if (route.state.kind !== 'ready') return;
+    const b = routeBounds(route.state.route);
+    if (b === null) return;
+    camera.current?.fitBounds(b, { padding: { top: insets.top + 80, right: 40, bottom: sheet + 30, left: 40 }, duration: 700 });
+  }, [route.state.kind === 'ready' ? route.state.route : null]);
   // What the map has here: read from disk at every render, which is cheap (a
   // directory listing and a point-in-polygon), so it can never lag behind a
   // download or a removal the way a cached answer did (#224, emulator walk).
@@ -481,15 +509,16 @@ export function MapScreen(
   // The phone's back button closes whatever is on top: a panel, then the map.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (offer !== null) setOffer(null); else if (picking) setPicking(false); else if (managing) setManaging(false); else onClose();
+      if (offer !== null) setOffer(null); else if (picking) setPicking(false); else if (managing) setManaging(false);
+      else if (route.state.kind !== 'none') route.clear(); else onClose();
       return true;
     });
     return () => sub.remove();
-  }, [offer, picking, managing, onClose]);
+  }, [offer, picking, managing, onClose, route.state.kind, route.clear]);
   return (
     <View style={styles.root}>
       <FredMap key={files} fix={fix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
-        onRegion={setOffer} />
+        onRegion={setOffer} route={route.state} onLongPress={dropPin} />
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}
@@ -548,6 +577,13 @@ export function MapScreen(
           </View>
           {/* The rest fades as the sheet is pushed down, so the folded sheet is a clean title. */}
           <Animated.View style={{ opacity: drop.interpolate({ inputRange: [0, 70], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
+          {/* With a pin down, the sheet is about the route; the signal and
+              settings come back when it is cleared. Keeps the sheet from
+              growing over the map (#227). */}
+          {route.state.kind !== 'none' ? (
+            <RouteCard state={route.state} fix={fix}
+              onRoute={() => { if (fix !== null) route.plan(fix); }} onClear={route.clear} />
+          ) : (<>
           {where.note !== null && (
             <Pressable onPress={where.dismissNote}>
               <Text style={styles.note}>{where.note}</Text>
@@ -640,6 +676,7 @@ export function MapScreen(
               <Text style={styles.linkValue}>Download or remove</Text>
             </Pressable>
           </View>
+          </>)}
           </Animated.View>
         </Animated.View>
       )}

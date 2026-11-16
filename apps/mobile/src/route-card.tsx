@@ -115,7 +115,11 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart, onLocate, onG
   const names = trailNames(route);
   const warnings = routeWarnings(route);
   // "2.3 km · about 40–60 min · 120 m up": one line to read, not three.
-  const numbers = [distanceWords(route.meters), timeWords(route.seconds), ...(climb === null ? [] : [climb.toLowerCase()])].join(' · ');
+  // Each part kept whole (no-break spaces inside it), so a narrow screen
+  // wraps between parts, never inside "20 m down" (phone, 2026-11-16).
+  const whole = (part: string): string => part.replace(/ /g, '\u00A0');
+  const numbers = [distanceWords(route.meters), timeWords(route.seconds), ...(climb === null ? [] : [climb.toLowerCase()])]
+    .map(whole).join(' · ');
   return (
     <View style={styles.card}>
       {stayPut}

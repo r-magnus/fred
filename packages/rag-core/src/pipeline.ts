@@ -485,6 +485,40 @@ export function checkable(unit: string): boolean {
   return !/\b(?:emergency services|911|call for help|get help|medical (?:help|attention|care)|see a doctor|seek (?:medical|help))\b/i.test(unit);
 }
 
+const JUDGE_STOP = new Set('a an the and or but if then than so to of in on at by for with from as is are was were be been being it its this that these those there here you your yours i me my we our us they them their he she his her him not no do does did can could should would will may might must just also very more most less some any all each every one two into out over under up down about after before while when where what which who how why own same other such only too off again further once'.split(' '));
+/** Content words, folded the same way for an answer and its sources: plurals and -ing/-ed cut. */
+function judgeWords(text: string): string[] {
+  return (text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?|\d+(?:[.,]\d+)?/g) ?? [])
+    .filter((w) => !JUDGE_STOP.has(w) && (w.length > 2 || /\d/.test(w)))
+    .map((w) => w.replace(/(?:ies)$/, 'y').replace(/(?:ing|ed|es|s)$/, ''));
+}
+
+/**
+ * Deep thinking's judge, round 2 (#21): a tool reading the words, not
+ * vectors. Round 1's vector scores differed by ~0.01 between drafts and
+ * chose the one without "3 feet". A draft scores for the specifics of its
+ * sources it keeps word for word (numbers, and two-word phrases from the
+ * passages) and loses for content words found in neither the sources nor
+ * the question (the model's own additions).
+ */
+export function judgeDraft(draft: string, sources: string, question: string): number {
+  const src = judgeWords(sources);
+  const known = new Set([...src, ...judgeWords(question)]);
+  const pairs = new Set(src.slice(1).map((w, i) => `${src[i]} ${w}`));
+  const words = judgeWords(draft);
+  if (words.length === 0) return 0;
+  const kept = new Set<string>();
+  words.forEach((w, i) => {
+    if (/\d/.test(w) && known.has(w)) kept.add(w);
+    const pair = i > 0 ? `${words[i - 1]} ${w}` : '';
+    if (pairs.has(pair)) kept.add(pair);
+  });
+  const novel = words.filter((w) => !known.has(w)).length / words.length;
+  return kept.size - JUDGE_NOVEL_WEIGHT * novel * words.length;
+}
+/** How much one invented content word costs against one kept specific. */
+export const JUDGE_NOVEL_WEIGHT = 0.5;
+
 /** Cosine of two float vectors. */
 function cosine(a: Float32Array, b: Float32Array): number {
   let dot = 0, na = 0, nb = 0;
@@ -2295,7 +2329,11 @@ async function askCore(
       // #21 is answers about something else: a draft is judged on keeping to
       // the question as much as on keeping to the sources.
       deepInfo.texts.push(text);
-      drafts.push({ text, units, score: isRefusal(text) ? -1 : mean(scored.map((u) => u.support!)) + mean(scored.map((u) => u.onQuestion!)) });
+      // Round 2 (#21): judged by the words (judgeDraft); the vector scores
+      // are still recorded beside it for the check.
+      const judged = judgeDraft(text, supportPassages.map((p) => p.text).join('\n'), query);
+      drafts.push({ text, units, score: isRefusal(text) ? -Infinity : judged });
+      void mean;
     }
     deepInfo.drafts = n;
     deepInfo.support = drafts.map((d) => Number(d.score.toFixed(3)));

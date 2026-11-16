@@ -16,3 +16,13 @@ test('short units and getting help are never judged', () => {
 test('kept steps are numbered again from 1', () => {
   assert.deepEqual(renumbered(['Intro line.', '1. a', '3. c', '4. d']), ['Intro line.', '1. a', '2. c', '3. d']);
 });
+
+import { judgeDraft } from '../src/pipeline.ts';
+
+test('the judge prefers the draft that keeps the source specifics', () => {
+  const src = 'The fire should be about 1 meter (3 feet) from the opening of the lean-to.';
+  const q = 'how far should the fire be from the opening of my lean-to';
+  const specific = judgeDraft('Keep the fire about 3 feet from the opening of the lean-to.', src, q);
+  const vague = judgeDraft('Keep the fire at a safe distance to prevent accidental exposure or spread of flames.', src, q);
+  assert.ok(specific > vague, `${specific} vs ${vague}`);
+});

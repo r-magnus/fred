@@ -10,7 +10,7 @@
  */
 
 /** The wizard's pages, in order. */
-export const STEPS = ['welcome', 'guides', 'place', 'sky', 'ready'] as const;
+export const STEPS = ['welcome', 'guides', 'place', 'ready'] as const;
 export type Step = typeof STEPS[number];
 
 /** The page after this one, or before it; null at either end. */
@@ -76,4 +76,17 @@ export function queueFor(
 export function listNames(names: readonly string[]): string {
   if (names.length <= 1) return names[0] ?? '';
   return `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+}
+
+/**
+ * Roughly how long is left, from the speed so far: "about 4 min left". Said
+ * only after a few seconds, when the speed means something, and in whole
+ * minutes, because a countdown in seconds jumps about and reads as precise.
+ */
+export function timeLeft(done: number, total: number, elapsedMs: number): string | null {
+  if (elapsedMs < 4000 || done <= 0 || done >= total) return null;
+  const secs = (total - done) / (done / (elapsedMs / 1000));
+  if (secs < 60) return 'under a minute left';
+  const mins = Math.round(secs / 60);
+  return mins >= 90 ? `about ${Math.round(mins / 60)} hours left` : `about ${mins} min left`;
 }

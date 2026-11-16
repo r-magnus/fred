@@ -59,6 +59,14 @@ export function removeChat<T>(chats: readonly SavedChat<T>[], id: number): Saved
   return next;
 }
 
+/** Puts a removed chat back where it was (Undo), keeping the list newest first. */
+export function restoreChat<T>(chats: readonly SavedChat<T>[], chat: SavedChat<T>): SavedChat<T>[] {
+  const next = [...chats.filter((c) => c.id !== chat.id), chat]
+    .sort((a, b) => b.updatedAt - a.updatedAt).slice(0, KEEP);
+  store(next);
+  return next;
+}
+
 /** "Today, 4:12 pm", "Yesterday", "Mon", "Oct 5": how long ago, the way a journal dates a page. */
 export function describeWhen(ms: number, now = Date.now()): string {
   const d = new Date(ms);

@@ -51,6 +51,11 @@ export interface Palette {
   readonly blush: string;
   /** Warnings stay warm but must not be missed. */
   readonly clay: string;
+  /**
+   * Bold words inside a "Don't" block, on blush: safety text, so 7:1 rather
+   * than 4.5:1 (WCAG AAA), the margin bright sun eats (ux-ui-review skill).
+   */
+  readonly warn: string;
   readonly amber: string;
   readonly plum: string;
   /** Soft shadows under cards and floating controls. */
@@ -60,10 +65,12 @@ export interface Palette {
 export const day: Palette = {
   night: false,
   cream: '#FBF4E4', paper: '#FFFCF4', oat: '#F3E9D2', sand: '#E6DAC0',
-  pine: '#316C33', logo: '#316C33', ink: '#2B352C', moss: '#5C6A59',
+  // moss darkened from #5C6A59 (5.2:1 on cream) to 6.2:1: sources and hints are read in sunlight.
+  pine: '#316C33', logo: '#316C33', ink: '#2B352C', moss: '#525F4F',
   sage: '#D5E7CC', leaf: '#8DBF8A', sky: '#8CB9D9', fir: '#5E9A62', grove: '#76AD77', bark: '#BFA27C',
   skyWash: '#D6E8F1', trail: '#D9CBA8', butter: '#F8EBC0', blush: '#F6DDD3',
-  clay: '#A4432B', amber: '#7A5A12', plum: '#73496A',
+  // plum (the medical disclaimer) darkened from #73496A, 6.6:1, to 7.9:1.
+  clay: '#A4432B', warn: '#7A2E1B', amber: '#7A5A12', plum: '#653F5D',
   shade: 'rgba(49, 108, 51, 0.10)',
 };
 
@@ -73,7 +80,7 @@ export const night: Palette = {
   pine: '#A5D6A0', logo: '#E3EEDA', ink: '#EDF2E6', moss: '#A7B6A5',
   sage: '#2E4A3A', leaf: '#86BD84', sky: '#8CB9D9', fir: '#6CAA70', grove: '#79B07A', bark: '#A98C68',
   skyWash: '#2A4253', trail: '#3E5247', butter: '#463F22', blush: '#4D342E',
-  clay: '#F2A48C', amber: '#EBCF82', plum: '#DDB6D2',
+  clay: '#F2A48C', warn: '#FAC7B5', amber: '#EBCF82', plum: '#DDB6D2',
   shade: 'rgba(0, 0, 0, 0.35)',
 };
 

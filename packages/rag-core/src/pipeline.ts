@@ -683,6 +683,12 @@ export interface Citation {
    * the page at the revision quoted (#96, docs/licensing.md).
    */
   readonly credit?: { readonly text: string; readonly url: string };
+  /**
+   * The passage itself, as the guide words it, so the reader can see what the
+   * answer was drawn from and not only where (US-03, #215). Left out for a
+   * field card, whose own text is the answer.
+   */
+  readonly passage?: string;
 }
 
 export interface Diagnostics {
@@ -2524,6 +2530,7 @@ function toCitation(c: ScoredChunk, i: number): Citation {
     page: c.chunk.page,
     licenseId: c.chunk.licenseId,
     score: c.score,
+    ...(c.chunk.source === 'Fred field card' ? {} : { passage: c.chunk.text }),
   };
 }
 

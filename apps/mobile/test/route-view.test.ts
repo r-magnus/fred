@@ -85,3 +85,27 @@ test('every failure but a cancel has words, and they say what to do or why', () 
   }
   assert.equal(failureWords('cancelled'), '');
 });
+
+test('progress: along, left, off the line, and arrival', async () => {
+  const { routeProgress, progressLine } = await import('../src/route-view.ts');
+  // Two stretches due north from 37.73: 0.01° of latitude each (~1113 m).
+  const r = route([
+    stretch({ name: 'Mist Trail', meters: 1113, seconds: 800, coords: [[-119.55, 37.73], [-119.55, 37.74]] }),
+    stretch({ kind: 'off-trail', sure: false, meters: 1113, seconds: 1600, coords: [[-119.55, 37.74], [-119.55, 37.75]] }),
+  ]);
+  const start = routeProgress(r, -119.55, 37.73)!;
+  assert.ok(start.along < 1 && Math.abs(start.remainingMeters - 2226) < 5);
+  assert.ok(Math.abs(start.remainingSeconds - 2400) < 1);
+  const mid = routeProgress(r, -119.55, 37.735)!;
+  assert.ok(Math.abs(mid.remainingSeconds - 2000) < 5, `${mid.remainingSeconds}`);
+  assert.equal(progressLine(mid, 10).text, 'On Mist Trail.');
+  const offTrail = routeProgress(r, -119.55, 37.745)!;
+  assert.ok(progressLine(offTrail, 10).warn);
+  // ~88 m east of the line.
+  const off = routeProgress(r, -119.549, 37.735)!;
+  assert.ok(off.offMeters > 80 && off.offMeters < 95);
+  assert.match(progressLine(off, 10).text, /off the route/);
+  // A poor fix widens what counts as on the route.
+  assert.equal(progressLine(off, 120).text, 'On Mist Trail.');
+  assert.ok(routeProgress(r, -119.55, 37.7499)!.arrived);
+});

@@ -29,6 +29,12 @@ export interface Heading {
   readonly facing: (typeof POINTS)[number] | null;
   /** Low calibration: the reading can be tens of degrees out. */
   readonly unsure: boolean;
+  /**
+   * The smoothed heading in degrees from true north, 0-360, or null before
+   * the first reading. A ref, not state: it changes many times a second, and
+   * the route view reads it on its own clock to turn the map (#226).
+   */
+  readonly degrees: { readonly current: number | null };
 }
 
 /** The phone's heading while the caller is on screen: one watcher for the dial and the map's marker. */
@@ -39,6 +45,7 @@ export function useHeading(): Heading {
   const [facing, setFacing] = useState<(typeof POINTS)[number] | null>(null);
   // Low calibration: the reading can be tens of degrees out, so it is shown fainter.
   const [unsure, setUnsure] = useState(false);
+  const degrees = useRef<number | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -53,12 +60,13 @@ export function useHeading(): Heading {
       // The sensor reports many times a second; a slight lag steadies the needle.
       angle.current += step * 0.35;
       turn.setValue(angle.current);
+      degrees.current = ((-angle.current % 360) + 360) % 360;
       setFacing(POINTS[Math.round(heading / 45) % 8]!);
       setUnsure(h.accuracy <= 1);
     }).then((s) => { if (live) sub = s; else s.remove(); }, () => undefined);
     return () => { live = false; sub?.remove(); };
   }, [turn]);
-  return { turn, facing, unsure };
+  return { turn, facing, unsure, degrees };
 }
 
 export function Compass({ heading }: { heading: Heading }): React.JSX.Element {

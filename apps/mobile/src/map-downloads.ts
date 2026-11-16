@@ -18,7 +18,16 @@
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
 import { downloadError } from './download-errors.ts';
 
-export const INDEX_URL = 'https://raw.githubusercontent.com/r-magnus/fred-maps/main/index.json';
+import { placeBundle, placesOf, regionOnly, type RegionalState } from './places.ts';
+import { splitKey } from './regions.ts';
+
+/**
+ * The published list, unless a build names another: the test app is built
+ * with EXPO_PUBLIC_FRED_INDEX_URL pointing at a list served from the desktop
+ * (scripts/build-test-index.mjs), to try downloads nobody else can see yet.
+ */
+export const INDEX_URL = process.env.EXPO_PUBLIC_FRED_INDEX_URL
+  ?? 'https://raw.githubusercontent.com/r-magnus/fred-maps/main/index.json';
 
 /** One piece of a large file, published as its own release file (#198). */
 export interface FilePart {
@@ -38,6 +47,8 @@ export interface BundleFile {
    * and the pieces are joined and the whole file checked at the end.
    */
   readonly parts?: readonly FilePart[];
+  /** Where this file is, when not its bundle's or the index's: set when bundles are joined (places.ts). */
+  readonly baseUrl?: string;
 }
 export interface StateBundle {
   readonly bytes: number;
@@ -57,6 +68,14 @@ export interface MapIndex {
    * phone without them can then only be set up by cable.
    */
   readonly core?: StateBundle;
+  /**
+   * States split into regions (#224), by USPS code. A newer field: a build
+   * that predates it reads `states` alone, which still lists every state
+   * whole, so the two never disagree.
+   */
+  readonly regions?: Readonly<Record<string, RegionalState>>;
+  /** The nationwide map to zoom 7, drawn under everything else so the map is never blank (#224). */
+  readonly overview?: StateBundle;
 }
 
 /** The index format this build understands. A newer one is refused, not guessed at. */
@@ -158,7 +177,7 @@ export async function downloadBundle(
     const parent = final.parentDirectory;
     if (!parent.exists) parent.create({ intermediates: true });
     if (f.parts === undefined) {
-      await fetchChecked(`${base}${f.asset}`, new File(parent, `${final.name}.partial`), f.bytes, f.md5, f.path,
+      await fetchChecked(`${f.baseUrl ?? base}${f.asset}`, new File(parent, `${final.name}.partial`), f.bytes, f.md5, f.path,
         (n) => onProgress({ done: done + n, total, file: f.path }), signal);
       if (final.exists) final.delete();
       new File(parent, `${final.name}.partial`).move(final);
@@ -169,7 +188,7 @@ export async function downloadBundle(
         if (partPresent(f, i)) continue;
         const piece = partFile(f, i);
         const partial = new File(parent, `${piece.name}.partial`);
-        await fetchChecked(`${base}${part.asset}`, partial, part.bytes, part.md5, f.path,
+        await fetchChecked(`${f.baseUrl ?? base}${part.asset}`, partial, part.bytes, part.md5, f.path,
           (n) => onProgress({ done: done + n, total, file: f.path }), signal);
         if (piece.exists) piece.delete();
         partial.move(piece);
@@ -236,4 +255,38 @@ export function removeState(bundle: StateBundle): void {
     const d = new Directory(Paths.document, ...dir.split('/'));
     if (d.exists && d.list().length === 0) d.delete();
   }
+}
+
+/**
+ * Where a place stands (#224). Whether it is installed is judged by its own
+ * files: a region is not "partly downloaded" just because its state's guide
+ * arrived with a neighbour. What is left counts everything its download
+ * would fetch, the state-wide part and the overview included.
+ */
+export function placeState(idx: MapIndex, key: string):
+  { readonly status: InstallState; readonly left: number; readonly bytes: number } | undefined {
+  const full = placeBundle(idx, key);
+  const own = regionOnly(idx, key) ?? idx.states[splitKey(key).state];
+  if (full === undefined || own === undefined) return undefined;
+  return { status: installState(own), left: remainingBytes(full), bytes: own.bytes };
+}
+
+/**
+ * Remove a place to free space. A region takes its own files, and the
+ * state-wide part too once no region of that state is left. The nationwide
+ * overview stays: it is small, and it is what keeps the map from going blank.
+ */
+export function removePlace(idx: MapIndex, key: string): void {
+  const { state, region } = splitKey(key);
+  if (region === null) {
+    const whole = idx.states[state];
+    if (whole !== undefined) removeState(whole);
+    return;
+  }
+  const own = regionOnly(idx, key);
+  if (own !== undefined) removeState(own);
+  const split = idx.regions?.[state];
+  if (split === undefined) return;
+  const othersLeft = placesOf(idx, state).some((k) => k !== key && installState(regionOnly(idx, k)!) !== 'none');
+  if (!othersLeft) removeState(split.base);
 }

@@ -145,3 +145,97 @@ export function failureWords(reason: PlanFailure): string {
     case 'cancelled': return '';
   }
 }
+
+// ------------------------------------------------------------------- walking it
+
+export interface RouteProgress {
+  /** Metres along the route to the point nearest the walker. */
+  readonly along: number;
+  readonly remainingMeters: number;
+  readonly remainingSeconds: number;
+  /** How far the walker is from the route line. */
+  readonly offMeters: number;
+  /** The stretch the walker is on. */
+  readonly stretch: RouteStretch;
+  readonly arrived: boolean;
+}
+
+/** Further from the line than this (or the fix's own accuracy, if worse) is off route. */
+export const OFF_ROUTE_M = 40;
+/** This close to the end counts as there. */
+export const ARRIVED_M = 25;
+
+interface Seg {
+  readonly ax: number; readonly ay: number; readonly bx: number; readonly by: number;
+  /** Metres along the route at a. */
+  readonly at: number;
+  readonly len: number;
+  readonly stretch: number;
+}
+
+/** Local metres east/north of a reference latitude: ample over a walking route. */
+const metresPerDegLat = 111_320;
+
+function segments(route: Route): { segs: Seg[]; total: number; lat0: number } {
+  const lat0 = route.stretches[0]?.coords[0]?.[1] ?? 0;
+  const kx = metresPerDegLat * Math.cos((lat0 * Math.PI) / 180);
+  const segs: Seg[] = [];
+  let at = 0;
+  route.stretches.forEach((s, si) => {
+    for (let i = 1; i < s.coords.length; i++) {
+      const [alon, alat] = s.coords[i - 1]!, [blon, blat] = s.coords[i]!;
+      const ax = alon * kx, ay = alat * metresPerDegLat, bx = blon * kx, by = blat * metresPerDegLat;
+      const len = Math.hypot(bx - ax, by - ay);
+      segs.push({ ax, ay, bx, by, at, len, stretch: si });
+      at += len;
+    }
+  });
+  return { segs, total: at, lat0 };
+}
+
+/**
+ * Where the walker is along the route. `lastAlong` is the previous answer:
+ * where the route passes the same place twice (out and back on a spur), the
+ * nearer pass ahead of it wins over one behind.
+ */
+export function routeProgress(route: Route, lon: number, lat: number, lastAlong = 0): RouteProgress | null {
+  const { segs, total, lat0 } = segments(route);
+  if (segs.length === 0) return null;
+  const kx = metresPerDegLat * Math.cos((lat0 * Math.PI) / 180);
+  const px = lon * kx, py = lat * metresPerDegLat;
+  let best: { d: number; along: number; seg: Seg } | null = null;
+  for (const g of segs) {
+    const vx = g.bx - g.ax, vy = g.by - g.ay;
+    const l2 = vx * vx + vy * vy;
+    const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - g.ax) * vx + (py - g.ay) * vy) / l2));
+    const d = Math.hypot(px - g.ax - t * vx, py - g.ay - t * vy);
+    const along = g.at + t * g.len;
+    // Behind where the walker already was costs extra: prefer the pass ahead.
+    const score = d + (along < lastAlong - 30 ? 60 : 0);
+    if (best === null || score < best.d + (best.along < lastAlong - 30 ? 60 : 0)) best = { d, along, seg: g };
+  }
+  const b = best!;
+  // Time left: the rest of this stretch by its share, plus every stretch after.
+  const geomOf = new Map<number, number>();
+  for (const g of segs) geomOf.set(g.stretch, (geomOf.get(g.stretch) ?? 0) + g.len);
+  const stretchStart = segs.find((g) => g.stretch === b.seg.stretch)!.at;
+  const here = route.stretches[b.seg.stretch]!;
+  const geom = geomOf.get(b.seg.stretch) || 1;
+  const leftHere = Math.max(0, 1 - (b.along - stretchStart) / geom);
+  let remainingSeconds = here.seconds * leftHere;
+  for (let i = b.seg.stretch + 1; i < route.stretches.length; i++) remainingSeconds += route.stretches[i]!.seconds;
+  const remainingMeters = Math.max(0, total - b.along);
+  return {
+    along: b.along, remainingMeters, remainingSeconds, offMeters: b.d, stretch: here,
+    arrived: remainingMeters <= ARRIVED_M && b.d <= OFF_ROUTE_M,
+  };
+}
+
+/** The one line under the numbers while walking: where you are on the route. */
+export function progressLine(p: RouteProgress, accuracyMeters: number | null): { readonly text: string; readonly warn: boolean } {
+  if (p.arrived) return { text: "You're at the pin.", warn: false };
+  const limit = Math.max(OFF_ROUTE_M, accuracyMeters ?? 0);
+  if (p.offMeters > limit) return { text: `You're about ${distanceWords(p.offMeters)} off the route. Head back to the line before going on.`, warn: true };
+  if (!p.stretch.sure) return { text: 'No trail on the map here. Go slowly, and turn back if it gets steep or blocked.', warn: true };
+  return { text: p.stretch.name !== null ? `On ${p.stretch.name}.` : p.stretch.cls === 'trail' ? 'On a trail.' : 'On a road.', warn: false };
+}

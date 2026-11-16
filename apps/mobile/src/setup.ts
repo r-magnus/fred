@@ -10,6 +10,8 @@ import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
 import { embedderFilesFor } from './device-pack.ts';
 import { MODEL_FILE } from './engine.ts';
+import { detailOnPhone } from './map-files.ts';
+import { splitKey } from './regions.ts';
 
 const done = (): File => new File(Paths.document, 'setup.json');
 const hook = (name: string): boolean => new File(Paths.document, name).exists;
@@ -56,14 +58,10 @@ export function guidesOnPhone(): boolean {
   }
 }
 
-/** States with a map on the phone, by USPS code. */
+/**
+ * States with a map on the phone, by USPS code: a whole state, or any region
+ * of a split one (#224). The nationwide overview alone does not count.
+ */
 export function statesOnPhone(): string[] {
-  try {
-    return Paths.document.list()
-      .map((f) => /^map-([A-Z]{2})-z\d+\.pmtiles$/.exec(f.name)?.[1])
-      .filter((s): s is string => s !== undefined)
-      .sort();
-  } catch {
-    return [];
-  }
+  return [...new Set([...detailOnPhone()].map((k) => splitKey(k).state))].sort();
 }

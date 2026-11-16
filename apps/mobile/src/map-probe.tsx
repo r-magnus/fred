@@ -9,8 +9,7 @@
  * thumbnail the chat shows when someone says they are lost (US-05).
  */
 import { Map, Camera, GeoJSONSource, Layer, Marker, type CameraRef } from '@maplibre/maplibre-react-native';
-import { File, Paths } from 'expo-file-system';
-import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
@@ -21,9 +20,17 @@ import { loadCoverage, coverageNear, carrierName, type CoverageView } from './co
 import { loadCarrier, saveCarrier, forgetCarrier, type CarrierChoice } from './carrier.ts';
 import type { LocationFix } from './location.ts';
 import { MapDownloads } from './map-downloads-panel.tsx';
+import { detailOnPhone, mapArchives, outlinedStates, outlinesOnPhone, whereOnMap, type MapArchive } from './map-files.ts';
+import { labelPoint, placeKey, roughKm, type RegionOutline } from './regions.ts';
+import { RegionOffer } from './region-offer.tsx';
 import { Compass, useHeading, type Heading } from './compass.tsx';
 import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
+import { RouteLayers } from './route-layer.tsx';
+import { NavCard, RouteCard } from './route-card.tsx';
+import { routeBounds, routeProgress, type RouteProgress } from './route-view.ts';
+import { useFollow } from './use-follow.ts';
+import { useRoute, type LngLat, type RouteState } from './use-route.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
 /**
@@ -71,7 +78,6 @@ const emptyStyle = (c: MapColours): StyleSpecification => ({
   layers: [{ id: 'bg', type: 'background', paint: { 'background-color': c.land } }],
 });
 
-export const mapFile = (state: string): string => `map-${state}-z14.pmtiles`;
 
 /**
  * Minimal style rather than @protomaps/basemaps.
@@ -89,22 +95,21 @@ const LINES: FilterSpecification = ['==', ['geometry-type'], 'LineString'];
 const TRAILS: FilterSpecification = ['==', ['get', 'kind'], 'path'];
 const ROADS: FilterSpecification = ['in', ['get', 'kind'], ['literal', ['highway', 'major_road', 'minor_road', 'other']]];
 
-const style = (uri: string, contoursUri: string | null, c: MapColours): StyleSpecification => ({
-  version: 8,
-  sources: {
-    proto: { type: 'vector', url: `pmtiles://${uri}` },
-    ...(contoursUri === null ? {} : {
-      contours: { type: 'vector', url: `pmtiles://${contoursUri}` },
-    }),
-  },
-  layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': c.water } },
-    { id: 'earth', type: 'fill', source: 'proto', 'source-layer': 'earth',
+/**
+ * One map file's layers, named after it. Each file is drawn whole, land first,
+ * so a detailed region covers the broader maps under it: its land and its sea
+ * are both painted, and nothing of the coarser map shows through.
+ */
+const stack = (a: MapArchive, c: MapColours): StyleSpecification['layers'] => {
+  const src = `m-${a.id}`;
+  const id = (name: string): string => `${a.id}-${name}`;
+  return [
+    { id: id('earth'), type: 'fill', source: src, 'source-layer': 'earth',
       filter: POLYGONS, paint: { 'fill-color': c.land } },
     // Topographic map (docs/results-topo-research.md, option B). Land cover is
     // already in the basemap archive, so it is always drawn; contours come
-    // from a separate per-state archive and are drawn when it is present.
-    { id: 'landuse', type: 'fill', source: 'proto', 'source-layer': 'landuse',
+    // from a separate archive and are drawn when it is present.
+    { id: id('landuse'), type: 'fill', source: src, 'source-layer': 'landuse',
       filter: POLYGONS,
       paint: { 'fill-color': ['match', ['get', 'kind'],
         ['forest', 'wood'], c.forest,
@@ -113,32 +118,50 @@ const style = (uri: string, contoursUri: string | null, c: MapColours): StyleSpe
         'glacier', c.glacier,
         'wetland', c.wetland,
         c.land] } },
-    ...(contoursUri === null ? [] : [
-      { id: 'contours', type: 'line', source: 'contours', 'source-layer': 'contours',
+    ...(a.contoursUri === null ? [] : [
+      { id: id('contours'), type: 'line', source: `c-${a.id}`, 'source-layer': 'contours',
         paint: {
           'line-color': c.contour,
           'line-opacity': ['case', ['==', ['get', 'idx'], 1], 0.55, 0.26],
           'line-width': ['case', ['==', ['get', 'idx'], 1], 1, 0.5],
         } },
     ] as StyleSpecification['layers']),
-    { id: 'water', type: 'fill', source: 'proto', 'source-layer': 'water',
+    { id: id('water'), type: 'fill', source: src, 'source-layer': 'water',
       filter: POLYGONS, paint: { 'fill-color': c.water } },
-    { id: 'waterways', type: 'line', source: 'proto', 'source-layer': 'water',
+    { id: id('waterways'), type: 'line', source: src, 'source-layer': 'water',
       filter: LINES, paint: { 'line-color': c.stream, 'line-width': 1.2 } },
     // Cliffs, from earth's line features. On a topo map they matter as much as
     // contours, so they are drawn dark and a little heavier than a contour.
-    { id: 'cliffs', type: 'line', source: 'proto', 'source-layer': 'earth',
+    { id: id('cliffs'), type: 'line', source: src, 'source-layer': 'earth',
       filter: LINES, paint: { 'line-color': c.cliff, 'line-width': 1.3 } },
     // Roads are white with a soft edge, and widen as the map is zoomed in, so
     // they can't be taken for contour lines. Trails are the dashed ones.
-    { id: 'road-edge', type: 'line', source: 'proto', 'source-layer': 'roads', filter: ROADS,
+    { id: id('road-edge'), type: 'line', source: src, 'source-layer': 'roads', filter: ROADS,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': c.roadEdge, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.4, 14, 5] } },
-    { id: 'roads', type: 'line', source: 'proto', 'source-layer': 'roads', filter: ROADS,
+    { id: id('roads'), type: 'line', source: src, 'source-layer': 'roads', filter: ROADS,
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': c.road, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.6, 14, 3] } },
-    { id: 'trails', type: 'line', source: 'proto', 'source-layer': 'roads', filter: TRAILS,
+    { id: id('trails'), type: 'line', source: src, 'source-layer': 'roads', filter: TRAILS,
       paint: { 'line-color': c.trail, 'line-width': 1.5, 'line-dasharray': [2.5, 1.5] } },
+  ];
+};
+
+/**
+ * Every map on the phone at once (#224), broadest first: the country, then
+ * whole states, then regions. Two downloaded regions side by side meet with
+ * no seam, and where nothing detailed is downloaded the coarser map still
+ * shows the roads and towns.
+ */
+const style = (archives: readonly MapArchive[], c: MapColours): StyleSpecification => ({
+  version: 8,
+  sources: Object.fromEntries(archives.flatMap((a) => [
+    [`m-${a.id}`, { type: 'vector', url: `pmtiles://${a.uri}` }],
+    ...(a.contoursUri === null ? [] : [[`c-${a.id}`, { type: 'vector', url: `pmtiles://${a.contoursUri}` }]]),
+  ])),
+  layers: [
+    { id: 'bg', type: 'background', paint: { 'background-color': c.water } },
+    ...archives.flatMap((a) => stack(a, c)),
   ],
 });
 
@@ -188,10 +211,43 @@ function Dots(): React.JSX.Element {
   );
 }
 
+/** Flat [lon, lat, ...] to GeoJSON pairs. */
+const pairs = (flat: readonly number[]): [number, number][] => {
+  const out: [number, number][] = [];
+  for (let i = 0; i + 1 < flat.length; i += 2) out.push([flat[i]!, flat[i + 1]!]);
+  return out;
+};
+
+/** Regions of states with outlines on the phone, which are not downloaded themselves. */
+function regionsToOffer(): { readonly place: string; readonly region: RegionOutline }[] {
+  const have = detailOnPhone();
+  return outlinedStates().flatMap((s) => {
+    const o = outlinesOnPhone(s);
+    if (o === null || have.has(s)) return [];
+    return o.regions.filter((r) => !have.has(placeKey(s, r.id))).map((region) => ({ place: placeKey(s, region.id), region }));
+  });
+}
+
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, onUserMove }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
+    /** A dropped pin and the walking route to it (#226), drawn under the hiker. */
+    route?: RouteState;
+    /** Long-press on the map: drops the route pin. */
+    onLongPress?: (at: LngLat) => void;
+    /**
+     * Walking a route (#226): the camera turns the map so the way the phone
+     * faces is up, so the hiker's drop points straight up instead of turning.
+     */
+    headingUp?: boolean;
+    /** The hiker moved the map by hand. */
+    onUserMove?: () => void;
+    /**
+     * Given on the full map: regions not on the phone are drawn washed out with
+     * a dashed edge and a name tag, and a tap on either offers that region.
+     */
+    onRegion?: (place: string) => void;
     /** The map-data credit button. The chat preview leaves it to the full map it opens. */
     credit?: boolean;
     /** How far the credit button sits above the bottom edge: clear of the sheet. */
@@ -201,15 +257,9 @@ function FredMap(
     heading?: Heading;
   },
 ): React.JSX.Element {
-  // No state means no map to choose; an absent file means that state has not
-  // been downloaded. Both render the terrain-less background rather than
-  // failing, because a missing map must not take the location zone with it.
-  const archive = fix?.state == null ? null : mapFile(fix.state);
-  const haveMap = archive !== null && new File(Paths.document, archive).exists;
-  const uri = archive === null ? null : `${Paths.document.uri}${archive}`;
-  const contours = fix?.state == null ? null : `contours-${fix.state}.pmtiles`;
-  const contoursUri = contours !== null && new File(Paths.document, contours).exists
-    ? `${Paths.document.uri}${contours}` : null;
+  // Every map on the phone, drawn together (#224). Read once per mount: the
+  // full map is remounted after a download or a removal.
+  const archives = useMemo(() => mapArchives(), []);
   // B-KR2's "estimated location zone". The radius is the GPS's own 68%
   // confidence figure, so the circle is a claim the hardware already makes
   // rather than one invented for the display. Outdoors this is single-digit
@@ -221,8 +271,17 @@ function FredMap(
   const colours = coloursFor(palette);
   // Built once per map and colour set: a new style object makes the map reload.
   const mapStyle = useMemo(
-    () => (haveMap && uri !== null ? style(uri, contoursUri, colours) : emptyStyle(colours)),
-    [haveMap, uri, contoursUri, colours]);
+    () => (archives.length > 0 ? style(archives, colours) : emptyStyle(colours)),
+    [archives, colours]);
+  // The regions of downloaded states that are not on the phone themselves.
+  const offered = useMemo(() => (onRegion === undefined ? [] : regionsToOffer()), [onRegion === undefined]);
+  const offeredShapes = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: offered.flatMap(({ place, region }) => region.rings.map((ring) => ({
+      type: 'Feature' as const, properties: { place },
+      geometry: { type: 'Polygon' as const, coordinates: [pairs(ring)] },
+    }))),
+  }), [offered]);
 
   return (
     <>
@@ -232,9 +291,16 @@ function FredMap(
         // the surface drew over the left third of every overlay (2026-09-26).
         androidView="texture"
         attribution={credit} attributionPosition={{ bottom: creditBottom, right: 10 }} logo={false}
+        // Fred has its own dial; MapLibre's appeared as a dark disc behind it once the map turned (#226).
+        compass={false}
         // North stays up and the map stays flat: the compass dial shows which
         // way the phone points, and a turned map would make it read wrongly.
-        touchRotate={false} touchPitch={false}>
+        touchRotate={false} touchPitch={false}
+        onRegionWillChange={onUserMove === undefined ? undefined : (e) => { if (e.nativeEvent.userInteraction) onUserMove(); }}
+        onLongPress={onLongPress === undefined ? undefined : (e) => {
+          const [lon, lat] = e.nativeEvent.lngLat;
+          onLongPress([lon, lat]);
+        }}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
         <Camera ref={camera} initialViewState={{
@@ -243,6 +309,27 @@ function FredMap(
           // searched); 13 showed three hexagons and no context.
           zoom: fix === null ? 9 : zoom,
         }} />
+        {/* Regions not on the phone, under everything else drawn on top:
+            washed out, with a dashed edge, and tappable. */}
+        {offered.length > 0 && (
+          <GeoJSONSource id="regions-offered" data={offeredShapes}
+            onPress={(e) => {
+              const place = e.nativeEvent.features[0]?.properties?.place;
+              if (typeof place === 'string') onRegion?.(place);
+            }}>
+            <Layer id="offered-wash" type="fill" paint={{ 'fill-color': colours.cliff, 'fill-opacity': palette.night ? 0.28 : 0.1 }} />
+            <Layer id="offered-edge" type="line"
+              paint={{ 'line-color': colours.cliff, 'line-width': 1.6, 'line-dasharray': [3, 2] }} />
+          </GeoJSONSource>
+        )}
+        {offered.map(({ place, region }) => (
+          <Marker key={place} id={`tag-${place}`} lngLat={labelPoint(region) as [number, number]} onPress={() => onRegion?.(place)}>
+            <View collapsable={false} style={styles.tag}>
+              <Text style={styles.tagName}>{region.name}</Text>
+              <Text style={styles.tagAction}>Tap to download</Text>
+            </View>
+          </Marker>
+        ))}
         {/* Under the location ring in draw order, so the user's own zone
             stays readable on top of the shading. Unshaded means assumed
             covered; the two zones never overlap. */}
@@ -282,6 +369,7 @@ function FredMap(
               paint={{ 'line-color': ME, 'line-width': 2 }} />
           </GeoJSONSource>
         )}
+        {route !== undefined && <RouteLayers state={route} night={palette.night} />}
         {/* The accuracy ring is metres wide and vanishes when zoomed out to
             see the coverage zones, so the position also gets a fixed-size dot. */}
         {fix !== null && heading != null && heading.facing !== null && (
@@ -290,7 +378,7 @@ function FredMap(
           // the opposite way to the rose.
           <Marker id="me-facing" lngLat={[fix.longitude, fix.latitude]}>
             <Animated.View collapsable={false} style={[styles.facing, heading.unsure && styles.facingUnsure, { transform: [{
-              rotate: heading.turn.interpolate({ inputRange: [-360, 360], outputRange: ['360deg', '-360deg'] }),
+              rotate: headingUp ? '0deg' : heading.turn.interpolate({ inputRange: [-360, 360], outputRange: ['360deg', '-360deg'] }),
             }] }]}>
               <View style={[styles.drop, { borderColor: colours.halo }]} />
             </Animated.View>
@@ -337,8 +425,31 @@ export function MapScreen(
   const { pack, carrier, coverage, reloadCarrier } = useCoverage(fix, files);
   const [picking, setPicking] = useState(false);
   const [managing, setManaging] = useState(false);
+  /** A region being offered for download, e.g. "CA/bay". */
+  const [offer, setOffer] = useState<string | null>(null);
   const camera = useRef<CameraRef | null>(null);
   const heading = useHeading();
+  // A dropped pin and the walking route to it (#226).
+  const route = useRoute();
+  // Walking it: the map follows the live position and turns with the phone.
+  // `following` drops when the hiker moves the map by hand, until Re-centre.
+  const [navigating, setNavigating] = useState(false);
+  const [following, setFollowing] = useState(true);
+  const live = useFollow(navigating);
+  const screen = useWindowDimensions();
+  const readyForNav = route.state.kind === 'ready' ? route.state.route : null;
+  useEffect(() => { if (readyForNav === null) setNavigating(false); }, [readyForNav]);
+  const lastAlong = useRef(0);
+  const progress: RouteProgress | null = useMemo(() => {
+    if (!navigating || readyForNav === null || live === null) return null;
+    const p = routeProgress(readyForNav, live.longitude, live.latitude, lastAlong.current);
+    if (p !== null) lastAlong.current = p.along;
+    return p;
+  }, [navigating, readyForNav, live]);
+  // Where to draw the hiker: the live position while walking, else the last fix.
+  const shownFix: LocationFix | null = navigating && live !== null && fix !== null
+    ? { ...fix, latitude: live.latitude, longitude: live.longitude, accuracyMeters: live.accuracyMeters }
+    : fix;
   // The sheet's height, so the map's credit button can sit just above it.
   const [sheet, setSheet] = useState(0);
   // The sheet folds down to its title, to give the map the screen: drag its
@@ -370,13 +481,68 @@ export function MapScreen(
       onPanResponderTerminate: () => rest(fold.current.folded),
     });
   }, [drop]);
-  const haveMap = fix?.state == null ? true : new File(Paths.document, mapFile(fix.state)).exists;
+  // A new pin opens the sheet, where its card is.
+  const dropPin = (at: LngLat): void => {
+    route.dropPin(at);
+    drop.setValue(0);
+    setFolded(false);
+  };
+  // A finished route is shown whole: from the hiker to the pin, clear of the
+  // sheet. Fitted again when the sheet's height settles, because the route
+  // card makes the sheet taller in the same render that brings the route, and
+  // a fit to the old height hid the start behind it (phone, 2026-11-15).
+  const readyRoute = route.state.kind === 'ready' ? route.state.route : null;
+  useEffect(() => {
+    if (readyRoute === null || navigating) return;
+    const b = routeBounds(readyRoute);
+    if (b === null) return;
+    camera.current?.fitBounds(b, {
+      padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, bearing: 0, pitch: 0, duration: 600,
+    });
+  }, [readyRoute, sheet, navigating]);
+  // The navigation camera: on its own clock rather than on every sensor
+  // reading, so the map turns smoothly and the JS thread is not flooded. Close
+  // in and tilted a little, the hiker low on the screen with the way ahead
+  // above, as navigation apps do.
+  const liveRef = useRef(live);
+  liveRef.current = live ?? (fix === null ? null : { latitude: fix.latitude, longitude: fix.longitude, accuracyMeters: fix.accuracyMeters });
+  useEffect(() => {
+    if (!navigating || !following) return;
+    let lastBearing = -1;
+    let lastKey = '';
+    const tick = (): void => {
+      const p = liveRef.current;
+      if (p === null) return;
+      const bearing = heading.degrees.current ?? Math.max(lastBearing, 0);
+      const key = `${p.latitude.toFixed(6)},${p.longitude.toFixed(6)}`;
+      const turned = Math.abs(((bearing - lastBearing + 540) % 360) - 180);
+      if (key === lastKey && turned < 3) return;
+      lastKey = key; lastBearing = bearing;
+      camera.current?.easeTo({
+        center: [p.longitude, p.latitude], bearing, zoom: 16.5, pitch: 40,
+        // The hiker about two thirds down the visible map, the way ahead above.
+        padding: { top: Math.max(0, (screen.height - sheet) * 0.6), right: 0, bottom: sheet, left: 0 }, duration: 450,
+      });
+    };
+    tick();
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [navigating, following, sheet, screen.height]);
+  const startNav = (): void => { lastAlong.current = 0; setFollowing(true); setNavigating(true); };
+  // The fit effect above runs again when this drops, and puts the map back
+  // north up and flat with the whole route on screen.
+  const endNav = (): void => setNavigating(false);
+  // What the map has here: read from disk at every render, which is cheap (a
+  // directory listing and a point-in-polygon), so it can never lag behind a
+  // download or a removal the way a cached answer did (#224, emulator walk).
+  const onMap = whereOnMap(fix);
+  useEffect(() => { console.log(`[fred] map here: ${onMap.kind} (files ${files})`); }, [onMap.kind, files]);
   const choose = (id: string | null | 'sim'): void => {
     setPicking(false);
     if (id === 'sim') forgetCarrier(); else saveCarrier(id);
     reloadCarrier();
   };
-  const panel = picking || managing;
+  const panel = picking || managing || offer !== null;
   // Iteration 4: ask for location only once the hiker knows why. With access
   // already given, the map looks at once, as before; without it, the sheet
   // explains and the system's question comes from "Find where I am". Blocked
@@ -411,14 +577,20 @@ export function MapScreen(
   // The phone's back button closes whatever is on top: a panel, then the map.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (picking) setPicking(false); else if (managing) setManaging(false); else onClose();
+      if (offer !== null) setOffer(null); else if (picking) setPicking(false); else if (managing) setManaging(false);
+      else if (navigating) endNav();
+      else if (route.state.kind !== 'none') route.clear(); else onClose();
       return true;
     });
     return () => sub.remove();
-  }, [picking, managing, onClose]);
+  }, [offer, picking, managing, onClose, route.state.kind, route.clear, navigating]);
   return (
     <View style={styles.root}>
-      <FredMap key={files} fix={fix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8} />
+      <FredMap key={files} fix={shownFix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
+        onRegion={setOffer} route={route.state} onLongPress={navigating ? undefined : dropPin}
+        // Paused (moved by hand) the map keeps the last bearing it turned to, so
+        // the drop still points up, not along the compass on top of the turn.
+        headingUp={navigating} onUserMove={navigating ? () => setFollowing(false) : undefined} />
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}
@@ -436,6 +608,8 @@ export function MapScreen(
           <Pressable style={[styles.roundInline, where.recording && styles.roundRecording]} hitSlop={10}
             disabled={where.locating}
             onPress={() => {
+              // Walking a route: the target puts the map back on you, turning with the phone.
+              if (navigating) { setFollowing(true); return; }
               if (fix !== null) camera.current?.easeTo({ center: [fix.longitude, fix.latitude], zoom: 12, duration: 600 });
               where.locate();
             }}
@@ -450,6 +624,14 @@ export function MapScreen(
         </View>
       )}
 
+      {/* Walking a route and the map was moved by hand: one tap puts it back. */}
+      {navigating && !following && !panel && (
+        <Pressable style={[styles.recentre, { bottom: (folded ? peek : sheet) + 14 }]} onPress={() => setFollowing(true)}
+          accessibilityRole="button" accessibilityLabel="Re-centre the map on you">
+          <Text style={styles.recentreText}>Re-centre</Text>
+        </Pressable>
+      )}
+
       {!panel && (
         <Animated.View style={[styles.sheet, { paddingBottom: insets.bottom + 12, transform: [{ translateY: drop }] }]}
           onLayout={(e) => setSheet(e.nativeEvent.layout.height)}>
@@ -458,6 +640,7 @@ export function MapScreen(
             accessible accessibilityRole="button" accessibilityState={{ expanded: !folded }}
             accessibilityLabel={folded ? 'Show the map details' : 'Hide the map details'}>
           <View style={styles.grip} />
+          {!navigating && (
           <View style={styles.where}>
             <Text style={[styles.whereTitle, where.locating && styles.whereTitleBusy]}
               accessibilityLabel={where.locating ? 'Finding you' : undefined}>
@@ -474,9 +657,20 @@ export function MapScreen(
               </View>
             )}
           </View>
+          )}
           </View>
           {/* The rest fades as the sheet is pushed down, so the folded sheet is a clean title. */}
           <Animated.View style={{ opacity: drop.interpolate({ inputRange: [0, 70], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
+          {/* With a pin down, the sheet is about the route; the signal and
+              settings come back when it is cleared. Keeps the sheet from
+              growing over the map (#227). */}
+          {navigating ? (
+            <NavCard progress={progress} accuracyMeters={live?.accuracyMeters ?? null} onEnd={endNav} />
+          ) : route.state.kind !== 'none' ? (
+            <RouteCard state={route.state} fix={fix}
+              onRoute={() => { if (fix !== null) route.plan(fix); }} onClear={route.clear}
+              onStart={fix === null ? undefined : startNav} />
+          ) : (<>
           {where.note !== null && (
             <Pressable onPress={where.dismissNote}>
               <Text style={styles.note}>{where.note}</Text>
@@ -506,13 +700,36 @@ export function MapScreen(
             <Text style={styles.sheetText}>Tap the round target button, top right, to find where you are.</Text>
           )}
           {/* The map for where you are isn't on the phone: offer it right here. */}
-          {!haveMap && (
+          {onMap.kind === 'state-missing' && (
             <>
-              <Text style={styles.sheetText}>The {fix?.state} map isn&apos;t on this phone yet, so only your position and the signal zones are drawn.</Text>
+              <Text style={styles.sheetText}>The {onMap.state} map isn&apos;t on this phone yet, so only your position and the signal zones are drawn.</Text>
               <Pressable style={styles.getMap} onPress={() => setManaging(true)} accessibilityRole="button">
-                <Text style={styles.getMapText}>Download the {fix?.state} map</Text>
+                <Text style={styles.getMapText}>Download the {onMap.state} map</Text>
               </Pressable>
             </>
+          )}
+          {onMap.kind === 'region-missing' && (
+            <>
+              <Text style={styles.sheetText}>
+                You&apos;re in {onMap.region.name}. Its detailed map isn&apos;t on this phone, so only main roads are drawn.
+              </Text>
+              <Pressable style={styles.getMap} onPress={() => setOffer(placeKey(onMap.state, onMap.region.id))} accessibilityRole="button">
+                <Text style={styles.getMapText}>Download {onMap.region.name}</Text>
+              </Pressable>
+            </>
+          )}
+          {/* Near the edge of what is downloaded (#224): said before the
+              detail runs out, with words and a shape, not colour alone. */}
+          {onMap.kind === 'edge' && (
+            <View style={styles.edge} accessibilityLiveRegion="polite">
+              <Text style={styles.edgeTitle}>Your detailed map ends {roughKm(onMap.edge.km)} from here</Text>
+              <Text style={styles.edgeText}>
+                Past that line, in {onMap.edge.to.name}, the map shows main roads only. Get it while you have signal.
+              </Text>
+              <Pressable style={styles.edgeButton} onPress={() => setOffer(placeKey(onMap.state, onMap.edge.to.id))} accessibilityRole="button">
+                <Text style={styles.edgeButtonText}>Download {onMap.edge.to.name}</Text>
+              </Pressable>
+            </View>
           )}
           {coverage !== null && (
             <>
@@ -546,6 +763,7 @@ export function MapScreen(
               <Text style={styles.linkValue}>Download or remove</Text>
             </Pressable>
           </View>
+          </>)}
           </Animated.View>
         </Animated.View>
       )}
@@ -553,9 +771,14 @@ export function MapScreen(
       {managing && (
         <MapDownloads
           here={fix?.state ?? null}
+          at={fix}
           onClose={() => setManaging(false)}
           onChanged={() => { setFiles((n) => n + 1); onPacksChanged(); }}
         />
+      )}
+      {offer !== null && (
+        <RegionOffer place={offer} onClose={() => setOffer(null)}
+          onInstalled={() => { setFiles((n) => n + 1); onPacksChanged(); }} />
       )}
       {picking && pack !== null && (
         <View style={[styles.picker, { top: insets.top + 70 }]}>
@@ -590,11 +813,16 @@ export function MapPreview(
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const { coverage } = useCoverage(fix);
+  const onMap = useMemo(() => whereOnMap(fix), [fix]);
+  const within = fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`;
   const caption = coverage !== null ? coverage.advice
     : fix === null ? 'Finding your location…'
-    : fix.state !== null && !new File(Paths.document, mapFile(fix.state)).exists
-      ? `You are here, within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m. The ${fix.state} map isn't on this phone yet.`
-    : `You are here, within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m.`;
+    : onMap.kind === 'state-missing' ? `You are here, ${within}. The ${onMap.state} map isn't on this phone yet.`
+    : onMap.kind === 'region-missing' ? `You are here, ${within}. The detailed map of ${onMap.region.name} isn't on this phone yet.`
+    : `You are here, ${within}.`;
+  // Said in the chat too: someone who asked because they're lost may not open the map.
+  const edgeNote = onMap.kind === 'edge'
+    ? `Your detailed map ends ${roughKm(onMap.edge.km)} from here; past it, the map shows main roads only.` : null;
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Open the map">
       <View style={styles.preview} pointerEvents="none">
@@ -602,6 +830,7 @@ export function MapPreview(
       </View>
       {/* #77: left out when Fred's reply above has already said it. */}
       {quiet && coverage !== null ? null : <Text style={styles.previewCaption}>{caption}</Text>}
+      {edgeNote !== null && <Text style={styles.previewEdge}>{edgeNote}</Text>}
       <Text style={styles.previewOpen}>Tap to open the map</Text>
     </Pressable>
   );
@@ -625,6 +854,7 @@ const makeStyles = (palette: Palette) => {
   return StyleSheet.create({
   preview: { height: 190, borderRadius: radius.control, overflow: 'hidden', backgroundColor: land },
   previewCaption: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 10 },
+  previewEdge: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 6 },
   previewOpen: { color: palette.pine, fontSize: 13, fontWeight: '700', marginTop: 4 },
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: land },
   map: { flex: 1 },
@@ -682,6 +912,32 @@ const makeStyles = (palette: Palette) => {
     backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 20, paddingVertical: 11,
   },
   getMapText: { color: palette.paper, fontSize: 15, fontWeight: '700' },
+  // The edge warning: a block with a heading, so it is not carried by colour alone.
+  edge: {
+    marginTop: 12, padding: 12, borderRadius: radius.control,
+    backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
+  },
+  edgeTitle: { color: palette.ink, fontSize: 15, fontWeight: '700', lineHeight: 21 },
+  edgeText: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  edgeButton: {
+    alignSelf: 'flex-start', marginTop: 10, minHeight: 48, justifyContent: 'center',
+    borderRadius: radius.pill, paddingHorizontal: 18, borderWidth: 1.5, borderColor: palette.pine, backgroundColor: palette.paper,
+  },
+  edgeButtonText: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  recentre: {
+    position: 'absolute', alignSelf: 'center', minHeight: 48, justifyContent: 'center',
+    backgroundColor: palette.paper, borderRadius: radius.pill, paddingHorizontal: 22,
+    borderWidth: 1.5, borderColor: palette.pine, boxShadow: `0 2 10 ${palette.shade}`,
+  },
+  recentreText: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  // A region's name tag on the map: tappable, so it looks like a button (ux-ui-review 7a), and 48 dp tall.
+  tag: {
+    minHeight: 48, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: palette.paper, borderRadius: radius.control, borderWidth: 1.5, borderColor: palette.pine,
+    paddingHorizontal: 12, paddingVertical: 6, boxShadow: `0 2 8 ${palette.shade}`,
+  },
+  tagName: { color: palette.ink, fontSize: 14, fontWeight: '700' },
+  tagAction: { color: palette.pine, fontSize: 13, fontWeight: '600', marginTop: 1 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6, marginTop: 10 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   swatch: { width: 14, height: 14, borderRadius: 4, borderWidth: 1.5 },

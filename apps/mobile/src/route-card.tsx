@@ -13,7 +13,8 @@ import { distanceMeters } from '@fred/geo';
 import { CalmLoader } from './calm-loader.tsx';
 import { radius, useThemed, type Palette } from './theme.tsx';
 import {
-  ALWAYS_CAVEAT, ROUTE_HEADLINE, climbWords, distanceWords, failureWords, routeWarnings, timeWords, trailNames,
+  ALWAYS_CAVEAT, ROUTE_HEADLINE, climbWords, distanceWords, failureWords, progressLine, routeWarnings, timeWords, trailNames,
+  type RouteProgress,
 } from './route-view.ts';
 import type { RouteState } from './use-route.ts';
 
@@ -22,9 +23,11 @@ export interface RouteCardProps {
   readonly fix: { readonly latitude: number; readonly longitude: number } | null;
   readonly onRoute: () => void;
   readonly onClear: () => void;
+  /** Start walking it: the map follows and turns with the phone. */
+  readonly onStart?: () => void;
 }
 
-export function RouteCard({ state, fix, onRoute, onClear }: RouteCardProps): React.JSX.Element | null {
+export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardProps): React.JSX.Element | null {
   const { styles } = useThemed(makeStyles);
   if (state.kind === 'none') return null;
 
@@ -95,7 +98,45 @@ export function RouteCard({ state, fix, onRoute, onClear }: RouteCardProps): Rea
         </View>
       )}
       <Text style={styles.caveat}>{ALWAYS_CAVEAT}</Text>
-      <View style={styles.row}>{clear('Clear route')}</View>
+      <View style={styles.row}>
+        {onStart !== undefined && (
+          <Pressable style={styles.primary} onPress={onStart} accessibilityRole="button"
+            accessibilityHint="The map follows you and turns the way you face">
+            <Text style={styles.primaryText}>Start</Text>
+          </Pressable>
+        )}
+        {clear('Clear route')}
+      </View>
+    </View>
+  );
+}
+
+/**
+ * The sheet while walking the route: small, so the map gets the screen.
+ * What's left, where you are on it, and End.
+ */
+export function NavCard(
+  { progress, accuracyMeters, onEnd }: { progress: RouteProgress | null; accuracyMeters: number | null; onEnd: () => void },
+): React.JSX.Element {
+  const { styles } = useThemed(makeStyles);
+  const line = progress === null ? null : progressLine(progress, accuracyMeters);
+  return (
+    <View style={styles.nav}>
+      <View style={styles.navText}>
+        <Text style={styles.numbers} accessibilityLiveRegion="polite">
+          {progress === null ? 'Finding you…'
+            : progress.arrived ? 'You made it'
+            : `${distanceWords(progress.remainingMeters)} to go · ${timeWords(progress.remainingSeconds)}`}
+        </Text>
+        {line !== null && (
+          <Text style={[styles.text, line.warn && styles.navWarn]} accessibilityLiveRegion={line.warn ? 'assertive' : 'polite'}>
+            {line.text}
+          </Text>
+        )}
+      </View>
+      <Pressable style={styles.end} onPress={onEnd} accessibilityRole="button" accessibilityLabel="End the route">
+        <Text style={styles.endText}>End</Text>
+      </Pressable>
     </View>
   );
 }
@@ -122,4 +163,16 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   warnTitle: { color: palette.ink, fontSize: 15, fontWeight: '700', lineHeight: 21 },
   warnText: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 4 },
   caveat: { color: palette.moss, fontSize: 13, lineHeight: 19, marginTop: 10 },
+  nav: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10 },
+  navText: { flex: 1 },
+  // Words and a left edge as well as colour, as the sheet's other warnings.
+  navWarn: {
+    backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, overflow: 'hidden',
+  },
+  end: {
+    minHeight: 48, minWidth: 72, justifyContent: 'center', alignItems: 'center',
+    borderRadius: radius.pill, paddingHorizontal: 18, borderWidth: 1.5, borderColor: palette.clay, backgroundColor: palette.paper,
+  },
+  endText: { color: palette.clay, fontSize: 15, fontWeight: '700' },
 });

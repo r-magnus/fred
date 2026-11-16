@@ -9,7 +9,7 @@
  * thumbnail the chat shows when someone says they are lost (US-05).
  */
 import { Map, Camera, GeoJSONSource, Layer, Marker, type CameraRef } from '@maplibre/maplibre-react-native';
-import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
@@ -27,8 +27,9 @@ import { Compass, useHeading, type Heading } from './compass.tsx';
 import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
 import { RouteLayers } from './route-layer.tsx';
-import { RouteCard } from './route-card.tsx';
-import { routeBounds } from './route-view.ts';
+import { NavCard, RouteCard } from './route-card.tsx';
+import { routeBounds, routeProgress, type RouteProgress } from './route-view.ts';
+import { useFollow } from './use-follow.ts';
 import { useRoute, type LngLat, type RouteState } from './use-route.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
@@ -229,12 +230,19 @@ function regionsToOffer(): { readonly place: string; readonly region: RegionOutl
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, onUserMove }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
     /** A dropped pin and the walking route to it (#226), drawn under the hiker. */
     route?: RouteState;
     /** Long-press on the map: drops the route pin. */
     onLongPress?: (at: LngLat) => void;
+    /**
+     * Walking a route (#226): the camera turns the map so the way the phone
+     * faces is up, so the hiker's drop points straight up instead of turning.
+     */
+    headingUp?: boolean;
+    /** The hiker moved the map by hand. */
+    onUserMove?: () => void;
     /**
      * Given on the full map: regions not on the phone are drawn washed out with
      * a dashed edge and a name tag, and a tap on either offers that region.
@@ -283,9 +291,12 @@ function FredMap(
         // the surface drew over the left third of every overlay (2026-09-26).
         androidView="texture"
         attribution={credit} attributionPosition={{ bottom: creditBottom, right: 10 }} logo={false}
+        // Fred has its own dial; MapLibre's appeared as a dark disc behind it once the map turned (#226).
+        compass={false}
         // North stays up and the map stays flat: the compass dial shows which
         // way the phone points, and a turned map would make it read wrongly.
         touchRotate={false} touchPitch={false}
+        onRegionWillChange={onUserMove === undefined ? undefined : (e) => { if (e.nativeEvent.userInteraction) onUserMove(); }}
         onLongPress={onLongPress === undefined ? undefined : (e) => {
           const [lon, lat] = e.nativeEvent.lngLat;
           onLongPress([lon, lat]);
@@ -367,7 +378,7 @@ function FredMap(
           // the opposite way to the rose.
           <Marker id="me-facing" lngLat={[fix.longitude, fix.latitude]}>
             <Animated.View collapsable={false} style={[styles.facing, heading.unsure && styles.facingUnsure, { transform: [{
-              rotate: heading.turn.interpolate({ inputRange: [-360, 360], outputRange: ['360deg', '-360deg'] }),
+              rotate: headingUp ? '0deg' : heading.turn.interpolate({ inputRange: [-360, 360], outputRange: ['360deg', '-360deg'] }),
             }] }]}>
               <View style={[styles.drop, { borderColor: colours.halo }]} />
             </Animated.View>
@@ -420,6 +431,25 @@ export function MapScreen(
   const heading = useHeading();
   // A dropped pin and the walking route to it (#226).
   const route = useRoute();
+  // Walking it: the map follows the live position and turns with the phone.
+  // `following` drops when the hiker moves the map by hand, until Re-centre.
+  const [navigating, setNavigating] = useState(false);
+  const [following, setFollowing] = useState(true);
+  const live = useFollow(navigating);
+  const screen = useWindowDimensions();
+  const readyForNav = route.state.kind === 'ready' ? route.state.route : null;
+  useEffect(() => { if (readyForNav === null) setNavigating(false); }, [readyForNav]);
+  const lastAlong = useRef(0);
+  const progress: RouteProgress | null = useMemo(() => {
+    if (!navigating || readyForNav === null || live === null) return null;
+    const p = routeProgress(readyForNav, live.longitude, live.latitude, lastAlong.current);
+    if (p !== null) lastAlong.current = p.along;
+    return p;
+  }, [navigating, readyForNav, live]);
+  // Where to draw the hiker: the live position while walking, else the last fix.
+  const shownFix: LocationFix | null = navigating && live !== null && fix !== null
+    ? { ...fix, latitude: live.latitude, longitude: live.longitude, accuracyMeters: live.accuracyMeters }
+    : fix;
   // The sheet's height, so the map's credit button can sit just above it.
   const [sheet, setSheet] = useState(0);
   // The sheet folds down to its title, to give the map the screen: drag its
@@ -463,11 +493,45 @@ export function MapScreen(
   // a fit to the old height hid the start behind it (phone, 2026-11-15).
   const readyRoute = route.state.kind === 'ready' ? route.state.route : null;
   useEffect(() => {
-    if (readyRoute === null) return;
+    if (readyRoute === null || navigating) return;
     const b = routeBounds(readyRoute);
     if (b === null) return;
-    camera.current?.fitBounds(b, { padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, duration: 600 });
-  }, [readyRoute, sheet]);
+    camera.current?.fitBounds(b, {
+      padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, bearing: 0, pitch: 0, duration: 600,
+    });
+  }, [readyRoute, sheet, navigating]);
+  // The navigation camera: on its own clock rather than on every sensor
+  // reading, so the map turns smoothly and the JS thread is not flooded. Close
+  // in and tilted a little, the hiker low on the screen with the way ahead
+  // above, as navigation apps do.
+  const liveRef = useRef(live);
+  liveRef.current = live ?? (fix === null ? null : { latitude: fix.latitude, longitude: fix.longitude, accuracyMeters: fix.accuracyMeters });
+  useEffect(() => {
+    if (!navigating || !following) return;
+    let lastBearing = -1;
+    let lastKey = '';
+    const tick = (): void => {
+      const p = liveRef.current;
+      if (p === null) return;
+      const bearing = heading.degrees.current ?? Math.max(lastBearing, 0);
+      const key = `${p.latitude.toFixed(6)},${p.longitude.toFixed(6)}`;
+      const turned = Math.abs(((bearing - lastBearing + 540) % 360) - 180);
+      if (key === lastKey && turned < 3) return;
+      lastKey = key; lastBearing = bearing;
+      camera.current?.easeTo({
+        center: [p.longitude, p.latitude], bearing, zoom: 16.5, pitch: 40,
+        // The hiker about two thirds down the visible map, the way ahead above.
+        padding: { top: Math.max(0, (screen.height - sheet) * 0.6), right: 0, bottom: sheet, left: 0 }, duration: 450,
+      });
+    };
+    tick();
+    const id = setInterval(tick, 500);
+    return () => clearInterval(id);
+  }, [navigating, following, sheet, screen.height]);
+  const startNav = (): void => { lastAlong.current = 0; setFollowing(true); setNavigating(true); };
+  // The fit effect above runs again when this drops, and puts the map back
+  // north up and flat with the whole route on screen.
+  const endNav = (): void => setNavigating(false);
   // What the map has here: read from disk at every render, which is cheap (a
   // directory listing and a point-in-polygon), so it can never lag behind a
   // download or a removal the way a cached answer did (#224, emulator walk).
@@ -514,15 +578,19 @@ export function MapScreen(
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       if (offer !== null) setOffer(null); else if (picking) setPicking(false); else if (managing) setManaging(false);
+      else if (navigating) endNav();
       else if (route.state.kind !== 'none') route.clear(); else onClose();
       return true;
     });
     return () => sub.remove();
-  }, [offer, picking, managing, onClose, route.state.kind, route.clear]);
+  }, [offer, picking, managing, onClose, route.state.kind, route.clear, navigating]);
   return (
     <View style={styles.root}>
-      <FredMap key={files} fix={fix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
-        onRegion={setOffer} route={route.state} onLongPress={dropPin} />
+      <FredMap key={files} fix={shownFix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
+        onRegion={setOffer} route={route.state} onLongPress={navigating ? undefined : dropPin}
+        // Paused (moved by hand) the map keeps the last bearing it turned to, so
+        // the drop still points up, not along the compass on top of the turn.
+        headingUp={navigating} onUserMove={navigating ? () => setFollowing(false) : undefined} />
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}
@@ -540,6 +608,8 @@ export function MapScreen(
           <Pressable style={[styles.roundInline, where.recording && styles.roundRecording]} hitSlop={10}
             disabled={where.locating}
             onPress={() => {
+              // Walking a route: the target puts the map back on you, turning with the phone.
+              if (navigating) { setFollowing(true); return; }
               if (fix !== null) camera.current?.easeTo({ center: [fix.longitude, fix.latitude], zoom: 12, duration: 600 });
               where.locate();
             }}
@@ -554,6 +624,14 @@ export function MapScreen(
         </View>
       )}
 
+      {/* Walking a route and the map was moved by hand: one tap puts it back. */}
+      {navigating && !following && !panel && (
+        <Pressable style={[styles.recentre, { bottom: (folded ? peek : sheet) + 14 }]} onPress={() => setFollowing(true)}
+          accessibilityRole="button" accessibilityLabel="Re-centre the map on you">
+          <Text style={styles.recentreText}>Re-centre</Text>
+        </Pressable>
+      )}
+
       {!panel && (
         <Animated.View style={[styles.sheet, { paddingBottom: insets.bottom + 12, transform: [{ translateY: drop }] }]}
           onLayout={(e) => setSheet(e.nativeEvent.layout.height)}>
@@ -562,6 +640,7 @@ export function MapScreen(
             accessible accessibilityRole="button" accessibilityState={{ expanded: !folded }}
             accessibilityLabel={folded ? 'Show the map details' : 'Hide the map details'}>
           <View style={styles.grip} />
+          {!navigating && (
           <View style={styles.where}>
             <Text style={[styles.whereTitle, where.locating && styles.whereTitleBusy]}
               accessibilityLabel={where.locating ? 'Finding you' : undefined}>
@@ -578,15 +657,19 @@ export function MapScreen(
               </View>
             )}
           </View>
+          )}
           </View>
           {/* The rest fades as the sheet is pushed down, so the folded sheet is a clean title. */}
           <Animated.View style={{ opacity: drop.interpolate({ inputRange: [0, 70], outputRange: [1, 0], extrapolate: 'clamp' }) }}>
           {/* With a pin down, the sheet is about the route; the signal and
               settings come back when it is cleared. Keeps the sheet from
               growing over the map (#227). */}
-          {route.state.kind !== 'none' ? (
+          {navigating ? (
+            <NavCard progress={progress} accuracyMeters={live?.accuracyMeters ?? null} onEnd={endNav} />
+          ) : route.state.kind !== 'none' ? (
             <RouteCard state={route.state} fix={fix}
-              onRoute={() => { if (fix !== null) route.plan(fix); }} onClear={route.clear} />
+              onRoute={() => { if (fix !== null) route.plan(fix); }} onClear={route.clear}
+              onStart={fix === null ? undefined : startNav} />
           ) : (<>
           {where.note !== null && (
             <Pressable onPress={where.dismissNote}>
@@ -841,6 +924,12 @@ const makeStyles = (palette: Palette) => {
     borderRadius: radius.pill, paddingHorizontal: 18, borderWidth: 1.5, borderColor: palette.pine, backgroundColor: palette.paper,
   },
   edgeButtonText: { color: palette.pine, fontSize: 15, fontWeight: '700' },
+  recentre: {
+    position: 'absolute', alignSelf: 'center', minHeight: 48, justifyContent: 'center',
+    backgroundColor: palette.paper, borderRadius: radius.pill, paddingHorizontal: 22,
+    borderWidth: 1.5, borderColor: palette.pine, boxShadow: `0 2 10 ${palette.shade}`,
+  },
+  recentreText: { color: palette.pine, fontSize: 15, fontWeight: '700' },
   // A region's name tag on the map: tappable, so it looks like a button (ux-ui-review 7a), and 48 dp tall.
   tag: {
     minHeight: 48, justifyContent: 'center', alignItems: 'center',

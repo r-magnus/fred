@@ -352,7 +352,8 @@ function Screen() {
     return () => { live = false; };
   }, [signalOwed, fix, update]);
 
-  const send = useCallback(async (questionText?: string, withState?: string | null, viaHook = false) => {
+  // `again`: a re-ask of an earlier turn (a state picked), which keeps that turn's deep thinking.
+  const send = useCallback(async (questionText?: string, withState?: string | null, viaHook = false, again?: { deep: boolean }) => {
     const question = (questionText ?? draft).trim();
     const eng = engine.current;
     if (question === '' || eng === null || busy) return;
@@ -379,7 +380,7 @@ function Screen() {
     const shown = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
       last.citations[0]?.source === 'Fred field card' ? last.citations[0].section : undefined;
     const map = wantsMap(question);
-    const deepOn = deepRef.current && !viaHook;
+    const deepOn = again !== undefined ? again.deep : deepRef.current && !viaHook;
     setTurns((ts) => [...ts, {
       id, question, askedAt: now, state: askState, text: '', kind: 'answer',
       citations: [], medical: false, candidateStates: [], done: false, stopped: false, map,
@@ -726,7 +727,7 @@ function Screen() {
                 <Pressable
                   style={styles.locateButton}
                   disabled={locating}
-                  onPress={() => void locate().then((s) => { if (s !== null) void send(t.question, s); })}
+                  onPress={() => void locate().then((s) => { if (s !== null) void send(t.question, s, false, { deep: t.deep === true }); })}
                 >
                   <Text style={styles.locateButtonText}>
                     {locating ? 'Locating…' : 'Use my location'}
@@ -739,7 +740,7 @@ function Screen() {
                       <Pressable
                         key={s}
                         style={styles.stateButton}
-                        onPress={() => { setState(s); void send(t.question, s); }}
+                        onPress={() => { setState(s); void send(t.question, s, false, { deep: t.deep === true }); }}
                       >
                         <Text style={styles.stateButtonText}>{s}</Text>
                       </Pressable>

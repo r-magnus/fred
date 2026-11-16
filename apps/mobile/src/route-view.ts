@@ -106,7 +106,7 @@ export const ROUTE_HEADLINE = 'Rough route: check it against what you see.';
  */
 export const SIGNAL_HEADLINE = 'Route to signal';
 export const STAY_PUT = 'If people know where you are, staying put is often safest.';
-export const SIGNAL_SOURCE = 'Signal here is what carriers report, not a promise of bars.';
+export const SIGNAL_SOURCE = 'The signal there is what carriers report, not a promise of bars.';
 
 export const ALWAYS_CAVEAT =
   "Maps can be out of date. This route doesn't know about private land, closures or how hard a trail is.";

@@ -831,7 +831,8 @@ export function MapPreview(
     if (b !== null) camera.current?.fitBounds(b, { padding: { top: 24, right: 24, bottom: 24, left: 24 }, duration: 0 });
   }, [ready]);
   const routeLine = ready === null ? null
-    : `Route to signal: ${distanceWords(ready.meters)} · ${timeWords(ready.seconds)}. ${STAY_PUT}`;
+    // Staying put first, as on the full map's card.
+    : `${STAY_PUT} Route to signal: ${distanceWords(ready.meters)} · ${timeWords(ready.seconds)}.`;
   const onMap = useMemo(() => whereOnMap(fix), [fix]);
   const within = fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`;
   const caption = coverage !== null ? coverage.advice

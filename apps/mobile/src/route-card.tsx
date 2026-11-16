@@ -132,7 +132,8 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart, onLocate, onG
   const whole = (part: string): string => part.replace(/ /g, '\u00A0');
   const up = route.hasElevation && route.ascent >= 20 ? `↑${(Math.round(route.ascent / 10) * 10).toLocaleString('en-US')} m` : null;
   const numbers = [timeWords(route.seconds).replace(/^about /, ''), distanceWords(route.meters), ...(up === null ? [] : [up])]
-    .map(whole).join('  ·  ');
+    // The dot stays with the part before it, so no line starts or ends on a lone "·".
+    .map(whole).join('\u00A0· ');
   const spoken = `About ${timeWords(route.seconds).replace(/^about /, '')}, ${distanceWords(route.meters)}${climb === null ? '' : `, ${climb}`}`;
   return (
     <View style={styles.card}>
@@ -177,11 +178,12 @@ export function NavCard(
   return (
     <View style={styles.nav}>
       <View style={styles.navText}>
-        <Text style={styles.numbers} accessibilityLiveRegion="polite">
+        <Text style={styles.navNumbers} accessibilityLiveRegion="polite">
           {progress === null ? 'Finding you…'
             : progress.arrived ? 'You made it'
             // Time first, as on the route card; "left" says it counts down.
-            : `${timeWords(progress.remainingSeconds).replace(/^about /, '')} · ${distanceWords(progress.remainingMeters)} left`}
+            : [timeWords(progress.remainingSeconds).replace(/^about /, ''), `${distanceWords(progress.remainingMeters)} left`]
+              .map((x) => x.replace(/ /g, '\u00A0')).join('\u00A0· ')}
         </Text>
         {line !== null && (
           <Text style={[styles.text, line.warn && styles.navWarn]} accessibilityLiveRegion={line.warn ? 'assertive' : 'polite'}>
@@ -237,6 +239,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   stayText: { color: palette.ink, fontSize: 16, fontWeight: '700', lineHeight: 22 },
   nav: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10 },
   navText: { flex: 1 },
+  // Smaller than the route card's: it shares the row with End.
+  navNumbers: { color: palette.ink, fontSize: 20, fontWeight: '700', lineHeight: 26 },
   navWarn: {
     backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
     paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, overflow: 'hidden',

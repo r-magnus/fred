@@ -12,6 +12,8 @@ export interface GenerateOptions {
   /** Upper bound on generated tokens. Set by the adaptive memory manager. */
   readonly maxTokens: number;
   readonly temperature?: number;
+  /** Fixes the sampling when temperature is above 0 (deep thinking's drafts), so a run can be repeated. */
+  readonly seed?: number;
   readonly stop?: readonly string[];
   readonly signal?: AbortSignal;
   /**

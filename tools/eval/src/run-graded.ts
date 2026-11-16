@@ -71,6 +71,7 @@ for (const [i, q] of questions.entries()) {
     ...((res.kind === 'abstain' || res.kind === 'chat') && res.offer != null ? { offer: res.offer.title } : {}),
     ...(res.kind === 'answer' && res.card !== undefined ? { offer: res.card.title } : {}),
     ...(d.secondSearch !== undefined ? { secondSearch: d.secondSearch } : {}),
+    ...(d.deep !== undefined ? { deep: d.deep } : {}),
     ...(d.widenedTopScore !== undefined ? { widenedTopScore: d.widenedTopScore } : {}),
     ...(d.understood !== undefined ? { understood: d.understood } : {}),
     ...(d.scope !== undefined ? { scope: d.scope } : {}),

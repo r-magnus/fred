@@ -271,6 +271,11 @@ function samplingFor(genOpts: GenerateOptions) {
     return { temperature: 0.6, topP: 0.95, topK: 20, minP: 0, seed: GEN_SEED } as const;
   }
   if (!QWEN_SAMPLING) {
+    // Deep thinking's extra drafts (#21) sample at the model card's
+    // non-greedy settings with a seed of their own, so each is repeatable.
+    if ((genOpts.temperature ?? 0) > 0) {
+      return { temperature: genOpts.temperature!, topP: 0.95, topK: 20, minP: 0, seed: genOpts.seed ?? GEN_SEED, repeatPenalty: { penalty: 1.15 } } as const;
+    }
     return {
       temperature: genOpts.temperature ?? 0,
       repeatPenalty: { penalty: 1.15 },

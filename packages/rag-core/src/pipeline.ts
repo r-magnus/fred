@@ -1155,8 +1155,11 @@ async function askCore(
   // Smoke test 2026-11-15: the scope scorer alone shut out "what can I do
   // with paracord if I take it apart?" (-0.63), whose answer is in the Army
   // manual. A card as the matcher's top label is let through too.
-  const deepSearch = opts.deep?.search === true && !medicine && !aboutPet && !BEYOND_FIRST_AID.test(query) &&
-    (inScope || (saidTop !== undefined && saidTopKind === undefined));
+  // Dev run 2026-11-15: also letting in a message whose top matcher label is
+  // a card admitted a belay knot, "where am I right now?" and magnetic
+  // declination (scope -0.22, -1.71, -1.09), the phase-3 failure again. Back
+  // to the scope scorer alone; paracord (-0.63) stays out.
+  const deepSearch = opts.deep?.search === true && inScope && !medicine && !aboutPet;
   if ((opts.secondSearch === true || deepSearch) && topScore < effectiveThreshold) {
     let rewrite = '';
     for await (const tok of backend.generate(buildRewriteParts(query), { maxTokens: 80, temperature: 0 })) rewrite += tok;

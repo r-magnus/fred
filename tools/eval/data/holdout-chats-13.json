@@ -1,0 +1,266 @@
+{
+ "description": "Fresh chats for the rest of #152, written 2026-11-15 before any change and before any example message was added for them, in wording not used elsewhere: a body part sore from use (with a real injury as control), a finger or wrist hurt in a fall that gets no card, a small cut mentioned as an aside, other trail users (bikes, runners, mules; a real bear as control), how long wet wood takes to dry, and a missed turnoff (with a lost hiker and a junction passed on purpose as controls). Committed before the first run. Not to be tuned against.",
+ "grading": "As holdout-chats-8.json: a chat passes only if every turn passes. card is the field card that fits (\"none\": no card fits; \"-\": not judged); a different card shown word for word fails the turn.",
+ "chats": [
+  {
+   "id": "c13-sore-shoulders",
+   "kind": "sore-from-use",
+   "turns": [
+    {
+     "q": "my shoulders ache where the pack straps sit",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-sore-calves",
+   "kind": "sore-from-use",
+   "turns": [
+    {
+     "q": "calves are tight and sore after all that climbing yesterday",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-sore-lowback",
+   "kind": "sore-from-use",
+   "turns": [
+    {
+     "q": "my lower back is stiff from sleeping on the ground",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-sore-feet",
+   "kind": "sore-from-use",
+   "turns": [
+    {
+     "q": "feet are throbbing after 15 miles today",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-ankle",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "i stepped in a hole and my ankle is swelling up and hurts to stand",
+     "expect": "answer",
+     "card": "Twisted or sprained ankle, or a strained muscle",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-neck",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "he fell off the ledge onto his back and his neck hurts, he can't feel his fingers",
+     "expect": "help-now",
+     "card": "Possible neck or back injury",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-finger-jammed",
+   "kind": "injury-no-card",
+   "turns": [
+    {
+     "q": "jammed my finger catching a fall on the rocks and now its fat and bluish",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-wrist-purple",
+   "kind": "injury-no-card",
+   "turns": [
+    {
+     "q": "she landed on her hand on the slab, the wrist is swollen and going purple",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-cut-aside",
+   "kind": "cut-aside",
+   "turns": [
+    {
+     "q": "totally different thing but i nicked my thumb with my knife cutting cheese",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-cut-btw",
+   "kind": "cut-aside",
+   "turns": [
+    {
+     "q": "he's fine now. also i cut my palm on a tin lid, it's bleeding a little",
+     "expect": "answer",
+     "card": "A cut or scrape",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-cut-deep",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "the hatchet slipped and there's a deep gash in his shin, blood is pouring out",
+     "expect": "help-now",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-bikes",
+   "kind": "trail-users",
+   "turns": [
+    {
+     "q": "mountain bikers are flying down the trail toward us, what do we do",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-runners",
+   "kind": "trail-users",
+   "turns": [
+    {
+     "q": "a pack of trail runners is coming up behind me on a narrow bit",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-mules",
+   "kind": "trail-users",
+   "turns": [
+    {
+     "q": "a string of pack mules is coming the other way, should i move",
+     "expect": "no-dead-end",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-bear",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "we just came around a bend and there's a big bear maybe 30 yards up from us",
+     "expect": "help-now",
+     "card": "A bear close by, charging or attacking",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-wood-dry",
+   "kind": "wet-wood",
+   "turns": [
+    {
+     "q": "how long do i have to leave damp sticks by the flames before they'll catch",
+     "expect": "any",
+     "card": "none",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-missed-turn",
+   "kind": "missed-turn",
+   "turns": [
+    {
+     "q": "i think we walked past our turnoff a couple miles ago",
+     "expect": "not-chat",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-missed-sign",
+   "kind": "missed-turn",
+   "turns": [
+    {
+     "q": "we never saw the sign for our trail and that was an hour back",
+     "expect": "not-chat",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-lost",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "i have no idea where i am and the trail is gone",
+     "expect": "answer",
+     "card": "Lost: should I stay or keep moving?",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c13-ctrl-passed",
+   "kind": "control",
+   "turns": [
+    {
+     "q": "we passed the junction on purpose to see the lake, heading back now",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  }
+ ]
+}

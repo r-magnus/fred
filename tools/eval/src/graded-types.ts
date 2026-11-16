@@ -214,7 +214,8 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'assembled': return ASSEMBLED_SETS;
     case 'assembled-sealed': return ASSEMBLED_SEALED_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
-    default: throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | hazards-confirm | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);
+    // file:<path> runs one question file, for a quick look at a few questions.
+    default: if (name!.startsWith('file:')) return [name!.slice(5)]; throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | hazards-confirm | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);
   }
 }
 

@@ -1,0 +1,35 @@
+ailments: 23 replies, answered 14 -> 14, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 26, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 21 -> 21, changed 0, misses 2 -> 2
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards-confirm: 35 replies, answered 22 -> 22, changed 0
+hazards: 24 replies, answered 19 -> 19, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-10: 37 replies, answered 21 -> 21, changed 0, misses 1 -> 1
+holdout-chats-11: 36 replies, answered 35 -> 35, changed 0, misses 1 -> 1
+holdout-chats-12: 18 replies, answered 11 -> 11, changed 0, misses 1 -> 1
+holdout-chats-2: 44 replies, answered 33 -> 33, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 17 -> 18, changed 2, misses 4 -> 4
+  c3-oos-pills#1 [not-urgent] watch/watch -> answer(gen:Camping Safely Step 1  | Before the Trip - Camp | Wilderness backpacking) said=none:minor:0.49[minor]  "my back is wrecked from the pack"
+  c3-switch-blister-fire#1 [answer] answer(gen:SOFT TISSUE TRAUMA | Hiking > Stay healthy  | Hiking > Stay healthy ) -> answer(gen:SOFT TISSUE TRAUMA | TRENCH FOOT | During Extremely Cold ) said=none:minor:0.44[]  "my heel is rubbed raw and there's a bubble on it"
+holdout-chats-4: 38 replies, answered 19 -> 18, changed 1, misses 5 -> 5
+  c4-sore-shoulders#1 [not-urgent] answer(card:Possible neck or back injury) -> decline/low-score said=none:minor:0.55[minor+no-card]  "my shoulders and neck are so stiff from this pack i can barely turn my head"
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 20 -> 21, changed 1, misses 1 -> 0
+  FIXED c6-slip-thumb#1 [answer] watch/watch -> answer(card:Suspected broken bone) said=Suspected broken bon:0.42[card]  "my sister slipped on the wet rocks by the creek and caught herself on one hand, now her thumb is puffy and turning purple"
+holdout-chats-7: 28 replies, answered 12 -> 12, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 24 -> 24, changed 0, misses 1 -> 1
+holdout-chats-9: 17 replies, answered 15 -> 15, changed 0, misses 2 -> 2
+holdout-chats: 162 replies, answered 109 -> 109, changed 0, misses 6 -> 6
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 0
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+4 replies changed

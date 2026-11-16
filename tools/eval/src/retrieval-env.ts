@@ -68,6 +68,18 @@ export function compressionFromEnv(): { minReduction: number; maxReduction: numb
  * run-graded.ts and run-conversations.ts so both measure the same pipeline.
  * The per-question fields (state, previous, signal) are the caller's.
  */
+/** DEEP=search,evidence,check,drafts3 -> the deep-thinking switches. */
+function deepFromEnv(raw: string): NonNullable<AskOptions['deep']> {
+  const parts = raw.split(',').map((x) => x.trim());
+  const drafts = parts.find((x) => /^drafts\d+$/.test(x));
+  return {
+    search: parts.includes('search'),
+    evidence: parts.includes('evidence'),
+    check: parts.includes('check'),
+    ...(drafts === undefined ? {} : { drafts: Number(drafts.slice(6)) }),
+  };
+}
+
 export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
   const retrieval = retrievalFromEnv();
   const compression = compressionFromEnv();
@@ -95,6 +107,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.JOIN === '1' ? { joinNeighbours: true } : {}),
     // SHAPE=how|how-few: how-to questions answered in steps; how-few also loosens the sentence cap.
     ...(env.SHAPE === 'how' || env.SHAPE === 'how-few' ? { shapeVariant: env.SHAPE } : {}),
+    // DEEP=search,evidence,check,drafts3: deep thinking's strategies (#21, docs/plan-deep-thinking.md).
+    ...(env.DEEP !== undefined && env.DEEP !== '' ? { deep: deepFromEnv(env.DEEP) } : {}),
     // SECOND_SEARCH=1 restates a question that scored under the gate in manual wording and searches again.
     ...(env.SECOND_SEARCH === '1' ? { secondSearch: true } : {}),
     // WIDEN=0 keeps a weak routed search instead of retrying it across every unscoped pack (on by default).

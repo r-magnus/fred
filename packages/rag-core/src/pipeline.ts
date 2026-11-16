@@ -141,6 +141,22 @@ export interface AskOptions {
    */
   readonly secondSearch?: boolean;
   /**
+   * Deep thinking (#21, docs/plan-deep-thinking.md): the person chose to wait
+   * for a better answer. Each strategy is its own switch so it can be
+   * measured alone. Cards, declines decided before generation and every
+   * safety rule are unchanged.
+   */
+  readonly deep?: {
+    /** A second search in manual wording under the gate, only for messages the scope scorer calls in scope. */
+    readonly search?: boolean;
+    /** The sentences closest to the question, put first as the evidence to write from. */
+    readonly evidence?: boolean;
+    /** Every sentence of the answer compared with the source sentences; unsupported ones dropped. */
+    readonly check?: boolean;
+    /** Drafts to write; the best supported is shown (1 or unset: one). */
+    readonly drafts?: number;
+  };
+  /**
    * When the routed search scores under the gate, search again across every
    * unscoped pack and keep it if it clears the gate. Default on; off only to
    * measure what it changes.
@@ -436,6 +452,86 @@ function queryVector(backend: InferenceBackend, query: string): Promise<Float32A
   return backend.embed(applyQueryTemplate(backend.embeddingSpec().queryTemplate, query));
 }
 
+/**
+ * Deep thinking (#21, docs/plan-deep-thinking.md). Starting values, set
+ * before any run and to be calibrated on the development sets only.
+ * The evidence floor sits under QUOTE_FLOOR (0.57): evidence is read by the
+ * model, not shown, so near lines are welcome.
+ */
+export const DEEP_EVIDENCE_FLOOR = 0.45;
+export const DEEP_EVIDENCE_MAX = 6;
+/** The Qwen3 model card's sampling for its non-greedy drafts. */
+export const DEEP_DRAFT_TEMPERATURE = 0.6;
+export const DEEP_DRAFT_SEED = 1729;
+/** An answer sentence this close to some source sentence is taken as supported. */
+export const DEEP_CHECK_FLOOR = 0.5;
+
+/**
+ * An answer cut into the units the check judges: a numbered or bulleted
+ * line is one step; other lines are cut into sentences.
+ */
+export function answerUnits(text: string): string[] {
+  return text.split('\n').map((l) => l.trim()).filter((l) => l !== '').flatMap((l) =>
+    /^(?:\d+[.)]|[-*•])\s/.test(l) ? [l] : l.split(/(?<=[.!?])\s+(?=["'(A-Z])/).map((x) => x.trim()).filter((x) => x !== ''));
+}
+
+/**
+ * Whether a unit is judged: short ones ("Stay calm.") and the advice to get
+ * help are always kept, since a source rarely words them the same way and
+ * dropping them could only make an answer less safe.
+ */
+export function checkable(unit: string): boolean {
+  if (unit.replace(/^(?:\d+[.)]|[-*•])\s+/, '').split(/\s+/).length < 5) return false;
+  return !/\b(?:emergency services|911|call for help|get help|medical (?:help|attention|care)|see a doctor|seek (?:medical|help))\b/i.test(unit);
+}
+
+const JUDGE_STOP = new Set('a an the and or but if then than so to of in on at by for with from as is are was were be been being it its this that these those there here you your yours i me my we our us they them their he she his her him not no do does did can could should would will may might must just also very more most less some any all each every one two into out over under up down about after before while when where what which who how why own same other such only too off again further once'.split(' '));
+/** Content words, folded the same way for an answer and its sources: plurals and -ing/-ed cut. */
+function judgeWords(text: string): string[] {
+  return (text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?|\d+(?:[.,]\d+)?/g) ?? [])
+    .filter((w) => !JUDGE_STOP.has(w) && (w.length > 2 || /\d/.test(w)))
+    .map((w) => w.replace(/(?:ies)$/, 'y').replace(/(?:ing|ed|es|s)$/, ''));
+}
+
+/**
+ * Deep thinking's judge, round 2 (#21): a tool reading the words, not
+ * vectors. Round 1's vector scores differed by ~0.01 between drafts and
+ * chose the one without "3 feet". A draft scores for the specifics of its
+ * sources it keeps word for word (numbers, and two-word phrases from the
+ * passages) and loses for content words found in neither the sources nor
+ * the question (the model's own additions).
+ */
+export function judgeDraft(draft: string, sources: string, question: string): number {
+  const src = judgeWords(sources);
+  const known = new Set([...src, ...judgeWords(question)]);
+  const pairs = new Set(src.slice(1).map((w, i) => `${src[i]} ${w}`));
+  const words = judgeWords(draft);
+  if (words.length === 0) return 0;
+  const kept = new Set<string>();
+  words.forEach((w, i) => {
+    if (/\d/.test(w) && known.has(w)) kept.add(w);
+    const pair = i > 0 ? `${words[i - 1]} ${w}` : '';
+    if (pairs.has(pair)) kept.add(pair);
+  });
+  const novel = words.filter((w) => !known.has(w)).length / words.length;
+  return kept.size - JUDGE_NOVEL_WEIGHT * novel * words.length;
+}
+/** How much one invented content word costs against one kept specific. */
+export const JUDGE_NOVEL_WEIGHT = 0.5;
+
+/** Cosine of two float vectors. */
+function cosine(a: Float32Array, b: Float32Array): number {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length && i < b.length; i++) { dot += a[i]! * b[i]!; na += a[i]! * a[i]!; nb += b[i]! * b[i]!; }
+  return na === 0 || nb === 0 ? 0 : dot / Math.sqrt(na * nb);
+}
+
+/** Kept lines with their step numbers closed up again (1, 3, 4 -> 1, 2, 3). */
+export function renumbered(lines: readonly string[]): string[] {
+  let n = 0;
+  return lines.map((l) => (/^\d+[.)]\s/.test(l) ? l.replace(/^\d+/, String(++n)) : l));
+}
+
 export function asksSpecifically(message: string): boolean {
   const specific = YES_NO.test(message) || WH_START.test(message) || (/\?\s*$/.test(message) && WH_ANY.test(message)) || WOULD_HELP.test(message);
   return specific && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
@@ -452,6 +548,10 @@ const SYMPTOM_UPDATE = /\b(?:swell\w*|swollen|bigger|puffy|puffing|redder|worse|
  * and hurting" also scored under AGREED_CARD_FLOOR, and the thread it followed
  * (a bear in camp) opened the bear card for a burn (sealed chat set). Five
  * words alone was too blunt: it lost the heat-stroke follow-up.
+ * #212: a longer question must still be on the thread's topic (the joined
+ * search keeps FOLLOW_UP_ON_TOPIC of the earlier match). "how do I tell if
+ * canned fish has gone bad" right after the head-injury card asked something
+ * and scored under AGREED_CARD_FLOOR, and reopened the head-injury card.
  */
 const THREAD_CARD_WORDS = 5;
 const THREAD_CARD_MIN = 0.05;
@@ -638,6 +738,8 @@ export interface Diagnostics {
   readonly widenedTopScore?: number;
   /** The manual-wording restatement, when a second search ran, and what it scored. */
   readonly secondSearch?: { readonly rewrite: string; readonly topScore: number };
+  /** What deep thinking did (#21): drafts written, support of the one shown, sentences dropped. */
+  readonly deep?: { readonly drafts: number; readonly support: readonly number[]; readonly chosen: number; readonly dropped: readonly string[]; readonly quoted: boolean; readonly evidence: number; readonly units: readonly { readonly draft: number; readonly text: string; readonly support: number; readonly onQuestion: number }[]; readonly texts: readonly string[] };
   /** What the hiker wants, when intent is on. */
   readonly intent?: Intent;
   /** The scope scorer's score, and what it changed, when it is on (scope.ts). */
@@ -781,7 +883,17 @@ export async function ask(
   deps: PipelineDeps,
   opts: AskOptions,
 ): Promise<AskResult> {
-  const res = await askUnvoiced(query, deps, opts);
+  // Deep thinking's "search harder" (#21, round 4): Fred answers as normal
+  // first, and only a flat decline (search under the bar, no card offered)
+  // is tried again with the second search. Running it before the quote and
+  // card rescues (rounds 1-3) let a written answer replace a right quote ("dead
+  // man" staking) or card (wet fire) on the confirmation sets.
+  const searchHarder = opts.deep?.search === true;
+  let res = await askUnvoiced(query, deps, searchHarder ? { ...opts, deep: { ...opts.deep, search: false } } : opts);
+  if (searchHarder && res.kind === 'abstain' && res.reason === 'low-score' && res.offer === undefined && !opts.signal?.aborted) {
+    const again = await askUnvoiced(query, deps, opts);
+    if (again.kind === 'answer') res = again;
+  }
   return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
 }
 
@@ -964,6 +1076,9 @@ async function askCore(
   // Conversation memory: search the follow-up joined to the previous question
   // too, and keep whichever scores higher.
   let followUp: { standaloneTopScore: number; joinedTopScore: number; used: boolean } | undefined;
+  // #212: joining the message to the earlier question diluted that question's
+  // own match, so the message is about something else.
+  let leftTopic = false;
   let standalone = candidates;
   // Memory applies only after a question Fred could answer: a follow-up to a
   // declined question has no topic to build on. With a knot question that
@@ -993,6 +1108,7 @@ async function askCore(
     // tuning sets, 17 of 20 follow-ups kept 0.91 or more; the choking switch
     // kept 0.69, and four out-of-scope follow-ups 0.76-0.85.
     const staysOnTopic = joinedTop >= FOLLOW_UP_ON_TOPIC * opts.previous.topScore;
+    leftTopic = !staysOnTopic;
     // Memory exists to answer: a joined search that still falls under the gate
     // must not change how Fred declines (into a location request, say, from the
     // joined query's routing). None of the 29 measured follow-ups needed it.
@@ -1082,10 +1198,23 @@ async function askCore(
   const scopeUsed: ('framed' | 'not-chat' | 'card' | 'gate' | 'hazard')[] = [];
 
   let secondSearch: { rewrite: string; topScore: number } | undefined;
-  if (opts.secondSearch === true && topScore < effectiveThreshold) {
+  // Deep thinking's "search harder" (#21): the phase-3 second search admitted
+  // out-of-scope questions (results-phase3.md step 4), so it runs here only
+  // for a message the scope scorer calls in scope, and never for a medicine
+  // or a procedure.
+  // Smoke test 2026-11-15: the scope scorer alone shut out "what can I do
+  // with paracord if I take it apart?" (-0.63), whose answer is in the Army
+  // manual. A card as the matcher's top label is let through too.
+  // Dev run 2026-11-15: also letting in a message whose top matcher label is
+  // a card admitted a belay knot, "where am I right now?" and magnetic
+  // declination (scope -0.22, -1.71, -1.09), the phase-3 failure again. Back
+  // to the scope scorer alone; paracord (-0.63) stays out.
+  const deepSearch = opts.deep?.search === true && inScope && !medicine && !aboutPet;
+  if ((opts.secondSearch === true || deepSearch) && topScore < effectiveThreshold) {
     let rewrite = '';
     for await (const tok of backend.generate(buildRewriteParts(query), { maxTokens: 80, temperature: 0 })) rewrite += tok;
-    rewrite = rewrite.trim();
+    // Markdown headings and bold came back in the smoke test ("**TREATING INJURIES...**").
+    rewrite = rewrite.replace(/[*#_`]+/g, ' ').replace(/\s+/g, ' ').trim();
     const keywords2 = extractKeywords(`${query} ${rewrite}`);
     const routed2 = route(keywords2, packs, { state: opts.state, ...(opts.allowRoutingFallback === true ? { allowFallback: true } : {}) });
     const candidates2 = await search(keywords2, routed2.packIds, store, backend, retrievalOpts, routed2.domains, rewrite);
@@ -1447,7 +1576,7 @@ async function askCore(
         forcedCard = agreedCard = own;
         forcedOwn = true;
       } else if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
-          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
+          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || (asksSomething(query) && !leftTopic))) {
         // A message with nothing of its own ("what do i do") takes the card
         // its thread leads with, searched in the hiker's own words: "i think
         // im lost" / "phone at 15%" / "its getting dark" / "what do i do".
@@ -1477,7 +1606,7 @@ async function askCore(
     else if (guardsOn && topCard === undefined && intent === 'question' && !aboutPet) {
       const said = setHere[0];
       if ((lastShown !== undefined || threadCard !== undefined) && await ownTopAgainst(lastShown ?? threadCard) < AGREED_CARD_FLOOR && !medicine &&
-          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || asksSomething(query))) {
+          (query.trim().split(/\s+/).length <= THREAD_CARD_WORDS || (asksSomething(query) && !leftTopic))) {
         forcedCard = agreedCard = lastShown ?? ownCard(threadCard);
       } else if (said !== undefined && topScore < effectiveThreshold) {
         // "splashed hot coffee all over my wrist" was read as a question and
@@ -1496,7 +1625,12 @@ async function askCore(
     // Fred must decline ("walk me through stitching a cut"), a safe
     // alternative (the cuts card: clean it and cover it). Only an answer
     // leaves it out; a pet still never gets a human card.
-    else if (topCard !== undefined && !aboutPet) offer = toOffer(topCard, citeOf(topCard, 0));
+    // #152: nor when the matcher says the message is a small ailment no card
+    // is for: "feet are throbbing after 15 miles today" was declined with the
+    // trench-foot card folded under it, "calves are tight and sore after all
+    // that climbing" with the sprain card. Only the minor label: a question
+    // Fred must decline still gets its safe alternative (the cuts card).
+    else if (topCard !== undefined && !aboutPet && !(guardsOn && saidNoCard && saidTopKind === 'minor')) offer = toOffer(topCard, citeOf(topCard, 0));
     // A prevention question takes the normal path, cards included: several
     // cards are prevention guidance ("staying warm on a cold night", "staying
     // healthy", "river crossing"), and hiding them cost three tuning answers.
@@ -2094,7 +2228,25 @@ async function askCore(
   const place = opts.state !== null && opts.locationInPrompt !== false && REFERS_TO_LOCATION.test(query) &&
     blocks.some((b) => statePacks.has(b.chunk.packId))
     ? STATE_NAMES[opts.state] : undefined;
-  const prompt = buildPromptParts(query, blocks, opts.answerVariant, place, earlier, opts.shapeVariant);
+  // Deep thinking's "evidence first" (#21): the sentences closest to the
+  // question, found by their vectors (no model), go first as the lines to
+  // write from. The passages follow as before.
+  const deepInfo: { drafts: number; support: number[]; chosen: number; dropped: string[]; quoted: boolean; evidence: number; units: { draft: number; text: string; support: number; onQuestion: number }[]; texts: string[] } =
+    { drafts: 0, support: [], chosen: 0, dropped: [], quoted: false, evidence: 0, units: [], texts: [] };
+  const supportPassages = usable.map((c) => ({ chunkId: c.chunk.id, text: c.chunk.text, rows: store.sentenceVectorsFor?.(c.chunk.id) }));
+  let promptBlocks = blocks;
+  if (opts.deep?.evidence === true) {
+    const seen = new Set<string>();
+    const lines = rankSentences(await queryVector(backend, query), supportPassages)
+      .filter((r) => r.similarity >= DEEP_EVIDENCE_FLOOR && !seen.has(r.text) && seen.add(r.text) !== undefined)
+      .slice(0, DEEP_EVIDENCE_MAX);
+    const first = lines[0] === undefined ? undefined : usable.find((c) => c.chunk.id === lines[0]!.chunkId);
+    if (first !== undefined) {
+      deepInfo.evidence = lines.length;
+      promptBlocks = [{ chunk: first.chunk, text: `The lines closest to the question:\n${lines.map((l) => `- ${l.text}`).join('\n')}` }, ...blocks];
+    }
+  }
+  const prompt = buildPromptParts(query, promptBlocks, opts.answerVariant, place, earlier, opts.shapeVariant);
   const generateOpts = opts.signal
     ? { maxTokens, signal: opts.signal }
     : { maxTokens };
@@ -2160,14 +2312,67 @@ async function askCore(
   const answerGuard: { replacedBy?: string; refused?: boolean } = {};
   // #126: the generation with its numbers checked against the passages given.
   const sourceText = [query, earlier ?? '', ...blocks.map((b) => b.text)].join('\n');
-  const generated = (): AsyncIterable<string> => (guardsOn
-    ? numberChecked(backend.generate(prompt, generateOpts), sourceText, async (shown) => {
+  const draft = (i: number): AsyncIterable<string> => {
+    // Draft 0 is the normal greedy answer; further drafts sample (#21).
+    const o = i === 0 ? generateOpts : { ...generateOpts, temperature: DEEP_DRAFT_TEMPERATURE, seed: DEEP_DRAFT_SEED + i };
+    return guardsOn
+      ? numberChecked(backend.generate(prompt, o), sourceText, async (shown) => {
+        const quoted = await quoteSources();
+        answerGuard.replacedBy = 'number';
+        if (quoted !== undefined) return shown ? `\n\n${quoted}` : quoted;
+        return shown ? '' : NO_ANSWER_REPLY;
+      })
+      : backend.generate(prompt, o);
+  };
+  // Deep thinking's "check every step" and "best of N" (#21): each draft is
+  // read whole, every step or sentence is compared with the source sentences
+  // by vector, the best-supported draft is kept, and with check on its
+  // unsupported sentences are dropped. A tool judges, not the model: small
+  // models voting or judging themselves lose accuracy (docs/plan-deep-thinking.md).
+  const deepOn = opts.deep !== undefined && (opts.deep.check === true || (opts.deep.drafts ?? 1) > 1);
+  const deepGenerated = async function* (): AsyncIterable<string> {
+    const n = Math.max(1, opts.deep?.drafts ?? 1);
+    const questionVec = await queryVector(backend, query);
+    const drafts: { text: string; units: { text: string; support: number | null; onQuestion: number | null }[]; score: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      let text = '';
+      for await (const tok of draft(i)) text += tok;
+      const units = await Promise.all(answerUnits(text).map(async (u) => {
+        if (!checkable(u)) return { text: u, support: null, onQuestion: null };
+        const v = await queryVector(backend, u);
+        const support = rankSentences(v, supportPassages)[0]?.similarity ?? 0;
+        const onQuestion = cosine(v, questionVec);
+        deepInfo.units.push({ draft: i, text: u, support: Number(support.toFixed(3)), onQuestion: Number(onQuestion.toFixed(3)) });
+        return { text: u, support, onQuestion };
+      }));
+      const scored = units.filter((u) => u.support !== null);
+      const mean = (xs: number[]): number => (xs.length === 0 ? 0 : xs.reduce((a, b) => a + b, 0) / xs.length);
+      // #21 is answers about something else: a draft is judged on keeping to
+      // the question as much as on keeping to the sources.
+      deepInfo.texts.push(text);
+      // Round 2 (#21): judged by the words (judgeDraft); the vector scores
+      // are still recorded beside it for the check.
+      const judged = judgeDraft(text, supportPassages.map((p) => p.text).join('\n'), query);
+      drafts.push({ text, units, score: isRefusal(text) ? -Infinity : judged });
+      void mean;
+    }
+    deepInfo.drafts = n;
+    deepInfo.support = drafts.map((d) => Number(d.score.toFixed(3)));
+    const chosen = drafts.reduce((b, d, i) => (d.score > drafts[b]!.score ? i : b), 0);
+    deepInfo.chosen = chosen;
+    const pick = drafts[chosen]!;
+    if (opts.deep?.check !== true || isRefusal(pick.text)) { yield pick.text; return; }
+    const keep = pick.units.filter((u) => u.support === null || u.support >= DEEP_CHECK_FLOOR);
+    deepInfo.dropped = pick.units.filter((u) => !keep.includes(u)).map((u) => u.text);
+    const checked = pick.units.filter((u) => u.support !== null).length;
+    if (checked > 0 && deepInfo.dropped.length * 2 > checked) {
+      // Most of it had no source behind it: the sources' own sentences instead.
       const quoted = await quoteSources();
-      answerGuard.replacedBy = 'number';
-      if (quoted !== undefined) return shown ? `\n\n${quoted}` : quoted;
-      return shown ? '' : NO_ANSWER_REPLY;
-    })
-    : backend.generate(prompt, generateOpts));
+      if (quoted !== undefined) { deepInfo.quoted = true; yield quoted; return; }
+    }
+    yield renumbered(keep.map((u) => u.text)).join('\n');
+  };
+  const generated = (): AsyncIterable<string> => (deepOn ? deepGenerated() : draft(0));
   // Only advice a condition forbids needs the whole answer read first. A
   // refusal in the middle of a condition is caught from its first words, so
   // everything else still streams: holding every answer in a "lost" chat
@@ -2225,6 +2430,7 @@ async function askCore(
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,
+      ...(opts.deep === undefined ? {} : { deep: deepInfo }),
       ...(guardsOn ? { answerGuard } : {}),
     },
   };

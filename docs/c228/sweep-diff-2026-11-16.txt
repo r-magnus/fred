@@ -1,0 +1,47 @@
+ailments: 23 replies, answered 14 -> 14, changed 0
+breadth: 57 replies, answered 48 -> 48, changed 0
+chats-long-dev: 40 replies, answered 26 -> 28, changed 3, misses 0 -> 0
+  dv-day-hike#3 [chat] chat -> answer(gen:Wilderness backpacking | Wilderness backpacking | Wilderness backpacking) said=Staying warm on a co:0.27[]  "on the trail"
+  dv-day-hike#4 [not-urgent] answer(gen:Hiking > Stay healthy  | Wilderness backpacking | Hiking > Stay healthy ) -> answer(gen:Hiking > Stay healthy  | Wilderness backpacking | Wilderness backpacking) said=none:minor:0.58[]  "my boots are rubbing"
+  dv-day-hike#11 [any] chat -> answer(card:Twisted or sprained ankle, or a st) said=Twisted or sprained :0.85[]  "we're 2 miles out"
+chats-phone: 37 replies, answered 21 -> 23, changed 3, misses 2 -> 2
+  ph-camp-bear#2 [chat] chat -> answer(gen:During Your Stay - Cam | Camping Safely Step 3  | Camping Safely Step 3 ) said=none:other:0.66[]  "we're in yosemite btw"
+  ph-lost-dusk#5 [any] chat -> answer(card:Lost: should I stay or keep moving) said=none:other:0.20[]  "i can hear a river"
+  ph-lost-dusk#6 [not-chat] answer(card:Crossing a river or stream) -> answer(card:Lost: should I stay or keep moving) said=none:fragment:0.72[]  "should i follow it down"
+colloquial: 36 replies, answered 31 -> 31, changed 0
+everyday: 40 replies, answered 31 -> 31, changed 0
+fresh-13-14: 56 replies, answered 30 -> 36, changed 6, misses 17 -> 11
+  FIXED c14-pot-only#2 [answer] chat{Making water safe to d} -> answer(card:Making water safe to drink) said=Making water safe to:0.92[]  "we only have a pot and a lighter"
+  FIXED c14-tarp-wind#2 [answer] chat{Setting up a shelter f} -> answer(card:Setting up a shelter for the night) said=Setting up a shelter:0.71[]  "it's really windy up here"
+  FIXED c14-winter-kids#2 [answer] chat -> answer(gen:Cold weather > Clothin | Hiking > Prepare > Clo | Wilderness backpacking) said=none:gear:0.32[]  "my kids are coming too"
+  FIXED c14-ticks-grass#2 [answer] chat -> answer(gen:Pests > Bugs > Ticks > | Pests > Bugs > Ticks > | tall fescue > Other Ma) said=Removing a tick:0.45[]  "we'll be in tall grass most of the day"
+  FIXED c14-feet-creeks#2 [answer] chat -> answer(card:Crossing a river or stream) said=Crossing a river or :0.38[]  "the trail crosses a bunch of creeks"
+  FIXED c14-bear-grizzly#2 [answer] chat{A bear close by, charg} -> answer(card:A bear close by, charging or attac) said=A bear close by, cha:0.91[]  "we're going into grizzly country"
+grounded-confirm: 18 replies, answered 14 -> 14, changed 0
+hazards-confirm: 35 replies, answered 22 -> 22, changed 0
+hazards: 24 replies, answered 19 -> 19, changed 0
+health-confirm: 17 replies, answered 13 -> 13, changed 0
+health: 32 replies, answered 27 -> 27, changed 0
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-10: 37 replies, answered 21 -> 21, changed 0, misses 1 -> 1
+holdout-chats-11: 36 replies, answered 35 -> 35, changed 0, misses 1 -> 1
+holdout-chats-12: 18 replies, answered 11 -> 11, changed 0, misses 1 -> 1
+holdout-chats-2: 44 replies, answered 33 -> 33, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 18 -> 18, changed 0, misses 4 -> 4
+holdout-chats-4: 38 replies, answered 18 -> 18, changed 0, misses 5 -> 5
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 21 -> 21, changed 0, misses 0 -> 0
+holdout-chats-7: 28 replies, answered 12 -> 12, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 24 -> 24, changed 0, misses 1 -> 1
+holdout-chats-9: 17 replies, answered 15 -> 15, changed 0, misses 2 -> 2
+holdout-chats: 162 replies, answered 109 -> 111, changed 3, misses 6 -> 6
+  qn-creek#2 [any] chat -> answer(card:Lost: should I stay or keep moving) said=Lost: should I stay :0.32[card]  "there's a creek down the hill"
+  qn-creek#3 [not-chat] answer(card:Crossing a river or stream) -> answer(card:Lost: should I stay or keep moving) said=none:fragment:0.87[]  "should i follow it"
+  lg-lake-heat#4 [any] chat{Heat exhaustion and he} -> answer(card:Heat exhaustion and heat stroke) said=Heat exhaustion and :0.68[]  "its really hot out"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+holdout: 40 replies, answered 30 -> 30, changed 0
+states: 28 replies, answered 24 -> 24, changed 0
+tuning: 104 replies, answered 67 -> 67, changed 0
+wildlife: 22 replies, answered 17 -> 17, changed 0
+
+15 replies changed

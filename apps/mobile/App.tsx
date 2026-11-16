@@ -185,6 +185,10 @@ function Screen() {
   const [recording, setRecording] = useState(isRecording());
   // The full-screen map: opened from a map in the chat or from the menu.
   const [mapOpen, setMapOpen] = useState(false);
+  // Opened from a chat reply to "I'm lost" or a signal question, not the menu:
+  // out of coverage, the map then suggests a route to signal (#226).
+  const [mapFromChat, setMapFromChat] = useState(false);
+  const openMapFromChat = (): void => { setMapFromChat(true); setMapOpen(true); };
   // #209: About Fred, opened by tapping the wordmark.
   const [aboutOpen, setAboutOpen] = useState(false);
   // 0 the chat, 1 About: the sky sets its sun by it and the page eases in by it.
@@ -631,6 +635,7 @@ function Screen() {
     return (
       <MapScreen
         fix={fix}
+        suggestSignal={mapFromChat}
         onPacksChanged={() => { packsChanged.current = true; }}
         onClose={() => {
           setMapOpen(false);
@@ -888,11 +893,11 @@ function Screen() {
             {t.map === true && (
               <View style={styles.card}>
                 {t.id === liveMap
-                  ? <MapPreview fix={fix} onOpen={() => setMapOpen(true)} quiet={saidSignal(t)} />
+                  ? <MapPreview fix={fix} onOpen={openMapFromChat} quiet={saidSignal(t)} />
                   : (
                     <>
                       {t.signal !== undefined && !saidSignal(t) && <Text style={styles.body}>{t.signal}</Text>}
-                      <Pressable onPress={() => setMapOpen(true)} style={styles.rowButton} accessibilityRole="button"
+                      <Pressable onPress={openMapFromChat} style={styles.rowButton} accessibilityRole="button"
                         accessibilityLabel="Open the map">
                         <Text style={styles.offerTitle}>▸ Open the map</Text>
                       </Pressable>
@@ -974,7 +979,7 @@ function Screen() {
         chats={chats}
         current={chatId.current}
         onClose={() => setDrawer(false)}
-        onMap={() => { setDrawer(false); setMapOpen(true); }}
+        onMap={() => { setDrawer(false); setMapFromChat(false); setMapOpen(true); }}
         onAbout={() => { setDrawer(false); setAboutOpen(true); }}
         onSetup={() => { setDrawer(false); setSetup(true); }}
         onNewChat={() => showChat(null)}

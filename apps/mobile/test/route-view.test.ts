@@ -109,3 +109,12 @@ test('progress: along, left, off the line, and arrival', async () => {
   assert.equal(progressLine(off, 120).text, 'On Mist Trail.');
   assert.ok(routeProgress(r, -119.55, 37.7499)!.arrived);
 });
+
+test('the route to signal leads with the stay-put advice Ryan approved', async () => {
+  const { STAY_PUT, SIGNAL_HEADLINE, SIGNAL_SOURCE } = await import('../src/route-view.ts');
+  assert.equal(STAY_PUT, 'If people know where you are, staying put is often safest.');
+  assert.equal(SIGNAL_HEADLINE, 'Route to signal');
+  // Coverage is the carriers' own claim, never a promise.
+  assert.match(SIGNAL_SOURCE, /carriers report/);
+  assert.doesNotMatch(SIGNAL_SOURCE, /you will have/i);
+});

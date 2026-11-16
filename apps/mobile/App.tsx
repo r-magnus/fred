@@ -805,7 +805,7 @@ function Screen() {
             {t.kind === 'answer' && (
               <View style={styles.card}>
                 {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
-                {t.deep === true && !t.done && t.text === '' && <Text style={styles.deepWorking}>Deep thinking: writing a few drafts and keeping the one closest to the guides…</Text>}
+                {t.deep === true && !t.done && t.text === '' && <Text style={styles.deepWorking}>Deep thinking: looking through the guides a second way…</Text>}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
                 {t.text !== '' && <ReplyText text={t.text} />}
                 {t.waiting === true && !t.done && (

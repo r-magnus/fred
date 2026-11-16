@@ -23,8 +23,10 @@ const BASE_PATH = BASE.uri.replace(/^file:\/\//, '').replace(/\/$/, '');
 /**
  * What deep thinking does (#21, docs/plan-deep-thinking.md): the strategies
  * that passed on the development sets. Updated from the measurements only.
+ * Search harder only: evidence-first and best-of-three drafts lost
+ * accuracy, and sampled drafts gave two unsafe answers (rounds 1 and 2).
  */
-export const DEEP_MODE = { search: true, drafts: 3 } as const;
+export const DEEP_MODE = { search: true } as const;
 
 export const MODEL_FILE = 'Qwen3-1.7B-Q4_K_M.gguf';
 

@@ -189,28 +189,6 @@ function useCoverage(fix: LocationFix | null, reload = 0) {
   return { pack, carrier, coverage, reloadCarrier };
 }
 
-/**
- * The dots after "Finding you": one, two, three, and round again, so the wait
- * visibly moves. All three are always laid out and the ones not yet lit are
- * clear, so the words beside them stay put. Three still dots when the phone
- * has animations turned off.
- */
-function Dots(): React.JSX.Element {
-  const { styles } = useThemed(makeStyles);
-  const still = useReduceMotion();
-  const [lit, setLit] = useState(1);
-  useEffect(() => {
-    if (still) return;
-    const t = setInterval(() => setLit((n) => (n % 3) + 1), 450);
-    return () => clearInterval(t);
-  }, [still]);
-  return (
-    <>
-      {[1, 2, 3].map((n) => <Text key={n} style={!still && n > lit ? styles.dotOff : undefined}>.</Text>)}
-    </>
-  );
-}
-
 /** Flat [lon, lat, ...] to GeoJSON pairs. */
 const pairs = (flat: readonly number[]): [number, number][] => {
   const out: [number, number][] = [];
@@ -698,11 +676,28 @@ export function MapScreen(
             onLongPress={where.toggleRecording}
             accessibilityRole="button"
             accessibilityLabel={where.locating ? 'Finding your location' : where.recording ? 'Find my location. Recording a track.' : 'Find my location'}>
-            {where.locating ? <CalmLoader size={24} />
-              : <View style={[styles.target, where.recording && styles.targetRecording]}>
-                  <View style={[styles.targetDot, where.recording && styles.targetDotRecording]} />
-                </View>}
+            {/* Always the target: the one waiting animation is the tree in the map's middle. */}
+            <View style={[styles.target, where.recording && styles.targetRecording, where.locating && styles.targetBusy]}>
+              <View style={[styles.targetDot, where.recording && styles.targetDotRecording]} />
+            </View>
           </Pressable>
+        </View>
+      )}
+
+      {/* Finding you (2026-11-16, Ryan): one large growing tree in the middle
+          of the visible map, in place of the blinking dots, the small tree in
+          the target button and the badge, three things moving at once. The
+          number under it is the real progress. It lets touches through, so
+          the map stays usable while it waits. */}
+      {where.locating && !navigating && !panel && (
+        <View pointerEvents="none" style={[styles.finding, { top: insets.top, bottom: folded ? peek : sheet }]}>
+          <View style={styles.findingCard}>
+            <CalmLoader size={112} />
+            <Text style={styles.findingText}>Finding you</Text>
+            <Text style={styles.findingSub}>
+              {where.progress === null ? 'Looking for GPS' : `within ${Math.round(where.progress)} m so far`}
+            </Text>
+          </View>
         </View>
       )}
 
@@ -728,16 +723,15 @@ export function MapScreen(
               drop already says where you are (2026-11-16 UX pass). */}
           {!navigating && route.state.kind === 'none' && (
           <View style={styles.where}>
-            <Text style={[styles.whereTitle, where.locating && styles.whereTitleBusy]}
-              accessibilityLabel={where.locating ? 'Finding you' : undefined}>
-              {where.locating ? <>Finding you<Dots /></> : fix === null ? 'Where are you?' : 'You are here'}
+            {/* One size, no dots; said aloud when it changes to "You are here". */}
+            <Text style={styles.whereTitle} accessibilityLiveRegion="polite">
+              {where.locating ? 'Finding you' : fix === null ? 'Where are you?' : 'You are here'}
             </Text>
-            {(where.locating ? where.progress !== null : fix !== null && (fix.accuracyMeters !== null || fix.state !== null)) && (
+            {!where.locating && fix !== null && (fix.accuracyMeters !== null || fix.state !== null) && (
               <View style={styles.wherePill}>
                 <View style={styles.meDot} />
                 <Text style={styles.wherePillText}>
-                  {where.locating && where.progress !== null ? `±${Math.round(where.progress)} m so far`
-                    : fix === null ? ''
+                  {fix === null ? ''
                     : [fix.accuracyMeters === null ? null : `within ${Math.round(fix.accuracyMeters)} m`, fix.state].filter((x) => x !== null).join(' · ')}
                 </Text>
               </View>
@@ -1019,6 +1013,7 @@ const makeStyles = (palette: Palette) => {
   roundInline: round,
   roundRecording: { backgroundColor: palette.clay, borderColor: palette.clay },
   targetRecording: { borderColor: palette.paper },
+  targetBusy: { opacity: 0.4 },
   targetDotRecording: { backgroundColor: palette.paper },
   note: {
     color: palette.amber, backgroundColor: palette.butter, fontSize: 13, lineHeight: 18,
@@ -1045,9 +1040,15 @@ const makeStyles = (palette: Palette) => {
   grip: { alignSelf: 'center', width: 38, height: 4, borderRadius: 2, backgroundColor: palette.trail, marginBottom: 12 },
   where: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   whereTitle: { fontFamily: JOURNAL, color: palette.ink, fontSize: 22 },
-  whereTitleBusy: { color: palette.pine, fontSize: 26 },
   // Not 'transparent': inside a line of text Android drew a fully clear dot in the title's colour.
-  dotOff: { color: 'rgba(0, 0, 0, 0.01)' },
+  finding: { position: 'absolute', left: 0, right: 0, alignItems: 'center', justifyContent: 'center' },
+  // A card, not words on the map: terrain behind text costs contrast (skill §3).
+  findingCard: {
+    alignItems: 'center', minWidth: 200, paddingHorizontal: 28, paddingTop: 22, paddingBottom: 18,
+    borderRadius: 28, backgroundColor: palette.paper, boxShadow: `0 4 18 ${palette.shade}`,
+  },
+  findingText: { fontFamily: JOURNAL, color: palette.ink, fontSize: 24, marginTop: 10 },
+  findingSub: { color: palette.moss, fontSize: 15, fontWeight: '700', marginTop: 4 },
   wherePill: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
     backgroundColor: palette.oat, borderRadius: radius.pill, paddingHorizontal: 11, paddingVertical: 5,

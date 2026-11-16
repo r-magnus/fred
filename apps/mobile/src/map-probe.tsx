@@ -436,8 +436,11 @@ export function MapScreen(
       onPanResponderTerminate: () => rest(fold.current.folded),
     });
   }, [drop]);
-  // What the map has here, read again after each download.
-  const onMap = useMemo(() => whereOnMap(fix), [fix, files]);
+  // What the map has here: read from disk at every render, which is cheap (a
+  // directory listing and a point-in-polygon), so it can never lag behind a
+  // download or a removal the way a cached answer did (#224, emulator walk).
+  const onMap = whereOnMap(fix);
+  useEffect(() => { console.log(`[fred] map here: ${onMap.kind} (files ${files})`); }, [onMap.kind, files]);
   const choose = (id: string | null | 'sim'): void => {
     setPicking(false);
     if (id === 'sim') forgetCarrier(); else saveCarrier(id);

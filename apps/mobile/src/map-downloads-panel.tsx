@@ -12,9 +12,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { STATE_NAMES } from '@fred/rag-core';
 import {
-  downloadBundle, fetchIndex, installState, placeState, removePlace,
+  downloadBundle, fetchIndex, placeState, removePlace,
   type MapIndex, type Progress,
 } from './map-downloads.ts';
+import { detailOnPhone } from './map-files.ts';
 import { orderPlaces, placeBundle, placeName } from './places.ts';
 import { placeKey, regionAt, splitKey } from './regions.ts';
 import { CalmLoader } from './calm-loader.tsx';
@@ -66,6 +67,7 @@ export function MapDownloads(
 
   const states = idx === null ? [] : orderStates(Object.keys(idx.states), here, STATE_NAMES);
   const outline = here === null ? undefined : idx?.regions?.[here]?.outline;
+  const have = detailOnPhone();
   const hereRegion = outline === undefined || at === null || here === null ? null
     : (() => { const r = regionAt(outline, at.longitude, at.latitude); return r === null ? null : placeKey(here, r.id); })();
   // A split state is a heading with its regions under it. A whole-state map
@@ -75,7 +77,9 @@ export function MapDownloads(
       const { state, region } = splitKey(key);
       if (region === null) return [{ kind: 'place' as const, key }];
       const first = i === 0 || splitKey(all[i - 1]!).state !== state;
-      const older = first && idx.states[state] !== undefined && installState(idx.states[state]!) !== 'none';
+      // Judged by its own map file: the state-wide part of the new download
+      // shares the guide and coverage files with it, which made it look half there.
+      const older = first && have.has(state);
       return [
         ...(first ? [{ kind: 'head' as const, state }] : []),
         ...(older ? [{ kind: 'place' as const, key: state, older: true }] : []),
@@ -104,7 +108,7 @@ export function MapDownloads(
           if (row.kind === 'head') {
             return (
               <Text key={`head-${row.state}`} style={styles.head2} accessibilityRole="header">
-                {STATE_NAMES[row.state] ?? row.state}{row.state === here ? '  · you are here' : ''}
+                {STATE_NAMES[row.state] ?? row.state}
               </Text>
             );
           }
@@ -115,7 +119,8 @@ export function MapDownloads(
           const mine = busy === s;
           const inRegion = splitKey(s).region !== null;
           const name = row.older ? `${STATE_NAMES[s] ?? s}, whole state (older download)` : placeName(idx, s, STATE_NAMES);
-          const youAreHere = inRegion ? s === hereRegion : s === here;
+          // Said once: on your region in a split state, else on your state.
+          const youAreHere = row.older === true ? false : inRegion ? s === hereRegion : s === here;
           return (
             <View key={s} style={[styles.row, inRegion && styles.rowRegion]}>
               <View style={{ flex: 1 }}>

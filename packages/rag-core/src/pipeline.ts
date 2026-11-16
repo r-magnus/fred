@@ -704,6 +704,8 @@ export interface Diagnostics {
   /** Model's verdict on whether the context answers the question; null if unchecked. */
   readonly sufficient?: boolean | null;
   /** The understanding step, when it ran: what it read, and whether its search was kept. */
+  /** #228: the message read as small talk was answered as the understanding step's request. */
+  readonly addedToThread?: { readonly message: string; readonly request: string };
   readonly understood?: {
     readonly intent: Understood['intent'];
     readonly request: string;
@@ -894,7 +896,52 @@ export async function ask(
     const again = await askUnvoiced(query, deps, opts);
     if (again.kind === 'answer') res = again;
   }
+  // #228: a message that adds a condition to the question just answered is
+  // not small talk. "what should i bring on a day hike" then "it's supposed
+  // to rain a lot" got "say the word if something comes up", though the
+  // understanding step had read it as "what to bring on a day hike when it's
+  // supposed to rain a lot" and that request found Wikivoyage's rain clothing
+  // at 0.443. The request is asked instead when it carries a word of the
+  // hiker's own that the earlier question didn't ("rain"), and only an
+  // answer is taken from it. "thanks, that helps" and "good to know" add no
+  // topic word to the request and stay small talk.
+  // The understanding step runs only after a weak search; a follow-up joined
+  // to the question before it searched well ("it's really windy up here"
+  // after a tarp question) and was never restated, so it is read here.
+  let addedRequest: string | undefined;
+  if (mayAddToThread(res, query, opts)) {
+    const request = res.kind === 'chat' ? res.diagnostics.understood?.request
+      ?? (await understandMessage(query, opts.history ?? [opts.previous!.question], deps.backend, opts.signal))?.request : undefined;
+    addedRequest = request === undefined ? undefined : addsToThread(res, query, opts, request);
+  }
+  if (addedRequest !== undefined && !opts.signal?.aborted) {
+    // The request already carries the earlier question; joining it again would double it.
+    const { previous: _joined, ...alone } = opts;
+    const again = await askUnvoiced(addedRequest, deps, alone);
+    if (again.kind === 'answer') {
+      res = { ...again, diagnostics: { ...again.diagnostics, addedToThread: { message: query, request: addedRequest } } };
+    }
+  }
   return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
+}
+
+/**
+ * #228: the understanding step's request, when a message read as small talk
+ * adds something of its own to the question Fred just answered.
+ */
+export function mayAddToThread(res: AskResult, query: string, opts: Pick<AskOptions, 'previous' | 'guards' | 'intent'>): boolean {
+  return res.kind === 'chat' && opts.previous !== undefined && opts.guards !== false && opts.intent === true &&
+    !ACKNOWLEDGES.test(query) && !ONLY_ACKNOWLEDGES.test(query) && !saysResolved(query);
+}
+
+export function addsToThread(res: AskResult, query: string, opts: Pick<AskOptions, 'previous' | 'guards' | 'intent'>, requestIn?: string): string | undefined {
+  if (!mayAddToThread(res, query, opts) || res.kind !== 'chat' || opts.previous === undefined) return undefined;
+  const request = (requestIn ?? res.diagnostics.understood?.request)?.trim();
+  if (request === undefined || request === '') return undefined;
+  const before = new Set(judgeWords(opts.previous.question));
+  const inRequest = new Set(judgeWords(request));
+  const added = judgeWords(query).filter((w) => !before.has(w) && inRequest.has(w));
+  return added.length > 0 ? request : undefined;
 }
 
 /**

@@ -1,0 +1,348 @@
+{
+ "description": "Fresh chats for #228 (a follow-up that adds context is read as small talk), written 2026-11-16 before any change: ten conversations where the second message adds a condition to an answered question (rain-like cases: heat, wind, damp wood, kids, tall grass, creeks, clouds, grizzlies, distance, only a pot), and eight controls where the second message only acknowledges or wraps up and must not get a fresh answer. Committed before the first run. Not to be tuned against.",
+ "grading": "A chat passes only if every turn passes. adds-context: the second turn must be answered (expect answer). acknowledgement: the second turn must not get an answer (expect decline, which also accepts small talk).",
+ "chats": [
+  {
+   "id": "c14-desert-heat",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "what should i pack for a desert hike",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "and it's going to be over 100 degrees",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-pot-only",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how do i purify stream water",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "we only have a pot and a lighter",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-tarp-wind",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "what's the best way to set up a tarp",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "it's really windy up here",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-damp-wood",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how do i start a campfire",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "all the wood around here is damp",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-winter-kids",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "what should i wear for a winter hike",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "my kids are coming too",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ticks-grass",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how do i avoid ticks",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "we'll be in tall grass most of the day",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-water-miles",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how much water should i carry",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "it's a 12 mile hike in august",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-feet-creeks",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how do i keep my feet dry",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "the trail crosses a bunch of creeks",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-north-cloudy",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "how do i find north without a compass",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "it's cloudy and i can't see the sun",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-bear-grizzly",
+   "kind": "adds-context",
+   "turns": [
+    {
+     "q": "what should i do if i see a bear",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "we're going into grizzly country",
+     "expect": "answer",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-thanks",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "what should i bring on a day hike",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "thanks, that helps",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-better",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "how do i treat a bee sting",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "ok it's feeling better now",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-gotit",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "how do i purify water",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "got it, thank you",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-allset",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "what should i pack for camping",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "cool, we're all set",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-going",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "how do i start a fire",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "haha nice, the fire is going now",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-goodtoknow",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "how far should i stay from a bear",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "good to know",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-appreciate",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "how do i deal with blisters",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "awesome, appreciate it",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  },
+  {
+   "id": "c14-ack-niceday",
+   "kind": "acknowledgement",
+   "turns": [
+    {
+     "q": "hey fred",
+     "expect": "any",
+     "card": "-",
+     "keyPoints": []
+    },
+    {
+     "q": "it's a nice day out",
+     "expect": "decline",
+     "card": "-",
+     "keyPoints": []
+    }
+   ],
+   "unsafe": []
+  }
+ ]
+}

@@ -931,16 +931,25 @@ export async function ask(
  */
 export function mayAddToThread(res: AskResult, query: string, opts: Pick<AskOptions, 'previous' | 'guards' | 'intent'>): boolean {
   return res.kind === 'chat' && opts.previous !== undefined && opts.guards !== false && opts.intent === true &&
-    !ACKNOWLEDGES.test(query) && !ONLY_ACKNOWLEDGES.test(query) && !saysResolved(query);
+    !ACKNOWLEDGES.test(query) && !ONLY_ACKNOWLEDGES.test(query) && !saysResolved(query) && !REPORTS_SUCCESS.test(query);
 }
+
+/**
+ * A message that says something worked is a wrap-up, not a new condition:
+ * "haha nice, the fire is going now" after a campfire question was answered
+ * with the campfire card again (#228, fresh controls).
+ */
+const REPORTS_SUCCESS = /^\s*(?:haha|ha|lol|yay|woo+|nice|sweet|awesome|perfect|great|good|cool|ok(?:ay)?|thanks?)\b|\b(?:is|are|it's|its) (?:going|working|lit|burning) (?:now|fine|well)\b|\b(?:that |it )?(?:worked|did the trick|did it)\b|\bmade it\b|\bfound (?:it|the trail|them|him|her)\b|\b(?:all|we're|were) (?:set|good|fine)\b/i;
 
 export function addsToThread(res: AskResult, query: string, opts: Pick<AskOptions, 'previous' | 'guards' | 'intent'>, requestIn?: string): string | undefined {
   if (!mayAddToThread(res, query, opts) || res.kind !== 'chat' || opts.previous === undefined) return undefined;
   const request = (requestIn ?? res.diagnostics.understood?.request)?.trim();
   if (request === undefined || request === '') return undefined;
-  const before = new Set(judgeWords(opts.previous.question));
+  const earlier = judgeWords(opts.previous.question);
+  const before = new Set(earlier);
   const inRequest = new Set(judgeWords(request));
-  const added = judgeWords(query).filter((w) => !before.has(w) && inRequest.has(w));
+  // Part of an earlier word is not new: "fire" after "campfire".
+  const added = judgeWords(query).filter((w) => !before.has(w) && !earlier.some((e) => e.includes(w) || w.includes(e)) && inRequest.has(w));
   return added.length > 0 ? request : undefined;
 }
 

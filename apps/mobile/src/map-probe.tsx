@@ -28,7 +28,7 @@ import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
 import { RouteLayers } from './route-layer.tsx';
 import { NavCard, RouteCard } from './route-card.tsx';
-import { STAY_PUT, distanceWords, routeBounds, routeProgress, timeWords, type RouteProgress } from './route-view.ts';
+import { PIN_HINT, SIGNAL_HEADLINE, STAY_PUT, distanceWords, routeBounds, routeProgress, timeWords, type RouteProgress } from './route-view.ts';
 import { useFollow } from './use-follow.ts';
 import { useRoute, type LngLat, type RouteState } from './use-route.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
@@ -230,7 +230,7 @@ function regionsToOffer(): { readonly place: string; readonly region: RegionOutl
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, onUserMove, navigating = false, track = false, onTrackingStopped }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, navigating = false, track = false, onTrackingStopped }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
     /** A dropped pin and the walking route to it (#226), drawn under the hiker. */
     route?: RouteState;
@@ -241,8 +241,6 @@ function FredMap(
      * faces is up, so the hiker's drop points straight up instead of turning.
      */
     headingUp?: boolean;
-    /** The hiker moved the map by hand. */
-    onUserMove?: () => void;
     /**
      * Walking a route (#226): MapLibre draws the hiker and, with `track`, its
      * camera follows them and turns with the compass natively, every frame.
@@ -307,7 +305,6 @@ function FredMap(
         // North stays up and the map stays flat: the compass dial shows which
         // way the phone points, and a turned map would make it read wrongly.
         touchRotate={false} touchPitch={false}
-        onRegionWillChange={onUserMove === undefined ? undefined : (e) => { if (e.nativeEvent.userInteraction) onUserMove(); }}
         onLongPress={onLongPress === undefined ? undefined : (e) => {
           const [lon, lat] = e.nativeEvent.lngLat;
           onLongPress([lon, lat]);
@@ -481,6 +478,7 @@ export function MapScreen(
   fold.current = { max: Math.max(0, sheet - peek), folded };
   // Its height changes as the signal advice arrives; a folded sheet stays folded.
   useEffect(() => { drop.setValue(folded ? fold.current.max : 0); }, [sheet]);
+  const toggleFold = useRef<() => void>(() => undefined);
   const drag = useMemo(() => {
     let from = 0;
     const rest = (down: boolean): void => {
@@ -489,6 +487,7 @@ export function MapScreen(
       }).start();
       setFolded(down);
     };
+    toggleFold.current = () => rest(!fold.current.folded);
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => { drop.stopAnimation(); from = fold.current.folded ? fold.current.max : 0; },
@@ -502,8 +501,40 @@ export function MapScreen(
     });
   }, [drop]);
   useSignalSuggestion(route, fix, coverage, suggestSignal);
+  // Who has the map (2026-11-16, Ryan: the map moved under his finger and
+  // the pin landed in the wrong place; Re-centre while walking let go at
+  // once). Only a finger on the map takes it from Fred: MapLibre's own
+  // "tracking stopped" and "user interaction" flags also fire for camera
+  // moves from code and the panel resizing, which read as the hiker leaving.
+  // `touched`: a finger has been on the map since Fred last moved it on
+  // request, so new positions and refits leave the camera alone.
+  // `dragged`: the current touch moved the map, which ends following a route.
+  const touched = useRef(false);
+  const touch = useRef({ x: 0, y: 0, dragged: false });
+  /** Until then the camera is moving by itself: a long-press now would land in the wrong place. */
+  const codeMoveUntil = useRef(0);
+  const moveCamera = (ms: number): void => { codeMoveUntil.current = Date.now() + ms + 150; };
+  const navRef = useRef(false);
+  const dragged = (): void => {
+    if (touch.current.dragged) return;
+    touch.current.dragged = true;
+    if (navRef.current) setFollowing(false);
+  };
+  const mapTouch = {
+    onTouchStart: (e: { nativeEvent: { pageX: number; pageY: number; touches: readonly unknown[] } }) => {
+      touched.current = true;
+      touch.current = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY, dragged: false };
+      if (e.nativeEvent.touches.length > 1) dragged();
+    },
+    onTouchMove: (e: { nativeEvent: { pageX: number; pageY: number; touches: readonly unknown[] } }) => {
+      const { pageX, pageY, touches } = e.nativeEvent;
+      if (touches.length > 1 || Math.hypot(pageX - touch.current.x, pageY - touch.current.y) > 12) dragged();
+    },
+  };
   // A new pin opens the sheet, where its card is.
   const dropPin = (at: LngLat): void => {
+    // The map was sliding under the finger: the point held is not the one meant.
+    if (Date.now() < codeMoveUntil.current) return;
     route.dropPin(at);
     drop.setValue(0);
     setFolded(false);
@@ -512,11 +543,20 @@ export function MapScreen(
   // sheet. Fitted again when the sheet's height settles, because the route
   // card makes the sheet taller in the same render that brings the route, and
   // a fit to the old height hid the start behind it (phone, 2026-11-15).
+  // A route the hiker asked for is always fitted; one Fred suggested, or a
+  // refit for the sheet's new height, only while nobody has a hand on the map.
   const readyRoute = route.state.kind === 'ready' ? route.state.route : null;
+  const fitted = useRef<typeof readyRoute>(null);
   useEffect(() => {
-    if (readyRoute === null || navigating) return;
+    if (readyRoute === null || navigating) { if (readyRoute === null) fitted.current = null; return; }
+    const fresh = fitted.current !== readyRoute;
+    const asked = route.state.kind === 'ready' && route.state.purpose !== 'signal';
+    if (touched.current && !(fresh && asked)) return;
     const b = routeBounds(readyRoute);
     if (b === null) return;
+    fitted.current = readyRoute;
+    touched.current = false;
+    moveCamera(600);
     camera.current?.fitBounds(b, {
       padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, bearing: 0, pitch: 0, duration: 600,
     });
@@ -530,9 +570,26 @@ export function MapScreen(
   // Tracking switches on only after the ease has finished: a camera move from
   // code cancels native tracking, which would read as the hiker dragging away.
   const [tracking, setTracking] = useState(false);
+  navRef.current = navigating;
+  // The walking sheet's height changes by a line as the words change; only a
+  // real change moves the camera, which used to drop tracking every few steps.
+  const [navSheet, setNavSheet] = useState(sheet);
+  useEffect(() => { if (Math.abs(sheet - navSheet) > 40) setNavSheet(sheet); }, [sheet]);
+  // Bumped to take the follow back after it dropped with no finger on the map.
+  const [rearm, setRearm] = useState(0);
+  const rearmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trackingLost = (): void => {
+    if (touch.current.dragged) { setFollowing(false); return; }
+    if (rearmTimer.current !== null) return;
+    rearmTimer.current = setTimeout(() => { rearmTimer.current = null; setRearm((n) => n + 1); }, 300);
+  };
+  useEffect(() => () => { if (rearmTimer.current !== null) clearTimeout(rearmTimer.current); }, []);
+  const sheetNow = useRef(sheet);
+  sheetNow.current = navSheet;
   useEffect(() => {
     setTracking(false);
     if (!navigating || !following) return;
+    const sheet = sheetNow.current;
     const p = liveRef.current;
     if (p !== null) {
       camera.current?.easeTo({
@@ -542,8 +599,9 @@ export function MapScreen(
     }
     const t = setTimeout(() => setTracking(true), 450);
     return () => clearTimeout(t);
-  }, [navigating, following, sheet, screen.height]);
-  const startNav = (): void => { lastAlong.current = 0; setFollowing(true); setNavigating(true); };
+  }, [navigating, following, navSheet, screen.height, rearm]);
+  const recentre = (): void => { touch.current.dragged = false; setFollowing(true); setRearm((n) => n + 1); };
+  const startNav = (): void => { lastAlong.current = 0; touch.current.dragged = false; setFollowing(true); setNavigating(true); };
   // The fit effect above runs again when this drops, and puts the map back
   // north up and flat with the whole route on screen.
   const endNav = (): void => setNavigating(false);
@@ -580,9 +638,12 @@ export function MapScreen(
   // The map follows a new position. It drew the one it opened with itself;
   // opened with none, it starts far out and has to be brought in to the first.
   const seen = useRef(fix === null ? 'none' : 'drawn');
+  // Not once a hand is on the map: a better fix arriving seconds later
+  // pulled the map out from under a pin being placed (Ryan, 2026-11-16).
   useEffect(() => {
     if (fix === null) return;
-    if (seen.current !== 'drawn') {
+    if (seen.current !== 'drawn' && !touched.current) {
+      moveCamera(600);
       camera.current?.easeTo({
         center: [fix.longitude, fix.latitude], duration: 600, ...(seen.current === 'none' ? { zoom: 11 } : {}),
       });
@@ -601,13 +662,15 @@ export function MapScreen(
   }, [offer, picking, managing, onClose, route.state.kind, route.clear, navigating]);
   return (
     <View style={styles.root}>
+      <View style={styles.root} {...mapTouch}>
       <FredMap key={files} fix={shownFix} coverage={coverage} zoom={11} camera={camera} heading={heading} creditBottom={(folded ? peek : sheet) + 8}
         onRegion={setOffer} route={route.state} onLongPress={navigating ? undefined : dropPin}
         // Paused (moved by hand) the map keeps the last bearing it turned to, so
         // the drop still points up, not along the compass on top of the turn.
-        headingUp={navigating} onUserMove={navigating ? () => setFollowing(false) : undefined}
+        headingUp={navigating}
         navigating={navigating} track={navigating && following && tracking}
-        onTrackingStopped={navigating && tracking ? () => setFollowing(false) : undefined} />
+        onTrackingStopped={navigating && tracking ? trackingLost : undefined} />
+      </View>
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}
@@ -626,8 +689,10 @@ export function MapScreen(
             disabled={where.locating}
             onPress={() => {
               // Walking a route: the target puts the map back on you, turning with the phone.
-              if (navigating) { setFollowing(true); return; }
-              if (fix !== null) camera.current?.easeTo({ center: [fix.longitude, fix.latitude], zoom: 12, duration: 600 });
+              if (navigating) { recentre(); return; }
+              // Asked for: the map is Fred's again, and follows the new fix.
+              touched.current = false;
+              if (fix !== null) { moveCamera(600); camera.current?.easeTo({ center: [fix.longitude, fix.latitude], zoom: 12, duration: 600 }); }
               where.locate();
             }}
             onLongPress={where.toggleRecording}
@@ -643,7 +708,7 @@ export function MapScreen(
 
       {/* Walking a route and the map was moved by hand: one tap puts it back. */}
       {navigating && !following && !panel && (
-        <Pressable style={[styles.recentre, { bottom: (folded ? peek : sheet) + 14 }]} onPress={() => setFollowing(true)}
+        <Pressable style={[styles.recentre, { bottom: (folded ? peek : sheet) + 14 }]} onPress={recentre}
           accessibilityRole="button" accessibilityLabel="Re-centre the map on you">
           <Text style={styles.recentreText}>Re-centre</Text>
         </Pressable>
@@ -655,6 +720,8 @@ export function MapScreen(
           {/* The handle: the grip and the title under it. */}
           <View {...drag.panHandlers} style={styles.handle}
             accessible accessibilityRole="button" accessibilityState={{ expanded: !folded }}
+            // TalkBack can't drag: a double-tap folds and opens it too.
+            accessibilityActions={[{ name: 'activate' }]} onAccessibilityAction={() => toggleFold.current()}
             accessibilityLabel={folded ? 'Show the map details' : 'Hide the map details'}>
           <View style={styles.grip} />
           {!navigating && (
@@ -663,13 +730,13 @@ export function MapScreen(
               accessibilityLabel={where.locating ? 'Finding you' : undefined}>
               {where.locating ? <>Finding you<Dots /></> : fix === null ? 'Where are you?' : 'You are here'}
             </Text>
-            {(fix !== null || where.progress !== null) && (
+            {(where.locating ? where.progress !== null : fix !== null && (fix.accuracyMeters !== null || fix.state !== null)) && (
               <View style={styles.wherePill}>
                 <View style={styles.meDot} />
                 <Text style={styles.wherePillText}>
                   {where.locating && where.progress !== null ? `±${Math.round(where.progress)} m so far`
-                    : fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`
-                      + `${fix.state === null ? '' : ` · ${fix.state}`}`}
+                    : fix === null ? ''
+                    : [fix.accuracyMeters === null ? null : `within ${Math.round(fix.accuracyMeters)} m`, fix.state].filter((x) => x !== null).join(' · ')}
                 </Text>
               </View>
             )}
@@ -686,7 +753,8 @@ export function MapScreen(
           ) : route.state.kind !== 'none' ? (
             <RouteCard state={route.state} fix={fix}
               onRoute={() => { if (fix !== null) route.plan(fix); }} onClear={route.clear}
-              onStart={fix === null ? undefined : startNav} />
+              onStart={fix === null ? undefined : startNav}
+              onLocate={where.locating ? undefined : where.locate} onGetMap={() => setManaging(true)} />
           ) : (<>
           {where.note !== null && (
             <Pressable onPress={where.dismissNote}>
@@ -714,7 +782,9 @@ export function MapScreen(
             </>
           )}
           {fix === null && !where.locating && where.note === null && access === 'granted' && (
-            <Text style={styles.sheetText}>Tap the round target button, top right, to find where you are.</Text>
+            <Pressable style={styles.getMap} onPress={where.locate} accessibilityRole="button">
+              <Text style={styles.getMapText}>Find where I am</Text>
+            </Pressable>
           )}
           {/* The map for where you are isn't on the phone: offer it right here. */}
           {onMap.kind === 'state-missing' && (
@@ -750,7 +820,7 @@ export function MapScreen(
           )}
           {coverage !== null && (
             <>
-              <Text style={styles.sheetText}>{coverage.advice}</Text>
+              <Advice text={coverage.advice} styles={styles} />
               <View style={styles.legend}>
                 {coverage.carrierName !== null && (
                   <View style={styles.legendItem}>
@@ -765,6 +835,7 @@ export function MapScreen(
               </View>
             </>
           )}
+          {fix !== null && <Text style={styles.hint}>{PIN_HINT}</Text>}
           <View style={styles.links}>
             {pack !== null && carrier !== null && (
               <Pressable onPress={() => setPicking(true)} hitSlop={10} style={styles.link} accessibilityRole="button">
@@ -841,9 +912,7 @@ export function MapPreview(
     const b = routeBounds(ready);
     if (b !== null) camera.current?.fitBounds(b, { padding: { top: 24, right: 24, bottom: 24, left: 24 }, duration: 0 });
   }, [ready]);
-  const routeLine = ready === null ? null
-    // Staying put first, as on the full map's card.
-    : `${STAY_PUT} Route to signal: ${distanceWords(ready.meters)} · ${timeWords(ready.seconds)}.`;
+  const routeLine = ready === null ? null : `${SIGNAL_HEADLINE}: ${distanceWords(ready.meters)} · ${timeWords(ready.seconds)}.`;
   const onMap = useMemo(() => whereOnMap(fix), [fix]);
   const within = fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`;
   const caption = coverage !== null ? coverage.advice
@@ -859,9 +928,14 @@ export function MapPreview(
       <View style={styles.preview} pointerEvents="none">
         <FredMap fix={fix} coverage={coverage} zoom={12} credit={false} camera={camera} route={route.state} />
       </View>
+      {/* Staying put first, as on the full map's card, then the route: two
+          lines, not one bold paragraph. With a route shown, the signal advice
+          keeps only its headline: its "nearest coverage" is the route. */}
+      {routeLine !== null && <Text style={styles.previewStay}>{STAY_PUT}</Text>}
       {routeLine !== null && <Text style={styles.previewRoute}>{routeLine}</Text>}
       {/* #77: left out when Fred's reply above has already said it. */}
-      {quiet && coverage !== null ? null : <Text style={styles.previewCaption}>{caption}</Text>}
+      {quiet && coverage !== null ? null
+        : <Text style={styles.previewCaption}>{routeLine !== null && coverage !== null ? splitAdvice(caption).head : caption}</Text>}
       {edgeNote !== null && <Text style={styles.previewEdge}>{edgeNote}</Text>}
       <Text style={styles.previewOpen}>Tap to open the map</Text>
     </Pressable>
@@ -886,6 +960,26 @@ function useSignalSuggestion(
   }, [enabled, fix, coverage, route.state.kind]);
 }
 
+/**
+ * The signal advice as a bold headline and the rest (2026-11-16 UX pass):
+ * three or four sentences in one paragraph were read as none. The words are
+ * the same ones the chat says, only split at the first sentence.
+ */
+export function splitAdvice(text: string): { head: string; rest: string } {
+  const at = text.indexOf('. ');
+  return at < 0 ? { head: text, rest: '' } : { head: text.slice(0, at + 1), rest: text.slice(at + 2) };
+}
+
+function Advice({ text, styles }: { text: string; styles: ReturnType<typeof makeStyles> }): React.JSX.Element {
+  const { head, rest } = splitAdvice(text);
+  return (
+    <>
+      <Text style={styles.adviceHead}>{head}</Text>
+      {rest !== '' && <Text style={styles.adviceRest}>{rest}</Text>}
+    </>
+  );
+}
+
 /** Your carrier's gaps: amber. No carrier at all: red, the stronger warning. */
 const GAP = '#E0892B';
 const NONE = '#D8423F';
@@ -903,9 +997,10 @@ const makeStyles = (palette: Palette) => {
   const land = coloursFor(palette).land;
   return StyleSheet.create({
   preview: { height: 190, borderRadius: radius.control, overflow: 'hidden', backgroundColor: land },
-  previewRoute: { color: palette.ink, fontSize: 14, lineHeight: 20, fontWeight: '700', marginTop: 8 },
-  previewCaption: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 10 },
-  previewEdge: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 6 },
+  previewStay: { color: palette.ink, fontSize: 16, lineHeight: 22, fontWeight: '700', marginTop: 10 },
+  previewRoute: { color: palette.ink, fontSize: 16, lineHeight: 22, marginTop: 4 },
+  previewCaption: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 8 },
+  previewEdge: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 6 },
   previewOpen: { color: palette.pine, fontSize: 13, fontWeight: '700', marginTop: 4 },
   root: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: land },
   map: { flex: 1 },
@@ -957,7 +1052,10 @@ const makeStyles = (palette: Palette) => {
   },
   meDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: ME, borderWidth: 2, borderColor: palette.paper },
   wherePillText: { color: palette.ink, fontSize: 13, fontWeight: '700' },
-  sheetText: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 10 },
+  sheetText: { color: palette.ink, fontSize: 16, lineHeight: 23, marginTop: 10 },
+  adviceHead: { color: palette.ink, fontSize: 16, lineHeight: 23, fontWeight: '700', marginTop: 10 },
+  adviceRest: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 4 },
+  hint: { color: palette.moss, fontSize: 14, lineHeight: 20, marginTop: 12 },
   getMap: {
     alignSelf: 'flex-start', marginTop: 12, minHeight: 48, justifyContent: 'center',
     backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 20, paddingVertical: 11,
@@ -969,7 +1067,7 @@ const makeStyles = (palette: Palette) => {
     backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
   },
   edgeTitle: { color: palette.ink, fontSize: 15, fontWeight: '700', lineHeight: 21 },
-  edgeText: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  edgeText: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 4 },
   edgeButton: {
     alignSelf: 'flex-start', marginTop: 10, minHeight: 48, justifyContent: 'center',
     borderRadius: radius.pill, paddingHorizontal: 18, borderWidth: 1.5, borderColor: palette.pine, backgroundColor: palette.paper,

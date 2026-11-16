@@ -38,18 +38,38 @@ export function RouteLayers({ state, night }: { state: RouteState; night: boolea
             paint={{ 'line-color': c.unsure, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 3, 15, 6], 'line-dasharray': [1.6, 1.1] }} />
         </GeoJSONSource>
       )}
+      {/* A classic map pin (2026-11-16, Ryan): a teardrop standing on its
+          point, the point exactly on the spot (anchor "bottom"). Not to be
+          taken for the hiker's own drop, which is blue, smaller and turns
+          with the compass: this one is clay, bigger, has a hole, and always
+          points down. A square with one sharp corner, turned 45° so the
+          corner is at the bottom. */}
       <Marker id="route-pin" lngLat={[state.pin[0], state.pin[1]]} anchor="bottom">
         <View style={styles.pin} accessibilityLabel="Route destination" collapsable={false}>
-          <View style={[styles.head, { backgroundColor: c.pin, borderColor: c.halo }]} />
-          <View style={[styles.stem, { backgroundColor: c.pin }]} />
+          <View style={[styles.drop, { backgroundColor: c.pin, borderColor: c.halo }]}>
+            <View style={[styles.hole, { backgroundColor: c.halo }]} />
+          </View>
         </View>
       </Marker>
     </>
   );
 }
 
+/**
+ * The pin's size. A square of side S turned 45° about its middle: the round
+ * part reaches S/2 above the middle, the point S/√2 below it, so the box is
+ * S wide and S/2 + S/√2 tall, with the point on its bottom edge.
+ */
+const S = 30;
+const TALL = Math.ceil(S / 2 + S / Math.SQRT2);
+
 const styles = StyleSheet.create({
-  pin: { alignItems: 'center', width: 28, height: 38 },
-  head: { width: 22, height: 22, borderRadius: 11, borderWidth: 3 },
-  stem: { width: 3, height: 14, marginTop: -1, borderRadius: 1.5 },
+  pin: { width: S, height: TALL },
+  drop: {
+    position: 'absolute', left: 0, top: 0, width: S, height: S,
+    borderRadius: S / 2, borderBottomRightRadius: 0, borderWidth: 3,
+    transform: [{ rotate: '45deg' }], alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 1 3 rgba(0,0,0,0.35)',
+  },
+  hole: { width: 10, height: 10, borderRadius: 5 },
 });

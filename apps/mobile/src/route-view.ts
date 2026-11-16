@@ -96,7 +96,8 @@ export function climbWords(route: Route): string | null {
 
 // ------------------------------------------------------------------- words
 
-export const ROUTE_HEADLINE = 'Rough route: check it against what you see.';
+/** The card's title: the route is a rough guide, said before its numbers. */
+export const ROUTE_HEADLINE = 'Rough route';
 
 /**
  * A route Fred suggests to the nearest reported signal, for someone who is
@@ -105,11 +106,17 @@ export const ROUTE_HEADLINE = 'Rough route: check it against what you see.';
  * wording 2026-11-16.
  */
 export const SIGNAL_HEADLINE = 'Route to signal';
+/** The full map's card title: "rough" said up front, as on any route (2026-11-16 UX pass). */
+export const SIGNAL_TITLE = 'Rough route to signal';
 export const STAY_PUT = 'If people know where you are, staying put is often safest.';
 export const SIGNAL_SOURCE = 'The signal there is what carriers report, not a promise of bars.';
 
+/**
+ * Said under every route, never behind a tap. One sentence since the
+ * 2026-11-16 UX pass: the card's title says "rough", this says why.
+ */
 export const ALWAYS_CAVEAT =
-  "Maps can be out of date. This route doesn't know about private land, closures or how hard a trail is.";
+  "Check it against what you see: maps can be out of date, and don't show private land, closures or how hard a trail is.";
 
 const unsureMeters = (route: Route, kind: RouteStretch['kind']): number =>
   route.stretches.reduce((a, s) => a + (s.kind === kind ? s.meters : 0), 0);
@@ -125,11 +132,13 @@ const NOTE_WORDS: Partial<Record<RouteNote, string>> = {
 export function routeWarnings(route: Route): string[] {
   const out: string[] = [];
   const off = unsureMeters(route, 'off-trail');
+  const guessed = route.stretches.some((s) => s.kind === 'guessed-join');
+  // One sentence for everything drawn in orange, so the box stays short.
   if (off >= 30) {
-    out.push(`${distanceWords(off)} has no trail on the map (shown in orange). Go slowly, and turn back if it gets steep or blocked.`);
-  }
-  if (route.stretches.some((s) => s.kind === 'guessed-join')) {
-    out.push('Where paths almost meet on the map, Fred guessed they join (also in orange).');
+    out.push(`${distanceWords(off)} has no trail on the map${guessed ? ', and Fred guessed where some paths join' : ''} (shown in orange). `
+      + 'Go slowly, and turn back if it gets steep or blocked.');
+  } else if (guessed) {
+    out.push('Where paths almost meet on the map, Fred guessed they join (shown in orange).');
   }
   for (const note of ['steep', 'stream', 'wetland', 'major-road'] as const) {
     if (route.notes.includes(note)) out.push(NOTE_WORDS[note]!);
@@ -144,6 +153,22 @@ export function trailNames(route: Route, max = 3): string[] {
   for (const s of route.stretches) if (s.sure && s.name !== null) byName.set(s.name, (byName.get(s.name) ?? 0) + s.meters);
   return [...byName.entries()].filter(([, m]) => m >= 200).sort((a, b) => b[1] - a[1]).slice(0, max).map(([n]) => n);
 }
+
+/** What the hiker can do about a failed plan: never a dead end. */
+export type FailureStep = 'move-pin' | 'get-map' | 'retry' | null;
+
+export function failureStep(reason: PlanFailure): FailureStep {
+  switch (reason) {
+    case 'too-far': case 'destination-unwalkable': case 'no-route': return 'move-pin';
+    case 'no-map': return 'get-map';
+    case 'start-unwalkable': return 'retry';
+    case 'cancelled': return null;
+  }
+}
+
+/** Shown wherever a pin can be dropped or moved; the gesture has no button of its own. */
+export const PIN_HINT = 'Press and hold the map to drop a pin and get a walking route there.';
+export const MOVE_PIN_HINT = 'Press and hold somewhere else on the map to move the pin.';
 
 export function failureWords(reason: PlanFailure): string {
   switch (reason) {

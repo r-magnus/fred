@@ -13,7 +13,7 @@ import { distanceMeters } from '@fred/geo';
 import { CalmLoader } from './calm-loader.tsx';
 import { radius, useThemed, type Palette } from './theme.tsx';
 import {
-  ALWAYS_CAVEAT, ROUTE_HEADLINE, SIGNAL_HEADLINE, SIGNAL_SOURCE, STAY_PUT, climbWords, distanceWords, failureWords, progressLine, routeWarnings, timeWords, trailNames,
+  ALWAYS_CAVEAT, MOVE_PIN_HINT, ROUTE_HEADLINE, SIGNAL_SOURCE, SIGNAL_TITLE, STAY_PUT, climbWords, distanceWords, failureStep, failureWords, progressLine, routeWarnings, timeWords, trailNames,
   type RouteProgress,
 } from './route-view.ts';
 import type { RouteState } from './use-route.ts';
@@ -25,9 +25,19 @@ export interface RouteCardProps {
   readonly onClear: () => void;
   /** Start walking it: the map follows and turns with the phone. */
   readonly onStart?: () => void;
+  /** No position yet: ask for one, in place of a greyed-out Route here. */
+  readonly onLocate?: () => void;
+  /** No detailed map here: open the offline maps panel. */
+  readonly onGetMap?: () => void;
 }
 
-export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardProps): React.JSX.Element | null {
+/**
+ * 2026-11-16 UX pass: the ready card went from about a dozen lines to the
+ * fewest that still say what matters. The title carries "rough"; distance,
+ * time and climb share one line; the caution is one sentence. Every failure
+ * ends with something to do (skill §4, never a dead end).
+ */
+export function RouteCard({ state, fix, onRoute, onClear, onStart, onLocate, onGetMap }: RouteCardProps): React.JSX.Element | null {
   const { styles } = useThemed(makeStyles);
   if (state.kind === 'none') return null;
   // Fred's suggestion of the nearest signal (#226): staying put comes first,
@@ -44,6 +54,11 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardPr
       <Text style={styles.linkText}>{label}</Text>
     </Pressable>
   );
+  const primary = (label: string, onPress: () => void, hint?: string) => (
+    <Pressable style={styles.primary} onPress={onPress} accessibilityRole="button" accessibilityHint={hint}>
+      <Text style={styles.primaryText}>{label}</Text>
+    </Pressable>
+  );
 
   if (state.kind === 'pin') {
     const away = fix === null ? null : distanceMeters(fix.latitude, fix.longitude, state.pin[1], state.pin[0]);
@@ -52,14 +67,13 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardPr
         {stayPut}
         <Text style={styles.title}>{signal ? 'Nearest reported signal' : 'Pin dropped'}</Text>
         <Text style={styles.text}>
-          {away === null ? 'Fred needs to know where you are before it can plan a route.'
+          {away === null ? 'Fred needs to know where you are to plan a route.'
             : `${distanceWords(away)} away in a straight line.`}
         </Text>
         <View style={styles.row}>
-          <Pressable style={[styles.primary, fix === null && styles.disabled]} disabled={fix === null}
-            onPress={onRoute} accessibilityRole="button" accessibilityState={{ disabled: fix === null }}>
-            <Text style={styles.primaryText}>Route here</Text>
-          </Pressable>
+          {away === null
+            ? (onLocate !== undefined && primary('Find where I am', onLocate))
+            : primary('Route here', onRoute)}
           {clear('Remove pin')}
         </View>
       </View>
@@ -80,12 +94,18 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardPr
   }
 
   if (state.kind === 'failed') {
+    const step = failureStep(state.reason);
     return (
       <View style={styles.card}>
         {stayPut}
         <Text style={styles.title}>{signal ? 'No route to signal' : 'No route'}</Text>
         <Text style={styles.text}>{failureWords(state.reason)}</Text>
-        <View style={styles.row}>{clear('Remove pin')}</View>
+        {step === 'move-pin' && <Text style={styles.hint}>{MOVE_PIN_HINT}</Text>}
+        <View style={styles.row}>
+          {step === 'get-map' && onGetMap !== undefined && primary('Get the map', onGetMap)}
+          {step === 'retry' && fix !== null && primary('Try again', onRoute)}
+          {clear('Remove pin')}
+        </View>
       </View>
     );
   }
@@ -94,15 +114,13 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardPr
   const climb = climbWords(route);
   const names = trailNames(route);
   const warnings = routeWarnings(route);
+  // "2.3 km · about 40–60 min · 120 m up": one line to read, not three.
+  const numbers = [distanceWords(route.meters), timeWords(route.seconds), ...(climb === null ? [] : [climb.toLowerCase()])].join(' · ');
   return (
     <View style={styles.card}>
       {stayPut}
-      <Text style={styles.title}>{signal ? SIGNAL_HEADLINE : ROUTE_HEADLINE}</Text>
-      <Text style={styles.numbers} accessibilityRole="summary">
-        {distanceWords(route.meters)} · {timeWords(route.seconds)}
-      </Text>
-      {signal && <Text style={styles.text}>{ROUTE_HEADLINE}</Text>}
-      {climb !== null && <Text style={styles.text}>{climb}</Text>}
+      <Text style={styles.title} accessibilityRole="header">{signal ? SIGNAL_TITLE : ROUTE_HEADLINE}</Text>
+      <Text style={styles.numbers} accessibilityRole="summary">{numbers}</Text>
       {names.length > 0 && <Text style={styles.text}>Follows {names.join(', ')}.</Text>}
       {warnings.length > 0 && (
         <View style={styles.warn}>
@@ -110,14 +128,9 @@ export function RouteCard({ state, fix, onRoute, onClear, onStart }: RouteCardPr
           {warnings.map((w) => <Text key={w} style={styles.warnText}>{w}</Text>)}
         </View>
       )}
-      <Text style={styles.caveat}>{signal ? `${SIGNAL_SOURCE} ${ALWAYS_CAVEAT}` : ALWAYS_CAVEAT}</Text>
+      <Text style={styles.caveat}>{signal ? `${ALWAYS_CAVEAT} ${SIGNAL_SOURCE}` : ALWAYS_CAVEAT}</Text>
       <View style={styles.row}>
-        {onStart !== undefined && (
-          <Pressable style={styles.primary} onPress={onStart} accessibilityRole="button"
-            accessibilityHint="The map follows you and turns the way you face">
-            <Text style={styles.primaryText}>Start</Text>
-          </Pressable>
-        )}
+        {onStart !== undefined && primary('Start', onStart, 'The map follows you and turns the way you face')}
         {clear('Clear route')}
       </View>
     </View>
@@ -157,15 +170,15 @@ export function NavCard(
 const makeStyles = (palette: Palette) => StyleSheet.create({
   card: { marginTop: 12 },
   title: { color: palette.ink, fontSize: 16, fontWeight: '700', lineHeight: 22 },
-  numbers: { color: palette.ink, fontSize: 20, fontWeight: '700', marginTop: 6 },
-  text: { color: palette.ink, fontSize: 15, lineHeight: 22, marginTop: 6 },
+  numbers: { color: palette.ink, fontSize: 20, fontWeight: '700', lineHeight: 26, marginTop: 6 },
+  text: { color: palette.ink, fontSize: 16, lineHeight: 23, marginTop: 6 },
+  hint: { color: palette.moss, fontSize: 15, lineHeight: 22, marginTop: 6 },
   planning: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: 12 },
   primary: {
     minHeight: 48, justifyContent: 'center',
     backgroundColor: palette.pine, borderRadius: radius.pill, paddingHorizontal: 20, paddingVertical: 11,
   },
-  disabled: { opacity: 0.45 },
   primaryText: { color: palette.paper, fontSize: 15, fontWeight: '700' },
   link: { minHeight: 48, justifyContent: 'center' },
   linkText: { color: palette.pine, fontSize: 15, fontWeight: '700', textDecorationLine: 'underline' },
@@ -174,14 +187,16 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     backgroundColor: palette.butter, borderLeftWidth: 4, borderLeftColor: palette.amber,
   },
   warnTitle: { color: palette.ink, fontSize: 15, fontWeight: '700', lineHeight: 21 },
-  warnText: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 4 },
+  // Safety text: body size, not small print (skill §2).
+  warnText: { color: palette.ink, fontSize: 16, lineHeight: 23, marginTop: 4 },
   // Safety advice before the route, not a warning about it: pine, not amber.
   stay: {
     padding: 12, borderRadius: radius.control, marginBottom: 10,
     backgroundColor: palette.cream, borderLeftWidth: 4, borderLeftColor: palette.pine,
   },
   stayText: { color: palette.ink, fontSize: 16, fontWeight: '700', lineHeight: 22 },
-  caveat: { color: palette.moss, fontSize: 13, lineHeight: 19, marginTop: 10 },
+  // Ink, not moss: it is safety text, and 7:1 survives the sun better (skill §3).
+  caveat: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 10 },
   nav: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10 },
   navText: { flex: 1 },
   // Words and a left edge as well as colour, as the sheet's other warnings.

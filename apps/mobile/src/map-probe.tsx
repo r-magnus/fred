@@ -9,7 +9,7 @@
  * thumbnail the chat shows when someone says they are lost (US-05).
  */
 import { Map, Camera, GeoJSONSource, Layer, Marker, NativeUserLocation, type CameraRef } from '@maplibre/maplibre-react-native';
-import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AccessibilityInfo, Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { FilterSpecification, StyleSpecification } from '@maplibre/maplibre-react-native';
@@ -612,7 +612,14 @@ export function MapScreen(
   }, []);
   // After the system's question is answered, and on coming back from Settings.
   const wasLocating = useRef(where.locating);
-  useEffect(() => { if (wasLocating.current && !where.locating) readAccess(); wasLocating.current = where.locating; }, [where.locating]);
+  useEffect(() => {
+    if (wasLocating.current && !where.locating) {
+      readAccess();
+      // The card goes quietly; a screen reader hears the outcome.
+      if (fix !== null) AccessibilityInfo.announceForAccessibility('Found you');
+    }
+    wasLocating.current = where.locating;
+  }, [where.locating]);
   // The map follows a new position. It drew the one it opened with itself;
   // opened with none, it starts far out and has to be brought in to the first.
   const seen = useRef(fix === null ? 'none' : 'drawn');
@@ -721,11 +728,12 @@ export function MapScreen(
           <View style={styles.grip} />
           {/* With a route up, the route is the sheet's subject; the blue
               drop already says where you are (2026-11-16 UX pass). */}
-          {!navigating && route.state.kind === 'none' && (
+          {/* While locating, the card in the map's middle says it, once. */}
+          {!navigating && route.state.kind === 'none' && !where.locating && (
           <View style={styles.where}>
             {/* One size, no dots; said aloud when it changes to "You are here". */}
-            <Text style={styles.whereTitle} accessibilityLiveRegion="polite">
-              {where.locating ? 'Finding you' : fix === null ? 'Where are you?' : 'You are here'}
+            <Text style={styles.whereTitle}>
+              {fix === null ? 'Where are you?' : 'You are here'}
             </Text>
             {!where.locating && fix !== null && (fix.accuracyMeters !== null || fix.state !== null) && (
               <View style={styles.wherePill}>

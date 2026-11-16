@@ -28,7 +28,7 @@ import { CalmLoader } from './calm-loader.tsx';
 import { useReduceMotion } from './motion.ts';
 import { RouteLayers } from './route-layer.tsx';
 import { NavCard, RouteCard } from './route-card.tsx';
-import { routeBounds, routeProgress, type RouteProgress } from './route-view.ts';
+import { STAY_PUT, distanceWords, routeBounds, routeProgress, timeWords, type RouteProgress } from './route-view.ts';
 import { useFollow } from './use-follow.ts';
 import { useRoute, type LngLat, type RouteState } from './use-route.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
@@ -402,8 +402,13 @@ function FredMap(
 }
 
 export function MapScreen(
-  { onClose, fix, onPacksChanged, where }: {
+  { onClose, fix, onPacksChanged, where, suggestSignal = false }: {
     onClose: () => void; fix: LocationFix | null; onPacksChanged: () => void;
+    /**
+     * Opened from a chat reply to "I'm lost" or a signal question (#226): out
+     * of coverage, Fred suggests a walking route to the nearest signal.
+     */
+    suggestSignal?: boolean;
     /** The location button's state and actions, which live with the chat screen. */
     where: {
       readonly locating: boolean;
@@ -481,6 +486,7 @@ export function MapScreen(
       onPanResponderTerminate: () => rest(fold.current.folded),
     });
   }, [drop]);
+  useSignalSuggestion(route, fix, coverage, suggestSignal);
   // A new pin opens the sheet, where its card is.
   const dropPin = (at: LngLat): void => {
     route.dropPin(at);
@@ -813,6 +819,20 @@ export function MapPreview(
 ): React.JSX.Element {
   const { styles } = useThemed(makeStyles);
   const { coverage } = useCoverage(fix);
+  // The chat's map only appears for "I'm lost" and signal questions, so out
+  // of coverage it always carries the suggested route to signal (#226).
+  const route = useRoute();
+  useSignalSuggestion(route, fix, coverage, true);
+  const camera = useRef<CameraRef | null>(null);
+  const ready = route.state.kind === 'ready' ? route.state.route : null;
+  useEffect(() => {
+    if (ready === null) return;
+    const b = routeBounds(ready);
+    if (b !== null) camera.current?.fitBounds(b, { padding: { top: 24, right: 24, bottom: 24, left: 24 }, duration: 0 });
+  }, [ready]);
+  const routeLine = ready === null ? null
+    // Staying put first, as on the full map's card.
+    : `${STAY_PUT} Route to signal: ${distanceWords(ready.meters)} · ${timeWords(ready.seconds)}.`;
   const onMap = useMemo(() => whereOnMap(fix), [fix]);
   const within = fix === null ? '' : `within ${fix.accuracyMeters === null ? '?' : Math.round(fix.accuracyMeters)} m`;
   const caption = coverage !== null ? coverage.advice
@@ -826,14 +846,33 @@ export function MapPreview(
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Open the map">
       <View style={styles.preview} pointerEvents="none">
-        <FredMap fix={fix} coverage={coverage} zoom={12} credit={false} />
+        <FredMap fix={fix} coverage={coverage} zoom={12} credit={false} camera={camera} route={route.state} />
       </View>
+      {routeLine !== null && <Text style={styles.previewRoute}>{routeLine}</Text>}
       {/* #77: left out when Fred's reply above has already said it. */}
       {quiet && coverage !== null ? null : <Text style={styles.previewCaption}>{caption}</Text>}
       {edgeNote !== null && <Text style={styles.previewEdge}>{edgeNote}</Text>}
       <Text style={styles.previewOpen}>Tap to open the map</Text>
     </Pressable>
   );
+}
+
+/**
+ * Out of coverage and asked from the chat: drop a pin at the nearest reported
+ * signal and plan the route to it, once. Clearing it is the hiker's choice,
+ * so it does not come back on the next render.
+ */
+function useSignalSuggestion(
+  route: ReturnType<typeof useRoute>, fix: LocationFix | null, coverage: CoverageView | null, enabled: boolean,
+): void {
+  const done = useRef(false);
+  useEffect(() => {
+    if (!enabled || done.current || fix === null || coverage === null || coverage.signalAt === null) return;
+    if (route.state.kind !== 'none') return;
+    done.current = true;
+    route.dropPin([coverage.signalAt.longitude, coverage.signalAt.latitude], 'signal');
+    route.plan(fix);
+  }, [enabled, fix, coverage, route.state.kind]);
 }
 
 /** Your carrier's gaps: amber. No carrier at all: red, the stronger warning. */
@@ -853,6 +892,7 @@ const makeStyles = (palette: Palette) => {
   const land = coloursFor(palette).land;
   return StyleSheet.create({
   preview: { height: 190, borderRadius: radius.control, overflow: 'hidden', backgroundColor: land },
+  previewRoute: { color: palette.ink, fontSize: 14, lineHeight: 20, fontWeight: '700', marginTop: 8 },
   previewCaption: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 10 },
   previewEdge: { color: palette.ink, fontSize: 14, lineHeight: 20, marginTop: 6 },
   previewOpen: { color: palette.pine, fontSize: 13, fontWeight: '700', marginTop: 4 },

@@ -98,6 +98,16 @@ export function climbWords(route: Route): string | null {
 
 export const ROUTE_HEADLINE = 'Rough route: check it against what you see.';
 
+/**
+ * A route Fred suggests to the nearest reported signal, for someone who is
+ * out of coverage (#226). Search-and-rescue advice for a lost person is often
+ * to stay put, so that comes first, before any walking; Ryan approved the
+ * wording 2026-11-16.
+ */
+export const SIGNAL_HEADLINE = 'Route to signal';
+export const STAY_PUT = 'If people know where you are, staying put is often safest.';
+export const SIGNAL_SOURCE = 'The signal there is what carriers report, not a promise of bars.';
+
 export const ALWAYS_CAVEAT =
   "Maps can be out of date. This route doesn't know about private land, closures or how hard a trail is.";
 

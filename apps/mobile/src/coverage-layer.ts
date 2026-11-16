@@ -13,7 +13,7 @@
  */
 import { File, Paths } from 'expo-file-system';
 import { gunzipSync } from 'fflate';
-import { cellsToMultiPolygon, latLngToCell } from 'h3-js';
+import { cellToLatLng, cellsToMultiPolygon, latLngToCell } from 'h3-js';
 import { insideState, MAJOR_CARRIERS } from '@fred/geo';
 import { loadCarrier } from './carrier.ts';
 import {
@@ -50,6 +50,14 @@ export interface CoverageView {
   readonly advice: string;
   /** Name of the carrier the gaps are drawn for, or null when none is. */
   readonly carrierName: string | null;
+  /**
+   * Where the nearest reported coverage is, when there is none here: the
+   * centre of the nearest covered cell, for any carrier when no carrier
+   * reports this spot (911), for your own carrier when only it is missing.
+   * Null when you have coverage, or none is found within the search. The map
+   * suggests a walking route to it for someone who is lost (#226).
+   */
+  readonly signalAt: { readonly latitude: number; readonly longitude: number; readonly meters: number } | null;
 }
 
 /** A carrier's display name: the pack's, then the national list's. */
@@ -92,16 +100,19 @@ export function coverageNear(
   // carriers' own propagation models, least reliable in the canyons and
   // timber Fred is for.
   let advice: string;
+  let target: NearestCoverage | null = null;
   const here = zoneOf(origin, pack, gapFor);
   if (here === 'no-service') {
+    target = nearestCoverage(origin, anyCarrier(pack), rings);
     advice = 'No carrier reports coverage here, so 911 calls may not connect. '
       + 'Satellite SOS may still work if your phone has it. '
-      + `Nearest reported coverage: ${walk(nearestCoverage(origin, anyCarrier(pack), rings), rings)}.`
+      + `Nearest reported coverage: ${walk(target, rings)}.`
       // For 911 any carrier will do; for your own calls and texts, only yours.
       + (mine === null ? '' : ` ${name}: ${walk(nearestCoverage(origin, mine, rings), rings)}.`);
   } else if (here === 'carrier-gap') {
+    target = nearestCoverage(origin, mine!, rings);
     advice = `${name} reports no coverage here. Other carriers do, so 911 may still connect. `
-      + `${name} coverage: ${walk(nearestCoverage(origin, mine!, rings), rings)}.`;
+      + `${name} coverage: ${walk(target, rings)}.`;
   } else if (mine !== null) {
     advice = `${name} reports coverage here.`;
   } else if (name !== null) {
@@ -114,6 +125,10 @@ export function coverageNear(
     noService: shape(zones.noService),
     advice,
     carrierName: gapFor === null ? null : name,
+    signalAt: target === null || target.rings === 0 ? null : (() => {
+      const [lat, lng] = cellToLatLng(target.cell);
+      return { latitude: lat, longitude: lng, meters: target.meters };
+    })(),
   };
 }
 

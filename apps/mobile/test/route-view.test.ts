@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Route, RouteStretch } from '@fred/geo/route';
 import {
-  ALWAYS_CAVEAT, climbWords, failureStep, distanceWords, failureWords, routeBounds, routeGeoJSON, routeWarnings, timeWords, trailNames,
+  ALWAYS_CAVEAT, climbWords, failureStep, warningTags, distanceWords, failureWords, routeBounds, routeGeoJSON, routeWarnings, timeWords, trailNames,
 } from '../src/route-view.ts';
 
 const stretch = (over: Partial<RouteStretch>): RouteStretch => ({
@@ -61,6 +61,17 @@ test('off-trail and guessed parts are named, with the colour they are drawn in',
   assert.ok(w.includes('Steep ground off the trail.'));
   assert.ok(w.includes('Crosses a stream with no bridge on the map.'));
   for (const line of w) assert.match(line, /[.)]$/);
+});
+
+test('warning tags: short, same order as the sentences, one per warning', () => {
+  const r = route([
+    stretch({}),
+    stretch({ kind: 'off-trail', sure: false, meters: 470, notes: ['steep', 'stream'] }),
+    stretch({ kind: 'guessed-join', sure: false, meters: 6 }),
+  ]);
+  assert.deepEqual(warningTags(r), ['470 m off trail', 'steep ground', 'stream, no bridge']);
+  assert.equal(warningTags(r).length, routeWarnings(r).length);
+  assert.deepEqual(warningTags(route([stretch({})])), []);
 });
 
 test('a guessed join alone still gets its own warning', () => {

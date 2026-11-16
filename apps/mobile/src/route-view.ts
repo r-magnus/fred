@@ -147,6 +147,24 @@ export function routeWarnings(route: Route): string[] {
   return out;
 }
 
+/**
+ * The warnings as short tags, for the one line the card shows before Details
+ * (2026-11-16, Ryan: "still a ton of text"). Same order as `routeWarnings`,
+ * whose full sentences sit behind Details. Words, not icons alone (skill §3).
+ */
+export function warningTags(route: Route): string[] {
+  const out: string[] = [];
+  const off = unsureMeters(route, 'off-trail');
+  if (off >= 30) out.push(`${distanceWords(off)} off trail`);
+  else if (route.stretches.some((s) => s.kind === 'guessed-join')) out.push('guessed path joins');
+  const tag: Record<'steep' | 'stream' | 'wetland' | 'major-road', string> = {
+    steep: 'steep ground', stream: 'stream, no bridge', wetland: 'boggy ground', 'major-road': 'busy road',
+  };
+  for (const note of ['steep', 'stream', 'wetland', 'major-road'] as const) if (route.notes.includes(note)) out.push(tag[note]);
+  if (!route.hasElevation) out.push('hills not counted');
+  return out;
+}
+
 /** The trails the route follows, longest first, for one line on the card. */
 export function trailNames(route: Route, max = 3): string[] {
   const byName = new Map<string, number>();
@@ -168,7 +186,7 @@ export function failureStep(reason: PlanFailure): FailureStep {
 
 /** Shown wherever a pin can be dropped or moved; the gesture has no button of its own. */
 export const PIN_HINT = 'Press and hold the map to drop a pin and get a walking route there.';
-export const MOVE_PIN_HINT = 'Press and hold somewhere else on the map to move the pin.';
+export const MOVE_PIN_HINT = 'Press and hold elsewhere on the map to move the pin.';
 
 export function failureWords(reason: PlanFailure): string {
   switch (reason) {
@@ -270,7 +288,8 @@ export function routeProgress(route: Route, lon: number, lat: number, lastAlong 
 export function progressLine(p: RouteProgress, accuracyMeters: number | null): { readonly text: string; readonly warn: boolean } {
   if (p.arrived) return { text: "You're at the pin.", warn: false };
   const limit = Math.max(OFF_ROUTE_M, accuracyMeters ?? 0);
-  if (p.offMeters > limit) return { text: `You're about ${distanceWords(p.offMeters)} off the route. Head back to the line before going on.`, warn: true };
-  if (!p.stretch.sure) return { text: 'No trail on the map here. Go slowly, and turn back if it gets steep or blocked.', warn: true };
+  // Short: read at a glance while walking (2026-11-16 UX pass).
+  if (p.offMeters > limit) return { text: `${distanceWords(p.offMeters)} off the route: head back to the line.`, warn: true };
+  if (!p.stretch.sure) return { text: 'No trail here. Go slowly; turn back if steep or blocked.', warn: true };
   return { text: p.stretch.name !== null ? `On ${p.stretch.name}.` : p.stretch.cls === 'trail' ? 'On a trail.' : 'On a road.', warn: false };
 }

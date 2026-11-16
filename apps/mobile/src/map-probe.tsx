@@ -724,7 +724,9 @@ export function MapScreen(
             accessibilityActions={[{ name: 'activate' }]} onAccessibilityAction={() => toggleFold.current()}
             accessibilityLabel={folded ? 'Show the map details' : 'Hide the map details'}>
           <View style={styles.grip} />
-          {!navigating && (
+          {/* With a route up, the route is the sheet's subject; the blue
+              drop already says where you are (2026-11-16 UX pass). */}
+          {!navigating && route.state.kind === 'none' && (
           <View style={styles.where}>
             <Text style={[styles.whereTitle, where.locating && styles.whereTitleBusy]}
               accessibilityLabel={where.locating ? 'Finding you' : undefined}>

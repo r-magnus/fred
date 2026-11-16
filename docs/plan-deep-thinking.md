@@ -84,3 +84,14 @@ normal mode on the confirmation sets:
    chose to wait, but a strategy that wins nothing doesn't earn its time.
 
 A strategy that only helps on tuning and `assembled` isn't adopted.
+
+## Round 4 and its confirmation (written 2026-11-15, 23:30, before the run)
+
+Rounds 1-3 and the first confirmation (held-out, assembled-sealed, breadth)
+are in `docs/deep-thinking/`. Search harder alone, running before Fred's
+quote and card rescues, lost two right answers on the confirmation sets.
+Round 4 runs it only after a **flat decline** (low score, no card offered).
+That rule was found by looking at the confirmation sets, so they can't
+confirm it. Fresh confirmation, on sets deep thinking has never been run on:
+ailments, colloquial, everyday, grounded-confirm, hazards, hazards-confirm,
+health, health-confirm, states, wildlife (275 questions). Same pass rule.

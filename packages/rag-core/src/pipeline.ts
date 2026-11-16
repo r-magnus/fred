@@ -877,7 +877,17 @@ export async function ask(
   deps: PipelineDeps,
   opts: AskOptions,
 ): Promise<AskResult> {
-  const res = await askUnvoiced(query, deps, opts);
+  // Deep thinking's "search harder" (#21, round 4): Fred answers as normal
+  // first, and only a flat decline (search under the bar, no card offered)
+  // is tried again with the second search. Running it before the quote and
+  // card rescues (rounds 1-3) let a written answer replace a right quote ("dead
+  // man" staking) or card (wet fire) on the confirmation sets.
+  const searchHarder = opts.deep?.search === true;
+  let res = await askUnvoiced(query, deps, searchHarder ? { ...opts, deep: { ...opts.deep, search: false } } : opts);
+  if (searchHarder && res.kind === 'abstain' && res.reason === 'low-score' && res.offer === undefined && !opts.signal?.aborted) {
+    const again = await askUnvoiced(query, deps, opts);
+    if (again.kind === 'answer') res = again;
+  }
   return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
 }
 

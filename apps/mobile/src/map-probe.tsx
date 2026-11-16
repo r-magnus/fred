@@ -457,13 +457,17 @@ export function MapScreen(
     drop.setValue(0);
     setFolded(false);
   };
-  // A finished route is shown whole: from the hiker to the pin, clear of the sheet.
+  // A finished route is shown whole: from the hiker to the pin, clear of the
+  // sheet. Fitted again when the sheet's height settles, because the route
+  // card makes the sheet taller in the same render that brings the route, and
+  // a fit to the old height hid the start behind it (phone, 2026-11-15).
+  const readyRoute = route.state.kind === 'ready' ? route.state.route : null;
   useEffect(() => {
-    if (route.state.kind !== 'ready') return;
-    const b = routeBounds(route.state.route);
+    if (readyRoute === null) return;
+    const b = routeBounds(readyRoute);
     if (b === null) return;
-    camera.current?.fitBounds(b, { padding: { top: insets.top + 80, right: 40, bottom: sheet + 30, left: 40 }, duration: 700 });
-  }, [route.state.kind === 'ready' ? route.state.route : null]);
+    camera.current?.fitBounds(b, { padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, duration: 600 });
+  }, [readyRoute, sheet]);
   // What the map has here: read from disk at every render, which is cheap (a
   // directory listing and a point-in-polygon), so it can never lag behind a
   // download or a removal the way a cached answer did (#224, emulator walk).

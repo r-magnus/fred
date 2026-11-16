@@ -552,7 +552,11 @@ export async function createDeviceBackend(
                 // clean answers that terminated in ~300 characters; sampling at 0.3
                 // on device rambled to the 1024-token cap without emitting EOS.
                 // Determinism is also worth more than variety for first-aid guidance.
-                temperature: 0,
+                // Deep thinking's extra drafts (#21) are the one exception: the
+                // model card's sampling with a fixed seed each, so they differ
+                // from the greedy first draft and repeat exactly.
+                temperature: genOpts.temperature ?? 0,
+                ...((genOpts.temperature ?? 0) > 0 ? { top_p: 0.95, top_k: 20, min_p: 0, seed: genOpts.seed ?? 1729 } : {}),
                 stop: [...(genOpts.stop ?? [])],
               },
               (tok) => stream.push(tok.token),

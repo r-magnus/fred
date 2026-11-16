@@ -102,6 +102,8 @@ interface Turn {
   waiting?: boolean;
   /** Asked by the desktop test hook, not typed: such a chat is not kept in past chats. */
   hook?: boolean;
+  /** Asked with deep thinking on (#21). */
+  deep?: boolean;
   /** #172: a first line before the safety-net or watch reply. */
   lead?: string;
   /** #172: what a plain decline says, fitted to the message. */
@@ -176,6 +178,10 @@ function Screen() {
     if (turns.length === 0) setGreeting((was) => pick(GREETINGS, was));
   }, [turns.length]);
   const [draft, setDraft] = useState('');
+  // #21: deep thinking, chosen per question while typing; off again after sending.
+  const [deep, setDeep] = useState(false);
+  const deepRef = useRef(false);
+  deepRef.current = deep;
   const [state, setState] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // US-13: the battery estimate for the message being typed.
@@ -373,15 +379,18 @@ function Screen() {
     const shown = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
       last.citations[0]?.source === 'Fred field card' ? last.citations[0].section : undefined;
     const map = wantsMap(question);
+    const deepOn = deepRef.current && !viaHook;
     setTurns((ts) => [...ts, {
       id, question, askedAt: now, state: askState, text: '', kind: 'answer',
       citations: [], medical: false, candidateStates: [], done: false, stopped: false, map,
       ...(viaHook ? { hook: true } : {}),
+      ...(deepOn ? { deep: true } : {}),
     }]);
     // A map with no position is no use to someone who is lost: find one now,
     // alongside the answer, instead of waiting to be asked.
     if (map && fix === null && !locating) void locate();
     setDraft('');
+    setDeep(false);
     setBusy(true);
 
     const ctrl = new AbortController();
@@ -394,7 +403,7 @@ function Screen() {
     await estimating.current?.catch(() => undefined);
     beginAnswer();
     try {
-      const res = await eng.ask(question, askState, ctrl.signal, previous, history, shown);
+      const res = await eng.ask(question, askState, ctrl.signal, previous, history, shown, deepOn);
       written = res.kind === 'answer' && res.diagnostics.cardAnswer === undefined;
       finished = res.kind !== 'answer';
       if (res.kind === 'needs-location') {
@@ -796,6 +805,7 @@ function Screen() {
             {t.kind === 'answer' && (
               <View style={styles.card}>
                 {t.text === '' && !t.done && <CalmLoader size={34} style={styles.thinking} />}
+                {t.deep === true && !t.done && t.text === '' && <Text style={styles.deepWorking}>Deep thinking: writing a few drafts and keeping the one closest to the guides…</Text>}
                 {/* The opening line ends in a line break; no blank line above the wait note. */}
                 {t.text !== '' && <ReplyText text={t.text} />}
                 {t.waiting === true && !t.done && (
@@ -900,6 +910,16 @@ function Screen() {
           <Text style={styles.costLine} accessibilityLabel={`Battery estimate: ${costLine.map((p) => p.text).join('')}`}>
             {costLine.map((p, i) => (p.figure ? <Text key={i} style={styles.costFigure}>{p.text}</Text> : p.text))}
           </Text>
+        )}
+        {/* #21: offered while a question is being typed, for that question only. */}
+        {draft.trim() !== '' && !busy && (
+          <Pressable style={[styles.deepChip, deep && styles.deepChipOn]} onPress={() => setDeep((d) => !d)}
+            accessibilityRole="switch" accessibilityState={{ checked: deep }}
+            accessibilityLabel="Deep thinking: a slower, more careful answer">
+            <View style={[styles.deepDot, deep && styles.deepDotOn]} />
+            <Text style={styles.deepText}>Deep thinking</Text>
+            <Text style={styles.deepNote}>{deep ? 'on · slower, more careful' : 'slower, more careful'}</Text>
+          </Pressable>
         )}
         <View style={[styles.composer, { paddingBottom: insets.bottom + 10 }]}>
          <View style={styles.composerPill}>
@@ -1049,6 +1069,18 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 10,
   },
   costLine: { color: palette.moss, fontSize: 12, paddingHorizontal: 26, paddingTop: 6 },
+  // #21: a 48 dp toggle above the box; filled while on.
+  deepChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', minHeight: 48,
+    marginLeft: 14, marginTop: 6, paddingHorizontal: 14, borderRadius: radius.pill,
+    borderWidth: 1, borderColor: palette.sand, backgroundColor: palette.paper,
+  },
+  deepChipOn: { backgroundColor: palette.sage, borderColor: palette.pine },
+  deepDot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: palette.moss },
+  deepDotOn: { backgroundColor: palette.pine, borderColor: palette.pine },
+  deepText: { color: palette.ink, fontSize: 14, fontWeight: '600' },
+  deepNote: { color: palette.moss, fontSize: 13 },
+  deepWorking: { color: palette.moss, fontSize: 13, fontStyle: 'italic', marginTop: 6 },
   costFigure: { color: palette.pine, fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
   send: { backgroundColor: palette.pine, borderRadius: radius.pill, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   sendOff: { backgroundColor: palette.sand },

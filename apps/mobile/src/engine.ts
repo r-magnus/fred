@@ -19,6 +19,13 @@ const BASE = Paths.document;
 const BASE_PATH = BASE.uri.replace(/^file:\/\//, '').replace(/\/$/, '');
 
 /** Filenames staged into internal storage. See tools/eval/measure-app.sh. */
+
+/**
+ * What deep thinking does (#21, docs/plan-deep-thinking.md): the strategies
+ * that passed on the development sets. Updated from the measurements only.
+ */
+export const DEEP_MODE = { search: true, drafts: 3 } as const;
+
 export const MODEL_FILE = 'Qwen3-1.7B-Q4_K_M.gguf';
 
 export type LoadPhase =
@@ -46,6 +53,8 @@ export interface Engine {
     previous?: { readonly question: string; readonly topScore: number },
     history?: readonly string[],
     lastCard?: string,
+    /** Deep thinking (#21): the person chose to wait for a more careful answer. */
+    deep?: boolean,
   ): Promise<AskResult>;
   /**
    * US-13: whether this message will likely get a written answer or a quick
@@ -186,7 +195,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     return {
       predict: (question, state) => predictCost(question, { backend: remembering, store, packs }, { state, saidAs: SAID_AS_MODEL }),
       voice,
-      ask: async (question, state, signal, previous, history, lastCard) => {
+      ask: async (question, state, signal, previous, history, lastCard, deep) => {
         const t0 = Date.now();
         const previousWasPet = petMessage !== undefined && history?.at(-1) === petMessage;
         const res = await ask(question, { backend: remembering, store, packs }, {
@@ -212,6 +221,7 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           ...(previous === undefined ? {} : { previous }),
           ...(history === undefined || history.length === 0 ? {} : { history }),
           ...(lastCard === undefined ? {} : { lastCard }),
+          ...(deep === true ? { deep: DEEP_MODE } : {}),
         });
         petMessage = res.diagnostics.said?.pet === true ? question : undefined;
         return timed(res, t0);

@@ -8,7 +8,7 @@
  * puts it full screen with the carrier picker; `MapPreview` is the tappable
  * thumbnail the chat shows when someone says they are lost (US-05).
  */
-import { Map, Camera, GeoJSONSource, Layer, Marker, type CameraRef } from '@maplibre/maplibre-react-native';
+import { Map, Camera, GeoJSONSource, Layer, Marker, NativeUserLocation, type CameraRef } from '@maplibre/maplibre-react-native';
 import { Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import * as Location from 'expo-location';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -230,7 +230,7 @@ function regionsToOffer(): { readonly place: string; readonly region: RegionOutl
 
 /** The map and every overlay: basemap, contours, coverage zones, the user's position. */
 function FredMap(
-  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, onUserMove }: {
+  { fix, coverage, zoom, credit = true, creditBottom = 8, camera, heading, onRegion, route, onLongPress, headingUp = false, onUserMove, navigating = false, track = false, onTrackingStopped }: {
     fix: LocationFix | null; coverage: CoverageView | null; zoom: number;
     /** A dropped pin and the walking route to it (#226), drawn under the hiker. */
     route?: RouteState;
@@ -243,6 +243,17 @@ function FredMap(
     headingUp?: boolean;
     /** The hiker moved the map by hand. */
     onUserMove?: () => void;
+    /**
+     * Walking a route (#226): MapLibre draws the hiker and, with `track`, its
+     * camera follows them and turns with the compass natively, every frame.
+     * The JS loop it replaced eased to a new bearing twice a second, and on a
+     * quick turn each ease cut the last one off: the map turned in jerks
+     * (Ryan, on his phone, 2026-11-16).
+     */
+    navigating?: boolean;
+    track?: boolean;
+    /** Native tracking stopped (a drag, a pinch): the map is the hiker's until Re-centre. */
+    onTrackingStopped?: () => void;
     /**
      * Given on the full map: regions not on the phone are drawn washed out with
      * a dashed edge and a name tag, and a tap on either offers that region.
@@ -303,7 +314,10 @@ function FredMap(
         }}>
         {/* Centre on the user when known; otherwise Yosemite, a public landmark
             packages/geo's tests already use, so no real position is hardcoded. */}
-        <Camera ref={camera} initialViewState={{
+        <Camera ref={camera}
+          trackUserLocation={track ? 'heading' : undefined}
+          onTrackUserLocationChange={(e) => { if (e.nativeEvent.trackUserLocation === null) onTrackingStopped?.(); }}
+          initialViewState={{
           center: fix === null ? [-119.5383, 37.8651] : [fix.longitude, fix.latitude],
           // 11 shows the coverage zones around the user (~1.2 km cells, 30 km
           // searched); 13 showed three hexagons and no context.
@@ -372,7 +386,8 @@ function FredMap(
         {route !== undefined && <RouteLayers state={route} night={palette.night} />}
         {/* The accuracy ring is metres wide and vanishes when zoomed out to
             see the coverage zones, so the position also gets a fixed-size dot. */}
-        {fix !== null && heading != null && heading.facing !== null && (
+        {navigating && <NativeUserLocation mode="heading" androidPreferredFramesPerSecond={30} />}
+        {!navigating && fix !== null && heading != null && heading.facing !== null && (
           // A drop instead of a dot: the round end is where you stand, the
           // point is the way the phone faces. It turns with the compass dial,
           // the opposite way to the rose.
@@ -385,7 +400,7 @@ function FredMap(
           </Marker>
         )}
         {/* Until the compass has a reading, and in the chat's small map: a plain dot. */}
-        {fix !== null && (heading == null || heading.facing === null) && (
+        {!navigating && fix !== null && (heading == null || heading.facing === null) && (
           <GeoJSONSource
             id="me"
             data={{ type: 'Feature', properties: {},
@@ -506,33 +521,27 @@ export function MapScreen(
       padding: { top: insets.top + 80, right: 50, bottom: sheet + 40, left: 50 }, bearing: 0, pitch: 0, duration: 600,
     });
   }, [readyRoute, sheet, navigating]);
-  // The navigation camera: on its own clock rather than on every sensor
-  // reading, so the map turns smoothly and the JS thread is not flooded. Close
-  // in and tilted a little, the hiker low on the screen with the way ahead
-  // above, as navigation apps do.
+  // Walking: bring the camera in close and tilted, the hiker about two thirds
+  // down the visible map with the way ahead above, then hand it to MapLibre's
+  // native tracking (FredMap `track`), which follows and turns every frame.
+  // The padding stays on the native camera while it tracks.
   const liveRef = useRef(live);
   liveRef.current = live ?? (fix === null ? null : { latitude: fix.latitude, longitude: fix.longitude, accuracyMeters: fix.accuracyMeters });
+  // Tracking switches on only after the ease has finished: a camera move from
+  // code cancels native tracking, which would read as the hiker dragging away.
+  const [tracking, setTracking] = useState(false);
   useEffect(() => {
+    setTracking(false);
     if (!navigating || !following) return;
-    let lastBearing = -1;
-    let lastKey = '';
-    const tick = (): void => {
-      const p = liveRef.current;
-      if (p === null) return;
-      const bearing = heading.degrees.current ?? Math.max(lastBearing, 0);
-      const key = `${p.latitude.toFixed(6)},${p.longitude.toFixed(6)}`;
-      const turned = Math.abs(((bearing - lastBearing + 540) % 360) - 180);
-      if (key === lastKey && turned < 3) return;
-      lastKey = key; lastBearing = bearing;
+    const p = liveRef.current;
+    if (p !== null) {
       camera.current?.easeTo({
-        center: [p.longitude, p.latitude], bearing, zoom: 16.5, pitch: 40,
-        // The hiker about two thirds down the visible map, the way ahead above.
-        padding: { top: Math.max(0, (screen.height - sheet) * 0.6), right: 0, bottom: sheet, left: 0 }, duration: 450,
+        center: [p.longitude, p.latitude], zoom: 16.5, pitch: 40,
+        padding: { top: Math.max(0, (screen.height - sheet) * 0.6), right: 0, bottom: sheet, left: 0 }, duration: 400,
       });
-    };
-    tick();
-    const id = setInterval(tick, 500);
-    return () => clearInterval(id);
+    }
+    const t = setTimeout(() => setTracking(true), 450);
+    return () => clearTimeout(t);
   }, [navigating, following, sheet, screen.height]);
   const startNav = (): void => { lastAlong.current = 0; setFollowing(true); setNavigating(true); };
   // The fit effect above runs again when this drops, and puts the map back
@@ -596,7 +605,9 @@ export function MapScreen(
         onRegion={setOffer} route={route.state} onLongPress={navigating ? undefined : dropPin}
         // Paused (moved by hand) the map keeps the last bearing it turned to, so
         // the drop still points up, not along the compass on top of the turn.
-        headingUp={navigating} onUserMove={navigating ? () => setFollowing(false) : undefined} />
+        headingUp={navigating} onUserMove={navigating ? () => setFollowing(false) : undefined}
+        navigating={navigating} track={navigating && following && tracking}
+        onTrackingStopped={navigating && tracking ? () => setFollowing(false) : undefined} />
 
       {/* Three round controls and one sheet: everything else that used to
           float over the map is written on the sheet. */}

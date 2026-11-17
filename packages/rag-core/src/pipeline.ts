@@ -917,9 +917,23 @@ export async function ask(
   if (addedRequest !== undefined && !opts.signal?.aborted) {
     // The request already carries the earlier question; joining it again would double it.
     const { previous: _joined, ...alone } = opts;
-    const again = await askUnvoiced(addedRequest, deps, alone);
-    if (again.kind === 'answer') {
-      res = { ...again, diagnostics: { ...again.diagnostics, addedToThread: { message: query, request: addedRequest } } };
+    let asked = addedRequest;
+    let again = await askUnvoiced(addedRequest, deps, alone);
+    // A terse restatement can read as small talk on its own ("water amount
+    // for 12 mile hike in august"): the earlier question with the message
+    // joined to it is asked instead.
+    if (again.kind !== 'answer' && !opts.signal?.aborted) {
+      asked = `${opts.previous!.question}, ${query}`;
+      again = await askUnvoiced(asked, deps, alone);
+    }
+    // A card already in play is not swapped for another one: in a dizzy,
+    // pale, headachy hiker's thread, "we're about 2 miles from the car" was
+    // restated with the whole emergency and opened the head-injury card, which
+    // then stuck to the next four messages (chats-phone, ph-day-hike).
+    const card = again.kind === 'answer' && again.citations[0]?.source === 'Fred field card' ? again.citations[0].section : undefined;
+    const swapsCard = opts.lastCard !== undefined && card !== undefined && card !== opts.lastCard;
+    if (again.kind === 'answer' && !swapsCard) {
+      res = { ...again, diagnostics: { ...again.diagnostics, addedToThread: { message: query, request: asked } } };
     }
   }
   return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
@@ -933,6 +947,9 @@ export function mayAddToThread(res: AskResult, query: string, opts: Pick<AskOpti
   return res.kind === 'chat' && opts.previous !== undefined && opts.guards !== false && opts.intent === true &&
     !ACKNOWLEDGES.test(query) && !ONLY_ACKNOWLEDGES.test(query) && !saysResolved(query) && !REPORTS_SUCCESS.test(query);
 }
+
+/** Words a restatement uses to frame a question, which add nothing to it. */
+const THREAD_FILLER = new Set(['need', 'want', 'know', 'tell', 'get', 'make', 'way', 'best', 'safe', 'good', 'help', 'thing', 'deal', 'handle', 'tip', 'advice', 'question', 'ask', 'mean', 'like', 'right', 'now']);
 
 /**
  * A message that says something worked is a wrap-up, not a new condition:
@@ -948,8 +965,12 @@ export function addsToThread(res: AskResult, query: string, opts: Pick<AskOption
   const earlier = judgeWords(opts.previous.question);
   const before = new Set(earlier);
   const inRequest = new Set(judgeWords(request));
-  // Part of an earlier word is not new: "fire" after "campfire".
-  const added = judgeWords(query).filter((w) => !before.has(w) && !earlier.some((e) => e.includes(w) || w.includes(e)) && inRequest.has(w));
+  // What the restatement adds to the earlier question. Not only the hiker's
+  // own words: "over 100 degrees" was restated as "in hot weather", "only a
+  // pot and a lighter" lost "pot" (#228, second round). Part of an earlier
+  // word is not new: "fire" after "campfire".
+  const isNew = (w: string): boolean => !before.has(w) && !earlier.some((e) => e.includes(w) || w.includes(e)) && !THREAD_FILLER.has(w);
+  const added = [...inRequest].filter(isNew);
   return added.length > 0 ? request : undefined;
 }
 

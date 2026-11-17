@@ -1,0 +1,23 @@
+chats-long-dev: 40 replies, answered 28 -> 28, changed 0, misses 0 -> 0
+chats-phone: 37 replies, answered 23 -> 23, changed 0, misses 2 -> 2
+fresh: 56 replies, answered 35 -> 38, changed 3, misses 12 -> 9
+  FIXED c14-desert-heat#2 [answer] chat{Heat exhaustion and he} -> answer(gen:Arid region safety > W | Wilderness backpacking | MOVEMENT CONSIDERATION) said=Heat exhaustion and :0.38[]  "and it's going to be over 100 degrees"
+  FIXED c14-pot-only#2 [answer] chat{Making water safe to d} -> answer(card:Making water safe to drink) said=Making water safe to:0.77[]  "we only have a pot and a lighter"
+  FIXED c14-water-miles#2 [answer] chat -> answer(gen:Wilderness backpacking | Hiking > Prepare > Pac | Wilderness backpacking) said=Dehydration:0.37[]  "it's a 12 mile hike in august"
+holdout-card-questions: 40 replies, answered 40 -> 40, changed 0, misses 0 -> 0
+holdout-chats-10: 37 replies, answered 21 -> 21, changed 0, misses 1 -> 1
+holdout-chats-11: 36 replies, answered 35 -> 35, changed 0, misses 1 -> 1
+holdout-chats-12: 18 replies, answered 11 -> 11, changed 0, misses 1 -> 1
+holdout-chats-2: 44 replies, answered 33 -> 33, changed 0, misses 1 -> 1
+holdout-chats-3: 37 replies, answered 18 -> 18, changed 0, misses 4 -> 4
+holdout-chats-4: 38 replies, answered 18 -> 18, changed 0, misses 5 -> 5
+holdout-chats-5: 10 replies, answered 8 -> 8, changed 0, misses 2 -> 2
+holdout-chats-6: 29 replies, answered 21 -> 21, changed 0, misses 0 -> 0
+holdout-chats-7: 28 replies, answered 12 -> 12, changed 0, misses 1 -> 1
+holdout-chats-8: 34 replies, answered 24 -> 24, changed 0, misses 1 -> 1
+holdout-chats-9: 17 replies, answered 15 -> 15, changed 0, misses 2 -> 2
+holdout-chats: 162 replies, answered 111 -> 110, changed 1, misses 6 -> 6
+  lg-lake-heat#4 [any] answer(card:Heat exhaustion and heat stroke) -> chat{Heat exhaustion and he} said=Heat exhaustion and :0.82[offered]  "its really hot out"
+holdout-long-2: 46 replies, answered 25 -> 25, changed 0, misses 1 -> 1
+
+4 replies changed

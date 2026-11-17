@@ -46,6 +46,7 @@
       [
         "expo-location",
         {
+          "locationWhenInUsePermission": "Fred uses your location to pick the right local plant and animal guide. It stays on the device.",
           "locationAlwaysAndWhenInUsePermission": "Fred uses your location to pick the right local plant and animal guide. It stays on the device."
         }
       ],

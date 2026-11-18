@@ -9,6 +9,9 @@ Nothing here has been started. Background: `docs/licensing.md`, issues #33,
 #214, #198, #29, and the licensing research page from 2026-11-04
 (https://claude.ai/artifact/YSnah8532BeYQU7FVnuKvr, linked from #214).
 
+**Added 2026-11-18:** section 5, external TestFlight testers on iPhone. It
+depends on section 2: a stranger's phone can't be set up by cable.
+
 > **Before anything: the shipped pack set is not on this Mac.** `packs/` here is
 > stale (field cards 0.5.0, no health, hazards, wildlife-safety or tips packs).
 > The A-KR2 figure of 73.8% was measured on `~/fred-packs-g-all` on the Linux
@@ -211,6 +214,84 @@ rather than ship a button that sounds more careful than it is.
 
 ---
 
+## 5 · External TestFlight testers *(added 2026-11-18 from the Mac)*
+
+**Goal:** strangers install Fred on iPhone from a TestFlight public link.
+**Order, by Ryan's choice:** finish the in-app user reviews feature first, then
+submit for external review, so Apple reviews the version testers will get.
+
+**Where things stand.** iOS builds now come from `main` through EAS (#242–#245);
+`ios-testflight` only holds the old Mac notes and `tools/ios/tap.swift`.
+
+- Build and upload: `eas login` once, then from `apps/mobile`:
+  `eas build --platform ios --profile production --auto-submit`. Answer **no**
+  to every Apple login prompt: the signing credentials and an App Store Connect
+  API key are stored on Expo (project `@fred-model-team/fred`). Ryan's Apple ID
+  is not on the Apple team, so any step that insists on an Apple login fails.
+- Build 12 (2026-11-18, `2b4fcec`) built and uploaded. App Store Connect warned
+  it used the iOS 26.5 SDK; from April 2027 uploads need Xcode 27. #245 pinned
+  the build image to `macos-tahoe-26.6-xcode-27.2`. **No build on that image
+  yet.** Don't switch to `latest`, which moves, and don't remove
+  `ios.enableSceneSupport`: Xcode 27 won't launch an app without it.
+- **Never checked on a real iPhone**, only the simulator.
+
+### Blocked on section 2
+
+An external tester can't plug their phone into a Mac. Without the core bundle
+listed in `index.json`, the setup wizard has nothing to fetch and Fred can't
+answer anything. **External testing needs section 2 done first.**
+
+### Steps
+
+1. **Build on the Xcode 27 image and test on Ryan's iPhone as an internal
+   tester.** Internal testers are App Store Connect users on the Apple team
+   (the account owner adds Ryan); no Apple review needed. Check: the first-run
+   download completes, a question is answered (op-sqlite FTS5, #243), "i’m lost"
+   opens the map (curly apostrophes, #243), the location prompt shows Fred's
+   wording, an offline route plans, and memory holds with the increased-memory
+   entitlements. Record it in `docs/results-ios-build.md`.
+2. **Build the reviews feature.** Reviews go only to the developer. If they are
+   ever shown to other users, App Review's user-generated-content rules apply
+   (a way to report and block, plus moderation). Keep them private unless that
+   work is planned.
+3. **Fix the privacy wording.** "Location stays on the device" stays true. "Fred
+   collects nothing" no longer does once reviews are sent. Say "only what you
+   choose to send in a review" in the privacy policy and anywhere Fred claims
+   to collect nothing.
+4. **Fill in App Store Connect › TestFlight.** Ryan writes these. Draft them
+   for him, but don't publish your own wording:
+   - **Test Information:** beta app description (testers see it), feedback
+     email, **privacy policy URL** (required for external testing: no account,
+     location stays on the phone, what reviews contain and what they're used
+     for), marketing URL (optional).
+   - **Beta App Review Information:** contact name, phone, email; "sign-in
+     required" **off** (Fred has no accounts); review notes, below.
+   - **What to Test**, on each build.
+   - Already handled: export compliance (`usesNonExemptEncryption: false` in
+     `app.json`). TestFlight doesn't need screenshots, an age rating or App
+     Privacy labels; the App Store will.
+5. **Review notes should say:**
+   - The first launch downloads about 1.5 GB over Wi-Fi, then works offline.
+     Without this the reviewer may think the app is stuck.
+   - Location is only used to pick the regional guide and plan routes, and it
+     stays on the device.
+   - Where the reviews feature is, and that reviews go only to the developer.
+   - Safety and health answers are informational, and Fred points to emergency
+     services. App Review looks closely at medical and safety advice.
+6. **Submit to an external group and turn on the public link.** Beta App Review
+   takes about 1–2 days for the first build of a version. Later builds of the
+   same version usually skip it; a new version number gets a full review again.
+   Builds expire after 90 days.
+
+### Not blocking external testing, but before the App Store
+
+- iCloud backup includes the 1.45 GB of downloads (guideline 2.23). It needs
+  native code to mark them excluded from backup.
+- The battery estimate is off on iPhone (`docs/results-battery-estimate.md` ›
+  "The iPhone").
+
+---
+
 ## Done looks like
 
 - [ ] WHO decision recorded in `docs/licensing.md` (free first release, or WHO replaced)
@@ -221,4 +302,7 @@ rather than ship a button that sounds more careful than it is.
 - [ ] Interrupted download resumes, proven by a test and a check on the phone (#198)
 - [ ] Fresh Nothing Phone install sets itself up through the wizard (#198)
 - [ ] Partitioning decision recorded (A / B / not now)
+- [ ] Xcode 27 EAS build checked on Ryan's iPhone; result in `docs/results-ios-build.md`
+- [ ] Reviews feature built; privacy policy and "collects nothing" wording match it
+- [ ] TestFlight Test Information and review notes in (Ryan's words); external group passes Beta App Review; public link live
 - [ ] *(Exploratory)* "Answer several times" tested on the tuning set; go or no-go recorded

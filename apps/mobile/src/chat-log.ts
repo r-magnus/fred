@@ -3,7 +3,8 @@
  *
  * One JSON file in the app's private storage, rewritten whole after each
  * finished answer: a chat is a few kilobytes and only the newest are kept, so
- * there is nothing to gain from a database. Nothing here leaves the phone.
+ * there is nothing to gain from a database. Nothing here leaves the phone; a
+ * rated reply is sent on its own, from src/feedback.ts (#247).
  *
  * Generic over the turn, which the screen defines; this file only needs each
  * turn's question and the time it was asked.

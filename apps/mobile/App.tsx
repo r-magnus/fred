@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Animated, Image, KeyboardAvoidingView, Platform, Pressable,
+  Animated, AppState, Image, KeyboardAvoidingView, Platform, Pressable,
   ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -42,8 +42,12 @@ import { Sources } from './src/sources.tsx';
 import { Scene } from './src/scene.tsx';
 import { MENU_BUTTON_SIZE, MenuButton, SideDrawer } from './src/side-drawer.tsx';
 import { SetupWizard } from './src/setup-wizard.tsx';
-import { guidesOnPhone, markSetupDone, wizardWanted } from './src/setup.ts';
+import { agreementWanted, guidesOnPhone, markAgreed, markSetupDone, wizardWanted } from './src/setup.ts';
+import { BetaNoticeScreen } from './src/beta-notice.tsx';
 import { loadChats, removeChat, restoreChat, saveChat, type SavedChat } from './src/chat-log.ts';
+import { appVersion, flushFeedback, platform, rate } from './src/feedback.ts';
+import type { Thumb } from './src/feedback-outbox.ts';
+import { RateReply, type ReplyRating } from './src/rate-reply.tsx';
 import { AboutScreen } from './src/about.tsx';
 import { GREETINGS, STARTERS, TOPICS, pick } from './src/words.ts';
 import { Crossfade, SUNSET, ThemeProvider, Veil, radius, useTheme, useThemed, type Palette } from './src/theme.tsx';
@@ -110,6 +114,26 @@ interface Turn {
   lead?: string;
   /** #172: what a plain decline says, fitted to the message. */
   decline?: DeclineReply;
+  /** #247: the hiker's thumbs up or down, and any comment. */
+  rating?: ReplyRating;
+}
+
+/** #247: a finished reply that can be rated. Not an error, a "which state?", or a test run's. */
+const rateable = (t: Turn): boolean => t.done && t.hook !== true &&
+  (t.kind === 'answer' ? t.text !== '' : t.kind === 'chat' || t.kind === 'abstain');
+
+/** #247: Fred's reply as the hiker read it, in one string for a rating. */
+function replyRead(t: Turn): string {
+  const shown = t.kind !== 'abstain' || t.text === REFER_REPLY || t.text === SAFETY_NET_REPLY || t.text === WATCH_REPLY
+    ? (t.lead === undefined ? t.text : `${t.lead}\n${t.text}`)
+    : t.signal !== undefined ? `${t.signal} The map below shows where.`
+    : t.map === true ? 'Here\u2019s where you are.'
+    : t.decline?.text ?? 'I don\u2019t have that in my guides, and I\u2019d rather not guess.';
+  return [
+    shown,
+    ...(t.offer === undefined ? [] : [`[Field card offered: ${t.offer.title}]`]),
+    ...(t.stopped ? ['[Stopped by the reader]'] : []),
+  ].join('\n\n');
 }
 
 /**
@@ -198,6 +222,8 @@ function Screen() {
   // start screen when the guides are missing. The engine is not loaded under it: a download and a
   // model in memory at once is more than a small phone has room for.
   const [setup, setSetup] = useState(wizardWanted);
+  // #248: the beta notice, for a phone set up before it existed (setup itself ends on it).
+  const [notice, setNotice] = useState(agreementWanted);
   const [locating, setLocating] = useState(false);
   const [locProgress, setLocProgress] = useState<number | null>(null);
   const [locNote, setLocNote] = useState<string | null>(null);
@@ -328,6 +354,34 @@ function Screen() {
   const update = useCallback((id: number, patch: Partial<Turn>): void => {
     setTurns((ts) => ts.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   }, []);
+
+  // #247: ratings wait on the phone and go when a send works: now, and each
+  // time Fred comes back to the screen (out of signal, the send just fails).
+  useEffect(() => {
+    void flushFeedback();
+    const sub = AppState.addEventListener('change', (s) => { if (s === 'active') void flushFeedback(); });
+    return () => sub.remove();
+  }, []);
+  /** #247: keeps the hiker's rating with the chat and puts it in the outbox. */
+  const rateTurn = useCallback((t: Turn, thumb: Thumb, comment?: string | null): void => {
+    const rating: ReplyRating = {
+      id: t.rating?.id ?? `${t.askedAt.toString(36)}-${t.id}-${Math.random().toString(36).slice(2, 10)}`,
+      thumb,
+      ...(comment === undefined ? (t.rating?.thumb === thumb && t.rating.comment !== undefined ? { comment: t.rating.comment } : {})
+        : comment === null ? {} : { comment }),
+      ...(comment !== undefined || thumb === 'up' ? { closed: true } : {}),
+    };
+    update(t.id, { rating });
+    rate({
+      id: rating.id, rating: thumb, comment: rating.comment ?? null,
+      question: t.question, reply: replyRead(t), replyKind: t.kind,
+      sources: [...t.citations, ...(t.offer === undefined ? [] : [t.offer.citation])]
+        .map((c) => `${c.source}${c.page === null ? '' : `, p. ${c.page}`}${c.section === '' ? '' : ` · ${c.section}`}`),
+      deep: t.deep === true, stopped: t.stopped,
+      askedAt: new Date(t.askedAt).toISOString(), ratedAt: new Date().toISOString(),
+      appVersion: appVersion(), platform: platform(),
+    });
+  }, [update]);
 
   // #77: a signal question ("no service", "where can I call from?") is answered
   // with how far and which way the nearest reported coverage is. Filled in once
@@ -608,7 +662,10 @@ function Screen() {
   };
 
   if (setup) {
-    return <SetupWizard onDone={() => { markSetupDone(); setSetup(false); }} />;
+    return <SetupWizard onDone={() => { markSetupDone(); setSetup(false); setNotice(agreementWanted()); }} />;
+  }
+  if (notice) {
+    return <BetaNoticeScreen onAgree={() => { markAgreed(); setNotice(false); }} />;
   }
 
   if (load.phase !== 'ready') {
@@ -906,6 +963,11 @@ function Screen() {
                     </>
                   )}
               </View>
+            )}
+
+            {rateable(t) && (
+              <RateReply value={t.rating} onRate={(thumb) => rateTurn(t, thumb)}
+                onComment={(text) => rateTurn(t, 'down', text)} />
             )}
             </View>
           </View>

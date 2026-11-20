@@ -39,6 +39,34 @@ export function markSetupDone(): void {
 }
 
 /**
+ * The beta notice (#248): the version of its words the hiker agreed to, and
+ * when. Raise AGREEMENT_VERSION when the words change in substance, and
+ * everyone is asked again on their next open.
+ */
+export const AGREEMENT_VERSION = 1;
+const agreement = (): File => new File(Paths.document, 'agreement.json');
+
+/** Whether to ask for the agreement before the chat: not yet given, or given to older words. */
+export function agreementWanted(): boolean {
+  // Phone test runs drive the chat with the screen locked; nothing may stand in their way.
+  if (hook('devhooks')) return false;
+  try {
+    const f = agreement();
+    if (!f.exists) return true;
+    const saved = JSON.parse(f.textSync()) as { version?: unknown };
+    return typeof saved.version !== 'number' || saved.version < AGREEMENT_VERSION;
+  } catch {
+    return true;
+  }
+}
+
+export function markAgreed(): void {
+  try {
+    agreement().write(JSON.stringify({ version: AGREEMENT_VERSION, agreedAt: new Date().toISOString() }));
+  } catch { /* asked again next time, which is the safe way to fail */ }
+}
+
+/**
  * Whether Fred can answer here: the model that writes, the model that
  * searches, and at least one guide that is the same everywhere. The same
  * things the engine needs at load (src/engine.ts), checked without loading

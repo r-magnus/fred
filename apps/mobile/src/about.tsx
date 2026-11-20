@@ -26,7 +26,7 @@ const SECTIONS: readonly { readonly heading: string; readonly text: readonly str
     heading: 'What he does',
     text: [
       'Fred answers questions about first aid, survival, and the plants and animals around you. ' +
-        'Everything he knows is stored on this phone, so he works without signal, and nothing you ask leaves it.',
+        'Everything he knows is stored on this phone, so he works without signal. Nothing you ask leaves it, unless you rate a reply: then that question and his reply are sent to the Fred team, never your location.',
       'He shows the sources he read, says so when something isn’t in his guides, and is no substitute for your own judgement.',
     ],
   },

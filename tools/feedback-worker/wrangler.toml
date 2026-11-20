@@ -1,0 +1,18 @@
+# Fred's feedback server (#247): takes ratings from the app, keeps them in D1.
+# Setup and reading the ratings: README.md.
+name = "fred-feedback"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fred-feedback"
+# Filled in from `wrangler d1 create fred-feedback` (README step 2).
+database_id = "REPLACE_WITH_DATABASE_ID"
+
+# 30 ratings a minute from one address is far past what a hiker taps;
+# past it, the app keeps the rating and tries again later.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "2471"
+simple = { limit = 30, period = 60 }

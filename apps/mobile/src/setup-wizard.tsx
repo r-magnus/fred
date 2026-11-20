@@ -5,7 +5,9 @@
  *   guides   the models and the guides that are the same everywhere
  *   place    the hiker's state or states: map, contours, coverage, local guide;
  *            a big state is offered as regions, the hiker's own ticked (#224)
- *   ready    all set; the app is left to discover (no tour, 2026-11-15)
+ *   ready    all set; the app is left to discover (no tour, 2026-11-15), and
+ *            the beta notice (#248), whose tick Start waits for. Skip setup
+ *            comes here too, so no way into the chat goes around it.
  *
  * The day and night page is gone (ux-ui-review pass, 2026-11-14): a page
  * about a colour switch was a page between someone and their downloads. The
@@ -45,7 +47,8 @@ import { mergeBundles, orderPlaces, placeBundle, placeName } from './places.ts';
 import { placeKey, regionAt, splitKey } from './regions.ts';
 import { Scene } from './scene.tsx';
 import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, timeLeft, type IndexState, type Step } from './setup-plan.ts';
-import { guidesOnPhone, statesOnPhone } from './setup.ts';
+import { guidesOnPhone, markAgreed, statesOnPhone } from './setup.ts';
+import { BetaNotice } from './beta-notice.tsx';
 import { Crossfade, Veil, radius, useThemed, type Palette } from './theme.tsx';
 
 const LOGO = require('../assets/ui/fred-logo.png');
@@ -190,6 +193,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
   const insets = useSafeAreaInsets();
   const { palette, styles } = useThemed(makeStyles);
   const [step, setStep] = useState<Step>('welcome');
+  const [agreed, setAgreed] = useState(false);
 
   // The list of downloads. Asked for at once, so it is usually here by the
   // time the welcome page has been read; `again` asks once more.
@@ -358,7 +362,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
       : haveStates.length > 0 || busy ? { label: 'Next', onPress: () => go(1) }
       : { label: 'Skip for now', onPress: () => go(1), quiet: true })
     : busy ? { label: 'Finishing downloads…', onPress: () => {}, off: true }
-    : { label: 'Start', onPress: onDone };
+    : { label: 'Start', onPress: () => { markAgreed(); onDone(); }, off: !agreed };
 
   let page: ReactNode;
   if (step === 'welcome') {
@@ -536,6 +540,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
             ? `The guides are on this phone${names.length === 0 ? '' : `, with ${listNames(names)}`}. Have a look around.`
             : 'The guides aren’t on this phone yet, so I can’t answer questions. You can still look around; Fred offers setup again when you next open him.'}
         </Text>
+        <BetaNotice agreed={agreed} onToggle={() => setAgreed((a) => !a)} />
       </ScrollView>
     );
   }
@@ -559,12 +564,14 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
       <View style={[styles.foot, { paddingBottom: insets.bottom + 14 }]}>
         {step === 'welcome'
           // Someone set up by cable, or who only wants a look, is not made to walk the pages.
-          ? <Pressable onPress={onDone} hitSlop={10} accessibilityRole="button"><Text style={styles.back}>Skip setup</Text></Pressable>
+          // It lands on the last page, for the beta notice, not in the chat.
+          ? <Pressable onPress={() => setStep('ready')} hitSlop={10} accessibilityRole="button"><Text style={styles.back}>Skip setup</Text></Pressable>
           : <Pressable onPress={() => go(-1)} hitSlop={10} accessibilityRole="button">
               <Text style={styles.back}>Back</Text>
             </Pressable>}
         <Pressable style={[styles.next, next.quiet === true && styles.nextQuiet, next.off === true && styles.dim]}
-          disabled={next.off === true} onPress={next.onPress} accessibilityRole="button">
+          disabled={next.off === true} onPress={next.onPress} accessibilityRole="button"
+          accessibilityState={{ disabled: next.off === true }}>
           <Text style={[styles.nextText, next.quiet === true && styles.nextTextQuiet]}>{next.label}</Text>
         </Pressable>
       </View>

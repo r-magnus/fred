@@ -169,6 +169,11 @@ downloads actually go (RC-KR1 measures setup completion). Skip C.
 
 ## 4 · A "think harder" mode on the same model *(exploratory, not release work)*
 
+> **Superseded 2026-11-20:** the research in
+> [`docs/handoff-deep-thinking.md`](docs/handoff-deep-thinking.md) re-ranks the
+> options below. Spend the time checking the greedy answer, and drop sampled
+> "answer several times" as a way to write answers.
+
 **The idea:** an opt-in mode where the same Qwen3-1.7B takes more time to give a
 more careful answer. There's room for it in the app. But the obvious version has
 already been measured and lost, so it needs a different method.

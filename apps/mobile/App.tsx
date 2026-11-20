@@ -768,6 +768,10 @@ function Screen() {
         onLayout={(e) => { scrollAt.current.height = e.nativeEvent.layout.height; checkBelow(); }}
         onScroll={(e) => { scrollAt.current.offset = e.nativeEvent.contentOffset.y; checkBelow(); }}
         scrollEventThrottle={100}
+        // With the keyboard up, a tap on a button (the rating box's Send) acts
+        // at once; by default the first tap only put the keyboard away (#247,
+        // seen on the phone). A tap on bare chat still puts it away.
+        keyboardShouldPersistTaps="handled"
         // A finger on the chat: the reader is in charge from here.
         onScrollBeginDrag={() => { following.current = false; }}
         // The last report of a fling can be dropped by the throttle: read where it came to rest.

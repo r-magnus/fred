@@ -300,8 +300,12 @@ The public link is created after approval. Draft wording: `docs/testflight-draft
 
 ### Not blocking external testing, but before the App Store
 
-- iCloud backup includes the 1.45 GB of downloads (guideline 2.23). It needs
-  native code to mark them excluded from backup.
+- ~~iCloud backup includes the 1.45 GB of downloads (guideline 2.23).~~ **Fixed
+  2026-11-20, not yet in a TestFlight build** (`modules/fred-backup`,
+  `src/backup.ts`). Everything in Documents except the hiker's own files
+  (`src/backup-list.ts`) is marked excluded, at launch and after each
+  download. Checked on the FredTest simulator; check on the iPhone with the
+  next build. Build 14 testers still back up the downloads.
 - The battery estimate is off on iPhone (`docs/results-battery-estimate.md` ›
   "The iPhone").
 

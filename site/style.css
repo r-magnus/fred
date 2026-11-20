@@ -1,0 +1,41 @@
+/* Fred's web pages: the app's day and night colours (apps/mobile/src/theme.tsx). */
+:root {
+  --cream: #FBF4E4; --paper: #FFFCF4; --sand: #E6DAC0; --oat: #F3E9D2;
+  --pine: #316C33; --ink: #2B352C; --moss: #525F4F;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream: #16221E; --paper: #1F2E28; --sand: #35483F; --oat: #2A3C34;
+    --pine: #A5D6A0; --ink: #EDF2E6; --moss: #A7B6A5;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--cream); color: var(--ink);
+  font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 680px; margin: 0 auto; padding: 40px 16px 72px; }
+h1, h2, h3 { font-family: Georgia, "Noto Serif", serif; font-weight: 400; line-height: 1.25; }
+h1 { font-size: clamp(30px, 7vw, 40px); margin: 6px 0 14px; }
+h2 { font-size: 24px; margin: 40px 0 8px; }
+h3 { font-size: 19px; margin: 26px 0 4px; }
+p, li { overflow-wrap: anywhere; }
+ul { padding-left: 22px; }
+li { margin: 6px 0; }
+a { color: var(--pine); text-underline-offset: 2px; }
+.kicker { color: var(--moss); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.kicker a { text-decoration: none; font-weight: 700; }
+.lead { font-size: 19px; }
+.meta { color: var(--moss); font-size: 14px; }
+.summary {
+  background: var(--paper); border: 1px solid var(--sand); border-radius: 18px;
+  padding: 4px 22px 10px; margin-top: 26px;
+}
+.summary h2 { margin-top: 18px; font-size: 20px; }
+.summary ul { list-style: none; padding: 0; }
+.summary li { padding-left: 26px; position: relative; }
+.summary li::before {
+  content: ""; position: absolute; left: 4px; top: .55em; width: 9px; height: 9px;
+  border-radius: 50%; background: var(--pine);
+}

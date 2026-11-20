@@ -244,7 +244,8 @@ answer anything. **External testing needs section 2 done first.**
 ### Steps
 
 1. **Build on the Xcode 27 image and test on Ryan's iPhone as an internal
-   tester.** Internal testers are App Store Connect users on the Apple team
+   tester.** Full instructions for the Mac, including what changed since build
+   12: **`IOS-CATCHUP.md`**. Internal testers are App Store Connect users on the Apple team
    (the account owner adds Ryan); no Apple review needed. Check: the first-run
    download completes, a question is answered (op-sqlite FTS5, #243), "i’m lost"
    opens the map (curly apostrophes, #243), the location prompt shows Fred's
@@ -262,8 +263,9 @@ answer anything. **External testing needs section 2 done first.**
    collects nothing" no longer does once reviews are sent. Say "only what you
    choose to send in a review" in the privacy policy and anywhere Fred claims
    to collect nothing.
-   **In-app wording done 2026-11-19** (About, the rating box). The privacy
-   policy itself is still to write.
+   **In-app wording done 2026-11-19** (About, the rating box). **Privacy
+   policy live** at `https://r-magnus.github.io/fred/privacy/` (source in
+   `site/`, published by `.github/workflows/pages.yml` on every push to main).
 4. **Fill in App Store Connect › TestFlight.** Ryan writes these. Draft them
    for him, but don't publish your own wording:
    - **Test Information:** beta app description (testers see it), feedback
@@ -309,6 +311,6 @@ answer anything. **External testing needs section 2 done first.**
 - [ ] Fresh Nothing Phone install sets itself up through the wizard (#198)
 - [ ] Partitioning decision recorded (A / B / not now)
 - [ ] Xcode 27 EAS build checked on Ryan's iPhone; result in `docs/results-ios-build.md`
-- [ ] Reviews feature built; privacy policy and "collects nothing" wording match it
+- [x] Reviews feature built; privacy policy and "collects nothing" wording match it (#249; policy at r-magnus.github.io/fred/privacy/)
 - [ ] TestFlight Test Information and review notes in (Ryan's words); external group passes Beta App Review; public link live
 - [ ] *(Exploratory)* "Answer several times" tested on the tuning set; go or no-go recorded

@@ -112,9 +112,11 @@ longer quote WHO. Testers get the same answers either way. Rebuild the core
 download with 0.11.0 the next time it's rebuilt for any reason. That matters
 only for a paid release, and the WHO pack still ships in a free one.
 
-The two #198 items (resume after a dropped download, and a fresh install on
-the Nothing phone) are still open. They're Android checks, so they belong to
-this machine, not the Mac.
+**Correction (same day):** the two #198 items (resume after a dropped
+download, and a fresh install on the Nothing phone) are done. #198 was closed
+on 2026-11-14 after both were checked on the phone. They're now ticked, along
+with the WHO decision, `results-no-who.md`, the `nonCommercial` switch and the
+re-backed cards, which were all done but never ticked.
 
 ### 5. Old notes
 

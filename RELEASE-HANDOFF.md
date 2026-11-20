@@ -15,10 +15,14 @@ depends on section 2: a stranger's phone can't be set up by cable.
 > **Before anything: the shipped pack set is not on this Mac.** `packs/` here is
 > stale (field cards 0.5.0, no health, hazards, wildlife-safety or tips packs).
 > The A-KR2 figure of 73.8% was measured on `~/fred-packs-g-all` on the Linux
-> machine, and the phone's packs match that folder byte for byte (2026-10-07).
-> Every measurement and every bundle build below must use that folder
-> (`PACKS_DIR=~/fred-packs-g-all`), or rebuild it here first. A run on `packs/`
-> gave 71.3% on 2026-10-06 and is **not** the shipped pipeline.
+> machine (the 2026-10-07 set: field cards 0.8.0, hazards 1.1.0). Use that
+> folder only to repeat that run. **What ships is newer:** the published core
+> download (`core-2026-11`) has field cards 0.10.0 and hazards 1.2.0, with the
+> other eight core packs matching `g-all` byte for byte (checked 2026-11-20).
+> Main's field cards are 0.11.0, which has the same text and search data as
+> 0.10.0 but credits sources other than WHO. A bundle build uses the newest
+> built version of each pack. A run on `packs/` gave 71.3% on 2026-10-06 and
+> is **not** the shipped pipeline.
 
 ---
 
@@ -105,8 +109,8 @@ copied into `bundle.json` so the go/no-go can be read from one file.
    Apache-2.0, and EmbeddingGemma falls under Google's Gemma terms, which
    require passing on the use restrictions.
 2. **Build from the shipped packs:**
-   `PACKS_DIR=~/fred-packs-g-all node scripts/build-core-bundle.mjs dist`.
-   Check `bundle.json`'s licence list against `docs/licensing.md`.
+   `PACKS_DIR=<folder with the newest built version of each pack> node scripts/build-core-bundle.mjs dist`
+   (not `g-all`, which is older; see the note at the top). Check `bundle.json`'s licence list against `docs/licensing.md`.
 3. **Pick the host. Recommendation: keep GitHub Releases on `fred-maps`.** It's
    free, it's already in use, and the app already trusts it. The asset limit is
    2 GiB per file, and the largest file (the generator model, 1.11 GB) fits.
@@ -246,7 +250,7 @@ fetch the core bundle. It does: `index.json` on `fred-maps` lists `core`
 2026-11-19 (EAS `157fba63-66fa-4062-af75-bf37ca1d14b1`; log confirms Xcode 27.2,
 iPhoneOS 27.2 SDK) and uploaded. On 2026-11-20 Ryan filled in Test Information
 and submitted it to the external group "Beta Testers": **Waiting for Review**.
-The public link is created after approval. Draft wording: `docs/testflight-draft.md`.
+The public link is created after approval. Ryan wrote the Test Information in his own words; it's in App Store Connect.
 
 ### Steps
 

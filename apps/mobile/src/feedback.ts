@@ -16,11 +16,11 @@ import { Platform } from 'react-native';
 import { flushOutbox, resultOf, upsert, type Rating, type SendResult } from './feedback-outbox.ts';
 
 /**
- * Where ratings go: the Worker's address once it is deployed
- * (tools/feedback-worker/README.md). Unset, ratings wait on the phone until a
- * build that knows it.
+ * Where ratings go: the Worker (tools/feedback-worker/README.md), deployed
+ * 2026-11-19. EXPO_PUBLIC_FRED_FEEDBACK_URL points a build at another one.
  */
-export const FEEDBACK_URL: string | null = process.env.EXPO_PUBLIC_FRED_FEEDBACK_URL ?? null;
+export const FEEDBACK_URL: string | null = process.env.EXPO_PUBLIC_FRED_FEEDBACK_URL
+  ?? 'https://fred-feedback.ryan-magnuson.workers.dev/feedback';
 /** Not a secret (anything in an app can be read out of it): it only keeps stray traffic off the server. */
 const CLIENT = 'fred-app/1';
 /** Long enough for a slow bar of signal; short enough not to hang on a dead one. */

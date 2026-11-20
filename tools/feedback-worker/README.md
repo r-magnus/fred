@@ -16,7 +16,15 @@ stopped, the times, the app version and the phone's OS. **No location, no
 device or person id.** The comment box in the app says that the question and
 reply are sent.
 
-## Set up (once)
+**Live:** `https://fred-feedback.ryan-magnuson.workers.dev/feedback`
+(deployed 2026-11-19; D1 database `fred-feedback`, region WNAM). After a
+change to `src/`, `npx wrangler@4 deploy` from this folder updates it.
+
+The rate limit is loose: Cloudflare counts per data centre and catches up
+late, so a burst of ~100 gets through before the 429s start. It is a guard
+against floods, not a quota.
+
+## Set up (once, done)
 
 From `tools/feedback-worker`:
 
@@ -34,7 +42,7 @@ From `tools/feedback-worker`:
 Check it from a shell:
 
 ```sh
-curl -s -X POST https://fred-feedback.<account>.workers.dev/feedback \
+curl -s -X POST https://fred-feedback.ryan-magnuson.workers.dev/feedback \
   -H 'X-Fred-Client: fred-app/1' -H 'Content-Type: application/json' \
   -d '{"id":"smoke-test","rating":"up","comment":null,"question":"test","reply":"test","replyKind":"answer","sources":[],"deep":false,"stopped":false,"askedAt":"2026-11-19T00:00:00Z","ratedAt":"2026-11-19T00:00:00Z","appVersion":"0.0.0","platform":"curl"}'
 # kept

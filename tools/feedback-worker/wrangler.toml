@@ -7,8 +7,8 @@ compatibility_date = "2025-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "fred-feedback"
-# Filled in from `wrangler d1 create fred-feedback` (README step 2).
-database_id = "REPLACE_WITH_DATABASE_ID"
+# From `wrangler d1 create fred-feedback` (2026-11-19). Not a secret: only this account can use it.
+database_id = "ee9c0fe4-4a83-4d5f-8ae7-5b4dd57e1109"
 
 # 30 ratings a minute from one address is far past what a hiker taps;
 # past it, the app keeps the rating and tries again later.

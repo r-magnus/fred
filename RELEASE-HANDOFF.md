@@ -254,10 +254,16 @@ answer anything. **External testing needs section 2 done first.**
    ever shown to other users, App Review's user-generated-content rules apply
    (a way to report and block, plus moderation). Keep them private unless that
    work is planned.
+   **Built 2026-11-19 (#247):** thumbs up/down under each reply; a thumbs down
+   asks "What can Fred do better?". Ratings wait on the phone until a send
+   works. Server: `tools/feedback-worker` (Cloudflare Worker + D1, README
+   there). The beta notice with an agreement tick ends setup (#248).
 3. **Fix the privacy wording.** "Location stays on the device" stays true. "Fred
    collects nothing" no longer does once reviews are sent. Say "only what you
    choose to send in a review" in the privacy policy and anywhere Fred claims
    to collect nothing.
+   **In-app wording done 2026-11-19** (About, the rating box). The privacy
+   policy itself is still to write.
 4. **Fill in App Store Connect › TestFlight.** Ryan writes these. Draft them
    for him, but don't publish your own wording:
    - **Test Information:** beta app description (testers see it), feedback

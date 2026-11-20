@@ -1,0 +1,10 @@
+{
+  "name": "@fred/feedback-worker",
+  "private": true,
+  "type": "module",
+  "description": "Fred's feedback server (#247): a Cloudflare Worker that keeps ratings in D1",
+  "scripts": {
+    "deploy": "npx wrangler@4 deploy",
+    "test": "node --test test/*.test.ts"
+  }
+}

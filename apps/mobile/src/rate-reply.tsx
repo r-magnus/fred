@@ -94,10 +94,10 @@ export function RateReply(
             style={styles.input} accessibilityLabel="What can Fred do better?" />
           <Text style={styles.note}>Your question and Fred&apos;s reply are sent with your rating. Your location is not.</Text>
           <View style={styles.buttons}>
-            <Pressable onPress={() => onComment(null)} hitSlop={8} accessibilityRole="button" style={styles.skip}>
+            <Pressable onPress={() => { Keyboard.dismiss(); onComment(null); }} hitSlop={8} accessibilityRole="button" style={styles.skip}>
               <Text style={styles.skipText}>Not now</Text>
             </Pressable>
-            <Pressable onPress={() => onComment(draft.trim() === '' ? null : draft.trim())} accessibilityRole="button"
+            <Pressable onPress={() => { Keyboard.dismiss(); onComment(draft.trim() === '' ? null : draft.trim()); }} accessibilityRole="button"
               style={styles.send}>
               <Text style={styles.sendText}>Send</Text>
             </Pressable>

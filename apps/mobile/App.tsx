@@ -70,6 +70,13 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { currentFix, lastKnownFix, describeAccuracy, startRecording, stopRecording,
   isRecording, type LocationFix } from './src/location.ts';
 
+/**
+ * #21: whether the deep thinking toggle is offered by the Ask box. Off since
+ * 2026-11-19 (Ryan: "sunset the deep thinking piece for now"). The engine
+ * side (DEEP_MODE, src/engine.ts) is kept as tested; true brings it back.
+ */
+const DEEP_OFFERED = false;
+
 /** Earlier messages older than this are not read with a new one (#98). */
 const HISTORY_WINDOW_MS = 30 * 60 * 1000;
 
@@ -449,7 +456,7 @@ function Screen() {
     const shown = last !== undefined && last.done && last.kind === 'answer' && !last.stopped &&
       last.citations[0]?.source === 'Fred field card' ? last.citations[0].section : undefined;
     const map = wantsMap(question);
-    const deepOn = again !== undefined ? again.deep : deepRef.current && !viaHook;
+    const deepOn = DEEP_OFFERED && (again !== undefined ? again.deep : deepRef.current && !viaHook);
     setTurns((ts) => [...ts, {
       id, question, askedAt: now, state: askState, text: '', kind: 'answer',
       citations: [], medical: false, candidateStates: [], done: false, stopped: false, map,
@@ -1008,7 +1015,7 @@ function Screen() {
           </Text>
         )}
         {/* #21: offered while a question is being typed, for that question only. */}
-        {draft.trim() !== '' && !busy && (
+        {DEEP_OFFERED && draft.trim() !== '' && !busy && (
           <Pressable style={[styles.deepChip, deep && styles.deepChipOn]} onPress={() => setDeep((d) => !d)}
             accessibilityRole="switch" accessibilityState={{ checked: deep }}
             accessibilityLabel="Deep thinking: a slower, more careful answer">

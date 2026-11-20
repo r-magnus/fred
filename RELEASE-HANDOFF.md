@@ -313,13 +313,13 @@ The public link is created after approval. Ryan wrote the Test Information in hi
 
 ## Done looks like
 
-- [ ] WHO decision recorded in `docs/licensing.md` (free first release, or WHO replaced)
-- [ ] `docs/results-no-who.md` with held-out and breadth numbers (#33)
-- [ ] `nonCommercial` flag read at bundle build time, with a test (#33)
-- [ ] 11 WHO-quoting field cards re-backed, PFA replaced, re-measured (#214) — only if commercial
+- [x] WHO decision recorded in `docs/licensing.md` (free first release, 2026-11-13)
+- [x] `docs/results-no-who.md` with held-out and breadth numbers (#33)
+- [x] `nonCommercial` flag read at bundle build time, with a test (#33)
+- [x] 11 WHO-quoting field cards re-backed, PFA replaced, re-measured (#214) — only if commercial
 - [x] Core bundle built from the shipped packs and published; `index.json` has `core` (#198; release `core-2026-11`)
-- [ ] Interrupted download resumes, proven by a test and a check on the phone (#198)
-- [ ] Fresh Nothing Phone install sets itself up through the wizard (#198)
+- [x] Interrupted download resumes, proven by a test and a check on the phone (#198, closed 2026-11-14)
+- [x] Fresh Nothing Phone install sets itself up through the wizard (#198, closed 2026-11-14)
 - [ ] Partitioning decision recorded (A / B / not now)
 - [ ] Xcode 27 EAS build checked on Ryan's iPhone; result in `docs/results-ios-build.md`
 - [x] Reviews feature built; privacy policy and "collects nothing" wording match it (#249; policy at r-magnus.github.io/fred/privacy/)

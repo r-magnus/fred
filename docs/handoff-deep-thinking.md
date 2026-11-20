@@ -1,0 +1,135 @@
+# Handoff: deep thinking, round 3 (research)
+
+Written 2026-11-20 on the Mac, for the main machine, which owns the accuracy
+work (#233, #21). This is research only: no code changed and nothing was
+measured. Below this header is the full report. The four researchers' notes
+it was built from are in
+[`deep-thinking/research-2026-11-20/`](deep-thinking/research-2026-11-20/).
+
+## Short version
+
+**Spend deep thinking's extra time checking the normal answer, not writing new
+ones.** Every failed attempt so far made the 1.7B model write more of its own
+text (thinking mode, sampled best-of-3, evidence-first), or used a judge too
+weak to catch it (sentence vectors, the NLI verifier). Every unsafe answer came
+from a sampled draft. The one rule that passed only acted where the normal path
+had already failed, and only used reviewed text. The proposal keeps that shape:
+the greedy answer stands unless a check flags it.
+
+This replaces `RELEASE-HANDOFF.md` §4's ranking. Its first idea, "answer
+several times and keep the agreed answer", samples, so drop it as a way to
+write answers.
+
+## Experiments, in order (all desktop, no phone work until one passes)
+
+1. **Grounding checker on the old drafts (about a day).** Score the archived
+   unsafe sampled drafts and their greedy siblings (rounds 1–2 in
+   `docs/deep-thinking/`), plus the 31 verifier-test answers, with
+   HHEM-2.1-Open (0.1B), FactCG-DeBERTa-L (0.4B) and MiniCheck-Flan-T5-L
+   (0.8B).
+   - **Pass:** every unsafe draft scores below its greedy sibling, and only a
+     few of the 22 acceptable answers are flagged at the chosen threshold.
+   - Enlarge the failure set beyond 9 before a go/no-go.
+   - **If none pass,** stop. Keep "search again after a flat decline" as the
+     whole mode, or reopen the bigger-model decision (#37).
+2. **Diagnose #21's failures (an hour, no code).** Did belly-wound packing,
+   scalp bleeding, plant cordage and marsh plants have an off-topic passage
+   ranked first?
+   - **If yes:** rerank the tuning set's top 20 with Qwen3-Reranker-0.6B
+     (official GGUF; community conversions often score 0) and grade the
+     changed answers blind.
+   - **If no:** reranking drops a rank.
+3. **Reverse-question check.** Run it on the #21 failures and an equal number
+   of right answers. Count catches against false rejects: a fallback scores 0,
+   the same as a wrong answer.
+
+Experiments 4–6 (greedy passage orders, read-only "from memory" flagging,
+`n_probs` confidence) only matter once one of the first three passes.
+
+## Decisions that are Ryan's
+
+- **Whether a checker model ships.** It adds roughly 0.1–0.6 GB and a
+  download. DeBERTa and T5 checkers may need a runtime other than llama.rn
+  (ONNX); nobody has published phone timings.
+- **A time ceiling for deep answers.** Heat sets it, not battery: the Nothing
+  Phone reached 86–100 °C after 82 s of sustained generation. The report
+  suggests about 30–40 s total, with deep mode off for emergency and card
+  questions.
+- **How much it can move.** Only 17 of 40 held-out replies are written by the
+  model, so even a perfect checker touches less than half of Fred's answers.
+
+## Caveats
+
+- Almost all outside evidence comes from 7B+ models, and none from
+  safety-graded first-aid text. Each candidate is a hypothesis with a cheap
+  test, not a known win.
+- A grounding checker only judges whether a passage supports a claim, not
+  whether the claim is dangerous. A wrong passage, or the right procedure for
+  the wrong patient (infant vs adult CPR), still passes.
+
+## Questions for the main machine
+
+1. Are the rounds 1–2 sampled drafts archived with their greedy siblings in
+   `docs/deep-thinking/`, so experiment 1 can run as described?
+2. Is the reasoning right that the #21 failures are retrieval (wrong passage
+   first) rather than generation? Experiment 2 settles it cheaply.
+3. Does this change the order of #233 and the "safe conversation
+   understanding" write-up you have drafted locally?
+
+---
+
+## Report: Spend deep-thinking compute checking answers, not generating them
+
+The attainable "deep thinking" for Fred is greedy-only: keep the normal Qwen3-1.7B answer as the default, spend the extra 10-40 s on **checking it and choosing among reviewed text**, and let any other output replace the normal answer only when a check flags it. Free generation is the wrong place to spend the time. The research points to three levers. The first is a purpose-trained grounding checker of 0.1-0.4B parameters, which gates whether the normal answer stands. The second is a 0.6B reranker that filters passages, aimed at the "answered a different question" failures. The third is a short reverse-question check that sends off-question answers to a field card, a quote or a decline. Each one leaves the normal answer unchanged when nothing is flagged. That is the same shape as the one deep-thinking rule that passed ("search again only after a flat decline": +1.5 on 275 unseen questions, nothing made worse). The handoff's first idea, sampled self-consistency, should be dropped as an answer generator. In Fred's own runs, every unsafe answer came from a sampled draft at temperature 0.6, never from the greedy one, and that has now happened in three separate experiments ([docs/results-deep-thinking.md](../docs/results-deep-thinking.md)). One caveat applies to everything below: almost none of the outside evidence comes from models of 2B or smaller, and none from safety-graded first-aid text. So each candidate is a hypothesis with a cheap desktop test, not a known win.
+
+### Five failures share one cause: new text from a 1.7B model
+
+Fred's record is consistent once the results are lined up. Thinking mode changed 24 answers, netted about -3.5, and added an unsafe one ("campfire smoke can be used for water purification"). It drifted away from the passages on plant and animal facts ([RELEASE-HANDOFF.md §4](../RELEASE-HANDOFF.md)). Best-of-3 sampling produced "wild beans generally considered safe to eat" and "burn poison oak in a controlled manner", both from sampled drafts. Evidence-first prompting changed 27 of 33 drafts and netted worse. Sentence-vector judging could not tell drafts apart, because their scores differed by about 0.01 ([docs/results-deep-thinking.md](../docs/results-deep-thinking.md)). Each of these either made the 1.7B model write more of its own text or relied on a judge too weak to catch it when it did.
+
+The research says this is expected at Fred's size rather than bad luck. Self-correction by prompting lowers accuracy, and correct answers flipping to wrong ones outnumber the reverse. Even at 7-13B, a model's own verifier reaches only 51-57 F1, against 88-90 for GPT-4, and the authors conclude that small models are "bottlenecked by the verifier rather than the refiner" ([Huang et al.](https://arxiv.org/html/2310.01798v2); [Zhang et al.](https://arxiv.org/html/2404.17140v1)). The one success in that literature came only when an oracle decided when to stop. So the valuable part of a "think harder" mode is a reliable signal for **when** to act, not a more elaborate redraft. The NLI verifier also failed for a reason. Plain NLI models score about **61** balanced accuracy on LLM fact-checking, while purpose-trained checkers of the same size score **72-75** ([MiniCheck](https://arxiv.org/html/2404.10774v2)). Fred tested the weak class of checker, not the strong one.
+
+### Ranked approaches: three gates first, generators last
+
+The ranking below weighs how likely each approach is to produce a net gain under Fred's pass rule of zero new unsafe answers, not how impressive it is in the literature. The phone costs assume Fred's binding device, the Nothing Phone (3) running on CPU. On that phone a Qwen3-1.7B pass costs 6-9 s of prefill, a written answer takes 15.3 s on average, and Qwen3-0.6B prefills at about 420 tok/s ([docs/METRICS.md](../docs/METRICS.md); [docs/results-m0.md](../docs/results-m0.md)).
+
+| Rank | Approach | Model size behind the evidence | Added phone cost (estimate) | Safety risk | First experiment |
+|---|---|---|---|---|---|
+| 1 | Grounding-checker gate on the greedy answer | 0.1-0.8B checkers, benchmarked on LLM output | ~1-3 s, +0.1-0.6 GB | Low: changes only flagged answers | Desktop: score the old unsafe sampled drafts against the greedy ones |
+| 2 | Rerank top 10-20 with Qwen3-Reranker-0.6B, then filter passages | 0.6B reranker over a 0.6B embedder | ~5-15 s prefill, +~0.6 GB | Low-moderate: can promote a distracting passage | Diagnose the #21 failures' top passages, then rerank the tuning set |
+| 3 | Reverse-question check that routes to reviewed fallbacks | Large judges only | One short generation (~3-5 s) | Low if it only falls back; costs points on false rejects | Run it on the #21 failures and the right answers; count catches and false rejects |
+| 4 | Greedy answers over several passage orders, used as candidates or an agreement signal | 8B (order sensitivity) | ~2 extra full passes, ~30 s | Low if a checker picks among them | Measure answer agreement across 3 orders on the tuning set |
+| 5 | Gated context-aware decoding, or read-only "from memory" token flagging | 8-70B; mixed results at 1.5B | ~2x decode; needs a native llama.rn patch | Rewriting mode: moderate. Flagging mode: low | Desktop llama.cpp prototype of the flagging mode on plant and animal answers |
+| 6 | Token-confidence trigger from `n_probs` | 7-8B, not RAG | ~0 s | None as a trigger | Log first-token entropy on graded answers |
+| Drop | Sampled self-consistency, self-refine, CoVe, HyDE, 4→8 passages, quote-first grammars | Mostly large models | 15-70 s | High or already failed locally | None |
+
+#### 1 · A trained grounding checker decides whether the normal answer stands
+
+This is the best-supported way to catch the drift failure behind thinking mode and the sampled drafts: added claims that the passages do not make. Current small checkers come close to GPT-4 on the LLM-AggreFact benchmark. **FactCG-DeBERTa-L (0.4B) averages 75.6 and MiniCheck-Flan-T5-L (0.8B) 75.0, against 75.9 for gpt-4o** ([LLM-AggreFact](https://llm-aggrefact.github.io/)). Vectara's HHEM-2.1-Open, fine-tuned from flan-t5-base (about 0.1B), uses under 600 MB of RAM, takes about 1.5 s for a 2k-token input on an x86 CPU, and scores 74.28 on RAGTruth-QA against 74.11 for GPT-4 ([HHEM model card](https://huggingface.co/vectara/hallucination_evaluation_model)). The design runs in tiers. If the checker accepts every sentence of the greedy answer, the user sees it unchanged, which should cover most answers. If one sentence scores low, deep mode may swap in a deterministic alternative (rank 4) that scores clearly higher, or else fall back to a field card or quote. A full decline is reserved for the case where the flagged sentence is the main instruction.
+
+The safety limit needs to be stated plainly. These models measure **whether a passage supports the claim, not whether the claim is dangerous**. They should catch "burn poison oak" when the passage says never to burn it. They will pass a dangerous answer that a passage does support: a wrong passage retrieved, or a correct procedure applied to the wrong patient, such as an adult rate given for an infant. In Fred's NLI test the two safety defects, wound packing and infant CPR, ranked mid-pack, which fits that pattern ([docs/results-verifier-test.md](../docs/results-verifier-test.md)). Two costs are still unknown. Nobody has published phone latency for these checkers, and an ONNX or GGUF route into React Native has not been confirmed for FactCG or MiniCheck; DeBERTa and T5 models may need a runtime other than llama.rn. If no such route exists, Qwen3-Reranker-0.6B runs natively in llama.rn and could be tried as a sentence-versus-passage scorer. But it is trained for relevance, not entailment, so that would be a separate bet. **First experiment:** a desktop script, with no phone work, that scores the archived unsafe sampled drafts and the greedy drafts from rounds 1-2, plus the 31 answers from the verifier test, using HHEM, FactCG and MiniCheck. The checker passes only if it ranks every unsafe draft below its greedy sibling and, at its threshold, flags no more than a few of the 22 acceptable answers. At 0.30, the NLI verifier caught 3 of 9 failures while flagging 2 of 22 acceptable answers, and catching both safety defects required flagging 13 of 22. The verifier test had only 9 failures, so the set should be enlarged before any go/no-go decision.
+
+#### 2 · Reranking and filtering go after "answered a different question"
+
+The unsolved #21 class (belly-wound packing answered as generic wound packing, scalp bleeding answered as general bleeding, plant cordage, marsh plants) looks like a neighboring-topic passage pulling the answer sideways, not drift. Small readers are especially distractible: **3B models across families are more susceptible to distracting passages than their larger siblings** ([The Distracting Effect](https://arxiv.org/pdf/2505.06914)). That is also why simply moving from 4 to 8 passages is a poor bet. **Qwen3-Reranker-0.6B is the only small reranker with published gains over a modern 0.6B embedder's own top 100: MTEB-R 61.82 → 65.80.** Older rerankers of 0.3-0.6B scored *below* that first stage in the same table, though these are the Qwen authors' own runs ([Qwen3 Embedding report](https://arxiv.org/html/2506.05176v3)). Off-the-shelf MiniLM rerankers lowered NDCG on technical corpora ([vstash](https://arxiv.org/pdf/2604.15484)). llama.rn 0.12.9 already exposes `rerank()`. The reranker needs a correctly converted GGUF, because many community conversions return scores of 0.0000 ([conversion notes](https://huggingface.co/Voodisss/Qwen3-Reranker-0.6B-GGUF-llama_cpp); [ggml-org Q8_0](https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF)).
+
+The research notes' estimate of "a few seconds" understates the phone cost. Twenty passages of about 300 tokens is 6k tokens. At the 0.6B model's measured 420 tok/s, that is **about 14 s of prefill on the Nothing Phone**; ten passages of about 200 tokens is about 5 s. Memory would rise from 2.9 GB to roughly 3.5 GB, which fits Android's budget only if the reranker is its own small context and the 1.7B weights are not loaded twice ([docs/results-cold-start-memory.md](../docs/results-cold-start-memory.md)). Using Qwen3-1.7B itself as a yes/no reranker avoids the download, but at roughly 80-150 tok/s of prefill it would take 40-75 s for the same 6k tokens, and its zero-shot ranking quality is unmeasured. The reranker only chooses among reviewed passages, so it adds no unreviewed claims. Its risk is promoting a distracting passage or dropping one that carries a caveat. In deep mode it also changes the input for every answer, so it needs the full held-out confirmation, not just a tuning-set run. **First experiment:** before writing any code, check whether the held-out #21 failures had an off-topic passage ranked first. If they did not, this lever does not address them and drops a rank. If they did, rerank the tuning set's top 20 on the desktop and grade the changed answers blind.
+
+#### 3 · A reverse-question check is a cheap gate for off-question answers
+
+RAGAS-style "answer relevance" has the model write the question its answer responds to, then compares that with the user's question ([RAGAS](https://arxiv.org/abs/2309.15217)). It differs from the failed draft-versus-draft vector check because it contrasts "how do I pack a belly wound" with "how do I pack a wound". Off-topic answers are about a third of wrong answers in multi-hop QA, and an LLM discriminator cut them by nearly 13% ([Dr3](https://arxiv.org/abs/2403.12393)). That evidence uses large judges, though, and SCORE warns that lexical overlap with domain keywords can inflate relevance scores ([SCORE](https://arxiv.org/pdf/2602.10017)). For Fred, a deterministic complement is to check whether the question's key qualifiers (body site, "belly", "scalp", a plant name) survive into the inferred question. Run as a separate greedy generation that only triggers a reviewed fallback, it never changes an answer that passes. Its real cost is false rejects. A decline scores 0, the same as a wrong answer, so a check that turns good answers into fallbacks loses points. **First experiment:** run it on the known #21 failures and on an equal number of right answers, and count catches against false rejects before wiring it into anything.
+
+#### 4 and 5 · Deterministic diversity and gated contrastive decoding are second-tier
+
+If the checker in rank 1 needs alternatives to choose from, they should be greedy. Answers vary with passage order, and **smaller Qwen3 models are more order-sensitive** ([Stable-RAG](https://arxiv.org/html/2601.02993v2)). Self-consistency over permuted orders is an established way to counter position bias ([arXiv 2412.10684](https://arxiv.org/html/2412.10684v1)). But no study shows that agreement across orders predicts correctness at 2B or smaller, and reordering breaks prefix-cache sharing. That makes each variant a full pass, about 15 s on the Nothing Phone. This approach is best used as rank 1's candidate pool, not on its own, because judging agreement between two-to-three-sentence answers is exactly what the vector judge failed at.
+
+Context-aware decoding runs the model with and without the passages and amplifies the difference, which is aimed squarely at the plant and animal facts the model supplies from memory. Its plain form is dangerous on ordinary questions: **a fixed-strength CAD dropped Llama3-8B on TriviaQA from 85.70 to 40.20**, and lost 18.58 points on average across natural QA sets ([AdaCAD](https://arxiv.org/html/2409.07394v2)). The 2026 "No-Worse" gate reproduces greedy output exactly when the two streams agree, and still keeps only 89-97% of already-correct answers on 8B models ([NWCAD](https://arxiv.org/html/2604.16686v1)). At 1.5B, contrastive decoders cut Qwen2.5-1.5B-Instruct's gold-context score from 47.3 to 12.3 on one set ([CUB](https://arxiv.org/html/2505.16518v1)). llama.rn does not expose guidance, so any version needs a native patch running two sequences. The low-risk form is **read-only**: flag content words that are likely without the passages and appear nowhere in them, which is the signature of thinking mode adding lynx and wolverines to a bear answer. Then feed that flag into rank 1's gate instead of rewriting tokens. Rank 6, first-token entropy from `n_probs`, is free and matched sampled self-consistency on 7-8B models. But its authors say it will not reliably catch confident falsehoods, and a fluent plant fact from memory is exactly that ([arXiv 2602.02888](https://arxiv.org/pdf/2602.02888)). It is useful only for deciding when to run the other checks.
+
+### What to drop, and the phone's 30-40 s ceiling
+
+Sampled self-consistency, the handoff's top untried idea, should not generate answers. Even if voting picks well, every sampled candidate is a chance to show the user a "burn poison oak" draft. Its only defensible use is as a hidden agreement signal that never displays sampled text, and the greedy-order variants in rank 4 provide that more safely. "Thinking for first-aid only" rests on two tuning answers, and it uses the same mechanism that produced an unsafe answer, so it ranks below all six candidates. Self-refine and Chain-of-Verification only have large-model support (CoVe was shown on Llama-65B without retrieval), and the free-rewrite step is where small models do harm ([CoVe](https://arxiv.org/html/2309.11495v2)). HyDE adds a measurable hallucination rate with a 1B-class generator ([arXiv 2506.21568](https://arxiv.org/abs/2506.21568)). Going from 4 to 8 passages raises distraction, and on this CPU it would push prefill to about 15-30 s. Quote-first grammars repeat the evidence-first failure, and the citation gains behind them came from **fine-tuned** 7-8B models ([FRONT](https://arxiv.org/abs/2408.04568v1)).
+
+Heat, not battery, sets the time budget. A written answer costs about 0.19% of the battery ([docs/results-battery-estimate.md](../docs/results-battery-estimate.md)). But Fred's phone reached **86-100 °C on its CPU cores after 82 s of sustained generation** ([docs/results-m3.md](../docs/results-m3.md)), and an iPhone running a 1.5B model lost 37-44% of its decode speed by the third to eighth back-to-back query ([arXiv 2603.23640](https://arxiv.org/html/2603.23640v1)). The gate-first design fits within that: the greedy answer streams at its normal ~15 s, then rank 1 and rank 3 add perhaps 5-10 s, and only a flagged answer pays for reranking or extra greedy passes. Deep mode should stay off for emergency and card intents, and the wait should be labelled honestly, as the handoff asks. One more constraint shapes every plan: only 17 of 40 held-out replies are written by the model, so even a perfect checker can move less than half of Fred's answers.
+
+### Conclusion
+
+The shipped rule worked because it acted only where the normal path had already failed and drew only on reviewed text. That pattern, more than any one paper, is the useful finding, and it changes the question. Fred does not need a model that thinks harder. It needs a signal good enough to say when the normal answer is suspect. The most likely reason that signal was never found is that the one checker tested was the weak kind. A purpose-trained grounding checker is about a day's work on the desktop with files that already exist. If it cannot separate the archived unsafe drafts from their greedy siblings, the case for a deep-thinking button mostly collapses. The honest outcome then is to keep "search harder after a flat decline" as the whole mode, or to reopen the product decision on a bigger model, rather than ship a button that sounds more careful than it is.

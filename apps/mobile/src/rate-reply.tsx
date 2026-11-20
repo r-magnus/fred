@@ -7,8 +7,8 @@
  * the box only adds to it. The box says what is sent, because Fred otherwise
  * promises that what you ask stays on the phone.
  */
-import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { Thumb } from './feedback-outbox.ts';
 import { radius, useThemed, type Palette } from './theme.tsx';
 
@@ -26,11 +26,17 @@ export interface ReplyRating {
 }
 
 export function RateReply(
-  { value, onRate, onComment }: {
+  { value, onRate, onComment, onReveal }: {
     value: ReplyRating | undefined;
     onRate: (thumb: Thumb) => void;
     /** The words from the box; null when it was closed without any. */
     onComment: (text: string | null) => void;
+    /**
+     * Brings the box into sight. It opens below the reply, often under the
+     * edge of the chat, and the keyboard covered its Send button (seen on
+     * the phone, 2026-11-19).
+     */
+    onReveal?: (box: View) => void;
   },
 ): React.JSX.Element {
   const { palette, styles } = useThemed(makeStyles);
@@ -38,6 +44,23 @@ export function RateReply(
   // Thanks is said once, just after rating, not under every rated reply in past chats.
   const [said, setSaid] = useState(false);
   const open = value?.thumb === 'down' && value.closed !== true;
+  const box = useRef<View>(null);
+  const revealRef = useRef(onReveal);
+  revealRef.current = onReveal;
+  const reveal = (): void => { if (box.current !== null) revealRef.current?.(box.current); };
+  // Once laid out, when it opens.
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(reveal, 80);
+    return () => clearTimeout(t);
+  }, [open]);
+  // Again once the keyboard is up and the chat has made room for it.
+  useEffect(() => {
+    if (!open) return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const sub = Keyboard.addListener('keyboardDidShow', () => { t = setTimeout(reveal, 150); });
+    return () => { sub.remove(); if (t !== undefined) clearTimeout(t); };
+  }, [open]);
 
   const mark = (thumb: Thumb): React.JSX.Element => {
     const on = value?.thumb === thumb;
@@ -64,7 +87,7 @@ export function RateReply(
         {mark('down')}
       </View>
       {open && (
-        <View style={styles.box}>
+        <View style={styles.box} ref={box}>
           <Text style={styles.ask}>What can Fred do better?</Text>
           <TextInput value={draft} onChangeText={setDraft} multiline maxLength={2000}
             placeholder="Wrong, unclear, missing something…" placeholderTextColor={palette.moss}

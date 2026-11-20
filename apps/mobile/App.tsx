@@ -362,6 +362,21 @@ function Screen() {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') void flushFeedback(); });
     return () => sub.remove();
   }, []);
+  /** #247: scrolls just far enough that this view (the rating box) is wholly in sight. */
+  const reveal = useCallback((box: View): void => {
+    const sv = scroller.current;
+    if (sv === null) return;
+    following.current = false;
+    box.measureInWindow((_x, by, _w, bh) => {
+      sv.getNativeScrollRef()?.measureInWindow((_sx, sy, _sw, sh) => {
+        const over = by + bh + 12 - (sy + sh);
+        if (over <= 0) return;
+        const y = scrollAt.current.offset + over;
+        scrollAt.current.offset = y;
+        sv.scrollTo({ y, animated: true });
+      });
+    });
+  }, []);
   /** #247: keeps the hiker's rating with the chat and puts it in the outbox. */
   const rateTurn = useCallback((t: Turn, thumb: Thumb, comment?: string | null): void => {
     const rating: ReplyRating = {
@@ -375,8 +390,10 @@ function Screen() {
     rate({
       id: rating.id, rating: thumb, comment: rating.comment ?? null,
       question: t.question, reply: replyRead(t), replyKind: t.kind,
+      // As the Sources line names them: a field card by the manual it comes from, too.
       sources: [...t.citations, ...(t.offer === undefined ? [] : [t.offer.citation])]
-        .map((c) => `${c.source}${c.page === null ? '' : `, p. ${c.page}`}${c.section === '' ? '' : ` · ${c.section}`}`),
+        .map((c) => `${c.source}${c.page === null ? '' : `, p. ${c.page}`}${c.section === '' ? '' : ` · ${c.section}`}` +
+          (c.basis === undefined || c.basis.length === 0 ? '' : ` (from ${c.basis.map((b) => b.source).join('; ')})`)),
       deep: t.deep === true, stopped: t.stopped,
       askedAt: new Date(t.askedAt).toISOString(), ratedAt: new Date().toISOString(),
       appVersion: appVersion(), platform: platform(),
@@ -967,7 +984,7 @@ function Screen() {
 
             {rateable(t) && (
               <RateReply value={t.rating} onRate={(thumb) => rateTurn(t, thumb)}
-                onComment={(text) => rateTurn(t, 'down', text)} />
+                onComment={(text) => rateTurn(t, 'down', text)} onReveal={reveal} />
             )}
             </View>
           </View>

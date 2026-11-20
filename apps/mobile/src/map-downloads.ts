@@ -16,6 +16,7 @@
  * hundreds of megabytes into JavaScript.
  */
 import { Directory, File, FileMode, Paths } from 'expo-file-system';
+import { keepDownloadsOutOfBackup } from './backup.ts';
 import { downloadError } from './download-errors.ts';
 
 import { placeBundle, placesOf, regionOnly, type RegionalState } from './places.ts';
@@ -192,10 +193,13 @@ export async function downloadBundle(
           (n) => onProgress({ done: done + n, total, file: f.path }), signal);
         if (piece.exists) piece.delete();
         partial.move(piece);
+        keepDownloadsOutOfBackup();
         done += part.bytes;
       }
       joinParts(f);
     }
+    // A finished file is new, so unmarked: keep it out of the iPhone's backup (src/backup.ts).
+    keepDownloadsOutOfBackup();
     onProgress({ done, total, file: f.path });
   }
 }

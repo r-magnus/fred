@@ -46,6 +46,7 @@ import { agreementWanted, guidesOnPhone, markAgreed, markSetupDone, wizardWanted
 import { BetaNoticeScreen } from './src/beta-notice.tsx';
 import { loadChats, removeChat, restoreChat, saveChat, type SavedChat } from './src/chat-log.ts';
 import { appVersion, flushFeedback, platform, rate } from './src/feedback.ts';
+import { keepDownloadsOutOfBackup } from './src/backup.ts';
 import type { Thumb } from './src/feedback-outbox.ts';
 import { RateReply, type ReplyRating } from './src/rate-reply.tsx';
 import { AboutScreen } from './src/about.tsx';
@@ -364,6 +365,10 @@ function Screen() {
 
   // #247: ratings wait on the phone and go when a send works: now, and each
   // time Fred comes back to the screen (out of signal, the send just fails).
+  // Guides, models and maps stay out of the iPhone's iCloud backup; marked
+  // again each launch because a replaced file loses the mark (src/backup.ts).
+  useEffect(() => { keepDownloadsOutOfBackup(); }, []);
+
   useEffect(() => {
     void flushFeedback();
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') void flushFeedback(); });

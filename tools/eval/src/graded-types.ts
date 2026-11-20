@@ -195,6 +195,12 @@ export const GROUNDED_CONFIRM_SETS = ['tools/eval/data/confirm-grounded.json'] a
  */
 export const ASSEMBLED_SETS = ['tools/eval/data/assembled.json'] as const;
 export const ASSEMBLED_SEALED_SETS = ['tools/eval/data/holdout-assembled.json'] as const;
+/**
+ * #258: written 2026-11-20 from passages drawn at random, before any of the RC
+ * accuracy fixes (docs/plan-accuracy-rc.md). Run once, at the final measure
+ * (#263); until then nothing is tuned on it.
+ */
+export const SEALED_RC_SETS = ['tools/eval/data/holdout-sealed-rc.json'] as const;
 
 export function setsFor(name: string | undefined): readonly string[] {
   switch (name === undefined || name === '' ? 'tuning' : name) {
@@ -213,6 +219,7 @@ export function setsFor(name: string | undefined): readonly string[] {
     case 'grounded-confirm': return GROUNDED_CONFIRM_SETS;
     case 'assembled': return ASSEMBLED_SETS;
     case 'assembled-sealed': return ASSEMBLED_SEALED_SETS;
+    case 'sealed-rc': return SEALED_RC_SETS;
     case 'all': return [...GRADED_SETS, ...HOLDOUT_SETS];
     // file:<path> runs one question file, for a quick look at a few questions.
     default: if (name!.startsWith('file:')) return [name!.slice(5)]; throw new Error(`EVAL_SET must be tuning | holdout | breadth | colloquial | everyday | health | health-confirm | ailments | wildlife | hazards | hazards-confirm | states | grounded-confirm | assembled | assembled-sealed | all, got "${name}"`);

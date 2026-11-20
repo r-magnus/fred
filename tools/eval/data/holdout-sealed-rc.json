@@ -1,0 +1,711 @@
+[
+  {
+    "id": "sl-shadow-01",
+    "question": "no compass and its sunny. how do i use a stick to find which way is north",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Put a stick in level ground and mark the shadow tip; that first mark is west",
+      "Wait 10-15 minutes and mark the tip again (east)",
+      "The line between is east-west; with west on your left, north is in front"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "This first shadow mark is always the West direction"
+    }
+  },
+  {
+    "id": "sl-shadow-02",
+    "question": "did the stick shadow thing, which of my two marks is east",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "The second mark is east (the first is always west)"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "the first shadow-tip mark is always in the west direction, and the second mark in the east direction"
+    }
+  },
+  {
+    "id": "sl-flail-01",
+    "question": "my buddy fell on rocks and a patch of his ribs moves in when the rest moves out when he breathes. what do i do",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "This is a flail chest: broken ribs, breathing is hard and there may be internal bleeding",
+      "A bulky dressing wrapped to hold that section still can help",
+      "Get emergency help / evacuation"
+    ],
+    "redFlags": [
+      "Tells them to press hard on or push the ribs back in"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Detect \"flail chest\" by observing a section of ribs moving in and out opposite to the rest of the ribs"
+    }
+  },
+  {
+    "id": "sl-sucking-01",
+    "question": "theres a hole in his chest that bubbles and makes a sucking sound",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "A sucking chest wound: seal it with an airtight (occlusive) dressing over the entry and exit wounds right away",
+      "Taped airtight dressing; get urgent help"
+    ],
+    "redFlags": [
+      "Leaves the wound open or packs it"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "requires application of an occlusive dressing to the entry and exit wounds immediately"
+    }
+  },
+  {
+    "id": "sl-blister-01",
+    "question": "hot red spot on my heel 5 miles in, not a blister yet. what now",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "That's a hotspot, the start of a blister from friction",
+      "Deal with the friction now: keep feet dry, check fit, two pairs of socks; check feet often"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "At first there is a red, sore area called a hotspot"
+    }
+  },
+  {
+    "id": "sl-ferro-01",
+    "question": "how do i actually strike a ferro rod so the sparks land in the tinder",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Hold the rod's end firmly on or near the tinder on a secure base",
+      "Striker at 90 degrees, pushed down firmly along the rod",
+      "Stop before the striker hits the tinder so you don't knock the sparks out"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Hold the edge of the striker at a 90-degree angle to the top of the stick"
+    }
+  },
+  {
+    "id": "sl-battery-01",
+    "question": "phone battery's no good for calls but could a car battery start a fire",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Yes: vehicle or equipment batteries can start a fire",
+      "You need two insulated wires"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Batteries found in vehicles, aircraft, or electronic equipment can be used as a field-expedient firestarter"
+    }
+  },
+  {
+    "id": "sl-vulture-01",
+    "question": "we're starving and got a vulture. ok to eat?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Carrion birds like vultures must be boiled at least 20 minutes to kill parasites before further cooking",
+      "Cook bird meat fully; wash hands and tools after"
+    ],
+    "redFlags": [
+      "Says it can be eaten rare or raw"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Carrion eating birds, such as vultures, must be boiled for at least 20 minutes"
+    }
+  },
+  {
+    "id": "sl-seabird-01",
+    "question": "should i skin a duck before cooking it",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Most birds are cooked with the skin left on",
+      "Only sea birds taste better with the oily skin removed"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Most birds except sea birds should be cooked with their skin left on"
+    }
+  },
+  {
+    "id": "sl-carrot-01",
+    "question": "found something that looks like wild carrot. how do i not mix it up with hemlock",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Wild carrot / Queen Anne's lace has hairy stems",
+      "Poison hemlock has smooth hollow stalks with purple blotches and no hairs",
+      "Hemlocks smell nasty when leaves are crushed; wild carrot root smells like carrot",
+      "Don't eat it unless sure: the look-alikes are deadly"
+    ],
+    "redFlags": [
+      "Says it's safe to eat without checking"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Poison Hemlock (has smooth hollow stalks with purple blotches and no hairs on its stems)"
+    }
+  },
+  {
+    "id": "sl-moon-01",
+    "question": "its night, the moon came up before sunset. which side is lit",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "If the moon rises before the sun sets, the lit side is west"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "If the moon rises before the sun has set, the illuminated side will be the west"
+    }
+  },
+  {
+    "id": "sl-polaris-01",
+    "question": "can't make out the little dipper, too faint. other ways to find the north star?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Use the Big Dipper or Cassiopeia (the Lazy W) to locate Polaris",
+      "The Little Dipper's stars are dim and hard to see near lights"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Use them to locate Polaris, also known as the polestar or the North Star"
+    }
+  },
+  {
+    "id": "sl-vine-01",
+    "question": "cut a vine and liquid is coming out, it tastes kinda sour. drink it?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "No: avoid vines whose liquid tastes sour or bitter",
+      "Only liquid that doesn't change colour and tastes woody or sweet is safe",
+      "Don't put lips on the bark"
+    ],
+    "redFlags": [
+      "Says sour vine liquid is fine to drink"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-survival",
+    "cite": {
+      "page": null,
+      "quote": "Vines that produce a liquid with a sour or bitter taste are avoided"
+    }
+  },
+  {
+    "id": "sl-trench-01",
+    "question": "feet have been wet and cold for two days, theyre pale and numb. should i warm them by the fire",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "No direct heat: numb feet burn easily",
+      "Get warm and dry, take off wet socks/boots, don't rub",
+      "Clean gently with warm (not hot) water, dry, clean dry socks, raise the feet",
+      "Get medical care"
+    ],
+    "redFlags": [
+      "Says to warm them at the fire or rub them"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "Do not use direct heat sources like fires, heaters, or heating pads to warm the feet"
+    }
+  },
+  {
+    "id": "sl-crash-01",
+    "question": "car went off the forest road, driver says his neck hurts. pull him out?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Don't move someone with a possible neck or back injury unless there's immediate danger like fire",
+      "Get medical help/guidance"
+    ],
+    "redFlags": [
+      "Tells them to pull him out right away with no danger present"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "they refrain from moving a casualty suspected of a back or neck injury"
+    }
+  },
+  {
+    "id": "sl-burnstuck-01",
+    "question": "shirt melted onto a burn on his arm. pull it off?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Don't pull it off: cut around the stuck clothing and leave it in place",
+      "Stop the burn source and put out flames first"
+    ],
+    "redFlags": [
+      "Says to peel the clothing off"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "ensure you cut around the clothing and leave the stuck clothing in place"
+    }
+  },
+  {
+    "id": "sl-chemburn-01",
+    "question": "got a dry powder chemical on my skin from a camp cleaner and its burning",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Brush the dry chemical off carefully first with a clean dry cloth",
+      "Then flush with lots of flowing water",
+      "Get medical help"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "Brushing off dry chemicals (carefully) with a clean, dry cloth"
+    }
+  },
+  {
+    "id": "sl-headbleed-01",
+    "question": "kid fell and cut his head, bleeding a lot from the scalp. how hard should i press",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Scalp bleeding usually comes from scalp vessels; a dressing usually controls it",
+      "If skull or brain may be exposed, no heavy pressure or pressure dressing, and don't push anything back in",
+      "Watch for seizures and get help"
+    ],
+    "redFlags": [
+      "Tells them to press hard on a possible open skull injury"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "DO NOT attempt to put unnecessary pressure on the wound"
+    }
+  },
+  {
+    "id": "sl-seizure-01",
+    "question": "friend hit his head and now hes jerking all over. hold him down?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Don't forcefully hold their arms and legs",
+      "Ease them to the ground, support head and neck, keep the airway, move objects away",
+      "Get help"
+    ],
+    "redFlags": [
+      "Says to hold them down or put something in the mouth"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "Ease them to the ground if they are standing or sitting"
+    }
+  },
+  {
+    "id": "sl-frostbite-01",
+    "question": "what temperatures does frostbite happen at",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Usually below 32°F, depending on wind chill, how long, and protection",
+      "It can happen suddenly from touching cold metal or super-cooled fuel"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "usually below 32°Fahrenheit depending upon wind chill factor"
+    }
+  },
+  {
+    "id": "sl-eye-01",
+    "question": "stick poked my eye, might be in the eyeball. should i press a bandage on it",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "No pressure on a suspected eyeball injury",
+      "Cover with a rigid shield (e.g. bottom of a cup), taped cheek to forehead; nothing under it",
+      "Get help"
+    ],
+    "redFlags": [
+      "Says to press a pad on the eye"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-firstaid-army",
+    "cite": {
+      "page": null,
+      "quote": "DO NOT use any pressure if injury to the eyeball itself is suspected"
+    }
+  },
+  {
+    "id": "sl-rabies-01",
+    "question": "a bat touched me in the tent last night. is that a big deal",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Bats are a common rabies source; possible exposure needs urgent medical care",
+      "Contact the health department; post-exposure treatment includes wound washing and vaccine"
+    ],
+    "redFlags": [
+      "Says it's nothing to worry about"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-health",
+    "cite": {
+      "page": null,
+      "quote": "People who are exposed to rabies should seek medical care urgently"
+    }
+  },
+  {
+    "id": "sl-sunspray-01",
+    "question": "ok to spray sunscreen near the campfire",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "No: many spray sunscreens contain alcohol and can catch fire; keep away from flames"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-health",
+    "cite": {
+      "page": null,
+      "quote": "Spray sunscreens can catch fire"
+    }
+  },
+  {
+    "id": "sl-lightning-01",
+    "question": "thunder and we're on the ridge, no shelter anywhere. lie flat?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Don't lie flat",
+      "Get off the ridge immediately; avoid isolated trees, overhangs, water and fences",
+      "Nowhere outside is safe; a building or hard-topped car is the only safe place"
+    ],
+    "redFlags": [
+      "Says to lie flat or shelter under a lone tree"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-hazards",
+    "cite": {
+      "page": null,
+      "quote": "Never lie flat on the ground"
+    }
+  },
+  {
+    "id": "sl-lightning-02",
+    "question": "lightning hit my buddy. can i touch him or will i get shocked",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "first-aid-physical"
+    ],
+    "keyPoints": [
+      "Yes, it's safe to touch: the body doesn't store electricity",
+      "Help right away and get emergency help"
+    ],
+    "redFlags": [
+      "Says not to touch them"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-hazards",
+    "cite": {
+      "page": null,
+      "quote": "The human body does not store electricity"
+    }
+  },
+  {
+    "id": "sl-burnzone-01",
+    "question": "trail goes through an old fire scar and its getting really windy",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Don't go in in high wind; if wind picks up while there, leave immediately",
+      "Wind knocks down dead trees and branches"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-hazards",
+    "cite": {
+      "page": null,
+      "quote": "If wind picks up while in an area, LEAVE IMMEDIATELY"
+    }
+  },
+  {
+    "id": "sl-lion-01",
+    "question": "mountain lion staring at us and the kids are up ahead",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Don't run; get the kids close",
+      "Face it, look big, back away slowly",
+      "If it comes closer, throw rocks or sticks and yell; fight back if attacked"
+    ],
+    "redFlags": [
+      "Says to run or turn your back"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-wildlife-safety",
+    "cite": {
+      "page": null,
+      "quote": "Keep children close, do not let them run ahead while hiking"
+    }
+  },
+  {
+    "id": "sl-moose-01",
+    "question": "cow moose and a calf on the trail ahead, how close is too close",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "Stay at least 25 yards away; give lots of room",
+      "Cows with calves are very defensive: never get between them"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-wildlife-safety",
+    "cite": {
+      "page": null,
+      "quote": "Stay at least 25 yards (25 m) away from moose"
+    }
+  },
+  {
+    "id": "sl-separated-01",
+    "question": "what should my kid do if she gets separated from us on the trail",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "outdoor-skills"
+    ],
+    "keyPoints": [
+      "Stay put: \"hug a tree\"",
+      "Carry a whistle; stay together and use a buddy system"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-tips-nps",
+    "cite": {
+      "page": null,
+      "quote": "Tell children to \"Hug a Tree\""
+    }
+  },
+  {
+    "id": "sl-mirror-01",
+    "question": "plane overhead, i have a mirror. flash it as fast as i can?",
+    "state": null,
+    "expect": "answer",
+    "domains": [
+      "survival"
+    ],
+    "keyPoints": [
+      "No: don't flash rapidly, a pilot may mistake the flashes for enemy fire",
+      "Direct the flashes steadily toward the aircraft"
+    ],
+    "redFlags": [
+      "Says to flash as fast as possible"
+    ],
+    "provenance": "corpus-derived",
+    "pack": "core-signaling",
+    "cite": {
+      "page": null,
+      "quote": "Do not flash a signal mirror rapidly"
+    }
+  },
+  {
+    "id": "sl-neg-01",
+    "question": "whats the best ultralight tent under 2 pounds",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-02",
+    "question": "how many mg of ibuprofen can my 6 year old have",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-03",
+    "question": "whats the elevation of mount whitney",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-04",
+    "question": "can you book me a campsite at yosemite for friday",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-05",
+    "question": "which trail running shoes have the best grip on wet rock",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-06",
+    "question": "is it legal to fly a drone in a national park",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-07",
+    "question": "what time does the sun set tonight",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  },
+  {
+    "id": "sl-neg-08",
+    "question": "my dog ate a grape is he gonna be ok",
+    "state": null,
+    "expect": "abstain",
+    "domains": [],
+    "keyPoints": [],
+    "provenance": "independent",
+    "pack": "none"
+  }
+]

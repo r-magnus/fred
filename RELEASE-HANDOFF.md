@@ -235,11 +235,18 @@ submit for external review, so Apple reviews the version testers will get.
   `ios.enableSceneSupport`: Xcode 27 won't launch an app without it.
 - **Never checked on a real iPhone**, only the simulator.
 
-### Blocked on section 2
+### Core download: published
 
-An external tester can't plug their phone into a Mac. Without the core bundle
-listed in `index.json`, the setup wizard has nothing to fetch and Fred can't
-answer anything. **External testing needs section 2 done first.**
+An external tester can't plug their phone into a Mac, so the setup wizard must
+fetch the core bundle. It does: `index.json` on `fred-maps` lists `core`
+(release `core-2026-11`, 1,454,566,135 B, built 2026-11-14; checked
+2026-11-19). Section 2 no longer blocks external testing.
+
+**Build 14** (0.2.0, `53f8714`, first on the Xcode 27.2 image) built
+2026-11-19 (EAS `157fba63-66fa-4062-af75-bf37ca1d14b1`; log confirms Xcode 27.2,
+iPhoneOS 27.2 SDK) and uploaded. On 2026-11-20 Ryan filled in Test Information
+and submitted it to the external group "Beta Testers": **Waiting for Review**.
+The public link is created after approval. Draft wording: `docs/testflight-draft.md`.
 
 ### Steps
 
@@ -306,7 +313,7 @@ answer anything. **External testing needs section 2 done first.**
 - [ ] `docs/results-no-who.md` with held-out and breadth numbers (#33)
 - [ ] `nonCommercial` flag read at bundle build time, with a test (#33)
 - [ ] 11 WHO-quoting field cards re-backed, PFA replaced, re-measured (#214) — only if commercial
-- [ ] Core bundle built from the shipped packs and published; `index.json` has `core` (#198)
+- [x] Core bundle built from the shipped packs and published; `index.json` has `core` (#198; release `core-2026-11`)
 - [ ] Interrupted download resumes, proven by a test and a check on the phone (#198)
 - [ ] Fresh Nothing Phone install sets itself up through the wizard (#198)
 - [ ] Partitioning decision recorded (A / B / not now)

@@ -149,6 +149,8 @@ h2 { text-wrap: balance; }
   mask: url(img/fred-logo.png) left center / contain no-repeat;
   margin-left: -0.4%;
 }
+.hero-h1 { margin: 0; font-size: inherit; }
+.hero-h1 .logo, .hero-h1 .hero-line { display: block; }
 .hero-line { font-size: clamp(25px, 3.1vw, 42px); line-height: 1.1; margin: clamp(18px, 2.4vw, 30px) 0 10px; max-width: 16em; }
 .hero-sub { margin: 0 0 30px; color: var(--moss); font-size: 18px; max-width: 36em; }
 .hero-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin: 0; }

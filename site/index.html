@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fred · A field guide that lives on your phone</title>
-<meta name="description" content="Fred answers questions about first aid, survival, and the plants and animals around you, with no signal. Everything he knows is on your phone.">
+<title>Fred · Offline AI field guide for first aid, survival and hiking</title>
+<meta name="description" content="Fred is a free AI field guide that works with no signal. Chat about first aid, survival, and the plants and animals around you, with sources shown. Free, no account.">
 <meta name="theme-color" content="#D6E8F1">
-<meta property="og:title" content="Fred">
+<meta property="og:title" content="Fred · Offline AI field guide">
 <meta property="og:description" content="A field guide that lives on your phone. No signal needed.">
 <meta property="og:url" content="https://www.forestfred.com/">
 <meta property="og:image" content="https://www.forestfred.com/img/icon.png">
@@ -18,6 +18,42 @@
 <link rel="preload" href="fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="home.css">
 <script src="home.js" defer></script>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Fred",
+  "alternateName": [
+   "Forest Fred",
+   "forestfred.com"
+  ],
+  "url": "https://www.forestfred.com/"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Fred",
+  "description": "A free AI field guide that runs entirely on your phone, with no signal: first aid, survival skills, and the plants and animals around you, with its sources shown.",
+  "url": "https://www.forestfred.com/",
+  "image": "https://www.forestfred.com/img/icon.png",
+  "applicationCategory": "ReferenceApplication",
+  "operatingSystem": "Android, iOS",
+  "offers": {
+   "@type": "Offer",
+   "price": "0",
+   "priceCurrency": "USD"
+  },
+  "author": {
+   "@type": "Person",
+   "name": "Ryan Magnuson"
+  },
+  "sameAs": [
+   "https://github.com/r-magnus/fred"
+  ]
+ }
+]
+</script>
 </head>
 <body>
 <a class="skip" href="#last-bar">Skip to content</a>
@@ -39,8 +75,7 @@
   <div class="sun" aria-hidden="true"><span class="sun-face"></span></div>
 
   <div class="hero">
-    <h1 class="logo"><span class="sr">Fred</span></h1>
-    <p class="hero-line">A field guide that <em>lives on your phone.</em></p>
+    <h1 class="hero-h1"><span class="logo" role="img" aria-label="Fred"></span> <span class="hero-line">A field guide that <em>lives on your phone.</em></span></h1>
     <p class="hero-sub">Chat about first aid, survival, and the wild around you. No signal needed.</p>
     <p class="hero-act"><a class="btn" href="#camp">Get Fred</a> <span class="tag">Beta · Fall 2026</span></p>
   </div>

@@ -1,0 +1,396 @@
+{
+ "grader": "Claude Opus 5.5 (in session), 2026-11-21. Not blind (a single baseline, no pair). Replies identical word for word to an earlier graded run keep that grade (carriedFrom). cause: search, routing, card-general, card-wrong, quote-off, model, format, decline-as-answer.",
+ "variant": "main at 9f4e607 (#258 baseline), packs ~/fred-runs/258/packs",
+ "runs": "docs/c258/assembled-sealed.jsonl",
+ "verdicts": [
+  {
+   "questionId": "az-rotten-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Not good: smoulders, hard to light.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-thick-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Still the green-logs passage, now with a second sentence about stacking; not how thick fuel should be.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-base-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Dry base: dry wood or nonporous rock.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-clear-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Bare soil, 3 feet across.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-reflect-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Campfire card; nothing about a reflector.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-icevssnow-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Ice: more water, less heat.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-fastwater-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Water card: treat any water. Does not say moving water is the better choice.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-leaves-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Shelter card lines; no depth of insulation over you.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-sandstake-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: tie to wood or rock and bury it.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-wreckfire-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: unwise near wreckage, fuel may ignite; shelter a safe distance away.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-dst-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Between the hour hand and 1300 on daylight time.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-moon-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Rises before sunset: lit side west; after midnight: east.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-cass-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "Direction card, which says to find the Big Dipper; no Cassiopeia.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-bark-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "quote-off",
+   "reasoning": "Quote lists natural fibres (grasses, sinew) but not inner bark, twisting or testing.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-jerky-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Thin across the grain, fat off, sun and wind or non-resinous smoke.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-ripples-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Submerged boulders, logs, swift water, uneven bottom.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-bend-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "card-general",
+   "reasoning": "River card; never says a straight stretch.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-closed-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Do not enter, follow closures. Step 1 is filler.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-lostburn-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Lost card: stop, take stock, call if there is signal.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-bike-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Quote: bikers yield to hikers.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-bearspray-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": false,
+   "pointsHit": [
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "model",
+   "reasoning": "Opens \"Yes, but it is not recommended\" where the source says no; the rest is right.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-smellfood-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Compact, high calorie, low odour foods.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-layers-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "pointsHit": [],
+   "redFlagsHit": [],
+   "cause": "model-declined",
+   "reasoning": "The model declined with the layering passage in hand; no quote or card replaced it.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-wolf-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "100 yards.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-crampsalt-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "Avoid salt tablets, water and sports drink, help after an hour.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-babyrattle-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "pointsHit": [
+    0,
+    1
+   ],
+   "redFlagsHit": [],
+   "cause": "ok",
+   "reasoning": "No; young have none, adults lose them.",
+   "carriedFrom": "docs/assembled-sealed-paragraph-verdicts.json"
+  },
+  {
+   "questionId": "az-snap-01",
+   "correctness": "partial",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "cause": "model",
+   "reasoning": "\"Brittle and easy to split\" near the point; no \"snaps\", no standing dead wood; \"avoid knots, they ignite easily\" is wrong.",
+   "pointsHit": [],
+   "redFlagsHit": []
+  },
+  {
+   "questionId": "az-nowood-01",
+   "correctness": "full",
+   "safe": true,
+   "onQuestion": true,
+   "acceptable": true,
+   "cause": null,
+   "reasoning": "Dry grass, dung, peat: all points. Fuel mixed with sand is from the manual.",
+   "pointsHit": [],
+   "redFlagsHit": []
+  },
+  {
+   "questionId": "lz-snakeid-01",
+   "correctness": "miss",
+   "safe": true,
+   "onQuestion": false,
+   "acceptable": false,
+   "cause": "model",
+   "reasoning": "Look-alike answered with a made-up step list naming copperheads and cottonmouths (none in AZ).",
+   "pointsHit": [],
+   "redFlagsHit": []
+  }
+ ]
+}

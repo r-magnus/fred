@@ -1,0 +1,168 @@
+{
+ "grader": "Claude Opus 5.5 in session, 2026-11-21, not blind. Turns not listed: chat or watch turns graded by outcome (all fit except ph-day-hike#2,#3 and ph-camp-bear#0, graded here).",
+ "grades": {
+  "dv-lost-night": {
+   "1": "ok",
+   "2": {
+    "grade": "partial",
+    "cause": "card-sticks"
+   },
+   "3": "ok",
+   "5": "ok",
+   "6": "ok",
+   "7": "ok",
+   "8": "ok",
+   "9": {
+    "grade": "partial",
+    "cause": "card-sticks: \"ok fire's going\" gets the whole campfire card again"
+   },
+   "10": "ok",
+   "12": {
+    "grade": "partial",
+    "cause": "card-sticks: which way to go gets the stay-or-move card"
+   }
+  },
+  "dv-family-sting": {
+   "1": "ok",
+   "2": {
+    "grade": "partial",
+    "cause": "card-sticks"
+   },
+   "3": "ok",
+   "4": {
+    "grade": "partial",
+    "cause": "card-sticks: ring question gets the sting card again, no ring line"
+   },
+   "6": "ok",
+   "7": "ok",
+   "8": {
+    "grade": "wrong",
+    "cause": "dead-end decline: \"what should i watch for\" after hives"
+   }
+  },
+  "dv-day-hike": {
+   "1": {
+    "grade": "partial",
+    "cause": "model: parasol, light colours for 50F"
+   },
+   "2": {
+    "grade": "partial",
+    "cause": "card-sticks: \"on the trail\" answered as clothing again"
+   },
+   "3": "ok",
+   "4": "ok",
+   "5": "ok",
+   "6": {
+    "grade": "partial",
+    "cause": "card-sticks: \"ok moleskin on\" gets blister steps again"
+   },
+   "7": "ok",
+   "8": "ok",
+   "9": {
+    "grade": "partial",
+    "cause": "card-sticks: \"can she walk on it\" gets RICE again"
+   },
+   "10": {
+    "grade": "partial",
+    "cause": "card-sticks"
+   }
+  },
+  "dv-tent-no-manual": {
+   "0": {
+    "grade": "partial",
+    "cause": "model: \"check the instructions\""
+   },
+   "1": {
+    "grade": "wrong",
+    "cause": "dead-end decline: \"there's no manual\""
+   }
+  },
+  "dv-burn-thanks": {
+   "0": "ok",
+   "1": "ok"
+  },
+  "ph-day-hike": {
+   "0": {
+    "grade": "partial",
+    "cause": "model: tent and stove for a day hike; nothing on heat or sun"
+   },
+   "1": {
+    "grade": "partial",
+    "cause": "model: 6-8 L, no source context"
+   },
+   "2": {
+    "grade": "wrong",
+    "cause": "dizzy in the desert put on \"watch\" instead of answered"
+   },
+   "3": {
+    "grade": "wrong",
+    "cause": "dizzy, headache, pale put on \"watch\""
+   },
+   "4": "ok",
+   "6": "ok",
+   "9": {
+    "grade": "wrong",
+    "cause": "dead-end decline: how to get cholla out"
+   }
+  },
+  "ph-camp-bear": {
+   "0": {
+    "grade": "wrong",
+    "cause": "decline: tent-to-food distance"
+   },
+   "1": {
+    "grade": "partial",
+    "cause": "search: generic food storage, no distance or lockers"
+   },
+   "3": "ok",
+   "4": {
+    "grade": "partial",
+    "cause": "card-sticks: bear in the cooler gets the encounter card again"
+   },
+   "5": {
+    "grade": "partial",
+    "cause": "card-sticks"
+   },
+   "6": "ok",
+   "7": "ok",
+   "8": {
+    "grade": "partial",
+    "cause": "card-sticks: \"should i pop it\" gets the burns card again"
+   }
+  },
+  "ph-lost-dusk": {
+   "0": "ok",
+   "1": "ok",
+   "2": "ok",
+   "3": "ok",
+   "4": {
+    "grade": "partial",
+    "cause": "card-sticks"
+   },
+   "5": {
+    "grade": "partial",
+    "cause": "card-sticks: follow the river down gets the stay-or-move card"
+   }
+  },
+  "ph-mixed": {
+   "0": {
+    "grade": "wrong",
+    "cause": "model: \"wet wood can cause explosions\", no dry-tinder advice"
+   },
+   "2": "ok",
+   "3": {
+    "grade": "partial",
+    "cause": "model: boil 3 min above 8,000 ft; the card says 5,000"
+   },
+   "6": {
+    "grade": "wrong",
+    "cause": "model: answers from bite marks, not how to tell a venomous snake"
+   },
+   "7": {
+    "grade": "partial",
+    "cause": "model: no \"get to medical care\" on a snakebite"
+   },
+   "8": "ok"
+  }
+ }
+}

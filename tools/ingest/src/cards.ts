@@ -118,7 +118,11 @@ export function cardText(c: FieldCard): string {
   const lines = [c.title, c.summary, ...c.steps.map((s, i) => `${i + 1}. ${s}`)];
   if (c.dont.length > 0) lines.push(...c.dont);
   if (c.getHelp !== '') lines.push(c.getHelp);
-  for (const u of c.unsourced ?? []) lines.push(u.text);
+  // An unsourced entry that only marks a line (or part of one) the card
+  // already says is a provenance note, not a new line: reading it out
+  // repeated the wildfire card's last lines and left a fragment (#268).
+  const spoken = lines.join('\n');
+  for (const u of c.unsourced ?? []) if (!spoken.includes(u.text)) lines.push(u.text);
   return lines.join('\n');
 }
 

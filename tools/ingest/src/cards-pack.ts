@@ -153,7 +153,9 @@ for (const [at, c] of cards.entries()) {
 const { dir } = await writePack(PACKS, {
   id: 'core-fieldcards',
   // 0.11.0: no card quotes WHO; spine and pelvis re-backed (#214).
-  version: '0.11.0',
+  // 0.11.1: an unsourced note that marks a line the card already says is not
+  // read out again (wildfire, bear encounter; #268).
+  version: '0.11.1',
   displayName: 'Field Cards',
   description: 'Plain-language answers for common wilderness first-aid and survival situations, each written from and checked against the manuals.',
   domains: ['first-aid-physical', 'survival'],

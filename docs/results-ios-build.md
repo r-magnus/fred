@@ -273,14 +273,19 @@ Valley). Taps were driven from the Mac, and the Mac keyboard was connected.
 
 ### Found along the way
 
-1. **"I’m lost" answered the previous question.** After "What eats manzanita
-   berries?", "I’m lost" replied: "Hey, being lost is frightening, I'm here
-   with you. Manzanita berries are eaten by birds, rodents, and mammals such
-   as black bears…", citing USFS FEIS. The map card that follows is right,
-   but the text carried the last topic over. The conversation logic is
-   shared, so this is probably not iOS-only. **For the main machine:** try
-   to reproduce on Android or in the harness (a plant question, then "I'm
-   lost").
+1. **"I’m lost" re-answers the previous question, two out of two times.**
+   Confirmed from the simulator's `chats.json`:
+   - After "What eats manzanita berries?", the reply was "Hey, being lost is
+     frightening, I'm here with you. Manzanita berries are eaten by birds,
+     rodents, and mammals such as black bears…", citing USFS FEIS.
+   - After "How do I build a shelter if it might rain tonight?", the reply was
+     the same opener, then a rewritten list of the shelter steps ("Choose a
+     safe, level spot early…", "Use natural cover first…").
+
+   The map card that follows is right both times; the model-written text
+   carries the last topic over. The conversation logic is shared, so this is
+   probably not iOS-only. **For the main machine:** reproduce it on Android
+   or in the harness (any question, then "I'm lost").
 2. **The setup wording runs ahead of the download.** On the states page,
    while the located region was still "Downloading now", the line above said
    it was "already on this phone". This is cosmetic.
@@ -296,3 +301,41 @@ Valley). Taps were driven from the Mac, and the Mac keyboard was connected.
 
 The simulator runs the model on the Mac's CPU, so the times above (model load
 under 40 s, a written answer taking 1–2 min) say nothing about an iPhone.
+
+### Memory footprint on the simulator (2026-11-21)
+
+iOS kills an app on its *physical footprint*. The simulator doesn't enforce
+any limit, but `footprint` and `vmmap` on the Mac read the same figure for
+the simulator's Fred process. Fred runs the model on the CPU on both
+platforms (`n_gpu_layers: 0`), so the path is the phone's. This was the
+same Release build of `main` on FredFresh, sampled every second for about
+21 minutes:
+
+| Moment | Footprint |
+|---|---|
+| Idle after the model loaded | 582–599 MB, flat for about 15 min |
+| A long model-written answer | 592–609 MB |
+| A second answer ("I’m lost") | 769–781 MB |
+| Full map open, pin dropped, route drawn, panned | 823 MB |
+| Turn-by-turn navigation | **933 MB**, which is also the kernel's lifetime peak, and steady |
+
+- **The model's weights don't count.** The 1.2 GB GGUF is memory-mapped
+  (about 1.0 GB resident), and clean mapped pages aren't counted, because
+  iOS can drop and re-read them. That's why this is far below Android's
+  2.9 GB PSS, which does count mapped pages.
+- **What does count:**
+  - about 470–570 MB of large allocations, mostly the 4,096-token context
+    cache, a fixed size on any device;
+  - about 130 MB of map graphics (`VM_ALLOCATE`);
+  - small allocations that grow with the chat.
+- **There's no sign of a leak.** Memory rises in steps with activity, then
+  holds; it's flat while idle and while navigating.
+- **Reading for real iPhones:** about 1 GB with everything open. If the
+  model were somehow counted as well, about 2 GB. That's below the ceilings
+  reported for current iPhones, and Fred also has the increased-memory
+  entitlement. Apple doesn't publish the limits, so this is an estimate.
+  The likelier risk on a busy older phone is **slowness**, when iOS evicts
+  the model's pages mid-answer, not a crash.
+- **Still worth checking on a real phone:** a long chat followed by
+  navigation, the case where memory was highest here, in testers' crash
+  reports.

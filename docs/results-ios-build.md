@@ -244,3 +244,55 @@ Native, not Fred.
 4. Fix the `packs/` directory check in `engine.ts` so both platforms show the
    intended message.
 5. A real iOS device: signing, Finder sideload of the models, engine load.
+
+---
+
+## Simulator run of main, first launch from nothing (2026-11-21)
+
+Ryan has no iPhone to hand, so this is `IOS-CATCHUP.md`'s checklist run on the
+Mac's simulator instead. **It does not replace the real-iPhone check.** Memory
+limits, speed, heat, the real lock screen and GPS still need a phone; the plan
+is a few trusted TestFlight testers before the public link.
+
+**What ran:** a **Release** simulator build of `main` at `9f4e607`. That's
+build 14 plus the iCloud fix (#252), with no other app changes: exactly what
+build 15 would be. It ran on a new simulator, "FredFresh" (iPhone 18 Pro,
+iOS 27.0), with no files staged, placed at 37.7456, -119.5936 (Yosemite
+Valley). Taps were driven from the Mac, and the Mac keyboard was connected.
+
+| Step (`IOS-CATCHUP.md`) | Result |
+|---|---|
+| 1 · Setup and the guides download | **Pass.** The wizard fetched `index.json` from GitHub. The 1.45 GB core download finished in about 4½ min on the Mac's connection. All 11 model pieces were joined, and the encoder and all 10 core packs landed. With Fred behind Safari for 30 s, the download kept going (+112 MB): iOS's background session works. "Find where I am" placed the phone in "Sierra Nevada and Central Valley" and ticked it. The region (229 MB) downloaded after the guides. |
+| 2 · Beta notice | **Pass.** Start is greyed until the box is ticked. With setup reset, "Skip setup" lands on the notice, not the chat. |
+| 3 · A question is answered | **Pass.** "How do I treat a bee sting?" gave the field card in about 25 s after the model loaded, which took under 40 s after Start. |
+| 4 · Rating | **Pass,** with one gap. Thumbs up showed "Thanks!". Thumbs down opened "What can Fred do better?" fully in view, Send worked on the first tap, and the box closed with "Thanks, that helps." Both rows reached D1 with `platform` `ios 27.0` and `app_version` 0.2.0, and both were deleted afterwards. **Not tested:** Send with the on-screen keyboard up, because a connected Mac keyboard hides it. |
+| 5 · No signal | **Not tested.** The simulator uses the Mac's network. The outbox logic is shared JS, already checked on Android. |
+| 6 · No deep thinking | **Pass.** Nothing appears above the Ask box while typing. |
+| 7 · Build 12's list | **Pass:** "I’m lost" with a curly apostrophe opens the map. The location prompt shows Fred's wording ("…to pick the right local plant and animal guide. It stays on the device."). An offline route planned: 5.0 km, 1½–2½ h, named trails, with "830 m has no trail" and steep-ground warnings. **Not tested:** memory holding on a long answer, which needs a real phone. |
+| iCloud backup (#252) | **Pass.** Every finished download piece was already excluded mid-download. At the end, all downloads were excluded; only `chats.json`, `setup.json` and `agreement.json` are backed up. |
+
+### Found along the way
+
+1. **"I’m lost" answered the previous question.** After "What eats manzanita
+   berries?", "I’m lost" replied: "Hey, being lost is frightening, I'm here
+   with you. Manzanita berries are eaten by birds, rodents, and mammals such
+   as black bears…", citing USFS FEIS. The map card that follows is right,
+   but the text carried the last topic over. The conversation logic is
+   shared, so this is probably not iOS-only. **For the main machine:** try
+   to reproduce on Android or in the harness (a plant question, then "I'm
+   lost").
+2. **The setup wording runs ahead of the download.** On the states page,
+   while the located region was still "Downloading now", the line above said
+   it was "already on this phone". This is cosmetic.
+3. **A thin model answer.** "What eats manzanita berries?" got only "Birds,
+   rodents, and mammals eat manzanita berries." It's the "thin answer"
+   failure the accuracy plan targets, not an iOS issue.
+4. **An Alabama download was my mistake, not Fred's.** Alabama (311 MB) was
+   also downloaded. The wizard only adds a state for the hiker's location or
+   a row tap, and the tap meant for the location prompt's "Allow While Using
+   App" sat over the Alabama row. I'm treating this as a test artifact.
+
+### Simulator speed is not phone speed
+
+The simulator runs the model on the Mac's CPU, so the times above (model load
+under 40 s, a written answer taking 1–2 min) say nothing about an iPhone.

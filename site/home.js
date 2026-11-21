@@ -15,7 +15,8 @@
   };
   const el = (name, attrs) => {
     const e = document.createElementNS(SVG, name);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    // Styles go through the style object, not a style attribute: the CSP (vercel.json) blocks those.
+    for (const k in attrs) { if (k === 'style') e.style.cssText = attrs[k]; else e.setAttribute(k, attrs[k]); }
     return e;
   };
   const f1 = (n) => Math.round(n * 10) / 10;

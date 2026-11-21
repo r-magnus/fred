@@ -22,14 +22,14 @@ answering.
 | Store links | `RELEASE LINKS` comment in the camp section. Both buttons point at the GitHub repo for now. |
 | Numbers in Field notes | From `docs/METRICS.md` (2026-10-06 held-out run). Update by hand. |
 | Hills, trees, stars, contours | Drawn by `home.js` from seeds, so they're the same on every visit. Colours are CSS variables in `home.css`. |
-| `og:image` | Needs an absolute URL once the domain is live. |
+| Security headers | `vercel.json` (CSP and friends). The CSP allows nothing from other sites: a new script, font or image host has to be added there, and styles must be set from JS through `el.style`, never a `style` attribute. |
 
 Fonts are self-hosted (no third-party requests): Fraunces and Public Sans,
 both SIL Open Font License.
 
 ## Hosting
 
-Vercel: import the repo, set **Root Directory** to `site`, framework "Other",
+Live at https://www.forestfred.com (Porkbun DNS → Vercel). Vercel: import the repo, set **Root Directory** to `site`, framework "Other",
 no build command. The GitHub Pages workflow (`.github/workflows/pages.yml`)
 also publishes `site/` on pushes to main; retire it once the domain points at
 Vercel and App Store Connect's privacy URL is updated.

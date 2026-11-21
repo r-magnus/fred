@@ -4,6 +4,8 @@
 
 <h3 align="center">An AI Wilderness App — bringing the power of LLMs outdoors</h3>
 
+<p align="center"><a href="https://forestfred.com"><b>forestfred.com</b></a></p>
+
 <p align="center">
   CS-195 Senior Seminar · Fall 2026 · Ryan Magnuson<br>
   <sub>Project proposal v1.2 (final), submitted 9/27/2026</sub>
@@ -41,7 +43,7 @@
 | **Submitted** | 9/27/2026 |
 | **Version** | v1.2 — Final Submission |
 
-**Artifacts:** [Core repository](https://github.com/r-magnus/fred) · [Project board](https://github.com/users/r-magnus/projects/1) · CS-195 Project Proposal Draft
+**Artifacts:** [Website](https://forestfred.com) · [Core repository](https://github.com/r-magnus/fred) · [Project board](https://github.com/users/r-magnus/projects/1) · CS-195 Project Proposal Draft
 
 ---
 

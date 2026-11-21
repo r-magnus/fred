@@ -3,23 +3,217 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fred Field Guide</title>
-<meta name="description" content="Fred, an offline field guide that lives on your phone.">
-<link rel="stylesheet" href="style.css">
+<title>Fred · A field guide that lives on your phone</title>
+<meta name="description" content="Fred answers questions about first aid, survival, and the plants and animals around you, with no signal. Everything he knows is on your phone.">
+<meta name="theme-color" content="#D6E8F1">
+<meta property="og:title" content="Fred">
+<meta property="og:description" content="A field guide that lives on your phone. No signal needed.">
+<meta property="og:image" content="img/icon.png">
+<link rel="icon" href="img/favicon.png">
+<link rel="preload" href="fonts/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="home.css">
+<script src="home.js" defer></script>
 </head>
 <body>
+<a class="skip" href="#last-bar">Skip to content</a>
+
+<!-- What a phone would show at this point on the walk. Drops a bar per stretch of trail. -->
+<div class="status" aria-hidden="true">
+  <span class="status-bars"><i></i><i></i><i></i><i></i></span>
+  <span class="status-word">LTE</span>
+  <span class="status-mile"><b>0.0</b> mi</span>
+</div>
+
+<svg class="trail" aria-hidden="true"><defs><linearGradient id="trail-ink" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1"></linearGradient></defs><path class="trail-path"/><g class="hiker"><circle r="13" class="hiker-ring"/><circle r="6" class="hiker-dot"/></g></svg>
+
+<!-- ─────────────── Trailhead · morning ─────────────── -->
+<header class="band band-morning" id="top">
+  <div class="sky-art" aria-hidden="true">
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  </div>
+  <div class="sun" aria-hidden="true"><span class="sun-face"></span></div>
+
+  <div class="hero">
+    <h1 class="logo"><span class="sr">Fred</span></h1>
+    <p class="hero-line">A field guide that <em>lives on your phone.</em></p>
+    <p class="hero-sub">Chat about first aid, survival, and the wild around you. No signal needed.</p>
+    <p class="hero-act"><a class="btn" href="#camp">Get Fred</a> <span class="tag">Beta · Fall 2026</span></p>
+  </div>
+
+  <svg class="hills" data-hills="morning" aria-hidden="true"></svg>
+</header>
+
 <main>
-  <p class="kicker">Fred</p>
-  <h1>A field guide that lives on your phone.</h1>
-  <p class="lead">
-    Fred answers questions about first aid, survival, and the plants and animals around you, with or
-    without signal. He shows his sources and says when he doesn't know.
-  </p>
-  <p>Fred is in beta: a CS-195 senior project by Ryan Magnuson at Westmont College, Fall 2026.</p>
-  <ul>
-    <li><a href="privacy/">Privacy policy</a></li>
-    <li><a href="https://github.com/r-magnus/fred">Source code on GitHub</a></li>
-  </ul>
+<!-- ─────────────── 0.4 mi · the last bar ─────────────── -->
+<section class="band band-ground" id="last-bar">
+  <div class="post post-head" data-mile="0.0"><span class="dot"></span><span class="post-label">Trailhead</span></div>
+  <div class="wrap">
+    <div class="post" data-mile="0.4"><span class="dot"></span><span class="post-label">0.4 mi · Last bar</span></div>
+    <h2 class="huge">Out here, the signal&nbsp;<span class="fade-word">ends.</span></h2>
+    <p class="lede">Fred doesn't need it. Everything he knows is already on your&nbsp;phone.</p>
+  </div>
+</section>
+
+<!-- ─────────────── The three stops ─────────────── -->
+<section class="band band-ground stops" aria-label="What Fred does">
+
+  <article class="stop">
+    <div class="stop-text">
+      <div class="post" data-mile="1.2"><span class="dot"></span><span class="post-label">1.2 mi · First aid</span></div>
+      <h2 class="big">Hurt out there? <em>Ask Fred.</em></h2>
+      <p>Clear steps from Army field manuals and the CDC, with the page they came&nbsp;from.</p>
+    </div>
+    <!-- MEDIA SLOT first-aid: swap .phone for a <video> or <img> of the real app when footage is ready. -->
+    <figure class="stop-media" data-slot="first-aid">
+      <div class="phone" role="img" aria-label="Fred answering “There’s a tick stuck in my leg” with three numbered steps, a Don’t warning, and its source.">
+        <div class="screen">
+          <div class="p-sky"><span class="p-sun"></span><span class="p-logo"></span><svg class="hills" data-hills="mini" data-seed="3"></svg></div>
+          <div class="p-chat">
+            <p class="p-q">There's a tick stuck in my leg</p>
+            <p class="p-a">Pull it straight out with steady pressure, clean the bite, and watch for a rash or flu-like illness over the next weeks.</p>
+            <ol class="p-steps">
+              <li>Grip the tick with fine tweezers as close to the skin as you can.</li>
+              <li>Pull straight up with slow, even pressure until it lets go.</li>
+              <li>Put the tick in a sealed bag or container.</li>
+            </ol>
+            <p class="p-dont"><b>Don't</b> twist or jerk the tick.</p>
+            <p class="p-src"><b>Sources</b> ATP 4-02.11 First Aid, 2026</p>
+          </div>
+          <div class="p-ask"><span>Ask about first aid…</span><i class="p-send"></i></div>
+        </div>
+      </div>
+    </figure>
+  </article>
+
+  <article class="stop flip">
+    <div class="stop-text">
+      <div class="post" data-mile="2.1"><span class="dot"></span><span class="post-label">2.1 mi · Survival</span></div>
+      <h2 class="big">Step by step. <em>Stop any time.</em></h2>
+      <p>Shelter, fire, water and direction. One tap stops an answer and saves your&nbsp;battery.</p>
+    </div>
+    <!-- MEDIA SLOT survival -->
+    <figure class="stop-media" data-slot="survival">
+      <div class="phone" role="img" aria-label="Fred partway through steps for finding north without a compass, with a stop button.">
+        <div class="screen">
+          <div class="p-sky"><span class="p-sun"></span><span class="p-logo"></span><svg class="hills" data-hills="mini" data-seed="8"></svg></div>
+          <div class="p-chat">
+            <p class="p-q">Which way is north?</p>
+            <p class="p-a">Use the sun and a stick in the day, or the North Star at night.</p>
+            <ol class="p-steps">
+              <li>Push a stick into the ground and mark the tip of its shadow with a stone. That first mark is west.</li>
+              <li>Wait 10 to 15 minutes and mark the shadow tip again. That second mark is east.</li>
+              <li>Draw a line through the two marks. Stand with the first<span class="caret"></span></li>
+            </ol>
+          </div>
+          <div class="p-ask"><span>Ask about survival…</span><i class="p-stop"></i></div>
+        </div>
+      </div>
+    </figure>
+  </article>
+
+  <article class="stop">
+    <div class="stop-text">
+      <div class="post" data-mile="3.0"><span class="dot"></span><span class="post-label">3.0 mi · Offline map</span></div>
+      <h2 class="big">Lost? <em>Find signal.</em></h2>
+      <p>Your position, found without a connection, on a map that's already on your phone, with the nearest place a call might get&nbsp;through.</p>
+    </div>
+    <!-- MEDIA SLOT map -->
+    <figure class="stop-media" data-slot="map">
+      <div class="phone" role="img" aria-label="Fred's offline map: you are here, inside a zone with no carrier coverage; service is likely about 2.4 km south.">
+        <div class="screen screen-map">
+          <svg class="p-map" viewBox="0 0 300 520" preserveAspectRatio="xMidYMid slice">
+            <rect width="300" height="520" class="m-land"/>
+            <g class="contours" data-contours="map" data-seed="11" data-w="300" data-h="520"></g>
+            <path class="m-water" d="M-10 120 C60 140 70 220 40 300 S90 430 60 540"/>
+            <circle cx="182" cy="150" r="84" class="m-none"/>
+            <ellipse cx="150" cy="410" rx="150" ry="80" class="m-ok"/>
+            <path class="m-trail" d="M190 -10 C210 60 160 110 182 150 S230 250 170 300 S130 380 150 420"/>
+            <circle cx="182" cy="150" r="17" class="m-halo"/>
+            <circle cx="182" cy="150" r="7" class="m-you"/>
+          </svg>
+          <div class="p-sheet">
+            <p class="p-sheet-title">You are here <span>within 12 m</span></p>
+            <p>No carrier reports coverage here. <b>Service is likely about 2.4 km south.</b></p>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </article>
+</section>
+
+<!-- ─────────────── 3.8 mi · no guessing ─────────────── -->
+<section class="band band-ground trust">
+  <div class="wrap">
+    <div class="post" data-mile="3.8"><span class="dot"></span><span class="post-label">3.8 mi · No guessing</span></div>
+    <h2 class="big">When Fred doesn't know, <em>he says&nbsp;so.</em></h2>
+    <div class="exchange">
+      <p class="note">Who won the 2024 World Series?</p>
+      <p class="reply">“That one isn't in my guides, and I'd rather not&nbsp;guess.”</p>
+    </div>
+    <p class="caveat">Fred is no substitute for your own judgement, or for emergency services. If you can reach 911, call&nbsp;first.</p>
+  </div>
+</section>
+
+<!-- ─────────────── 4.5 mi · field notes ─────────────── -->
+<section class="band band-afternoon notes">
+  <div class="wrap">
+    <div class="post" data-mile="4.5"><span class="dot"></span><span class="post-label">4.5 mi · Field notes</span></div>
+    <dl class="log">
+      <div><dt>0</dt><dd>bars of signal needed</dd></div>
+      <div><dt>50</dt><dd>states of plants and animals</dd></div>
+      <div><dt>1.7<small>B</small></dt><dd>parameter model, on the phone</dd></div>
+      <div><dt>0</dt><dd>unsafe answers in blind grading</dd></div>
+    </dl>
+    <p class="log-foot">Measured October 2026 on 40 questions Fred was never tuned on. <a href="https://github.com/r-magnus/fred/blob/main/docs/METRICS.md">Every number, on&nbsp;GitHub</a></p>
+  </div>
+</section>
+
+<!-- ─────────────── 5.6 mi · sunset: why, and his name ─────────────── -->
+<section class="band band-sunset" id="about">
+  <svg class="contours-bg" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><g data-contours="sunset" data-seed="1947"></g></svg>
+  <div class="wrap">
+    <div class="post" data-mile="5.6"><span class="dot"></span><span class="post-label">5.6 mi · Why he exists</span></div>
+    <p class="mission">So that a question asked past the last bar still gets a careful&nbsp;answer.</p>
+    <div class="name">
+      <h2>His name</h2>
+      <p>Fred is named for Fred James, who served 45 years with the USDA Forest Service. His grandson still remembers the maps he made, hung on the walls of his home in&nbsp;Wisconsin.</p>
+      <p class="sig">Ryan Magnuson · CS-195, Westmont College</p>
+    </div>
+  </div>
+  <div class="sun-low" aria-hidden="true"></div>
+  <svg class="hills" data-hills="sunset" aria-hidden="true"></svg>
+</section>
+
+<!-- ─────────────── 6.2 mi · camp, at night ─────────────── -->
+<section class="band band-night" id="camp">
+  <div class="stars" data-stars="120" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="post" data-mile="6.2"><span class="dot"></span><span class="post-label">6.2 mi · Camp</span></div>
+    <h2 class="huge">For anyone who goes <em>past the last&nbsp;bar.</em></h2>
+    <p class="lede">Free. No account. Hikers, campers, backpackers, and the friend who wandered off the&nbsp;trail.</p>
+    <!-- RELEASE LINKS: point these at the Play / App Store / TestFlight pages when they exist. -->
+    <p class="get">
+      <a class="btn btn-night" href="https://github.com/r-magnus/fred">Android beta</a>
+      <a class="btn btn-ghost" href="https://github.com/r-magnus/fred">iPhone · TestFlight soon</a>
+    </p>
+  </div>
+  <svg class="hills" data-hills="night" aria-hidden="true"></svg>
+</section>
 </main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <nav aria-label="Site">
+      <a href="privacy/">Privacy</a>
+      <a href="https://github.com/r-magnus/fred">Source</a>
+      <a href="#about">About</a>
+    </nav>
+    <p class="credits">Guides from US Army field manuals, the CDC, NIH, National Park Service, Forest Service and others; WHO/ICRC Basic Emergency Care (CC BY-NC-SA 3.0 IGO); Wikivoyage (CC BY-SA 4.0). Maps © OpenStreetMap contributors. Answers by Qwen3-1.7B (Apache 2.0); search by Google's EmbeddingGemma. Type: Fraunces and Public Sans (SIL OFL).</p>
+    <p class="credits">© 2026 Ryan Magnuson. Fred is in beta.</p>
+  </div>
+</footer>
+
 </body>
 </html>

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
-import { ask, maxTokensForPressure, tipsInTrustOrder, DEFAULT_ABSTAIN_THRESHOLD, CLOSEST_CARD_FLOOR, UNDER_GATE_QUOTE_FLOOR } from '../src/pipeline.ts';
+import { ask, maxTokensForPressure, tipsInTrustOrder, CARD_HOLDS_FOLLOW_UPS, DEFAULT_ABSTAIN_THRESHOLD, CLOSEST_CARD_FLOOR, UNDER_GATE_QUOTE_FLOOR } from '../src/pipeline.ts';
 import { currentThread, readUnderstood } from '../src/understand.ts';
 import { applyQueryTemplate, assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { quantizeInt8 } from '../src/score.ts';
@@ -1067,4 +1067,11 @@ test('#240: a plain statement after the card keeps it', async () => {
 test('#240: an update on how it is going after the card keeps it', async () => {
   const res = await ask('the fire is getting worse', { backend: saying('QUESTION'), store: fireStore(), packs: clinicalPacks }, fireThread);
   assert.equal(res.kind === 'answer' ? res.diagnostics.repeatHeld : undefined, undefined);
+});
+
+test('#240: every card held for follow-ups is a real card title', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const raw = JSON.parse(await readFile(new URL('../../../corpora/cards/cards.json', import.meta.url), 'utf8')) as { title: string }[] | { cards: { title: string }[] };
+  const titles = new Set((Array.isArray(raw) ? raw : raw.cards).map((c) => c.title));
+  for (const t of CARD_HOLDS_FOLLOW_UPS) assert.ok(titles.has(t), `not a card: ${t}`);
 });

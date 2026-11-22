@@ -1037,6 +1037,23 @@ async function askUnvoiced(
   return { ...res, stream: withOpener(), opener: holder };
 }
 
+/**
+ * #240: cards that stay the answer to any follow-up while the danger lasts,
+ * because a written reply could tell the hiker to do the one thing the card
+ * forbids, and no check (conditions.ts) catches it for these: "should i sit
+ * her up against a tree" after a possible neck injury, "can we keep going up
+ * tomorrow" after altitude illness, "is it ok to let him nap" after a head
+ * injury, "do we play dead" with a bear close. Reviewed by title.
+ */
+export const CARD_HOLDS_FOLLOW_UPS: ReadonlySet<string> = new Set([
+  'Heavy bleeding from a wound', 'A bandage soaking through with blood', 'Snakebite', 'Someone is choking',
+  'Hypothermia: shivering, confused, too cold', 'Heat exhaustion and heat stroke', 'Someone is unconscious or not responding',
+  'CPR: not breathing, no pulse', 'Shock after an injury', 'Severe allergic reaction (anaphylaxis)', 'Head injury or concussion',
+  'Possible neck or back injury', 'Wound to the chest', 'Hip or pelvis injury after a fall', 'Altitude illness', 'Seizure',
+  'Low blood sugar', 'Wound to the belly', 'Chest pain or signs of a stroke', 'A bear close by, charging or attacking',
+  'A wildfire or its smoke nearby',
+]);
+
 async function askCore(
   query: string,
   deps: PipelineDeps,
@@ -2203,10 +2220,11 @@ async function askCore(
   // pop the blister"). Only questions (Ryan, 2026-11-22): told a plain
   // statement, the model wrote off the point ("it's about 7pm" after the lost
   // card got how to find north with a watch), so a statement keeps the card.
-  // An update on the condition, a bare "what now", and anything with a
-  // danger sign keep it too.
+  // An update on the condition, a bare "what now", anything with a danger
+  // sign, and the cards for a danger that lasts (CARD_HOLDS_FOLLOW_UPS) keep
+  // it too.
   if (clear !== undefined && guardsOn && cardMode === 'verbatim' && opts.lead !== false && lastShown?.chunk.id === clear.chunk.id &&
-      asksSpecifically(query) && !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
+      asksSpecifically(query) && !CARD_HOLDS_FOLLOW_UPS.has(clear.chunk.section) && !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
     const shown = clear;
     const picked = matchCardLines(await queryVector(backend, query), parseCard(shown.chunk.text), store.cardLineVectorsFor?.(shown.chunk.id), query);
     if (picked.length === 0) {

@@ -723,6 +723,8 @@ export interface Diagnostics {
   readonly conditions?: readonly string[];
   /** Round 2: a card that was not shown because it must not follow a condition. */
   readonly blocked?: { readonly card: string; readonly condition: string };
+  /** #240: the card just shown, held back from being shown whole again; the model wrote with it first. */
+  readonly repeatHeld?: string;
   /** Round 2: a below-gate emergency card opened because two searches agreed on it. */
   readonly agreedCard?: string;
   /**
@@ -1727,6 +1729,7 @@ async function askCore(
   // A card must never be shown, open or folded, after a condition it is not
   // for (conditions.ts). A folded offer becomes the condition's own card.
   let blocked: { card: string; condition: string } | undefined;
+  let repeatHeld: string | undefined;
   if (offer !== undefined) {
     const by = blockingCondition(offer.title, blockers);
     const instead = by === undefined ? undefined : await cardByTitle(by.card);
@@ -2191,6 +2194,30 @@ async function askCore(
       if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
     }
   }
+  // #240: the card just shown is not shown again, whole, for a message that
+  // moves the conversation on. "can she walk on it" and "we're 2 miles out"
+  // after the sprain card, "i can hear a river" after the lost card, "it's
+  // getting into the cooler" after the bear card: each got the same card
+  // again (11 of 17 repeats in the dev chats fell short, docs/c258). The
+  // lines that answer a specific question still come from the card (#109);
+  // otherwise the model writes, with the card first and the conversation in
+  // view (Ryan, 2026-11-22: a written answer over a fixed "still applies").
+  // An update on the condition ("it's swelling", "a few bubbles came up"), a
+  // bare "what now", and anything with a danger sign keep the card: those
+  // repeats were right.
+  if (clear !== undefined && guardsOn && cardMode === 'verbatim' && history.length > 0 && lastShown?.chunk.id === clear.chunk.id &&
+      !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
+    const shown = clear;
+    const picked = opts.lead !== false && asksSpecifically(query)
+      ? matchCardLines(await queryVector(backend, query), parseCard(shown.chunk.text), store.cardLineVectorsFor?.(shown.chunk.id), query)
+      : [];
+    if (picked.length === 0) {
+      clear = undefined;
+      repeatHeld = shown.chunk.section;
+      usable = [shown, ...usable.filter((c) => c.chunk.id !== shown.chunk.id)];
+      earlier ??= history.slice(-UNDERSTAND_HISTORY).join(' / ');
+    }
+  }
   if (cardMode !== 'off' && clear !== undefined) {
     const card = clear;
     const parsed = parseCard(card.chunk.text);
@@ -2522,6 +2549,7 @@ async function askCore(
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,
+      ...(repeatHeld === undefined ? {} : { repeatHeld }),
       ...(opts.deep === undefined ? {} : { deep: deepInfo }),
       ...(guardsOn ? { answerGuard } : {}),
     },

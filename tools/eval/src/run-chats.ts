@@ -118,6 +118,7 @@ for (const set of sets) {
           ...(d.conditions === undefined ? {} : { conditions: d.conditions }),
           ...(d.blocked === undefined ? {} : { blocked: d.blocked }),
           ...(d.agreedCard === undefined ? {} : { agreedCard: d.agreedCard }),
+          ...(d.repeatHeld === undefined ? {} : { repeatHeld: d.repeatHeld }),
           ...(d.scope === undefined ? {} : { scope: d.scope }),
           ...(d.said === undefined ? {} : { said: d.said }),
           ...(d.everyday === undefined ? {} : { everyday: d.everyday }),

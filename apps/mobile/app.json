@@ -58,7 +58,8 @@
             "enableSceneSupport": true
           }
         }
-      ]
+      ],
+      "./plugins/with-onnxruntime-nuget"
     ],
     "extra": {
       "eas": {

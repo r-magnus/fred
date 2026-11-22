@@ -1018,3 +1018,42 @@ test('under the gate, a sentence close to the question is quoted; a distant one 
   const danger = await ask(`he is not breathing. ${q}`, { ...urgent, backend: understanding('NOW | not breathing', 'NOW'), store: make(`he is not breathing. ${q}`) }, { ...uOpts, state: null, abstainThreshold: 5, fallbackThreshold: 5 });
   assert.equal(danger.kind === 'abstain' && danger.reason, 'safety-net');
 });
+
+// #240: the card just shown is not shown whole again for a message that
+// moves the conversation on; the model writes with it first.
+const FIRE_CARD = 'Starting a campfire';
+const fireStore = (): FakePackStore => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Feed a young fire slowly with bigger wood once the kindling burns well.')]);
+  store.addPack('core-fieldcards', [seed('start a fire: get tinder, kindling and bigger wood ready, light the tinder, feed the fire slowly', { source: 'Fred field card', section: FIRE_CARD })]);
+  return store;
+};
+const FIRE_Q = 'how do i start a fire';
+const fireOpts = { ...intentOpts, abstainThreshold: 0.05, fallbackThreshold: 0.05 } as const;
+const fireThread = { ...fireOpts, previous: { question: FIRE_Q, topScore: 0.9 }, history: [FIRE_Q], lastCard: FIRE_CARD } as const;
+const fireCardShown = (res: Awaited<ReturnType<typeof ask>>): boolean =>
+  res.kind === 'answer' && res.diagnostics.cardAnswer === 'verbatim';
+
+test('#240: the first time, the card is shown', async () => {
+  const res = await ask(FIRE_Q, { backend: saying('QUESTION'), store: fireStore(), packs: clinicalPacks }, fireOpts);
+  assert.ok(fireCardShown(res), `fixture: the card should open (${res.kind})`);
+});
+
+test('#240: a message that moves on after the card is written, with the card first', async () => {
+  const res = await ask('ok the fire is going now, the wood is lit', { backend: saying('QUESTION'), store: fireStore(), packs: clinicalPacks }, fireThread);
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  assert.equal(res.diagnostics.repeatHeld, FIRE_CARD, JSON.stringify({ c: res.diagnostics.cardAnswer, t: res.diagnostics.topScore, s: res.citations.map((x) => x.section), u: res.diagnostics.understood, f: res.diagnostics.followUp }));
+  assert.equal(res.diagnostics.cardAnswer, undefined);
+  assert.equal(res.citations[0]!.section, FIRE_CARD);
+});
+
+test('#240: a bare "what now" after the card keeps it', async () => {
+  const res = await ask('what now', { backend: saying('QUESTION'), store: fireStore(), packs: clinicalPacks }, fireThread);
+  assert.equal(res.kind === 'answer' ? res.diagnostics.repeatHeld : undefined, undefined);
+});
+
+test('#240: an update on how it is going after the card keeps it', async () => {
+  const res = await ask('the fire is getting worse', { backend: saying('QUESTION'), store: fireStore(), packs: clinicalPacks }, fireThread);
+  assert.equal(res.kind === 'answer' ? res.diagnostics.repeatHeld : undefined, undefined);
+});

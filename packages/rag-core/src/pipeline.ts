@@ -2108,6 +2108,21 @@ async function askCore(
 
   const cardMode = opts.cardAnswer ?? 'verbatim';
   let clear = forcedCard ?? clearCard(usable, retrievalOpts.reserve, await supportOf(usable));
+  // #268: the card the matcher is sure of, when the search found it too, is
+  // shown above the gate as it is under it ('opened', above). Between the
+  // gate and CARD_TOP_FLOOR neither rule held: "we can see a big smoke column
+  // a few ridges over" led with the wildfire card at 0.30 (matcher 0.73) and
+  // got a written answer, and "a wildfire started on the slope below the
+  // trailhead" (0.82) the same. Only a first message that says what is
+  // happening; a specific question keeps its written answer.
+  if (clear === undefined && forcedCard === undefined && saidSure !== undefined && saidKind === undefined &&
+      history.length === 0 && !asksSpecifically(query) && !saysResolved(query) && cardMode === 'verbatim') {
+    const said = usable.find((c) => isCard(c) && c.chunk.section === saidSure.label);
+    if (said !== undefined && ownCard(said) !== undefined) {
+      clear = said;
+      saidUsed.push('opened');
+    }
+  }
   // The same holds for the understanding step's search: "what's the magnetic
   // declination where I'm standing?" after "how can I find north?" was read as
   // a navigation request and repeated the finding-north card word for word

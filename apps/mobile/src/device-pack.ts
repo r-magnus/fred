@@ -342,6 +342,23 @@ function fnv1a(text: string): string {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 
+/**
+ * llama.rn could not set up a model: the generator (after every context size
+ * was tried) or the search encoder. Says which, so a tester's screenshot of the
+ * load screen tells the two apart: both fail with llama.rn's "Failed to load
+ * model".
+ */
+export class ModelLoadError extends Error {
+  constructor(
+    readonly model: 'generator' | 'encoder',
+    readonly ctxTried: readonly number[],
+    readonly reason: unknown,
+  ) {
+    super(reason instanceof Error ? reason.message : String(reason));
+    this.name = 'ModelLoadError';
+  }
+}
+
 export async function createDeviceBackend(
   opts: DeviceBackendOptions,
 ): Promise<DeviceBackend> {
@@ -352,24 +369,43 @@ export async function createDeviceBackend(
   // 2048 was too small: a 1095-token RAG prompt left only 953 tokens, and
   // generation ran until "context full" rather than finishing an answer.
   const N_CTX = 4096;
-
-  const gen: LlamaContext = await initLlama({
-    model: opts.modelPath,
-    n_ctx: N_CTX,
-    n_batch: 512,
-    n_threads: N_THREADS,
-    // CPU only. llama.cpp defaults n_gpu_layers to auto, and this llama.rn build
-    // ships OpenCL and Hexagon backends, so the context silently offloaded to
-    // GPUOpenCL + HTP0 and produced fluent nonsense ("Please check your textbook")
-    // from a prompt byte-identical to one CPU llama.cpp answers correctly on the
-    // same phone. CPU-only was also faster end to end: 4.8 s vs 12.1 s for the
-    // bleeding query (docs/results-m3.md).
-    n_gpu_layers: opts.gpuLayers ?? 0,
-    // flash_attn is left at llama.cpp's default (auto). Forcing it off was
-    // coherent but slower (8.3 s). KV cache quantization (PocketRAG §3.4.3) is
-    // not set: its "word salad" result in M3 was measured on the GPU-offloaded
-    // context and needs retesting on CPU before it means anything.
-  });
+  // A tester's iPhone 12 (4 GB) got "Failed to load model" from llama.rn. If
+  // the full context can't be set up, a smaller one is tried before giving up:
+  // its KV cache costs less (about 470 MB at 4096, 350 at 3072, 235 at 2048),
+  // and Fred working with less room beats Fred not starting. Long prompts may
+  // then run out of room ("context full"), as at 2048 before (see above).
+  const CTX_STEPS = [N_CTX, 3072, 2048] as const;
+  const ctxTried: number[] = [];
+  let gen: LlamaContext | undefined;
+  let lastError: unknown;
+  for (const nCtx of CTX_STEPS) {
+    ctxTried.push(nCtx);
+    try {
+      gen = await initLlama({
+        model: opts.modelPath,
+        n_ctx: nCtx,
+        n_batch: 512,
+        n_threads: N_THREADS,
+        // CPU only. llama.cpp defaults n_gpu_layers to auto, and this llama.rn build
+        // ships OpenCL and Hexagon backends, so the context silently offloaded to
+        // GPUOpenCL + HTP0 and produced fluent nonsense ("Please check your textbook")
+        // from a prompt byte-identical to one CPU llama.cpp answers correctly on the
+        // same phone. CPU-only was also faster end to end: 4.8 s vs 12.1 s for the
+        // bleeding query (docs/results-m3.md).
+        n_gpu_layers: opts.gpuLayers ?? 0,
+        // flash_attn is left at llama.cpp's default (auto). Forcing it off was
+        // coherent but slower (8.3 s). KV cache quantization (PocketRAG §3.4.3) is
+        // not set: its "word salad" result in M3 was measured on the GPU-offloaded
+        // context and needs retesting on CPU before it means anything.
+      });
+      break;
+    } catch (e) {
+      lastError = e;
+      console.log(`[fred] generator n_ctx=${nCtx} failed: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+  if (gen === undefined) throw new ModelLoadError('generator', ctxTried, lastError);
+  const nCtxUsed = ctxTried[ctxTried.length - 1]!;
 
   // The intent check and the understanding step send the same system prompt
   // every time (#101). They used to get a model context each, so that prompt
@@ -452,14 +488,19 @@ export async function createDeviceBackend(
     // disagree" of docs/results-m3.md; verifyEmbedderParity is what caught it.
     const modelPath = opts.embedder.modelPath;
     embed = async (text) => {
-      const ctx: LlamaContext = await initLlama({
-        model: modelPath,
-        embedding: true,
-        n_ctx: 2048,
-        n_batch: 512,
-        n_threads: N_THREADS,
-        n_gpu_layers: 0,
-      });
+      let ctx: LlamaContext;
+      try {
+        ctx = await initLlama({
+          model: modelPath,
+          embedding: true,
+          n_ctx: 2048,
+          n_batch: 512,
+          n_threads: N_THREADS,
+          n_gpu_layers: 0,
+        });
+      } catch (e) {
+        throw new ModelLoadError('encoder', [2048], e);
+      }
       try {
         return l2Normalize(Float32Array.from((await ctx.embedding(text)).embedding));
       } finally {
@@ -486,7 +527,7 @@ export async function createDeviceBackend(
   // "gpu: true" here means a GPU device exists, not that layers are on it; the
   // devices list is what would reveal an offload if n_gpu_layers regressed.
   const backend: DeviceBackend = {
-    genInfo: { gpu: info.gpu, devices: info.devices, reasonNoGPU: info.reasonNoGPU, androidLib: info.androidLib },
+    genInfo: { nCtx: nCtxUsed, gpu: info.gpu, devices: info.devices, reasonNoGPU: info.reasonNoGPU, androidLib: info.androidLib },
     embeddingSpec: () => opts.spec,
     embed,
     async countTokens(texts: readonly string[]): Promise<number[]> {

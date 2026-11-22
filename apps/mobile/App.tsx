@@ -708,6 +708,13 @@ function Screen() {
           {!failed && <CalmLoader size={72} style={styles.loadShapes} />}
           <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
           {!failed && <Text style={styles.loadHint}>Getting the guides ready. This takes a moment.</Text>}
+          {/* A model that wouldn't start: what a tester screenshots. */}
+          {load.phase === 'failed' && load.detail !== undefined && (
+            <>
+              <Text style={styles.loadAsk}>If you&apos;re seeing this, send a screenshot to the developer.</Text>
+              <Text style={styles.loadDetail} selectable>{load.detail.join('\n')}</Text>
+            </>
+          )}
           {/* A phone with no guides: setup is where they come from. */}
           {failed && !guidesOnPhone() && (
             <Pressable style={styles.loadSetup} onPress={() => setSetup(true)} accessibilityRole="button">
@@ -1120,6 +1127,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   loadSetup: { marginTop: 22, borderRadius: radius.pill, backgroundColor: palette.pine, paddingHorizontal: 26, paddingVertical: 14 },
   loadSetupText: { color: palette.paper, fontSize: 16, fontWeight: '700' },
   loadFailed: { color: palette.clay, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 24 },
+  loadAsk: { color: palette.ink, fontSize: 14, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 12 },
+  loadDetail: { color: palette.moss, fontSize: 11, lineHeight: 15, paddingHorizontal: 24, marginTop: 16, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
 
   // #209: the logo at the top right, clear of the menu tab on the left.
   header: {

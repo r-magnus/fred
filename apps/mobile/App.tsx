@@ -706,10 +706,13 @@ function Screen() {
         <View style={styles.loading}>
           <Image source={LOGO} style={styles.wordmark} resizeMode="contain" accessibilityLabel="Fred" />
           {!failed && <CalmLoader size={72} style={styles.loadShapes} />}
-          <Text style={failed ? styles.loadFailed : styles.loadNote}>{describePhase(load)}</Text>
+          {/* Guides not all here (a download that stopped): setup, not a model fault. */}
+          <Text style={failed ? styles.loadFailed : styles.loadNote}>
+            {failed && !guidesOnPhone() ? 'Fred\u2019s guides aren\u2019t all on this phone yet.' : describePhase(load)}
+          </Text>
           {!failed && <Text style={styles.loadHint}>Getting the guides ready. This takes a moment.</Text>}
           {/* A model that wouldn't start: what a tester screenshots. */}
-          {load.phase === 'failed' && load.detail !== undefined && (
+          {load.phase === 'failed' && load.detail !== undefined && guidesOnPhone() && (
             <>
               <Text style={styles.loadAsk}>If you&apos;re seeing this, send a screenshot to the developer.</Text>
               <Text style={styles.loadDetail} selectable>{load.detail.join('\n')}</Text>

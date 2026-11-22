@@ -44,3 +44,19 @@ test('cards that quote WHO BEC make the card pack nonCommercial; without WHO quo
   assert.equal(cardsLicense([card({})]).nonCommercial, false);
   assert.equal(cardsLicense([card({})]).id, cardsLicense([who]).id);
 });
+
+test('an unsourced line the card already says is not read out again (#268)', () => {
+  const c = card({
+    steps: ['Go to the place with the least to burn: bare ground, rock, a road.'],
+    dont: ["Don't light any fire, even to signal."],
+    unsourced: [
+      { text: "Don't light any fire, even to signal.", why: 'w' },
+      { text: 'bare ground, rock, a road', why: 'w' },
+      { text: 'A line only the note has.', why: 'w' },
+    ],
+  });
+  const text = cardText(c);
+  assert.equal(text.split("Don't light any fire").length - 1, 1);
+  assert.equal(text.split('bare ground, rock, a road').length - 1, 1);
+  assert.match(text, /\nA line only the note has\.$/);
+});

@@ -2194,28 +2194,26 @@ async function askCore(
       if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
     }
   }
-  // #240: the card just shown is not shown again, whole, for a message that
-  // moves the conversation on. "can she walk on it" and "we're 2 miles out"
-  // after the sprain card, "i can hear a river" after the lost card, "it's
-  // getting into the cooler" after the bear card: each got the same card
-  // again (11 of 17 repeats in the dev chats fell short, docs/c258). The
-  // lines that answer a specific question still come from the card (#109);
-  // otherwise the model writes, with the card first and the conversation in
-  // view (Ryan, 2026-11-22: a written answer over a fixed "still applies").
-  // An update on the condition ("it's swelling", "a few bubbles came up"), a
-  // bare "what now", and anything with a danger sign keep the card: those
-  // repeats were right.
-  if (clear !== undefined && guardsOn && cardMode === 'verbatim' && history.length > 0 && lastShown?.chunk.id === clear.chunk.id &&
-      !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
+  // #240: the card just shown is not shown again, whole, for a specific
+  // question it does not answer. "should i pop it" after the burns card and
+  // "can she walk on it" after the sprain card got the same card again (11
+  // of 17 repeats in the dev chats fell short, docs/c258). The lines that
+  // answer it still come from the card (#109); with none close enough, the
+  // model writes, with the card first and the conversation in view ("Do not
+  // pop the blister"). Only questions (Ryan, 2026-11-22): told a plain
+  // statement, the model wrote off the point ("it's about 7pm" after the lost
+  // card got how to find north with a watch), so a statement keeps the card.
+  // An update on the condition, a bare "what now", and anything with a
+  // danger sign keep it too.
+  if (clear !== undefined && guardsOn && cardMode === 'verbatim' && opts.lead !== false && lastShown?.chunk.id === clear.chunk.id &&
+      asksSpecifically(query) && !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
     const shown = clear;
-    const picked = opts.lead !== false && asksSpecifically(query)
-      ? matchCardLines(await queryVector(backend, query), parseCard(shown.chunk.text), store.cardLineVectorsFor?.(shown.chunk.id), query)
-      : [];
+    const picked = matchCardLines(await queryVector(backend, query), parseCard(shown.chunk.text), store.cardLineVectorsFor?.(shown.chunk.id), query);
     if (picked.length === 0) {
       clear = undefined;
       repeatHeld = shown.chunk.section;
       usable = [shown, ...usable.filter((c) => c.chunk.id !== shown.chunk.id)];
-      earlier ??= history.slice(-UNDERSTAND_HISTORY).join(' / ');
+      earlier ??= (opts.history ?? []).slice(-UNDERSTAND_HISTORY).join(' / ') || undefined;
     }
   }
   if (cardMode !== 'off' && clear !== undefined) {

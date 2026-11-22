@@ -1,0 +1,70 @@
+{
+ "1": {
+  "id": "chats-phone:ph-day-hike#0",
+  "X": "new"
+ },
+ "2": {
+  "id": "chats-phone:ph-day-hike#1",
+  "X": "new"
+ },
+ "3": {
+  "id": "chats-phone:ph-camp-bear#0",
+  "X": "base"
+ },
+ "4": {
+  "id": "chats-phone:ph-camp-bear#1",
+  "X": "new"
+ },
+ "5": {
+  "id": "chats-phone:ph-lost-dusk#2",
+  "X": "base"
+ },
+ "6": {
+  "id": "chats-phone:ph-mixed#0",
+  "X": "base"
+ },
+ "7": {
+  "id": "chats-phone:ph-mixed#3",
+  "X": "base"
+ },
+ "8": {
+  "id": "chats-phone:ph-mixed#6",
+  "X": "new"
+ },
+ "9": {
+  "id": "chats-phone:ph-mixed#7",
+  "X": "base"
+ },
+ "10": {
+  "id": "chats-long-dev:dv-lost-night#6",
+  "X": "new"
+ },
+ "11": {
+  "id": "chats-long-dev:dv-day-hike#1",
+  "X": "new"
+ },
+ "12": {
+  "id": "chats-long-dev:dv-day-hike#2",
+  "X": "base"
+ },
+ "13": {
+  "id": "chats-long-dev:dv-day-hike#3",
+  "X": "new"
+ },
+ "14": {
+  "id": "chats-long-dev:dv-day-hike#4",
+  "X": "base"
+ },
+ "15": {
+  "id": "chats-long-dev:dv-day-hike#5",
+  "X": "new"
+ },
+ "16": {
+  "id": "chats-long-dev:dv-day-hike#6",
+  "X": "new"
+ },
+ "17": {
+  "id": "chats-long-dev:dv-tent-no-manual#0",
+  "X": "new"
+ }
+}

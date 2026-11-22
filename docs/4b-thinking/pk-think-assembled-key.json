@@ -1,0 +1,78 @@
+{
+ "1": {
+  "id": "assembled:as-green-01",
+  "X": "new"
+ },
+ "2": {
+  "id": "assembled:as-dying-01",
+  "X": "new"
+ },
+ "3": {
+  "id": "assembled:as-firedist-01",
+  "X": "base"
+ },
+ "4": {
+  "id": "assembled:as-tinder-01",
+  "X": "new"
+ },
+ "5": {
+  "id": "assembled:as-melt-01",
+  "X": "base"
+ },
+ "6": {
+  "id": "assembled:as-digital-01",
+  "X": "base"
+ },
+ "7": {
+  "id": "assembled:as-toofast-01",
+  "X": "base"
+ },
+ "8": {
+  "id": "assembled:as-glacier-01",
+  "X": "new"
+ },
+ "9": {
+  "id": "assembled:as-burnedforest-01",
+  "X": "base"
+ },
+ "10": {
+  "id": "assembled:as-ashpit-01",
+  "X": "new"
+ },
+ "11": {
+  "id": "assembled:as-fireout-01",
+  "X": "new"
+ },
+ "12": {
+  "id": "assembled:as-antler-01",
+  "X": "base"
+ },
+ "13": {
+  "id": "assembled:as-hotspot-01",
+  "X": "new"
+ },
+ "14": {
+  "id": "assembled:as-down-01",
+  "X": "base"
+ },
+ "15": {
+  "id": "assembled:as-widow-01",
+  "X": "new"
+ },
+ "16": {
+  "id": "assembled:as-tickdryer-01",
+  "X": "new"
+ },
+ "17": {
+  "id": "assembled:as-algaeboil-01",
+  "X": "new"
+ },
+ "18": {
+  "id": "assembled:as-mooseears-01",
+  "X": "new"
+ },
+ "19": {
+  "id": "assembled:as-fawn-01",
+  "X": "base"
+ }
+}

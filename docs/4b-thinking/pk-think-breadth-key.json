@@ -1,0 +1,98 @@
+{
+ "1": {
+  "id": "breadth:br-tootight-01",
+  "X": "new"
+ },
+ "2": {
+  "id": "breadth:br-tq-01",
+  "X": "new"
+ },
+ "3": {
+  "id": "breadth:br-sling-01",
+  "X": "base"
+ },
+ "4": {
+  "id": "breadth:br-maggots-01",
+  "X": "new"
+ },
+ "5": {
+  "id": "breadth:br-cook-01",
+  "X": "base"
+ },
+ "6": {
+  "id": "breadth:br-azimuth-01",
+  "X": "base"
+ },
+ "7": {
+  "id": "breadth:br-shellfish-01",
+  "X": "base"
+ },
+ "8": {
+  "id": "breadth:br-moon-01",
+  "X": "new"
+ },
+ "9": {
+  "id": "breadth:br-rope-01",
+  "X": "base"
+ },
+ "10": {
+  "id": "breadth:br-sweat-01",
+  "X": "new"
+ },
+ "11": {
+  "id": "breadth:br-bowdrill-01",
+  "X": "new"
+ },
+ "12": {
+  "id": "breadth:br-bugs-01",
+  "X": "base"
+ },
+ "13": {
+  "id": "breadth:br-mirror-01",
+  "X": "new"
+ },
+ "14": {
+  "id": "breadth:br-hawk-01",
+  "X": "base"
+ },
+ "15": {
+  "id": "breadth:br-deer-01",
+  "X": "new"
+ },
+ "16": {
+  "id": "breadth:br-moose-01",
+  "X": "new"
+ },
+ "17": {
+  "id": "breadth:br-buttonbush-01",
+  "X": "new"
+ },
+ "18": {
+  "id": "breadth:br-sycamore-01",
+  "X": "new"
+ },
+ "19": {
+  "id": "breadth:br-thistle-01",
+  "X": "base"
+ },
+ "20": {
+  "id": "breadth:br-tarragon-01",
+  "X": "new"
+ },
+ "21": {
+  "id": "breadth:br-catbird-01",
+  "X": "base"
+ },
+ "22": {
+  "id": "breadth:br-shoulder-01",
+  "X": "new"
+ },
+ "23": {
+  "id": "breadth:br-infect-01",
+  "X": "base"
+ },
+ "24": {
+  "id": "breadth:br-loc-animals-01",
+  "X": "base"
+ }
+}

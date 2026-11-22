@@ -5,7 +5,7 @@
  * Because the pipeline code above them is shared, results measured here describe
  * the system that ships.
  */
-import { readFileSync } from 'node:fs';
+import { appendFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import type {
@@ -262,12 +262,27 @@ if (!Number.isInteger(GEN_SEED)) throw new Error(`GEN_SEED must be an integer, g
 /** Reasoning tokens Qwen3 may spend before answering; 0 (the default) turns thinking off. */
 const THINKING_BUDGET = Number(process.env.THINKING ?? 0);
 
-function samplingFor(genOpts: GenerateOptions) {
+/**
+ * Bigger-answer-model research (2026-11-21). ANSWER_MODEL=<gguf> sends only the
+ * final answer calls (the prompt that ends "ANSWER:") to a second model; every
+ * routing, intent, opener and check call stays on the shipped model, so the
+ * decisions are identical and only the written answer can change.
+ * ANSWER_THINKING=<n> lets that model reason for up to n tokens first, at the
+ * Qwen3 thinking settings. ANSWER_LOG=<file> appends each answer call's
+ * question, reasoning, answer and time as one JSON line.
+ */
+const ANSWER_MODEL = process.env.ANSWER_MODEL;
+const ANSWER_THINKING = Number(process.env.ANSWER_THINKING ?? 0);
+const ANSWER_LOG = process.env.ANSWER_LOG;
+const ANSWER_GPU = process.env.ANSWER_GPU === '1';
+const isAnswerCall = (user: string): boolean => /\nANSWER:$/.test(user);
+
+function samplingFor(genOpts: GenerateOptions, thinking = THINKING_BUDGET) {
   // Qwen3's model card for thinking mode: temperature 0.6, top-p 0.95, top-k
   // 20, min-p 0, and no greedy decoding, which loops while reasoning. The
   // device's repeat penalty is left off: it also penalises every word of the
   // reasoning, and with it the first thinking run came back empty.
-  if (THINKING_BUDGET > 0 && genOpts.temperature === undefined) {
+  if (thinking > 0 && genOpts.temperature === undefined) {
     return { temperature: 0.6, topP: 0.95, topK: 20, minP: 0, seed: GEN_SEED } as const;
   }
   if (!QWEN_SAMPLING) {
@@ -296,19 +311,31 @@ function samplingFor(genOpts: GenerateOptions) {
 }
 
 export async function createNodeBackend(opts: NodeBackendOptions): Promise<InferenceBackend & { dispose(): Promise<void> }> {
-  const llama = await getLlama();
-  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath ?? embedModelPathFor(opts.embedModelId) });
+  // ANSWER_GPU=1 (research only): the answer model goes on the CUDA GPU and
+  // everything else is pinned to the CPU, so the shipped model's decisions
+  // stay those of the CPU runs.
+  const llama = await getLlama(ANSWER_GPU ? { gpu: 'cuda' } : undefined);
+  const cpuOnly = ANSWER_GPU ? { gpuLayers: 0 } : {};
+  const embedModel: LlamaModel = await llama.loadModel({ modelPath: opts.embedModelPath ?? embedModelPathFor(opts.embedModelId), ...cpuOnly });
   const embedCtx = await embedModel.createEmbeddingContext();
 
   let genModel: LlamaModel | null = null;
   let genCtx: LlamaContext | null = null;
   if (opts.genModelPath) {
-    genModel = await llama.loadModel({ modelPath: opts.genModelPath });
+    genModel = await llama.loadModel({ modelPath: opts.genModelPath, ...cpuOnly });
     // sequences: Qwen3.5-2B exhausted the default pool on the fourth question
     // ("No sequences left") even though every sequence is disposed per call, so
     // the pool is sized explicitly. Generation is greedy at temperature 0, so
     // this changes capacity only, never output.
     genCtx = await genModel.createContext({ contextSize: 4096, sequences: 4 });
+  }
+  let ansModel: LlamaModel | null = null;
+  let ansCtx: LlamaContext | null = null;
+  if (ANSWER_MODEL !== undefined && genModel !== null) {
+    ansModel = await llama.loadModel({ modelPath: ANSWER_MODEL, ...(ANSWER_GPU ? { gpuLayers: 'max' as const } : {}) });
+    // Reasoning plus a long prompt does not fit 4096.
+    ansCtx = await ansModel.createContext({ contextSize: 8192, sequences: 1 });
+    console.log(`[answer-model] ${ANSWER_MODEL.split('/').pop()} thinking=${ANSWER_THINKING}`);
   }
 
   const spec: EmbeddingSpec = {
@@ -350,7 +377,11 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
       if (genOpts.signal?.aborted === true) { release(); return; }
       // Acquire and release per call: a context owns a fixed pool of sequences,
       // and leaking them fails with "No sequences left" on the second question.
-      const sequence = genCtx.getSequence();
+      const forAnswer = ansCtx !== null && isAnswerCall(prompt.user);
+      const thinking = forAnswer ? ANSWER_THINKING : THINKING_BUDGET;
+      const model = forAnswer ? ansModel! : genModel!;
+      const started = Date.now();
+      const sequence = (forAnswer ? ansCtx! : genCtx).getSequence();
       try {
         const session = new LlamaChatSession({
           contextSequence: sequence,
@@ -373,12 +404,12 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
         // Fred's prompt ("two or three short sentences and nothing else ...
         // ANSWER:") leads Qwen3 to skip reasoning entirely: 0 tokens on every
         // smoke question. /think is Qwen3's documented per-message switch.
-        const user = THINKING_BUDGET > 0 ? `${prompt.user}\n/think` : prompt.user;
+        const user = thinking > 0 && !forAnswer ? `${prompt.user}\n/think` : prompt.user;
         const meta = await session.promptWithMeta(user, {
-          maxTokens: genOpts.maxTokens + THINKING_BUDGET,
+          maxTokens: genOpts.maxTokens + thinking,
           ...(genOpts.signal === undefined ? {} : { signal: genOpts.signal, stopOnAbortSignal: true }),
-          ...samplingFor(genOpts),
-          budgets: { thoughtTokens: THINKING_BUDGET },
+          ...samplingFor(genOpts, thinking),
+          budgets: { thoughtTokens: thinking },
         });
         // Qwen3 sometimes writes its closing </think> as plain text rather than
         // the special token, so the library files the whole answer under the
@@ -393,7 +424,16 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
           thought += part.text.slice(0, close);
           answer += part.text.slice(close + '</think>'.length);
         }
-        if (THINKING_BUDGET > 0) console.log(`[think] ${genModel!.tokenize(thought).length} reasoning tokens`);
+        // A template that opens <think> itself (Qwen3-*-Thinking-2507) leaves
+        // the reasoning in the plain text, closed by a bare </think>.
+        const bare = answer.lastIndexOf('</think>');
+        if (bare !== -1) { thought += answer.slice(0, bare); answer = answer.slice(bare + '</think>'.length); }
+        // Out of reasoning budget with no answer: nothing is shown.
+        if (thinking > 0) console.log(`[think] ${model.tokenize(thought).length} reasoning tokens`);
+        if (forAnswer && ANSWER_LOG !== undefined) {
+          const q = /QUESTION: (.*)/.exec(prompt.user)?.[1] ?? '';
+          appendFileSync(ANSWER_LOG, JSON.stringify({ q, thought: thought.trim(), answer: answer.trim(), ms: Date.now() - started }) + '\n');
+        }
         yield answer.trim();
       } finally {
         sequence.dispose();
@@ -405,6 +445,8 @@ export async function createNodeBackend(opts: NodeBackendOptions): Promise<Infer
       await embedModel.dispose();
       if (genCtx) await genCtx.dispose();
       if (genModel) await genModel.dispose();
+      if (ansCtx) await ansCtx.dispose();
+      if (ansModel) await ansModel.dispose();
     },
   };
 }

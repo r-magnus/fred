@@ -1,0 +1,242 @@
+{
+ "1": {
+  "id": "breadth:br-tootight-01",
+  "X": "new"
+ },
+ "2": {
+  "id": "breadth:br-tq-01",
+  "X": "new"
+ },
+ "3": {
+  "id": "breadth:br-sling-01",
+  "X": "base"
+ },
+ "4": {
+  "id": "breadth:br-maggots-01",
+  "X": "new"
+ },
+ "5": {
+  "id": "breadth:br-cook-01",
+  "X": "base"
+ },
+ "6": {
+  "id": "breadth:br-azimuth-01",
+  "X": "base"
+ },
+ "7": {
+  "id": "breadth:br-shellfish-01",
+  "X": "base"
+ },
+ "8": {
+  "id": "breadth:br-moon-01",
+  "X": "new"
+ },
+ "9": {
+  "id": "breadth:br-rope-01",
+  "X": "base"
+ },
+ "10": {
+  "id": "breadth:br-sweat-01",
+  "X": "new"
+ },
+ "11": {
+  "id": "breadth:br-bowdrill-01",
+  "X": "new"
+ },
+ "12": {
+  "id": "breadth:br-bugs-01",
+  "X": "base"
+ },
+ "13": {
+  "id": "breadth:br-mirror-01",
+  "X": "new"
+ },
+ "14": {
+  "id": "breadth:br-hawk-01",
+  "X": "base"
+ },
+ "15": {
+  "id": "breadth:br-deer-01",
+  "X": "new"
+ },
+ "16": {
+  "id": "breadth:br-moose-01",
+  "X": "new"
+ },
+ "17": {
+  "id": "breadth:br-buttonbush-01",
+  "X": "new"
+ },
+ "18": {
+  "id": "breadth:br-sycamore-01",
+  "X": "new"
+ },
+ "19": {
+  "id": "breadth:br-thistle-01",
+  "X": "base"
+ },
+ "20": {
+  "id": "breadth:br-tarragon-01",
+  "X": "new"
+ },
+ "21": {
+  "id": "breadth:br-catbird-01",
+  "X": "base"
+ },
+ "22": {
+  "id": "breadth:br-shoulder-01",
+  "X": "new"
+ },
+ "23": {
+  "id": "breadth:br-infect-01",
+  "X": "base"
+ },
+ "24": {
+  "id": "breadth:br-loc-animals-01",
+  "X": "base"
+ },
+ "25": {
+  "id": "assembled:as-green-01",
+  "X": "base"
+ },
+ "26": {
+  "id": "assembled:as-dying-01",
+  "X": "new"
+ },
+ "27": {
+  "id": "assembled:as-firedist-01",
+  "X": "new"
+ },
+ "28": {
+  "id": "assembled:as-tinder-01",
+  "X": "base"
+ },
+ "29": {
+  "id": "assembled:as-melt-01",
+  "X": "new"
+ },
+ "30": {
+  "id": "assembled:as-digital-01",
+  "X": "base"
+ },
+ "31": {
+  "id": "assembled:as-toofast-01",
+  "X": "base"
+ },
+ "32": {
+  "id": "assembled:as-glacier-01",
+  "X": "new"
+ },
+ "33": {
+  "id": "assembled:as-burnedforest-01",
+  "X": "base"
+ },
+ "34": {
+  "id": "assembled:as-ashpit-01",
+  "X": "base"
+ },
+ "35": {
+  "id": "assembled:as-fireout-01",
+  "X": "base"
+ },
+ "36": {
+  "id": "assembled:as-antler-01",
+  "X": "base"
+ },
+ "37": {
+  "id": "assembled:as-hotspot-01",
+  "X": "base"
+ },
+ "38": {
+  "id": "assembled:as-down-01",
+  "X": "base"
+ },
+ "39": {
+  "id": "assembled:as-widow-01",
+  "X": "base"
+ },
+ "40": {
+  "id": "assembled:as-tickdryer-01",
+  "X": "new"
+ },
+ "41": {
+  "id": "assembled:as-algaeboil-01",
+  "X": "base"
+ },
+ "42": {
+  "id": "assembled:as-mooseears-01",
+  "X": "base"
+ },
+ "43": {
+  "id": "assembled:as-fawn-01",
+  "X": "new"
+ },
+ "44": {
+  "id": "chats-phone:ph-day-hike#0",
+  "X": "new"
+ },
+ "45": {
+  "id": "chats-phone:ph-day-hike#1",
+  "X": "base"
+ },
+ "46": {
+  "id": "chats-phone:ph-camp-bear#0",
+  "X": "base"
+ },
+ "47": {
+  "id": "chats-phone:ph-camp-bear#1",
+  "X": "new"
+ },
+ "48": {
+  "id": "chats-phone:ph-lost-dusk#2",
+  "X": "base"
+ },
+ "49": {
+  "id": "chats-phone:ph-mixed#0",
+  "X": "base"
+ },
+ "50": {
+  "id": "chats-phone:ph-mixed#3",
+  "X": "base"
+ },
+ "51": {
+  "id": "chats-phone:ph-mixed#6",
+  "X": "new"
+ },
+ "52": {
+  "id": "chats-phone:ph-mixed#7",
+  "X": "new"
+ },
+ "53": {
+  "id": "chats-long-dev:dv-lost-night#6",
+  "X": "new"
+ },
+ "54": {
+  "id": "chats-long-dev:dv-day-hike#1",
+  "X": "base"
+ },
+ "55": {
+  "id": "chats-long-dev:dv-day-hike#2",
+  "X": "new"
+ },
+ "56": {
+  "id": "chats-long-dev:dv-day-hike#3",
+  "X": "new"
+ },
+ "57": {
+  "id": "chats-long-dev:dv-day-hike#4",
+  "X": "base"
+ },
+ "58": {
+  "id": "chats-long-dev:dv-day-hike#5",
+  "X": "base"
+ },
+ "59": {
+  "id": "chats-long-dev:dv-day-hike#6",
+  "X": "base"
+ },
+ "60": {
+  "id": "chats-long-dev:dv-tent-no-manual#0",
+  "X": "new"
+ }
+}

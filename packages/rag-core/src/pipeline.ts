@@ -723,6 +723,8 @@ export interface Diagnostics {
   readonly conditions?: readonly string[];
   /** Round 2: a card that was not shown because it must not follow a condition. */
   readonly blocked?: { readonly card: string; readonly condition: string };
+  /** #240: the card just shown, held back from being shown whole again; the model wrote with it first. */
+  readonly repeatHeld?: string;
   /** Round 2: a below-gate emergency card opened because two searches agreed on it. */
   readonly agreedCard?: string;
   /**
@@ -1034,6 +1036,23 @@ async function askUnvoiced(
   }
   return { ...res, stream: withOpener(), opener: holder };
 }
+
+/**
+ * #240: cards that stay the answer to any follow-up while the danger lasts,
+ * because a written reply could tell the hiker to do the one thing the card
+ * forbids, and no check (conditions.ts) catches it for these: "should i sit
+ * her up against a tree" after a possible neck injury, "can we keep going up
+ * tomorrow" after altitude illness, "is it ok to let him nap" after a head
+ * injury, "do we play dead" with a bear close. Reviewed by title.
+ */
+export const CARD_HOLDS_FOLLOW_UPS: ReadonlySet<string> = new Set([
+  'Heavy bleeding from a wound', 'A bandage soaking through with blood', 'Snakebite', 'Someone is choking',
+  'Hypothermia: shivering, confused, too cold', 'Heat exhaustion and heat stroke', 'Someone is unconscious or not responding',
+  'CPR: not breathing, no pulse', 'Shock after an injury', 'Severe allergic reaction (anaphylaxis)', 'Head injury or concussion',
+  'Possible neck or back injury', 'Wound to the chest', 'Hip or pelvis injury after a fall', 'Altitude illness', 'Seizure',
+  'Low blood sugar', 'Wound to the belly', 'Chest pain or signs of a stroke', 'A bear close by, charging or attacking',
+  'A wildfire or its smoke nearby',
+]);
 
 async function askCore(
   query: string,
@@ -1727,6 +1746,7 @@ async function askCore(
   // A card must never be shown, open or folded, after a condition it is not
   // for (conditions.ts). A folded offer becomes the condition's own card.
   let blocked: { card: string; condition: string } | undefined;
+  let repeatHeld: string | undefined;
   if (offer !== undefined) {
     const by = blockingCondition(offer.title, blockers);
     const instead = by === undefined ? undefined : await cardByTitle(by.card);
@@ -2191,6 +2211,29 @@ async function askCore(
       if (card !== undefined && !usable.some((x) => x.chunk.id === card.chunk.id)) usable = [card, ...usable];
     }
   }
+  // #240: the card just shown is not shown again, whole, for a specific
+  // question it does not answer. "should i pop it" after the burns card and
+  // "can she walk on it" after the sprain card got the same card again (11
+  // of 17 repeats in the dev chats fell short, docs/c258). The lines that
+  // answer it still come from the card (#109); with none close enough, the
+  // model writes, with the card first and the conversation in view ("Do not
+  // pop the blister"). Only questions (Ryan, 2026-11-22): told a plain
+  // statement, the model wrote off the point ("it's about 7pm" after the lost
+  // card got how to find north with a watch), so a statement keeps the card.
+  // An update on the condition, a bare "what now", anything with a danger
+  // sign, and the cards for a danger that lasts (CARD_HOLDS_FOLLOW_UPS) keep
+  // it too.
+  if (clear !== undefined && guardsOn && cardMode === 'verbatim' && opts.lead !== false && lastShown?.chunk.id === clear.chunk.id &&
+      asksSpecifically(query) && !CARD_HOLDS_FOLLOW_UPS.has(clear.chunk.section) && !dangerNow && !petPatient && !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
+    const shown = clear;
+    const picked = matchCardLines(await queryVector(backend, query), parseCard(shown.chunk.text), store.cardLineVectorsFor?.(shown.chunk.id), query);
+    if (picked.length === 0) {
+      clear = undefined;
+      repeatHeld = shown.chunk.section;
+      usable = [shown, ...usable.filter((c) => c.chunk.id !== shown.chunk.id)];
+      earlier ??= (opts.history ?? []).slice(-UNDERSTAND_HISTORY).join(' / ') || undefined;
+    }
+  }
   if (cardMode !== 'off' && clear !== undefined) {
     const card = clear;
     const parsed = parseCard(card.chunk.text);
@@ -2522,6 +2565,7 @@ async function askCore(
       tokensBefore: compressed.tokensBefore,
       tokensAfter: compressed.tokensAfter,
       contextReduction: compressed.reduction,
+      ...(repeatHeld === undefined ? {} : { repeatHeld }),
       ...(opts.deep === undefined ? {} : { deep: deepInfo }),
       ...(guardsOn ? { answerGuard } : {}),
     },

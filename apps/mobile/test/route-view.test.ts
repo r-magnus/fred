@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Route, RouteStretch } from '@fred/geo/route';
 import {
-  ALWAYS_CAVEAT, climbWords, distanceWords, failureWords, routeBounds, routeGeoJSON, routeWarnings, timeWords, trailNames,
+  ALWAYS_CAVEAT, climbWords, failureStep, warningTags, distanceWords, failureWords, routeBounds, routeGeoJSON, routeWarnings, timeWords, trailNames,
 } from '../src/route-view.ts';
 
 const stretch = (over: Partial<RouteStretch>): RouteStretch => ({
@@ -55,11 +55,36 @@ test('off-trail and guessed parts are named, with the colour they are drawn in',
     stretch({ kind: 'guessed-join', sure: false, meters: 6 }),
   ]);
   const w = routeWarnings(r);
-  assert.match(w[0]!, /^470 m has no trail on the map \(shown in orange\)/);
-  assert.ok(w.some((x) => /guessed/.test(x)));
+  // Everything drawn in orange is one sentence, so the warning box stays short.
+  assert.match(w[0]!, /^470 m has no trail on the map, and Fred guessed where some paths join \(shown in orange\)\. Go slowly/);
+  assert.equal(w.filter((x) => /orange/.test(x)).length, 1);
   assert.ok(w.includes('Steep ground off the trail.'));
   assert.ok(w.includes('Crosses a stream with no bridge on the map.'));
   for (const line of w) assert.match(line, /[.)]$/);
+});
+
+test('warning tags: short, same order as the sentences, one per warning', () => {
+  const r = route([
+    stretch({}),
+    stretch({ kind: 'off-trail', sure: false, meters: 470, notes: ['steep', 'stream'] }),
+    stretch({ kind: 'guessed-join', sure: false, meters: 6 }),
+  ]);
+  assert.deepEqual(warningTags(r), ['470 m off trail', 'steep ground', 'stream, no bridge']);
+  assert.equal(warningTags(r).length, routeWarnings(r).length);
+  assert.deepEqual(warningTags(route([stretch({})])), []);
+});
+
+test('a guessed join alone still gets its own warning', () => {
+  const w = routeWarnings(route([stretch({}), stretch({ kind: 'guessed-join', sure: false, meters: 6 })]));
+  assert.deepEqual(w, ['Where paths almost meet on the map, Fred guessed they join (shown in orange).']);
+});
+
+test('every failed plan but a cancel offers a next step', () => {
+  for (const r of ['too-far', 'no-map', 'start-unwalkable', 'destination-unwalkable', 'no-route'] as const) {
+    assert.notEqual(failureStep(r), null, r);
+  }
+  assert.equal(failureStep('no-map'), 'get-map');
+  assert.equal(failureStep('cancelled'), null);
 });
 
 test('trail names: longest first, short scraps left out', () => {

@@ -339,3 +339,25 @@ same Release build of `main` on FredFresh, sampled every second for about
 - **Still worth checking on a real phone:** a long chat followed by
   navigation, the case where memory was highest here, in testers' crash
   reports.
+
+---
+
+## Builds 16 and 17 (2026-11-22)
+
+**Build 15 failed** (EAS `fd895a10`) at Install pods.
+`download.onnxruntime.ai` served a `*.azureedge.net` certificate, so the
+`onnxruntime-c` pod archive couldn't be downloaded. Build number 15 was used up
+and nothing was submitted.
+
+**Build 16** (EAS `5da8bc7a`, `4f78756`): build 14 + the iCloud fix (#252),
+with `onnxruntime-c` 1.30.0 taken from Microsoft's NuGet package instead
+(#277, the same version build 14 used). Checked on the FredFresh simulator: a
+Release build answered "How do I make stream water safe to drink?" with the
+water card. Uploaded to TestFlight and approved for external testing.
+
+**Build 17** (EAS `f35a5790`, `main` at `1f6cbfa`, the same code as Android
+0.2.0-4, #278): built and uploaded on 2026-11-22. Ryan installed it over build
+16 on his iPhone and ran the short check in `IOS-BUILD-17.md` (still set up,
+an answer, the #240 ankle follow-up, the map pass, a rating). **All passed,
+with nothing odd reported.** This was the first run on a real iPhone. Build 17
+replaces build 16 for the tester links.

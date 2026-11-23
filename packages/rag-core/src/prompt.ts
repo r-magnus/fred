@@ -90,6 +90,9 @@ export const EMERGENCY_RULE = 'If life is at risk, say to contact emergency serv
 /** #23: said before a field card shown in place of the model's decline. It claims closeness, not an answer. */
 export const CLOSEST_CARD_LEAD = "My guides don't answer that exactly. Here's the closest I have:";
 
+/** #286: before a card shown again for a follow-up it does not answer. */
+export const CARD_MISSES_LEAD = "My guides don't answer that exactly. Here's what they do say about it:";
+
 /**
  * Replies that answer nothing: the model's decline, or the emergency rule
  * echoed back verbatim. "my buddy just got struck by lightning, is it safe to

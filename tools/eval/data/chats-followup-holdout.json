@@ -1,0 +1,202 @@
+{
+ "description": "#286 held-out: same kinds as chats-followup-dev, other topics. Not read until the final check of #286.",
+ "grading": "Read each reply: answers the question from the guides, or says honestly what the guides lack; no made-up facts; a switch turn must leave the old topic.",
+ "chats": [
+  {
+   "id": "fu-burn-butter",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i treat a burn from the camp stove",
+     "expect": "answer"
+    },
+    {
+     "q": "should butter go on",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-lion-eyes",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "what do i do if i see a mountain lion",
+     "expect": "answer"
+    },
+    {
+     "q": "do i keep eye contact or look away",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-desert-drink",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how much water should i carry in the desert",
+     "expect": "answer"
+    },
+    {
+     "q": "does sports drink count toward that",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-river-belt",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "best way to cross a river on foot",
+     "expect": "answer"
+    },
+    {
+     "q": "should the hip belt be clipped or unclipped",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-signal-mirror",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i signal a helicopter",
+     "expect": "answer"
+    },
+    {
+     "q": "is a mirror better than a flashlight in daytime",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-nose-tilt",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "my buddy has a nosebleed that won't stop",
+     "expect": "answer"
+    },
+    {
+     "q": "should his head tilt back",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-altitude-height",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "what does altitude sickness feel like",
+     "expect": "answer"
+    },
+    {
+     "q": "how high up does it usually start",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-hook-way",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i get a fishhook out of my finger",
+     "expect": "answer"
+    },
+    {
+     "q": "push through or pull back out",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-dehyd-kids",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "what are the signs of dehydration",
+     "expect": "answer"
+    },
+    {
+     "q": "how is that different in little kids",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-splint-done",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i splint a broken forearm",
+     "expect": "answer"
+    },
+    {
+     "q": "ok it's splinted with two sticks and a shirt",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-cut-stopped",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i stop the bleeding from a cut on my hand",
+     "expect": "answer"
+    },
+    {
+     "q": "bleeding has stopped now",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "sw-food-breathe",
+   "kind": "switch",
+   "turns": [
+    {
+     "q": "how do i keep my food away from bears",
+     "expect": "answer"
+    },
+    {
+     "q": "wait my wife can't breathe properly and her face is swelling",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "sw-knot-fall",
+   "kind": "switch",
+   "turns": [
+    {
+     "q": "how do i tie a bowline knot",
+     "expect": "answer"
+    },
+    {
+     "q": "my kid fell off a boulder and isn't moving",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "pt-cattail",
+   "kind": "partial",
+   "turns": [
+    {
+     "q": "can you eat cattails",
+     "expect": "answer"
+    },
+    {
+     "q": "which part tastes best",
+     "expect": "answer"
+    }
+   ]
+  }
+ ]
+}

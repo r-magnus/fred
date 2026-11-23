@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { ChunkRecord } from '@fred/pack-format';
-import { ask, maxTokensForPressure, tipsInTrustOrder, CARD_HOLDS_FOLLOW_UPS, DEFAULT_ABSTAIN_THRESHOLD, CLOSEST_CARD_FLOOR, UNDER_GATE_QUOTE_FLOOR } from '../src/pipeline.ts';
+import { ask, maxTokensForPressure, tipsInTrustOrder, CARD_HOLDS_FOLLOW_UPS, SEQUENCE_CARDS, DEFAULT_ABSTAIN_THRESHOLD, CLOSEST_CARD_FLOOR, UNDER_GATE_QUOTE_FLOOR } from '../src/pipeline.ts';
 import { currentThread, readUnderstood } from '../src/understand.ts';
 import { applyQueryTemplate, assertCompatibleEmbedding, retrieve, DEFAULT_RETRIEVAL, type ScoredChunk } from '../src/retrieve.ts';
 import { quantizeInt8 } from '../src/score.ts';
 import { route } from '../src/router.ts';
 import { extractKeywords } from '../src/lexicon.ts';
-import { SYSTEM_PREFIX, CLOSEST_CARD_LEAD } from '../src/prompt.ts';
+import { SYSTEM_PREFIX, CLOSEST_CARD_LEAD, CARD_MISSES_LEAD } from '../src/prompt.ts';
 import { FakeBackend, FakePackStore, FAKE_SPEC, fakeEmbed } from './fakes.ts';
 import { truncateVector } from '../src/sentences.ts';
 
@@ -1074,4 +1074,120 @@ test('#240: every card held for follow-ups is a real card title', async () => {
   const raw = JSON.parse(await readFile(new URL('../../../corpora/cards/cards.json', import.meta.url), 'utf8')) as { title: string }[] | { cards: { title: string }[] };
   const titles = new Set((Array.isArray(raw) ? raw : raw.cards).map((c) => c.title));
   for (const t of CARD_HOLDS_FOLLOW_UPS) assert.ok(titles.has(t), `not a card: ${t}`);
+});
+
+// #286: a question right after an answered one is read with that question
+// when it finds nothing alone, even with no "it" or "they" pointing back.
+test('#286: a weak question after an answered one is read with the earlier question', async () => {
+  const seen: string[] = [];
+  const b = understanding('QUESTION | black bear or brown bear, how to tell them apart');
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) { seen.push(p.user); yield* gen(p, o); };
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed('Knots\nTie it well.\n1. Tie a bowline.', { source: 'Fred field card', section: 'Knots and cord' })]);
+  const earlier = 'what should i do if i see a bear on the trail';
+  await ask('how to tell difference between black and brown?', { backend: b, store, packs: clinicalPacks },
+    { ...uOpts, previous: { question: earlier, topScore: 0.9 }, history: [earlier] });
+  assert.ok(seen.some((u) => u.startsWith('Messages:') && u.includes(earlier)), 'the earlier question was not read with it');
+});
+
+test('#286: news after an answered question still starts its own topic', async () => {
+  const seen: string[] = [];
+  const b = understanding('QUESTION | bear');
+  const gen = b.generate.bind(b);
+  b.generate = async function* (p, o) { seen.push(p.user); yield* gen(p, o); };
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed('Knots\nTie it well.\n1. Tie a bowline.', { source: 'Fred field card', section: 'Knots and cord' })]);
+  const earlier = 'what should i do if i see a bear on the trail';
+  await ask('my friend sliced his thumb open whittling', { backend: b, store, packs: clinicalPacks },
+    { ...uOpts, previous: { question: earlier, topScore: 0.9 }, history: [earlier] });
+  assert.ok(!seen.some((u) => u.startsWith('Messages:') && u.includes(earlier)), 'news was read as a follow-up');
+});
+
+// #286: a card that holds, asked something none of its lines answers, says so first.
+const BEAR = 'A bear close by, charging or attacking';
+const BEAR_Q = 'how to tell a black one from a brown one';
+const bearStore = async (b: FakeBackend, close: readonly boolean[]) => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed(`${BEAR}\nDon't run; back away slowly.\n1. Stay calm and talk to it.\nDon't climb a tree.`, { source: 'Fred field card', section: BEAR })]);
+  const q = await b.embed(applyQueryTemplate(b.embeddingSpec().queryTemplate, BEAR_Q));
+  const rows = close.map((c) => quantizeInt8(q.map((x) => (c ? x : -x))).vec);
+  return Object.assign(store, { cardLineVectorsFor: () => rows });
+};
+const bearOpts = { ...leadOpts, voice: true, history: ['what do i do if i see a bear on the trail'], lastCard: BEAR } as const;
+
+test('#286: a held card shown again for a question it does not answer says so', async () => {
+  const b = saying('QUESTION');
+  const res = await ask(BEAR_Q, { backend: b, store: await bearStore(b, [false, false]), packs: clinicalPacks }, bearOpts);
+  assert.equal(res.kind, 'answer');
+  if (res.kind !== 'answer') return;
+  assert.equal(res.diagnostics.cardMisses, true);
+  assert.ok((await readAll(res.stream)).startsWith(CARD_MISSES_LEAD));
+});
+
+test('#286: a held card whose line answers the question gets no such line', async () => {
+  const b = saying('QUESTION');
+  const res = await ask(BEAR_Q, { backend: b, store: await bearStore(b, [false, true]), packs: clinicalPacks }, bearOpts);
+  assert.equal(res.kind === 'answer' ? res.diagnostics.cardMisses : 'not an answer', undefined);
+});
+
+// #286: a report of progress after a card in order gets its next step.
+const TICK = 'Removing a tick';
+const DONE_Q = 'ok pulled it straight up and it came off';
+const progressStore = async (b: FakeBackend, title = TICK) => {
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
+  store.addPack('core-fieldcards', [seed(`${title}\nPull it out and clean the bite.\n1. Grip the tick near the skin.\n2. Pull straight up.\n3. If the mouthparts break off, leave them.\n4. Put the tick in a sealed bag.\nDon't twist it.`, { source: 'Fred field card', section: title })]);
+  const q = await b.embed(applyQueryTemplate(b.embeddingSpec().queryTemplate, DONE_Q));
+  // Lines: the four steps, then the don't. Step 2 points the way the message does.
+  const rows = [false, true, false, false, false].map((c) => quantizeInt8(q.map((x) => (c ? x : -x))).vec);
+  return Object.assign(store, { cardLineVectorsFor: () => rows });
+};
+const progressOpts = { ...leadOpts, voice: true, previous: { question: 'found a tick on my arm', topScore: 0.9 }, history: ['found a tick on my arm'] } as const;
+
+test('#286: progress after a card in order gets the next step, past a branch line', async () => {
+  const b = saying('CHAT');
+  const res = await ask(DONE_Q, { backend: b, store: await progressStore(b), packs: clinicalPacks }, { ...progressOpts, lastCard: TICK });
+  assert.equal(res.kind, 'chat');
+  if (res.kind !== 'chat') return;
+  assert.equal(res.reply, 'Good. Next: Put the tick in a sealed bag.');
+  assert.equal(res.offer?.title, TICK);
+});
+
+test('#286: a setback, or a card not in order, keeps small talk', async () => {
+  const b = saying('CHAT');
+  const setback = await ask('ok it still will not come off', { backend: b, store: await progressStore(b), packs: clinicalPacks }, { ...progressOpts, lastCard: TICK });
+  assert.ok(setback.kind !== 'chat' || !setback.reply.startsWith('Good. Next'));
+  const other = 'Making water safe to drink';
+  const b2 = saying('CHAT');
+  const res = await ask(DONE_Q, { backend: b2, store: await progressStore(b2, other), packs: clinicalPacks }, { ...progressOpts, lastCard: other });
+  assert.ok(res.kind !== 'chat' || !res.reply.startsWith('Good. Next'));
+});
+
+test('#286: every card in order is a real card title', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const raw = JSON.parse(await readFile(new URL('../../../corpora/cards/cards.json', import.meta.url), 'utf8')) as { title: string }[] | { cards: { title: string }[] };
+  const titles = new Set((Array.isArray(raw) ? raw : raw.cards).map((c) => c.title));
+  for (const t of SEQUENCE_CARDS) assert.ok(titles.has(t), `not a card: ${t}`);
+});
+
+test('#286: a rewrite that drops every word of the new message is not used', async () => {
+  const b = understanding('QUESTION | hiking with wet wood, how to start a fire');
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Hiking with wet wood: start a fire with dry tinder from inside dead branches.')]);
+  store.addPack('core-fieldcards', [seed('Knots\nTie it well.\n1. Tie a bowline.', { source: 'Fred field card', section: 'Knots and cord' })]);
+  const earlier = 'hiking with wet wood, how do i start a fire';
+  const res = await ask('can you recommend a good restaurant near yosemite', { backend: b, store, packs: clinicalPacks },
+    { ...uOpts, previous: { question: earlier, topScore: 0.9 }, history: [earlier] });
+  assert.ok(res.diagnostics.understood !== undefined, 'fixture: the understanding step should run');
+  assert.equal(res.diagnostics.understood?.used, false);
+});
+
+test('#286: a yes/no question after a held card gets no such line, the card answers it', async () => {
+  const b = saying('QUESTION');
+  const res = await ask('do we play dead', { backend: b, store: await bearStore(b, [false, false]), packs: clinicalPacks }, bearOpts);
+  assert.equal(res.kind === 'answer' ? res.diagnostics.cardMisses : undefined, undefined);
 });

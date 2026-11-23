@@ -10,7 +10,7 @@ import type { InferenceBackend, MemoryMonitor, PackStore } from './backends.ts';
 import type { CardSource, ChunkRecord, DomainTag } from '@fred/pack-format';
 import { compressContext } from './compress.ts';
 import { extractKeywords, type Keyword } from './lexicon.ts';
-import { isRefusal, DEAD_ENDS, CLOSEST_CARD_LEAD, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
+import { isRefusal, DEAD_ENDS, CLOSEST_CARD_LEAD, CARD_MISSES_LEAD, NO_ANSWER_REPLY, SAFETY_NET_REPLY, CONDITION_INSTEAD, buildPromptParts, buildRewriteParts, buildSufficiencyParts, readSufficiency, CHAT_REPLY, CHAT_REPLY_WITH_OFFER, CONDITION_CLARIFY, type ContextBlock, type PromptParts, type SufficiencyVariant, type AnswerVariant, type ShapeVariant } from './prompt.ts';
 import { applyQueryTemplate, retrieve, DEFAULT_RETRIEVAL, type RetrievalOptions, type ScoredChunk } from './retrieve.ts';
 import { classifyIntent, type Intent } from './intent.ts';
 import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type Understood } from './understand.ts';
@@ -532,9 +532,12 @@ export function renumbered(lines: readonly string[]): string[] {
   return lines.map((l) => (/^\d+[.)]\s/.test(l) ? l.replace(/^\d+/, String(++n)) : l));
 }
 
+/** A how-to or a what-do-I-do: the card's steps are the answer. */
+const HOW_TO = /\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i;
+
 export function asksSpecifically(message: string): boolean {
   const specific = YES_NO.test(message) || WH_START.test(message) || (/\?\s*$/.test(message) && WH_ANY.test(message)) || WOULD_HELP.test(message);
-  return specific && !/\bhow (?:do|can|should|would) (?:i|we|you)\b|\bwhat (?:do|should|can) (?:i|we) do\b|\bwhat now\b/i.test(message);
+  return specific && !HOW_TO.test(message);
 }
 
 const SYMPTOM_REPORT = /\b(?:shiver\w*|shaking|shaky|dizzy|nause\w*|headache|throwing up|threw up|vomit\w*|hurts?|pain\w*|bleeding|blood|swell\w*|swollen|blister\w*|rash|itch\w*|numb|cramp\w*|wheez\w*|sweat\w*|breathing|soak\w*|bent|broken|tick|bonk\w*|hit (?:his|her|my|their) head|fell|tripped|landed on|stung|bit|bitten|cut|sliced|gash\w*|burn\w*|scald\w*|splinter|puffy|hives|sick|pale|out of it|confused|getting (?:cold|dark|worse)|freezing|can'?t (?:walk|stand|breathe|feel|move))\b/i;
@@ -725,6 +728,10 @@ export interface Diagnostics {
   readonly blocked?: { readonly card: string; readonly condition: string };
   /** #240: the card just shown, held back from being shown whole again; the model wrote with it first. */
   readonly repeatHeld?: string;
+  /** #286: the card shown again does not answer the question asked; the reply says so first. */
+  readonly cardMisses?: true;
+  /** #286: a progress report after a card: the card step it matched best and how closely, and whether the next step was the reply. */
+  readonly nextStep?: { readonly at: number; readonly sim: number; readonly used: boolean };
   /** Round 2: a below-gate emergency card opened because two searches agreed on it. */
   readonly agreedCard?: string;
   /**
@@ -811,6 +818,8 @@ export type AskResult =
       readonly kind: 'chat';
       readonly reply: string;
       readonly offer: CardOffer | null;
+      /** #286: the reply is the card's next step, not small talk; voice keeps it. */
+      readonly progress?: true;
       readonly diagnostics: Diagnostics;
     }
   /** The query needs a state pack but the location is unknown. */
@@ -982,7 +991,7 @@ export function addsToThread(res: AskResult, query: string, opts: Pick<AskOption
  */
 function voiced(res: AskResult, query: string, history: readonly string[]): AskResult {
   if (res.kind === 'needs-location') return res;
-  if (res.kind === 'chat') return { ...res, reply: chatReply(query, history, res.offer !== null) };
+  if (res.kind === 'chat') return res.progress === true ? res : { ...res, reply: chatReply(query, history, res.offer !== null) };
   const moment = dangerSign(sinceResolved([...history, query])) ? 'danger' : res.diagnostics.intent === 'now' ? 'now' : 'calm';
   if (res.kind === 'abstain') {
     if (res.reason === 'provider-only') return res;
@@ -994,7 +1003,7 @@ function voiced(res: AskResult, query: string, history: readonly string[]): AskR
   }
   // A model-written answer with the opener on: the line is settled there.
   if (res.opener !== undefined) return res;
-  const lead = leadLine(query, history, moment);
+  const lead = res.diagnostics.cardMisses === true ? CARD_MISSES_LEAD : leadLine(query, history, moment);
   if (lead === null) return res;
   const inner = res.stream;
   return { ...res, stream: (async function* () { yield `${lead}\n`; yield* inner; })(), opener: { text: lead } };
@@ -1035,6 +1044,70 @@ async function askUnvoiced(
     yield* inner;
   }
   return { ...res, stream: withOpener(), opener: holder };
+}
+
+/**
+ * #286: how close a progress report must come to a card step to count as
+ * having done it. Set on chats-followup-dev; see docs/results-286.md.
+ */
+export const PROGRESS_FLOOR = 0.4;
+
+/**
+ * A card step that is a branch or another way of doing the one before, not
+ * the next thing to do: "If the bear follows...", "No tourniquet? Make one",
+ * "Otherwise, turn them gently onto one side".
+ */
+const ANOTHER_WAY = /^\s*(?:if\b|otherwise\b|or\b|instead\b|in a group\b|[^.?]{1,30}\?)/i;
+
+/**
+ * #286: cards whose steps are done in order, so a step done has a next one.
+ * Reviewed by title, with the branch lines (ANOTHER_WAY) skipped. Left out:
+ * lists of options or of things done together (RICE, ways to treat water,
+ * finding north, staying warm), cards that split by kind (burns, heat
+ * exhaustion or stroke, bears, wildfire, river crossings), and CPR, whose
+ * child line sits between the adult steps.
+ */
+export const SEQUENCE_CARDS: ReadonlySet<string> = new Set([
+  'Heavy bleeding from a wound', 'A bandage soaking through with blood', 'Someone is choking',
+  'Hypothermia: shivering, confused, too cold', 'Immersion foot (trench foot): cold, wet, numb feet', 'Suspected broken bone',
+  'Someone is unconscious or not responding', 'Shock after an injury', 'Starting a campfire', 'Setting up a shelter for the night',
+  'Removing a tick', 'Snakebite', 'A cut or scrape', 'Possible neck or back injury', 'Wound to the chest',
+  'Hip or pelvis injury after a fall', 'Seizure', 'Low blood sugar', 'Wound to the belly', 'Snow blindness', 'Altitude illness',
+  'Severe allergic reaction (anaphylaxis)',
+]);
+
+/** A report that something went wrong or is undone, which "Good. Next:" must not follow. */
+const SETBACK = /\b(?:not|no|never|can'?t|cannot|won'?t|wouldn'?t|didn'?t|doesn'?t|isn'?t|aren'?t|wasn'?t|still|keeps?|again|worse|fell|fallen|blew|broke|broken|failed|stopped|gone|(?:went|is|'s) out)\b|n't\b/i;
+
+/**
+ * #286: a report of progress after a card ("ok we got him into the sleeping
+ * bag", "ok the tarp is up") is answered with the card's next step, in the
+ * card's own words, instead of small talk with the whole card folded under it.
+ * The step it matches is found by meaning against the card's step vectors;
+ * under PROGRESS_FLOOR, or for a setback, a question, a danger sign or a
+ * wrap-up, nothing changes. A plain written reply was tried for #240 and the
+ * model wrote "SOURCE 2" into it and wandered off the point.
+ */
+async function nextStepAfter(
+  query: string, shown: ScoredChunk | undefined, backend: InferenceBackend, store: PipelineDeps['store'],
+): Promise<{ at: number; sim: number; text?: string } | undefined> {
+  if (shown === undefined || !SEQUENCE_CARDS.has(shown.chunk.section) || saysResolved(query) || ONLY_ACKNOWLEDGES.test(query) || asksSomething(query) ||
+      dangerSign([query]) || SETBACK.test(query) || SYMPTOM_UPDATE.test(query)) return undefined;
+  const card = parseCard(shown.chunk.text);
+  const rows = store.cardLineVectorsFor?.(shown.chunk.id);
+  if (rows === undefined || rows.length !== cardLines(card).length || card.steps.length < 2) return undefined;
+  const q = await queryVector(backend, query);
+  let at = -1;
+  let sim = -Infinity;
+  card.steps.forEach((_, i) => { const v = cosineInt8(q, rows[i]!); if (v > sim) { sim = v; at = i; } });
+  if (sim < PROGRESS_FLOOR) return { at, sim };
+  // The next step to do, past any other way of doing this one ("Can't boil?
+  // Use purification tablets" after the boiling step is done).
+  const following = card.steps.slice(at + 1).find((st) => !ANOTHER_WAY.test(st));
+  const text = following === undefined
+    ? "Good, that's the last step on the card. Tell me if anything changes."
+    : `Good. Next: ${following}`;
+  return { at, sim, text };
 }
 
 /**
@@ -1411,6 +1484,19 @@ async function askCore(
   // blood sugar): its card leads over a card that only shares the words.
   // A danger sign in the thread, unless the hiker has since said it is over (#173).
   const dangerNow = guardsOn ? dangerStands([...history, query], active) : dangerSign([...history, query]);
+  /**
+   * #286: the messages the understanding step reads this one in. A question
+   * right after one Fred answered is read with that question when the word
+   * test (leansBack) found nothing pointing back: "How to tell difference
+   * between black and brown?" after a bear question is seven words with no
+   * "it" or "they", so it was searched alone (0.04) and declined, and so were
+   * "should the moleskin go right on top" and "does the moss trick actually
+   * work" (tester rating, 2026-11-22; chats-followup-dev). The step still runs
+   * only after a weak search, so a question that finds its own answer is
+   * untouched, and only for a question: news starts its own topic as before.
+   */
+  const thread = history.length === 0 && guardsOn && opts.intent === true && opts.previous !== undefined &&
+    opts.previous.topScore >= effectiveThreshold && asksSomething(query) ? [opts.previous.question] : history;
   const explaining = setHere.find((c) => c.explains === true);
   const explainCard = explaining === undefined ? undefined : await cardByTitle(explaining.card);
   let understood: UnderstoodDiag | undefined;
@@ -1440,8 +1526,8 @@ async function askCore(
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
     // check rather than adding to it.
-    if (understandOn && topScore < effectiveThreshold && history.length > 0) {
-      u = await understandMessage(query, history, backend, opts.signal);
+    if (understandOn && topScore < effectiveThreshold && thread.length > 0) {
+      u = await understandMessage(query, thread, backend, opts.signal);
     }
     if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
     intent = u === undefined ? await classifyIntent(query, backend, opts.signal)
@@ -1544,7 +1630,7 @@ async function askCore(
     const noTipsPool = (): readonly RoutablePack[] => packs.filter((p) => !tipsPackIds.has(p.id));
     if (understandOn && u === undefined && intent === 'now' && topScore < effectiveThreshold &&
         leadingCard(candidates, isCard, await supportOf(candidates)) === undefined && !aboutPet) {
-      u = await understandMessage(query, history, backend, opts.signal);
+      u = await understandMessage(query, thread, backend, opts.signal);
       if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
       if (u?.intent === 'out') intent = 'question';
     }
@@ -1574,8 +1660,8 @@ async function askCore(
       // With guards on, the hiker's own thread is searched whenever there is
       // one: its leading card is used below when the message has nothing of
       // its own ("what do i do").
-      if (clears || (guardsOn && history.length > 0)) {
-        const own = [...history.slice(-UNDERSTAND_HISTORY), query].join(' ');
+      if (clears || (guardsOn && thread.length > 0)) {
+        const own = [...thread.slice(-UNDERSTAND_HISTORY), query].join(' ');
         const kwO = extractKeywords(own);
         const ids = [...new Set([...routedR.packIds, ...pool.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
         const domains = [...new Set([...routedR.domains, ...pool.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
@@ -1587,7 +1673,15 @@ async function askCore(
       }
       // Kept when it clears the own-words floor or, with guards on, ranks
       // near the top for the hiker's own words.
-      const used = clears && ownScore !== undefined && (
+      // #286: read with the earlier question only by #286's rule (no word
+      // pointing back), the request must keep a word of this message that the
+      // earlier question lacks. Otherwise the model has answered the earlier
+      // question again: "can you recommend a good restaurant near yosemite"
+      // after a wet-wood fire question was restated as "hiking with wet wood,
+      // how to start a fire" and answered from the campfire passages.
+      const fromEarlier = history.length === 0 && thread.length > 0;
+      const keepsOwn = !fromEarlier || ((before) => judgeWords(u.request).some((w) => !before.has(w) && judgeWords(query).includes(w)))(new Set(thread.flatMap(judgeWords)));
+      const used = clears && keepsOwn && ownScore !== undefined && (
         ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
         (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
       requestCard = leadingCard(candR, isCard, await supportOf(candR));
@@ -1600,7 +1694,7 @@ async function askCore(
         topScore = best(candR);
         searchText = u.request;
         // The model that answers sees the hiker's own messages, never the request.
-        earlier = history.slice(-UNDERSTAND_HISTORY).join(' / ');
+        earlier = thread.slice(-UNDERSTAND_HISTORY).join(' / ');
       }
     } else if (u !== undefined) {
       understood = { intent: u.intent, request: u.request, used: false };
@@ -1747,6 +1841,8 @@ async function askCore(
   // for (conditions.ts). A folded offer becomes the condition's own card.
   let blocked: { card: string; condition: string } | undefined;
   let repeatHeld: string | undefined;
+  /** #286: a card kept for a follow-up whose question none of its lines answers. */
+  let cardMisses = false;
   if (offer !== undefined) {
     const by = blockingCondition(offer.title, blockers);
     const instead = by === undefined ? undefined : await cardByTitle(by.card);
@@ -1819,10 +1915,14 @@ async function askCore(
   }
 
   if (intent === 'chat') {
-    return {
-      kind: 'chat', reply: offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: offer ?? null,
-      diagnostics: { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0 },
-    };
+    const next = guardsOn ? await nextStepAfter(query, lastShown, backend, store) : undefined;
+    const diagnostics = { ...baseDiag, candidates, topScore, tokensBefore: 0, tokensAfter: 0, contextReduction: 0,
+      ...(next === undefined ? {} : { nextStep: { at: next.at, sim: next.sim, used: next.text !== undefined } }) };
+    if (next?.text !== undefined) {
+      // The card stays folded beneath, so the whole of it is a tap away.
+      return { kind: 'chat', reply: next.text, offer: toOffer(lastShown!, citeOf(lastShown!, 0)), progress: true, diagnostics };
+    }
+    return { kind: 'chat', reply: offer === undefined ? CHAT_REPLY : CHAT_REPLY_WITH_OFFER, offer: offer ?? null, diagnostics };
   }
 
   // #152: a card opened under the gate because it led the message's own search
@@ -2234,6 +2334,23 @@ async function askCore(
       earlier ??= (opts.history ?? []).slice(-UNDERSTAND_HISTORY).join(' / ') || undefined;
     }
   }
+  // #286: a card that holds stays for any follow-up, but when no line of it
+  // answers what is asked, the reply says so first: "How to tell difference
+  // between black and brown?" after the bear card got the bear card again as
+  // if it were the answer (tester rating, 2026-11-22). Only a question that
+  // asks for information: not a how-to, whose answer is the card's steps, and
+  // not a yes/no question about the care. "should i sit her up against a
+  // tree" after the neck card, "do we play dead" after the bear card and "is
+  // it ok to let him nap" after the head-injury card matched no single line,
+  // but the card answers them (keep them flat; when to play dead; watch them),
+  // and "my guides don't answer that" would cast doubt on it (decision sweep).
+  if (clear !== undefined && guardsOn && cardMode === 'verbatim' && lastShown?.chunk.id === clear.chunk.id &&
+      CARD_HOLDS_FOLLOW_UPS.has(clear.chunk.section) && asksSomething(query) && !HOW_TO.test(query) && !YES_NO.test(query) &&
+      !/\b(?:is|are) it (?:ok|okay|safe|fine|alright|all right)\b/i.test(query) && !dangerNow && !petPatient &&
+      !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
+    const picked = matchCardLines(await queryVector(backend, query), parseCard(clear.chunk.text), store.cardLineVectorsFor?.(clear.chunk.id), query);
+    if (picked.length === 0) cardMisses = true;
+  }
   if (cardMode !== 'off' && clear !== undefined) {
     const card = clear;
     const parsed = parseCard(card.chunk.text);
@@ -2242,6 +2359,7 @@ async function askCore(
     const diagnostics = {
       ...baseDiag, candidates, topScore, sufficient: null,
       tokensBefore: 0, tokensAfter: 0, contextReduction: 0, cardAnswer: cardMode,
+      ...(cardMisses ? { cardMisses: true as const } : {}),
     };
     const common = { kind: 'answer' as const, citations: [citeOf(card, 0)], prompt, medical: MEDICAL_DOMAINS.has(card.chunk.domain), diagnostics };
     if (cardMode === 'card-only') {

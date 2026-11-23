@@ -1108,7 +1108,7 @@ test('#286: news after an answered question still starts its own topic', async (
 
 // #286: a card that holds, asked something none of its lines answers, says so first.
 const BEAR = 'A bear close by, charging or attacking';
-const BEAR_Q = 'is a black one different from a brown one';
+const BEAR_Q = 'how to tell a black one from a brown one';
 const bearStore = async (b: FakeBackend, close: readonly boolean[]) => {
   const store = new FakePackStore();
   store.addPack('core-firstaid', [seed('Bandage technique for the forearm.')]);
@@ -1184,4 +1184,10 @@ test('#286: a rewrite that drops every word of the new message is not used', asy
     { ...uOpts, previous: { question: earlier, topScore: 0.9 }, history: [earlier] });
   assert.ok(res.diagnostics.understood !== undefined, 'fixture: the understanding step should run');
   assert.equal(res.diagnostics.understood?.used, false);
+});
+
+test('#286: a yes/no question after a held card gets no such line, the card answers it', async () => {
+  const b = saying('QUESTION');
+  const res = await ask('do we play dead', { backend: b, store: await bearStore(b, [false, false]), packs: clinicalPacks }, bearOpts);
+  assert.equal(res.kind === 'answer' ? res.diagnostics.cardMisses : undefined, undefined);
 });

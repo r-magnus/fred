@@ -2337,10 +2337,16 @@ async function askCore(
   // #286: a card that holds stays for any follow-up, but when no line of it
   // answers what is asked, the reply says so first: "How to tell difference
   // between black and brown?" after the bear card got the bear card again as
-  // if it were the answer (tester rating, 2026-11-22). Any question but a
-  // how-to, whose answer is the card's steps.
+  // if it were the answer (tester rating, 2026-11-22). Only a question that
+  // asks for information: not a how-to, whose answer is the card's steps, and
+  // not a yes/no question about the care. "should i sit her up against a
+  // tree" after the neck card, "do we play dead" after the bear card and "is
+  // it ok to let him nap" after the head-injury card matched no single line,
+  // but the card answers them (keep them flat; when to play dead; watch them),
+  // and "my guides don't answer that" would cast doubt on it (decision sweep).
   if (clear !== undefined && guardsOn && cardMode === 'verbatim' && lastShown?.chunk.id === clear.chunk.id &&
-      CARD_HOLDS_FOLLOW_UPS.has(clear.chunk.section) && asksSomething(query) && !HOW_TO.test(query) && !dangerNow && !petPatient &&
+      CARD_HOLDS_FOLLOW_UPS.has(clear.chunk.section) && asksSomething(query) && !HOW_TO.test(query) && !YES_NO.test(query) &&
+      !/\b(?:is|are) it (?:ok|okay|safe|fine|alright|all right)\b/i.test(query) && !dangerNow && !petPatient &&
       !SYMPTOM_UPDATE.test(query) && !BARE_ASK.test(query)) {
     const picked = matchCardLines(await queryVector(backend, query), parseCard(clear.chunk.text), store.cardLineVectorsFor?.(clear.chunk.id), query);
     if (picked.length === 0) cardMisses = true;

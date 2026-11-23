@@ -11,6 +11,7 @@
 export const BACKED_UP: ReadonlySet<string> = new Set([
   'chats.json',
   'feedback-outbox.json',
+  'usage.json',
   'setup.json',
   'agreement.json',
   'theme.json',

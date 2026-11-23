@@ -7,7 +7,7 @@ test('downloads are kept out of backup, the hiker\'s own files are not', () => {
     'Qwen3-1.7B-Q4_K_M.gguf', 'embeddinggemma-300M-Q8_0.gguf', 'packs',
     'map-CA-z14.pmtiles', 'map-US-overview.pmtiles', 'contours-CA.pmtiles', 'coverage-CA-voice.bin', 'regions-CA.json',
     'map-CA-z14.pmtiles.partial', 'map-TX-z14.pmtiles.part000',
-    'chats.json', 'feedback-outbox.json', 'setup.json', 'agreement.json', 'theme.json', 'carrier.json', 'energy.json',
+    'chats.json', 'feedback-outbox.json', 'usage.json', 'setup.json', 'agreement.json', 'theme.json', 'carrier.json', 'energy.json',
     'devhooks', 'devhooks-setup',
   ];
   assert.deepEqual(notBackedUp(names), [

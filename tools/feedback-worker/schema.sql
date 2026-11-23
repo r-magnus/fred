@@ -18,3 +18,19 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 CREATE INDEX IF NOT EXISTS feedback_received ON feedback (received_at);
 CREATE INDEX IF NOT EXISTS feedback_rating ON feedback (rating, received_at);
+
+-- Usage counts (#285): one row per install, event and day, for the Release
+-- Candidate KRs (testers finish setup; testers come back). install_id is a
+-- random ID made on the phone, never sent with a rating. No question, reply
+-- or location.
+CREATE TABLE IF NOT EXISTS usage (
+  install_id  TEXT NOT NULL,
+  event       TEXT NOT NULL,          -- open, ask, setup_started, guides_ready, area_ready,
+                                      -- setup_done, setup_found, model_ready, model_failed
+  day         TEXT NOT NULL,          -- YYYY-MM-DD, the phone's own date
+  app_version TEXT NOT NULL,
+  platform    TEXT NOT NULL,          -- "ios 18.2", "android 36"
+  received_at TEXT NOT NULL,          -- ISO, server clock
+  PRIMARY KEY (install_id, event, day)
+);
+CREATE INDEX IF NOT EXISTS usage_event_day ON usage (event, day);

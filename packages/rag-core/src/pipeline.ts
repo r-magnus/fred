@@ -1411,6 +1411,19 @@ async function askCore(
   // blood sugar): its card leads over a card that only shares the words.
   // A danger sign in the thread, unless the hiker has since said it is over (#173).
   const dangerNow = guardsOn ? dangerStands([...history, query], active) : dangerSign([...history, query]);
+  /**
+   * #286: the messages the understanding step reads this one in. A question
+   * right after one Fred answered is read with that question when the word
+   * test (leansBack) found nothing pointing back: "How to tell difference
+   * between black and brown?" after a bear question is seven words with no
+   * "it" or "they", so it was searched alone (0.04) and declined, and so were
+   * "should the moleskin go right on top" and "does the moss trick actually
+   * work" (tester rating, 2026-11-22; chats-followup-dev). The step still runs
+   * only after a weak search, so a question that finds its own answer is
+   * untouched, and only for a question: news starts its own topic as before.
+   */
+  const thread = history.length === 0 && guardsOn && opts.intent === true && opts.previous !== undefined &&
+    opts.previous.topScore >= effectiveThreshold && asksSomething(query) ? [opts.previous.question] : history;
   const explaining = setHere.find((c) => c.explains === true);
   const explainCard = explaining === undefined ? undefined : await cardByTitle(explaining.card);
   let understood: UnderstoodDiag | undefined;
@@ -1440,8 +1453,8 @@ async function askCore(
     // A weak search that follows earlier messages is read in its conversation.
     // The understanding call also gives the intent, so it replaces the intent
     // check rather than adding to it.
-    if (understandOn && topScore < effectiveThreshold && history.length > 0) {
-      u = await understandMessage(query, history, backend, opts.signal);
+    if (understandOn && topScore < effectiveThreshold && thread.length > 0) {
+      u = await understandMessage(query, thread, backend, opts.signal);
     }
     if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
     intent = u === undefined ? await classifyIntent(query, backend, opts.signal)
@@ -1544,7 +1557,7 @@ async function askCore(
     const noTipsPool = (): readonly RoutablePack[] => packs.filter((p) => !tipsPackIds.has(p.id));
     if (understandOn && u === undefined && intent === 'now' && topScore < effectiveThreshold &&
         leadingCard(candidates, isCard, await supportOf(candidates)) === undefined && !aboutPet) {
-      u = await understandMessage(query, history, backend, opts.signal);
+      u = await understandMessage(query, thread, backend, opts.signal);
       if (u !== undefined && u.intent === undefined) u = { ...u, intent: await classifyIntent(u.request, backend, opts.signal) };
       if (u?.intent === 'out') intent = 'question';
     }
@@ -1574,8 +1587,8 @@ async function askCore(
       // With guards on, the hiker's own thread is searched whenever there is
       // one: its leading card is used below when the message has nothing of
       // its own ("what do i do").
-      if (clears || (guardsOn && history.length > 0)) {
-        const own = [...history.slice(-UNDERSTAND_HISTORY), query].join(' ');
+      if (clears || (guardsOn && thread.length > 0)) {
+        const own = [...thread.slice(-UNDERSTAND_HISTORY), query].join(' ');
         const kwO = extractKeywords(own);
         const ids = [...new Set([...routedR.packIds, ...pool.filter((p) => p.scope.kind !== 'us-state').map((p) => p.id)])];
         const domains = [...new Set([...routedR.domains, ...pool.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
@@ -1600,7 +1613,7 @@ async function askCore(
         topScore = best(candR);
         searchText = u.request;
         // The model that answers sees the hiker's own messages, never the request.
-        earlier = history.slice(-UNDERSTAND_HISTORY).join(' / ');
+        earlier = thread.slice(-UNDERSTAND_HISTORY).join(' / ');
       }
     } else if (u !== undefined) {
       understood = { intent: u.intent, request: u.request, used: false };

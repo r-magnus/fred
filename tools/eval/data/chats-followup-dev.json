@@ -1,0 +1,212 @@
+{
+ "description": "#286 dev: follow-ups that drop the subject, statements after a card, topic switches, partly covered questions. fu-bear-id is the tester rating of 2026-11-22. Tuned against.",
+ "grading": "Read each reply: answers the question from the guides, or says honestly what the guides lack; no made-up facts; a switch turn must leave the old topic.",
+ "chats": [
+  {
+   "id": "fu-bear-id",
+   "kind": "tester",
+   "turns": [
+    {
+     "q": "I may encounter a bear. What should I do if I see one on trail?",
+     "expect": "answer"
+    },
+    {
+     "q": "How to tell difference between black and brown?",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-water-wait",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i make stream water safe to drink",
+     "expect": "answer"
+    },
+    {
+     "q": "how long after the tablets before drinking",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-berries-red",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "is it safe to eat wild berries out here",
+     "expect": "answer"
+    },
+    {
+     "q": "the red ones on the bush by the trail?",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-fire-tinder",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i start a fire when all the wood is wet",
+     "expect": "answer"
+    },
+    {
+     "q": "what kind of tinder works best for this",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-blister-moleskin",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "got a blister coming on my heel",
+     "expect": "answer"
+    },
+    {
+     "q": "should the moleskin go right on top",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-storm-crouch",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "thunderstorm rolling in and we're up on the ridge",
+     "expect": "answer"
+    },
+    {
+     "q": "is crouching on my backpack any good",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-tick-burn",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "found a tick stuck in my leg",
+     "expect": "answer"
+    },
+    {
+     "q": "should i burn the body first with a match",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-north-moss",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how do i find north without a compass",
+     "expect": "answer"
+    },
+    {
+     "q": "does the moss trick actually work",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-heat-diff",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "what are the signs of heat stroke",
+     "expect": "answer"
+    },
+    {
+     "q": "how is that different from heat exhaustion",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "fu-tent-raccoons",
+   "kind": "dropped",
+   "turns": [
+    {
+     "q": "how far should the tent be from food in bear country",
+     "expect": "answer"
+    },
+    {
+     "q": "is the distance different for raccoons",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-cold-bag",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my friend is shivering hard and acting confused",
+     "expect": "answer"
+    },
+    {
+     "q": "ok we got him into the sleeping bag",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-shelter-tarp",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i set up a shelter for the night",
+     "expect": "answer"
+    },
+    {
+     "q": "ok the tarp is up between two trees",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "sw-water-sting",
+   "kind": "switch",
+   "turns": [
+    {
+     "q": "how do i purify water from a lake",
+     "expect": "answer"
+    },
+    {
+     "q": "my son just got stung by a bee and his lips are swelling up",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "sw-pack-ankle",
+   "kind": "switch",
+   "turns": [
+    {
+     "q": "what should i pack for a day hike",
+     "expect": "answer"
+    },
+    {
+     "q": "i just rolled my ankle on a rock and it hurts to stand",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "pt-mushroom",
+   "kind": "partial",
+   "turns": [
+    {
+     "q": "how do i tell a poisonous mushroom from an edible one",
+     "expect": "answer"
+    }
+   ]
+  }
+ ]
+}

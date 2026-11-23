@@ -13,7 +13,9 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import type { PackManifest } from '@fred/pack-format';
 import { ask, predictCost, verifyEmbedderParity, warmUp, SAID_AS_MODEL, SCOPE_MODEL, type AskResult, type ReplyCost, type RoutablePack } from '@fred/rag-core';
-import { DevicePackStore, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
+import { addNativeLogListener, toggleNativeLog } from 'llama.rn';
+import { DevicePackStore, ModelLoadError, createDeviceBackend, embedderFilesFor } from './device-pack.ts';
+import { appVersion, platform } from './feedback.ts';
 
 const BASE = Paths.document;
 const BASE_PATH = BASE.uri.replace(/^file:\/\//, '').replace(/\/$/, '');
@@ -36,7 +38,15 @@ export type LoadPhase =
   | { readonly phase: 'models' }
   | { readonly phase: 'verifying' }
   | { readonly phase: 'ready'; readonly packs: number; readonly chunks: number }
-  | { readonly phase: 'failed'; readonly message: string };
+  | {
+      readonly phase: 'failed';
+      readonly message: string;
+      /**
+       * For a model that wouldn't start: which step, llama.cpp's own reason and
+       * the phone, shown small under the message so a tester can screenshot it.
+       */
+      readonly detail?: readonly string[];
+    };
 
 export interface Engine {
   /** #172: Fred's side of the conversation is on (voice.ts). */
@@ -81,11 +91,14 @@ export interface Engine {
 export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Engine> {
   // Every phase is logged as well as shown, so a failed load can be read with
   // `adb logcat -s ReactNativeJS` even when the screen is locked.
+  let step = 'idle' as LoadPhase['phase'];
   const onPhase = (p: LoadPhase): void => {
+    if (p.phase !== 'failed') step = p.phase;
     console.log(`[fred] load ${p.phase}${p.phase === 'failed' ? `: ${p.message}` : p.phase === 'ready' ? `: ${p.packs} packs, ${p.chunks} passages` : ''}`);
     onPhaseUi(p);
   };
   const t0 = Date.now();
+  const nativeLog = await captureNativeLog();
   try {
     onPhase({ phase: 'packs' });
     const store = new DevicePackStore();
@@ -233,9 +246,64 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
     };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    onPhase({ phase: 'failed', message });
+    if (e instanceof ModelLoadError || step === 'models' || step === 'verifying') {
+      onPhase({ phase: 'failed', message: 'Fred couldn\u2019t start its model on this phone.', detail: loadDetail(e, step, nativeLog.lines()) });
+    } else {
+      onPhase({ phase: 'failed', message });
+    }
     throw e;
+  } finally {
+    nativeLog.stop();
   }
+}
+
+/**
+ * llama.cpp's own log while the models load, kept in memory only. llama.rn's
+ * "Failed to load model" says nothing about why; the native log does
+ * ("failed to allocate buffer for kv cache", "failed to mmap", ...).
+ */
+async function captureNativeLog(): Promise<{ lines(): readonly string[]; stop(): void }> {
+  const kept: string[] = [];
+  let sub: { remove(): void } | undefined;
+  try {
+    sub = addNativeLogListener((level, text) => {
+      const line = text.trim();
+      if (line === '') return;
+      kept.push(`${level}: ${line}`);
+      if (kept.length > 60) kept.shift();
+    });
+    await toggleNativeLog(true);
+  } catch {
+    // No native log: the failure screen still says which step failed.
+  }
+  return {
+    lines: () => kept,
+    stop: () => {
+      sub?.remove();
+      void toggleNativeLog(false).catch(() => undefined);
+    },
+  };
+}
+
+/** Lines for the failure screen: the step, llama.cpp's reason, the phone. */
+export function loadDetail(e: unknown, step: LoadPhase['phase'], log: readonly string[]): string[] {
+  const out: string[] = [];
+  if (e instanceof ModelLoadError) {
+    out.push(e.model === 'generator'
+      ? `Step: the answer model (context tried: ${e.ctxTried.join(', ')})`
+      : 'Step: the search encoder');
+  } else {
+    out.push(`Step: ${step}`);
+  }
+  out.push(`Error: ${e instanceof Error ? e.message : String(e)}`);
+  const telling = log.filter((l) => /fail|error|unable|cannot|alloc|mmap|memory/i.test(l));
+  for (const raw of (telling.length > 0 ? telling : log).slice(-3)) {
+    // The app's own folder is a long path that pushes the reason off the line.
+    const l = raw.replace(/\/\S*?\/Documents\//g, '\u2026/');
+    out.push(`llama: ${l.length > 220 ? `${l.slice(0, 220)}\u2026` : l}`);
+  }
+  out.push(`Fred ${appVersion()} \u00b7 ${platform()}`);
+  return out;
 }
 
 /**

@@ -335,6 +335,9 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
     ? { kind: 'loaded', coreBytesLeft: idx.core === undefined ? null : remainingBytes(idx.core) || idx.core.bytes }
     : idxError !== null ? { kind: 'unreachable', message: idxError } : { kind: 'loading' };
   const guides = guidesStatus(haveGuides, index);
+  // Some of the guides already arrived (a pause, a lost connection, the app
+  // closed): the button carries on rather than offering a fresh download.
+  const guidesPartly = guides.kind === 'offer' && idx?.core !== undefined && guides.bytes < idx.core.bytes;
 
   const busy = job !== null;
   const go = useCallback((by: 1 | -1) => {
@@ -407,7 +410,11 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
           )}
           {guides.kind === 'offer' && !guidesComing && (
             <>
-              <Text style={styles.body}>{size(guides.bytes)}, downloaded once. Wi-Fi is best.</Text>
+              <Text style={styles.body}>
+                {guidesPartly
+                  ? `${size(guides.bytes)} left to download. What already arrived is kept.`
+                  : `${size(guides.bytes)}, downloaded once. Wi-Fi is best.`}
+              </Text>
               {/* Room is checked before the tap, not after it (ux-ui-review, states). */}
               {free < guides.bytes * 1.1
                 ? <Text style={styles.caution}>This phone has {size(free)} free, which isn&apos;t enough. Free up some space, then come back.</Text>
@@ -415,7 +422,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
               <Pressable style={[styles.action, free < guides.bytes * 1.1 && styles.dim]} accessibilityRole="button"
                 disabled={free < guides.bytes * 1.1}
                 onPress={() => enqueue([{ what: GUIDES, name: 'the guides', bundle: idx!.core! }])}>
-                <Text style={styles.actionText}>Download {size(guides.bytes)}</Text>
+                <Text style={styles.actionText}>{guidesPartly ? 'Resume' : `Download ${size(guides.bytes)}`}</Text>
               </Pressable>
             </>
           )}

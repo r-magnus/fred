@@ -1173,3 +1173,15 @@ test('#286: every card in order is a real card title', async () => {
   const titles = new Set((Array.isArray(raw) ? raw : raw.cards).map((c) => c.title));
   for (const t of SEQUENCE_CARDS) assert.ok(titles.has(t), `not a card: ${t}`);
 });
+
+test('#286: a rewrite that drops every word of the new message is not used', async () => {
+  const b = understanding('QUESTION | hiking with wet wood, how to start a fire');
+  const store = new FakePackStore();
+  store.addPack('core-firstaid', [seed('Hiking with wet wood: start a fire with dry tinder from inside dead branches.')]);
+  store.addPack('core-fieldcards', [seed('Knots\nTie it well.\n1. Tie a bowline.', { source: 'Fred field card', section: 'Knots and cord' })]);
+  const earlier = 'hiking with wet wood, how do i start a fire';
+  const res = await ask('can you recommend a good restaurant near yosemite', { backend: b, store, packs: clinicalPacks },
+    { ...uOpts, previous: { question: earlier, topScore: 0.9 }, history: [earlier] });
+  assert.ok(res.diagnostics.understood !== undefined, 'fixture: the understanding step should run');
+  assert.equal(res.diagnostics.understood?.used, false);
+});

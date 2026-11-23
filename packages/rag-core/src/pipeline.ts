@@ -1673,7 +1673,15 @@ async function askCore(
       }
       // Kept when it clears the own-words floor or, with guards on, ranks
       // near the top for the hiker's own words.
-      const used = clears && ownScore !== undefined && (
+      // #286: read with the earlier question only by #286's rule (no word
+      // pointing back), the request must keep a word of this message that the
+      // earlier question lacks. Otherwise the model has answered the earlier
+      // question again: "can you recommend a good restaurant near yosemite"
+      // after a wet-wood fire question was restated as "hiking with wet wood,
+      // how to start a fire" and answered from the campfire passages.
+      const fromEarlier = history.length === 0 && thread.length > 0;
+      const keepsOwn = !fromEarlier || ((before) => judgeWords(u.request).some((w) => !before.has(w) && judgeWords(query).includes(w)))(new Set(thread.flatMap(judgeWords)));
+      const used = clears && keepsOwn && ownScore !== undefined && (
         ownScore >= (opts.understandOwnFloor ?? UNDERSTOOD_OWN_FLOOR) ||
         (guardsOn && ownRank !== undefined && ownRank < (opts.understandOwnTop ?? UNDERSTOOD_OWN_TOP)));
       requestCard = leadingCard(candR, isCard, await supportOf(candR));

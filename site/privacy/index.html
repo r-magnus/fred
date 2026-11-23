@@ -19,7 +19,7 @@
     and animals around you. He doesn't need an account, and he answers without signal. This page
     says what stays on your phone and the few things that leave it.
   </p>
-  <p class="meta">Effective 19 November 2026 · Fred is in beta</p>
+  <p class="meta">Effective 23 November 2026 · Fred is in beta</p>
 
   <section class="summary" aria-label="In short">
     <h2>In short</h2>
@@ -27,7 +27,9 @@
       <li><strong>No account.</strong> Fred never asks who you are.</li>
       <li><strong>Your location never leaves your phone.</strong></li>
       <li><strong>Your chats stay on your phone</strong>, unless you choose to rate a reply.</li>
-      <li><strong>No ads, no analytics, no tracking</strong>, and nothing is sold or shared for marketing.</li>
+      <li><strong>A few anonymous usage counts</strong>, such as whether setup finished and which days
+        Fred was opened, so we can tell whether Fred works for testers. Never what you asked, never where you are.</li>
+      <li><strong>No ads and no tracking</strong> across other apps or websites, and nothing is sold or shared for marketing.</li>
     </ul>
   </section>
 
@@ -74,7 +76,32 @@
     shown to other people who use Fred, and never sold or shared.
   </p>
 
-  <h3>2. Downloads</h3>
+  <h3>2. Usage counts</h3>
+  <p>
+    To learn whether testers can set Fred up and whether they come back to him, Fred sends a short
+    note when these happen, at most once a day each:
+  </p>
+  <ul>
+    <li>setup was started, the guides finished downloading, a state's map finished downloading,
+      and setup was finished;</li>
+    <li>Fred's model started on your phone, or couldn't;</li>
+    <li>Fred was opened that day, and whether a question was asked that day (not what it was).</li>
+  </ul>
+  <p>
+    Each note carries the date (just the day), Fred's version number, your phone's operating system
+    and version, and a random ID that Fred makes up the first time it runs. That ID is not taken
+    from your phone, your Apple or Google account, or anything else about you. It only lets us tell
+    that two notes came from the same copy of Fred, for example that someone opened Fred on three
+    different days. It is never sent with a rating, so ratings still can't be tied to each other or
+    to these notes.
+  </p>
+  <p>
+    Usage counts never include your questions, Fred's answers, your location, or your name. Out of
+    signal, they wait on your phone like ratings do. They are stored in the same Cloudflare database
+    as ratings, and only the Fred team reads them.
+  </p>
+
+  <h3>3. Downloads</h3>
   <p>
     Setting Fred up downloads his guides and the maps you pick from
     <a href="https://github.com/r-magnus/fred-maps">GitHub</a>, where they are published. Like any
@@ -82,20 +109,20 @@
     with the request. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.
   </p>
 
-  <h3>3. Your internet address</h3>
+  <h3>4. Your internet address</h3>
   <p>
     Any time a phone connects to a server, the server sees its internet (IP) address. Cloudflare uses
-    it for a moment to stop anyone flooding the ratings server. It is not saved with your rating,
-    and the Fred team doesn't keep it.
+    it for a moment to stop anyone flooding the server. It is not saved with your ratings or usage
+    counts, and the Fred team doesn't keep it.
   </p>
 
-  <h3>4. Links you open</h3>
+  <h3>5. Links you open</h3>
   <p>
     Some sources have a credit link. Tapping one opens that website in your browser, and that site's
     own privacy policy applies.
   </p>
 
-  <h3>5. TestFlight (iPhone beta testers)</h3>
+  <h3>6. TestFlight (iPhone beta testers)</h3>
   <p>
     If you test Fred through Apple's TestFlight, Apple shares some information with us under
     <a href="https://www.apple.com/legal/privacy/">Apple's privacy policy</a>: crash reports, and any
@@ -103,10 +130,10 @@
     TestFlight collects.
   </p>
 
-  <h2>How long ratings are kept</h2>
+  <h2>How long ratings and usage counts are kept</h2>
   <p>
-    Ratings are kept while Fred is being developed and tested, and deleted when they are no longer
-    useful for improving him.
+    Ratings and usage counts are kept while Fred is being developed and tested, and deleted when
+    they are no longer useful for improving him.
   </p>
 
   <h2>Your choices</h2>
@@ -115,7 +142,8 @@
     <li><strong>Turn off location.</strong> You can refuse or withdraw location in your phone's
       settings. Fred will ask which state you're in when it needs to know.</li>
     <li><strong>Delete your chats</strong> from Fred's menu, or delete the app to remove everything
-      it stored on your phone, including any ratings still waiting to be sent.</li>
+      it stored on your phone, including any ratings still waiting to be sent. Reinstalling makes
+      a new random ID, so later usage counts can't be tied to the earlier ones.</li>
     <li><strong>Ask for a rating to be deleted.</strong> Because ratings carry no ID, we find yours by
       what it said. <a href="#contact">Get in touch</a> with roughly when you rated and what the
       question was about. A short description is enough; please don't paste the full text.</li>

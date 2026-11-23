@@ -46,6 +46,7 @@ import { agreementWanted, guidesOnPhone, markAgreed, markSetupDone, wizardWanted
 import { BetaNoticeScreen } from './src/beta-notice.tsx';
 import { loadChats, removeChat, restoreChat, saveChat, type SavedChat } from './src/chat-log.ts';
 import { appVersion, flushFeedback, platform, rate } from './src/feedback.ts';
+import { flushUsage, noteUsage, usageEver } from './src/usage.ts';
 import { keepDownloadsOutOfBackup } from './src/backup.ts';
 import type { Thumb } from './src/feedback-outbox.ts';
 import { RateReply, type ReplyRating } from './src/rate-reply.tsx';
@@ -374,6 +375,21 @@ function Screen() {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') void flushFeedback(); });
     return () => sub.remove();
   }, []);
+
+  // #285: usage counts (src/usage.ts): one 'open' a day, sent like ratings.
+  // A phone set up before counting began says so once, so it still counts as
+  // having finished setup.
+  useEffect(() => {
+    if (!wizardWanted() && guidesOnPhone() && !usageEver('setup_done') && !usageEver('setup_found')) noteUsage('setup_found');
+    noteUsage('open');
+    const sub = AppState.addEventListener('change', (s) => { if (s === 'active') { noteUsage('open'); void flushUsage(); } });
+    return () => sub.remove();
+  }, []);
+  // #285: whether Fred could start on this phone. A failure without the guides is a setup that didn't finish, counted there.
+  useEffect(() => {
+    if (load.phase === 'ready') noteUsage('model_ready');
+    else if (load.phase === 'failed' && guidesOnPhone()) noteUsage('model_failed');
+  }, [load.phase]);
   /** #247: scrolls just far enough that this view (the rating box) is wholly in sight. */
   const reveal = useCallback((box: View): void => {
     const sv = scroller.current;
@@ -438,6 +454,7 @@ function Screen() {
     const question = (questionText ?? draft).trim().replace(/[‘’ʼ]/g, "'");
     const eng = engine.current;
     if (question === '' || eng === null || busy) return;
+    if (!viaHook) noteUsage('ask');
 
     const id = nextId.current++;
     const askState = withState === undefined ? state : withState;
@@ -691,7 +708,7 @@ function Screen() {
   };
 
   if (setup) {
-    return <SetupWizard onDone={() => { markSetupDone(); setSetup(false); setNotice(agreementWanted()); }} />;
+    return <SetupWizard onDone={() => { markSetupDone(); noteUsage('setup_done'); setSetup(false); setNotice(agreementWanted()); }} />;
   }
   if (notice) {
     return <BetaNoticeScreen onAgree={() => { markAgreed(); setNotice(false); }} />;

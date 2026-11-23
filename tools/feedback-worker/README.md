@@ -67,6 +67,51 @@ npx wrangler@4 d1 execute fred-feedback --remote --json --command "SELECT * FROM
 The Cloudflare dashboard (Workers & Pages › D1 › fred-feedback › Console)
 runs the same queries in a browser.
 
+## Usage counts (#285)
+
+`POST /usage` takes a batch of up to 50 rows from one install:
+`{ installId, events: [{ event, day, appVersion, platform }] }`. They go in
+the `usage` table, one row per install, event and day, so a resend is
+ignored. `installId` is a random ID made on the phone
+(`apps/mobile/src/usage-log.ts`), never sent with a rating. Events:
+
+| event | when |
+|---|---|
+| `setup_started` | the setup wizard was shown |
+| `guides_ready` | the guides download finished |
+| `area_ready` | a state's or region's download finished |
+| `setup_done` | the wizard was finished, or skipped out of |
+| `setup_found` | the phone was already set up when counting began (an update) |
+| `model_ready` / `model_failed` | Fred's model loaded, or didn't with the guides on the phone |
+| `open` | Fred came to the screen that day |
+| `ask` | a question was sent that day |
+
+The table was added to the live database with
+`npx wrangler@4 d1 execute fred-feedback --remote --file schema.sql`, which
+only creates what is missing.
+
+```sh
+# RC-KR1, the setup funnel: installs that reached each step
+npx wrangler@4 d1 execute fred-feedback --remote --command \
+  "SELECT event, count(DISTINCT install_id) AS installs FROM usage
+   WHERE event IN ('setup_started','guides_ready','area_ready','setup_done','setup_found','model_ready','model_failed')
+   GROUP BY event"
+
+# RC-KR3, coming back: each install's days with Fred opened, and first and last day
+npx wrangler@4 d1 execute fred-feedback --remote --command \
+  "SELECT install_id, platform, count(*) AS days, min(day) AS first, max(day) AS last,
+     (SELECT count(*) FROM usage a WHERE a.install_id = u.install_id AND a.event = 'ask') AS days_asked
+   FROM usage u WHERE event = 'open' GROUP BY install_id ORDER BY days DESC"
+
+# Active installs: opened on 2+ different days
+npx wrangler@4 d1 execute fred-feedback --remote --command \
+  "SELECT count(*) FROM (SELECT install_id FROM usage WHERE event = 'open'
+   GROUP BY install_id HAVING count(*) >= 2)"
+```
+
+Test rows from a shell use `platform = 'curl'` and are deleted with
+`DELETE FROM usage WHERE platform='curl'`.
+
 ## Abuse
 
 Anything inside an app can be read out of it, so there is no secret key. What

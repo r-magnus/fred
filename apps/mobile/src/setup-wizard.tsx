@@ -48,6 +48,7 @@ import { placeKey, regionAt, splitKey } from './regions.ts';
 import { Scene } from './scene.tsx';
 import { STEPS, guidesStatus, listNames, orderStates, queueFor, size, stepFrom, timeLeft, type IndexState, type Step } from './setup-plan.ts';
 import { guidesOnPhone, markAgreed, statesOnPhone } from './setup.ts';
+import { noteUsage } from './usage.ts';
 import { BetaNotice } from './beta-notice.tsx';
 import { Crossfade, Veil, radius, useThemed, type Palette } from './theme.tsx';
 
@@ -194,6 +195,8 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
   const { palette, styles } = useThemed(makeStyles);
   const [step, setStep] = useState<Step>('welcome');
   const [agreed, setAgreed] = useState(false);
+  // #285: the first step of the setup funnel.
+  useEffect(() => { noteUsage('setup_started'); }, []);
 
   // The list of downloads. Asked for at once, so it is usually here by the
   // time the welcome page has been read; `again` asks once more.
@@ -256,6 +259,7 @@ export function SetupWizard({ onDone }: { onDone: () => void }): React.JSX.Eleme
             return;
           }
           pending.current.shift();
+          noteUsage(item.what === GUIDES ? 'guides_ready' : 'area_ready');
           setDisk((d) => d + 1);
         }
       } finally {

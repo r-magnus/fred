@@ -196,7 +196,7 @@ export async function downloadBundle(
         keepDownloadsOutOfBackup();
         done += part.bytes;
       }
-      joinParts(f);
+      await joinParts(f, signal);
     }
     // A finished file is new, so unmarked: keep it out of the iPhone's backup (src/backup.ts).
     keepDownloadsOutOfBackup();
@@ -220,32 +220,62 @@ async function fetchChecked(url: string, partial: File, bytes: number, md5: stri
 }
 
 
-/** Join a file's pieces in order into the file itself, check it whole, then drop the pieces. */
+/**
+ * Join a file's pieces in order into the file itself, then drop the pieces.
+ *
+ * Memory: on a 4 GB iPhone 12 the app was killed here, every time (a tester,
+ * 2026-11-22). The join used to run as one synchronous loop, then hash the
+ * joined 1.1 GB model in a single native call; neither let iOS free the chunks
+ * it read until the end, and the simulator measured 112 MB -> 2.76 GB. Now each
+ * chunk is followed by a turn of the run loop, which frees it, and instead of
+ * hashing the whole file each piece is hashed again on its own (~100 MB) just
+ * before it is copied. The pieces are the published pieces, byte for byte, and
+ * the joined file must come out at the published size, so this checks as much
+ * as the whole-file hash did.
+ */
 const JOIN_CHUNK = 8 * 1024 * 1024;
-function joinParts(f: BundleFile): void {
+/** One turn of the run loop: lets iOS free what the last native call read. */
+const breathe = (): Promise<void> => new Promise((resolve) => { setTimeout(resolve, 0); });
+async function joinParts(f: BundleFile, signal: AbortSignal): Promise<void> {
+  const parts = f.parts!;
+  const dropPieces = (): void => {
+    for (let i = 0; i < parts.length; i++) { const p = partFile(f, i); if (p.exists) p.delete(); }
+  };
+  for (const [i, part] of parts.entries()) {
+    if (signal.aborted) throw new Error('Download cancelled.');
+    const piece = partFile(f, i);
+    const info = piece.info({ md5: true });
+    if (info.size !== part.bytes || info.md5 !== part.md5) {
+      piece.delete();
+      throw new Error(`${f.path} arrived damaged. Try again.`);
+    }
+    await breathe();
+  }
   const final = target(f.path);
   const joined = new File(final.parentDirectory, `${final.name}.partial`);
   if (joined.exists) joined.delete();
   joined.create();
   const out = joined.open(FileMode.Truncate);
   try {
-    for (let i = 0; i < f.parts!.length; i++) {
+    for (const [i, part] of parts.entries()) {
       const src = partFile(f, i).open(FileMode.ReadOnly);
       try {
-        for (let left = f.parts![i]!.bytes; left > 0; left -= JOIN_CHUNK) out.writeBytes(src.readBytes(Math.min(JOIN_CHUNK, left)));
+        for (let left = part.bytes; left > 0; left -= JOIN_CHUNK) {
+          out.writeBytes(src.readBytes(Math.min(JOIN_CHUNK, left)));
+          await breathe();
+        }
       } finally { src.close(); }
     }
   } finally { out.close(); }
-  const info = joined.info({ md5: true });
-  if (info.size !== f.bytes || info.md5 !== f.md5) {
+  if (joined.size !== f.bytes) {
     // The pieces each checked out, so the join went wrong: start the file over.
     joined.delete();
-    for (let i = 0; i < f.parts!.length; i++) { const p = partFile(f, i); if (p.exists) p.delete(); }
+    dropPieces();
     throw new Error(`${f.path} could not be put together. Try again.`);
   }
   if (final.exists) final.delete();
   joined.move(final);
-  for (let i = 0; i < f.parts!.length; i++) { const p = partFile(f, i); if (p.exists) p.delete(); }
+  dropPieces();
 }
 
 /** Remove a state's downloaded files, to free space. The plant and animal pack goes with it. */

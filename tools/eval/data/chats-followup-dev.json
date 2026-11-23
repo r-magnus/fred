@@ -207,6 +207,90 @@
      "expect": "answer"
     }
    ]
+  },
+  {
+   "id": "st-fire-lit",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i start a campfire",
+     "expect": "answer"
+    },
+    {
+     "q": "ok the tinder is lit",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-tick-out",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "found a tick on my arm",
+     "expect": "answer"
+    },
+    {
+     "q": "got it out with the tweezers",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-ankle-up",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "my friend twisted her ankle on the trail",
+     "expect": "answer"
+    },
+    {
+     "q": "ok she's resting with it up on the pack",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-water-boil",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i make creek water safe to drink",
+     "expect": "answer"
+    },
+    {
+     "q": "ok it's been boiling for a minute",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-choke-blows",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "someone is choking on food",
+     "expect": "answer"
+    },
+    {
+     "q": "ok i did five back blows",
+     "expect": "answer"
+    }
+   ]
+  },
+  {
+   "id": "st-tarp-setback",
+   "kind": "statement",
+   "turns": [
+    {
+     "q": "how do i set up a shelter for the night",
+     "expect": "answer"
+    },
+    {
+     "q": "the tarp keeps blowing down",
+     "expect": "answer"
+    }
+   ]
   }
  ]
 }

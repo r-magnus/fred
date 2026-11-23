@@ -120,6 +120,7 @@ for (const set of sets) {
           ...(d.agreedCard === undefined ? {} : { agreedCard: d.agreedCard }),
           ...(d.repeatHeld === undefined ? {} : { repeatHeld: d.repeatHeld }),
           ...(d.followUp === undefined ? {} : { followUp: d.followUp }),
+          ...(d.nextStep === undefined ? {} : { nextStep: d.nextStep }),
           ...(d.scope === undefined ? {} : { scope: d.scope }),
           ...(d.said === undefined ? {} : { said: d.said }),
           ...(d.everyday === undefined ? {} : { everyday: d.everyday }),

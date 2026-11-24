@@ -979,11 +979,13 @@ async function withAskBack(
   const kind = res.diagnostics.said === undefined ? undefined : noCardKind(res.diagnostics.said.label);
   const notFreds = (m: string): boolean => asksDose(m) || NOT_FREDS_JOB.test(m);
   if (kind === 'medicine' || kind === 'out' || notFreds(query)) return res;
+  // Not in an emergency: the first words must be what to do, not a question.
+  const history = opts.history ?? [];
+  if (res.diagnostics.intent === 'now' || dangerSign(sinceResolved([...history, query]))) return res;
   const sections = [...res.diagnostics.candidates]
     .filter((c) => c.chunk.audience !== 'provider')
     .sort((a, b) => b.score - a.score)
     .map((c) => c.chunk.section);
-  const history = opts.history ?? [];
   const drafted = await draftChoices(query, history, sections, deps.backend, opts.signal);
   const kept: string[] = [];
   const checked: { text: string; subject: number; answers: boolean }[] = [];

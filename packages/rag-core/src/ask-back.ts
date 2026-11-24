@@ -30,13 +30,14 @@ Hiker: "what's the best stock to buy" GUIDE TOPICS: Lost: should I stay or keep 
 /**
  * A choice must be at least this close in meaning (search vectors, cosine) to
  * the hiker's message, or to their message before it, to stay on their
- * subject. Set from the first trial (85 declined questions): under 0.55
- * came "how do I treat blisters" for the runs, a loop knot for belaying a
- * lead climber, natural cord for stitching a cut and making water safe for
- * a cracked tooth; from 0.56 up, on-subject choices such as staying healthy
- * on a hike with the runs.
+ * subject. Set from the first trials: under 0.55 came "how do I treat
+ * blisters" for the runs, a loop knot for belaying a lead climber, natural
+ * cord for stitching a cut; from 0.55 to 0.6, removing a tick for cactus
+ * spines in a forearm and "what should I do if I see a bear?" for leaving a
+ * cooler in the car. From 0.6 up: staying healthy on a hike with the runs,
+ * relieving chafing, stiff neck and shoulders from a pack.
  */
-export const ASK_BACK_SUBJECT_FLOOR = 0.55;
+export const ASK_BACK_SUBJECT_FLOOR = 0.6;
 
 /**
  * A choice this close to the message only says it again: "how do I know if

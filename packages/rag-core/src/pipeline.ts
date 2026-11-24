@@ -17,6 +17,7 @@ import { currentThread, leansBack, understandMessage, UNDERSTAND_HISTORY, type U
 import { blockingCondition, CONDITIONS, FIRE_STARTING, NO_FIRE, PAST_FIRE, violatedCondition, WILDFIRE_NEAR, type Condition } from './conditions.ts';
 import { buildRecord, conditionsFor, latestFor, onlyHandedOver, saysResolved, sinceResolved } from './record.ts';
 import { asksDose, asksSomething, asksToEatUnknown, dangerSign, dangerStands, eatingUnknownInThread, namesSpeaker, personIsHurt, petIsPatient, pointsBackAtPet, stuckOnTerrain } from './triage.ts';
+import { ASK_BACK_CHOICES, ASK_BACK_QUESTION, ASK_BACK_SAME_CEILING, ASK_BACK_SUBJECT_FLOOR, draftChoices } from './ask-back.ts';
 import { noCardKind, noCardShare, saidAs, type Said, type SaidAsModel } from './said-as.ts';
 import type { ReplyCost } from './energy.ts';
 import { joinNeighbours } from './join.ts';
@@ -252,6 +253,11 @@ export interface AskOptions {
    * default so earlier runs compare word for word; left off with guards off.
    */
   readonly voice?: boolean;
+  /**
+   * #286: a plain decline asks "Did you mean one of these?" with questions
+   * Fred can answer (ask-back.ts), when the model drafts any that pass.
+   */
+  readonly askBack?: boolean;
   /**
    * Experiment: a trained scorer on the message's search vector gives a
    * second chance to messages about to be called small talk or declined
@@ -764,6 +770,8 @@ export interface Diagnostics {
   readonly everyday?: { readonly routedTopScore: number; readonly topScore: number };
   /** Small talk taken as news about a problem still open in the conversation. */
   readonly newsNotChat?: boolean;
+  /** #286: the question back's choices as drafted, and those a search could answer. */
+  readonly askBack?: { readonly drafted: readonly string[]; readonly kept: readonly string[]; readonly checked: readonly { readonly text: string; readonly subject: number; readonly answers: boolean }[] };
   /** Conversation memory: both searches' top scores, and whether the joined one won. */
   readonly followUp?: { readonly standaloneTopScore: number; readonly joinedTopScore: number; readonly used: boolean };
   /** Set when the answer was built from a field card rather than the passages. */
@@ -848,6 +856,8 @@ export type AskResult =
       readonly lead?: string;
       /** #172: what to say for a plain decline, in place of the one fixed sentence. */
       readonly decline?: DeclineReply;
+      /** #286: questions Fred can answer, offered as "Did you mean one of these?". */
+      readonly askBack?: readonly string[];
       readonly diagnostics: Diagnostics;
     };
 
@@ -947,7 +957,59 @@ export async function ask(
       res = { ...again, diagnostics: { ...again.diagnostics, addedToThread: { message: query, request: asked } } };
     }
   }
+  if (opts.askBack === true && opts.guards !== false && res.kind === 'abstain' && res.reason === 'low-score' && res.offer === undefined && !opts.signal?.aborted) {
+    res = await withAskBack(res, query, deps, opts);
+  }
   return opts.voice === true && opts.guards !== false ? voiced(res, query, opts.history ?? []) : res;
+}
+
+/**
+ * #286: a plain decline with a question back, when the model drafts choices
+ * that pass ask-back.ts's rules and a search for each would be answered. Not
+ * for what Fred must not answer however it is put: a dose, a forecast or a
+ * thing to buy, or a message the card matcher reads as medicine or as
+ * outside his scope.
+ */
+async function withAskBack(
+  res: Extract<AskResult, { kind: 'abstain' }>,
+  query: string,
+  deps: PipelineDeps,
+  opts: AskOptions,
+): Promise<AskResult> {
+  const kind = res.diagnostics.said === undefined ? undefined : noCardKind(res.diagnostics.said.label);
+  const notFreds = (m: string): boolean => asksDose(m) || NOT_FREDS_JOB.test(m);
+  if (kind === 'medicine' || kind === 'out' || notFreds(query)) return res;
+  const sections = [...res.diagnostics.candidates]
+    .filter((c) => c.chunk.audience !== 'provider')
+    .sort((a, b) => b.score - a.score)
+    .map((c) => c.chunk.section);
+  const history = opts.history ?? [];
+  const drafted = await draftChoices(query, history, sections, deps.backend, opts.signal);
+  const kept: string[] = [];
+  const checked: { text: string; subject: number; answers: boolean }[] = [];
+  const said = await Promise.all([query, ...history.slice(-1)].map((m) => queryVector(deps.backend, m)));
+  for (const c of drafted) {
+    if (kept.length >= ASK_BACK_CHOICES || opts.signal?.aborted) break;
+    const v = await queryVector(deps.backend, c);
+    const subject = Math.max(...said.map((s) => cosine(s, v)));
+    // The choice is held to the same limits as the message: no dose, forecast or thing to buy.
+    let fits = subject >= ASK_BACK_SUBJECT_FLOOR && subject < ASK_BACK_SAME_CEILING && !notFreds(c);
+    if (fits && opts.saidAs !== undefined) {
+      const k = noCardKind(saidAs(opts.saidAs, v)[0]?.label ?? '');
+      fits = k !== 'medicine' && k !== 'out';
+    }
+    // The search alone first, as it is cheap; then the decision a tap would
+    // get, with the declined message before it. The search alone reaches
+    // more packs: "what insects feed on honey mesquite pods?" passed it and
+    // was declined when tapped (first trial).
+    const { previous: _p, ...rest } = opts;
+    const answers = fits && await searchAnswers(c, deps, opts) &&
+      (await askUnvoiced(c, deps, { ...rest, askBack: false, opener: false, history: [...history, query] })).kind === 'answer';
+    checked.push({ text: c, subject: Number(subject.toFixed(3)), answers });
+    if (answers) kept.push(c);
+  }
+  const diagnostics = { ...res.diagnostics, askBack: { drafted, kept, checked } };
+  return kept.length === 0 ? { ...res, diagnostics } : { ...res, askBack: kept, diagnostics };
 }
 
 /**
@@ -999,7 +1061,8 @@ function voiced(res: AskResult, query: string, history: readonly string[]): AskR
       const lead = leadLine(query, history, res.reason === 'safety-net' ? 'danger' : moment, ['urgent', 'problem', 'worry']);
       return lead === null ? res : { ...res, lead };
     }
-    return { ...res, decline: declineReply(query, history, res.reason === 'out-of-scope') };
+    const decline = declineReply(query, history, res.reason === 'out-of-scope');
+    return { ...res, decline: res.askBack === undefined ? decline : { ...decline, hint: ASK_BACK_QUESTION } };
   }
   // A model-written answer with the opener on: the line is settled there.
   if (res.opener !== undefined) return res;
@@ -2801,8 +2864,28 @@ export async function predictCost(
   deps: PipelineDeps,
   opts: Pick<AskOptions, 'state' | 'retrieval' | 'abstainThreshold' | 'saidAs'>,
 ): Promise<ReplyCost> {
-  const { store, packs, backend } = deps;
   if (query.trim() === '' || ONLY_ACKNOWLEDGES.test(query)) return 'quick';
+  const found = await searchOnly(query, deps, opts);
+  if (found.top < (opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD)) return 'quick';
+  if (found.card !== undefined) return 'quick';
+  const { backend } = deps;
+  if (opts.saidAs !== undefined) {
+    const said = saidAs(opts.saidAs, await queryVector(backend, query))[0];
+    if (said !== undefined && said.p >= opts.saidAs.sure && noCardKind(said.label) !== 'other' && noCardKind(said.label) !== 'gear' && noCardKind(said.label) !== 'minor') return 'quick';
+  }
+  return 'written';
+}
+
+/**
+ * The search alone, on the message alone (as predictCost): its best score,
+ * and the field card that clearly leads it, if one does.
+ */
+async function searchOnly(
+  query: string,
+  deps: PipelineDeps,
+  opts: Pick<AskOptions, 'state' | 'retrieval'>,
+): Promise<{ top: number; card: ScoredChunk | undefined }> {
+  const { store, packs, backend } = deps;
   const retrievalOpts = opts.retrieval ?? DEFAULT_RETRIEVAL;
   const keywords = extractKeywords(withExposures(query));
   const unscoped = packs.filter((p) => p.scope.kind !== 'us-state' || p.scope.state === opts.state);
@@ -2813,13 +2896,21 @@ export async function predictCost(
   const domains = [...new Set([...routed.domains, ...unscoped.filter((p) => ids.includes(p.id)).flatMap((p) => p.domains)])];
   const candidates = await retrieve(keywords, ids, store, backend, retrievalOpts, domains, query);
   const top = candidates.reduce((m, c) => Math.max(m, c.score), 0);
-  if (top < (opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD)) return 'quick';
-  // A card that clearly matches, or one the matcher is sure of, is shown as it is.
+  // A card that clearly matches is shown as it is.
   const usable = candidates.filter((c) => c.chunk.audience !== 'provider');
-  if (clearCard(usable, retrievalOpts.reserve) !== undefined) return 'quick';
-  if (opts.saidAs !== undefined) {
-    const said = saidAs(opts.saidAs, await queryVector(backend, query))[0];
-    if (said !== undefined && said.p >= opts.saidAs.sure && noCardKind(said.label) !== 'other' && noCardKind(said.label) !== 'gear' && noCardKind(said.label) !== 'minor') return 'quick';
-  }
-  return 'written';
+  return { top, card: clearCard(usable, retrievalOpts.reserve) };
+}
+
+/**
+ * #286: whether a question, asked on its own, finds enough to be answered:
+ * its search clears the gate, or a field card clearly leads it. For the
+ * choices of a question back, so a tap never leads to another dead end.
+ */
+export async function searchAnswers(
+  query: string,
+  deps: PipelineDeps,
+  opts: Pick<AskOptions, 'state' | 'retrieval' | 'abstainThreshold'>,
+): Promise<boolean> {
+  const found = await searchOnly(query, deps, opts);
+  return found.card !== undefined || found.top >= (opts.abstainThreshold ?? DEFAULT_ABSTAIN_THRESHOLD);
 }

@@ -21,6 +21,7 @@ export * from './type-out.ts';
 export * from './exposures.ts';
 export * from './sentences.ts';
 export * from './opener.ts';
+export * from './ask-back.ts';
 export * from './scope.ts';
 export * from './scope-model.ts';
 export * from './said-as.ts';

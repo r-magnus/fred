@@ -142,6 +142,8 @@ export function askOptionsFromEnv(): Omit<AskOptions, 'state'> {
     ...(env.OPENER === '1' ? { opener: true } : {}),
     // VOICE=1: Fred's side of the conversation around fixed replies (#172, voice.ts).
     ...(env.VOICE === '1' ? { voice: true } : {}),
+    // ASKBACK=1: a plain decline asks "Did you mean one of these?" (#286, ask-back.ts).
+    ...(env.ASKBACK === '1' ? { askBack: true } : {}),
     // SCOPE=<model.json>: the scope scorer's second chance (scope.ts). SCOPE_T overrides its threshold.
     ...(env.SCOPE !== undefined && env.SCOPE !== '' ? { scope: scopeModelFromFile(env.SCOPE, env.SCOPE_T) } : {}),
     // SAID=<model.json>: the card matcher (said-as.ts, #152).

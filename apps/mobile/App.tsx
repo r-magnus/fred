@@ -123,6 +123,8 @@ interface Turn {
   lead?: string;
   /** #172: what a plain decline says, fitted to the message. */
   decline?: DeclineReply;
+  /** #286: "Did you mean one of these?": questions Fred can answer, one tap each. */
+  askBack?: readonly string[];
   /** #247: the hiker's thumbs up or down, and any comment. */
   rating?: ReplyRating;
 }
@@ -530,6 +532,7 @@ function Screen() {
           ...(res.offer === undefined ? {} : { offer: res.offer }),
           ...(res.lead === undefined ? {} : { lead: res.lead }),
           ...(res.decline === undefined ? {} : { decline: res.decline }),
+          ...(res.askBack === undefined ? {} : { askBack: res.askBack }),
         });
         return;
       }
@@ -898,6 +901,22 @@ function Screen() {
                 ) : (
                   <Text style={styles.hint}>The closest field card, in case it&apos;s what you need:</Text>
                 )}
+                {/* #286: a question back. A tap asks the choice like a typed
+                    message; only the newest reply keeps its choices. */}
+                {t.askBack !== undefined && t.offer === undefined && t.id === turns.at(-1)?.id && !busy && (
+                  <View style={styles.askBack}>
+                    {t.askBack.map((c) => (
+                      <Pressable key={c} style={styles.askBackButton} onPress={() => { void send(c); }}
+                        accessibilityRole="button" accessibilityLabel={`Ask: ${c}`}>
+                        <Text style={styles.stateButtonText}>{c}</Text>
+                      </Pressable>
+                    ))}
+                    <Pressable style={styles.askBackButton} onPress={() => input.current?.focus()}
+                      accessibilityRole="button" accessibilityLabel="Something else: type your own question">
+                      <Text style={styles.clarifyOther}>Something else…</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             )}
 
@@ -1137,6 +1156,7 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   clarify: { marginTop: 14, borderTopWidth: 1, borderTopColor: palette.sand, paddingTop: 12 },
   clarifyQ: { color: palette.ink, fontSize: 15, fontWeight: '600' },
   clarifyOther: { color: palette.moss, fontSize: 14, fontWeight: '600' },
+  askBack: { marginTop: 12, gap: 8, alignItems: 'flex-start' },
   root: { flex: 1, backgroundColor: palette.cream },
   loading: { flex: 1, alignItems: 'center', paddingTop: 12 },
   wordmark: { height: 76, width: 76 * LOGO_RATIO, tintColor: palette.logo },
@@ -1213,6 +1233,11 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     minHeight: 48, minWidth: 48, alignItems: 'center', justifyContent: 'center',
   },
   stateButtonText: { color: palette.ink, fontSize: 15, fontWeight: '600' },
+  // Whole questions: left-aligned, wrapping, full width, 48 px tall at least.
+  askBackButton: {
+    backgroundColor: palette.oat, borderRadius: radius.control, paddingHorizontal: 16, paddingVertical: 10,
+    minHeight: 48, alignSelf: 'stretch', justifyContent: 'center',
+  },
 
   composer: { paddingHorizontal: 12, paddingTop: 8 },
   // One floating pill: the text box with the Ask button inside it.

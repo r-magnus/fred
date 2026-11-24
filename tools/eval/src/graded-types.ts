@@ -254,6 +254,8 @@ export interface GradedRun {
   readonly widenedTopScore?: number;
   /** The understanding step, when it ran (#98). */
   readonly understood?: { readonly intent?: string | undefined; readonly request: string; readonly topScore?: number; readonly ownScore?: number; readonly used: boolean };
+  /** #286: the question back's choices as drafted, and those a search could answer. */
+  readonly askBack?: { readonly drafted: readonly string[]; readonly kept: readonly string[]; readonly checked: readonly { readonly text: string; readonly subject: number; readonly answers: boolean }[] };
   /** #23: the closest sentence in the passages found, for a search under the gate. */
   readonly nearSentence?: { readonly similarity: number; readonly text: string };
   /** The model's whole reply was the decline sentence (#23). */

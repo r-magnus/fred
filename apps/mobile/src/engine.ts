@@ -223,6 +223,10 @@ export async function loadEngine(onPhaseUi: (p: LoadPhase) => void): Promise<Eng
           // off, to time answers with and without it.
           opener: !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-opener').exists),
           voice,
+          // #286: a plain decline asks "Did you mean one of these?" with
+          // questions Fred can answer. Field test: a `devhooks-no-askback`
+          // file beside `devhooks` turns it off.
+          askBack: voice && !(new File(Paths.document, 'devhooks').exists && new File(Paths.document, 'devhooks-no-askback').exists),
           // A last chance for a message about to be called small talk or
           // declined (#149, docs/results-scope-scorer.md). Field test: a
           // `devhooks-no-scope` file beside `devhooks` turns it off.
@@ -332,7 +336,7 @@ function timed(res: AskResult, t0: number): AskResult {
   // The understanding step (#98): whether it ran, and whether its search was kept.
   const u = res.diagnostics.understood;
   const understood = u === undefined ? '' : ` understood=${u.used ? 'used' : 'unused'}${verbose ? `(${JSON.stringify(u.request)})` : ''}`;
-  const reason = res.kind === 'abstain' ? ` reason=${res.reason}` : '';
+  const reason = res.kind === 'abstain' ? ` reason=${res.reason}${res.diagnostics.askBack === undefined ? '' : ` askBack=${res.diagnostics.askBack.kept.length}/${res.diagnostics.askBack.drafted.length}`}` : '';
   // Round 2 of #98: conditions in the conversation, a card held back, two searches agreeing.
   const d = res.diagnostics;
   const guards = `${d.scope === undefined || d.scope.used.length === 0 ? '' : ` scope=${d.scope.used.join('+')}`}${d.said === undefined || (d.said.used.length === 0 && !d.said.pet) ? '' : ` said=${[...d.said.used, ...(d.said.pet ? ['pet'] : [])].join('+')}`}${d.everyday === undefined ? '' : ' everyday'}${d.conditions === undefined ? '' : ` conditions=${d.conditions.join(',')}`}${d.blocked === undefined ? '' : ` blocked=${JSON.stringify(d.blocked.card)}`}${d.agreedCard === undefined ? '' : ` agreed=${JSON.stringify(d.agreedCard)}`}`;
@@ -340,7 +344,7 @@ function timed(res: AskResult, t0: number): AskResult {
   const timing = tm === undefined ? '' : ` model=${tm.modelMs}ms embed=${tm.embedMs}ms`;
   if (res.kind !== 'answer') {
     // #172: what Fred says, for the phone check of the conversation lines.
-    const said = res.kind === 'chat' ? res.reply : res.kind === 'abstain' ? [res.lead, res.decline?.text, res.decline?.hint].filter((x) => x !== undefined).join(' / ') : '';
+    const said = res.kind === 'chat' ? res.reply : res.kind === 'abstain' ? [res.lead, res.decline?.text, res.decline?.hint, ...(res.askBack ?? [])].filter((x) => x !== undefined).join(' / ') : '';
     if (verbose && said !== '') console.log(`[fred] text ${JSON.stringify(said)}`);
     console.log(`[fred] ${res.kind} retrieval=${retrievalMs}ms U=${res.diagnostics.topScore.toFixed(3)}${mem}${intent}${understood}${guards}${reason}${offered}${timing} top=${top}`);
     return res;
